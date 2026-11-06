@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Stretch is built from source: it is checked out beside the app, where settings.gradle.kts looks for it.
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: arc-review
+      - uses: actions/checkout@v4
+        with:
+          repository: nrc4867/stretch
+          path: stretch
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: arc-review
+      - run: ./gradlew build
+        working-directory: arc-review
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: arc-review
+      - uses: actions/checkout@v4
+        with:
+          repository: nrc4867/stretch
+          path: stretch
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: arc-review
+      - run: ./gradlew build
+        working-directory: arc-review
+
+  # Linux keeps building so it stays possible; it is not tested or supported, so it never fails the run.
+  linux:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: arc-review
+      - uses: actions/checkout@v4
+        with:
+          repository: nrc4867/stretch
+          path: stretch
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 25
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: arc-review
+      - run: xvfb-run --auto-servernum ./gradlew build
+        working-directory: arc-review
