@@ -2,8 +2,8 @@ package dev.chieppa.arc.core.review
 
 import dev.chieppa.arc.core.mark.FileMark
 import dev.chieppa.arc.core.mark.MarkKind
+import dev.chieppa.arc.core.mark.PatchFingerprint
 import dev.chieppa.arc.core.mark.PatchHash
-import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.SourceRefs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -45,14 +45,16 @@ class ReviewTest {
     }
 
     @Test
-    fun aFileHoldsOneMark() {
-        val api = RepoName("api")
-        val reviewed = FileMark(api, "Token.kt", PatchHash("a1"), MarkKind.Reviewed)
+    fun aFileHoldsOneMarkInEachSource() {
+        val fingerprint = PatchFingerprint(PatchHash("m"), PatchHash("a1"))
+        val reviewed = FileMark(prA, "Token.kt", fingerprint, MarkKind.Reviewed)
         val aside = reviewed.copy(kind = MarkKind.SetAside)
         val review = empty.mark(reviewed).mark(aside)
         assertEquals(listOf(aside), review.marks)
-        assertEquals(aside, review.markOf(api, "Token.kt"))
-        assertNull(review.unmark(api, "Token.kt").markOf(api, "Token.kt"))
+        assertEquals(aside, review.markOf(prA, "Token.kt"))
+        assertNull(review.markOf(prB, "Token.kt"))
+        assertNull(review.unmark(prA, "Token.kt").markOf(prA, "Token.kt"))
+        assertEquals(2, review.mark(reviewed.copy(source = prB)).marks.size)
     }
 
     @Test

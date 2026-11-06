@@ -11,11 +11,15 @@ enum class FileReviewState {
     ;
 
     companion object {
-        /** The state of a file whose change is now [current], given its [mark] if it has one. */
-        fun of(mark: FileMark?, current: PatchHash): FileReviewState = when (mark?.kind) {
+        /** The state of a file with [mark], if it has one, whose reviewed mark got [verdict]. */
+        fun of(mark: FileMark?, verdict: MarkVerdict): FileReviewState = when (mark?.kind) {
             null -> NotReviewed
             MarkKind.SetAside -> SetAside
-            MarkKind.Reviewed -> if (mark.patch == current) Reviewed else ChangedSinceReviewed
+            MarkKind.Reviewed -> if (verdict == MarkVerdict.Keep) Reviewed else ChangedSinceReviewed
         }
+
+        /** The state of a file with [mark] whose change is now [current], deciding as [MarkRules] does. */
+        fun of(mark: FileMark?, current: PatchFingerprint?, replay: ReplayOutcome? = null): FileReviewState =
+            of(mark, mark?.let { MarkRules.verdict(it, current, replay) } ?: MarkVerdict.Clear)
     }
 }

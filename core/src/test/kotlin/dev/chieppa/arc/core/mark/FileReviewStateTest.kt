@@ -1,15 +1,15 @@
 package dev.chieppa.arc.core.mark
 
-import dev.chieppa.arc.core.source.RepoName
+import dev.chieppa.arc.core.source.SourceRefs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FileReviewStateTest {
-    private val api = RepoName("api")
-    private val first = PatchHash("a1")
-    private val second = PatchHash("b2")
+    private val source = SourceRefs.parse("api#412")!!
+    private val first = PatchFingerprint(PatchHash("m"), PatchHash("a1"))
+    private val second = PatchFingerprint(PatchHash("m"), PatchHash("b2"))
 
-    private fun mark(kind: MarkKind, patch: PatchHash = first) = FileMark(api, "src/Token.kt", patch, kind)
+    private fun mark(kind: MarkKind, fingerprint: PatchFingerprint = first) = FileMark(source, "src/Token.kt", fingerprint, kind)
 
     @Test
     fun aFileWithNoMarkIsNotReviewed() {
