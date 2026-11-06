@@ -23,6 +23,7 @@ import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.staged_edit
 import dev.chieppa.arc.design.generated.staged_in_summary
 import dev.chieppa.arc.design.generated.staged_line_gone
+import dev.chieppa.arc.design.generated.staged_location
 import dev.chieppa.arc.design.generated.staged_menu
 import dev.chieppa.arc.design.generated.staged_state
 import dev.chieppa.arc.ui.util.ArcSizes
@@ -32,6 +33,7 @@ import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.IconButton
+import dev.chieppa.stretch.ui.PathLabel
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -56,9 +58,9 @@ fun StagedRow(comment: StagedComment, modifier: Modifier = Modifier) {
         val mono = Stretch.type.valueSm
         BasicText(SourceLabels.of(comment.source), Modifier.width(ArcSizes.stagedSource), style = mono.merge(TextStyle(color = c.inkMuted)), maxLines = 1, overflow = TextOverflow.Ellipsis)
         Row(Modifier.width(ArcSizes.stagedLocation), horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space6), verticalAlignment = Alignment.CenterVertically) {
-            val location = "${comment.path.substringAfterLast('/')}:${comment.line}"
-            val style = if (gone != null) mono.merge(TextStyle(color = c.warnInk, textDecoration = TextDecoration.LineThrough)) else mono.merge(TextStyle(color = c.inkStrong))
-            BasicText(location, style = style, maxLines = 1)
+            val location = stringResource(Res.string.staged_location, comment.path, comment.line)
+            val style = if (gone != null) mono.merge(TextStyle(textDecoration = TextDecoration.LineThrough)) else mono
+            PathLabel(location, style, if (gone != null) c.warnInk else c.inkStrong, Modifier.weight(1f, fill = false))
             if (gone != null) StateChip(stringResource(Res.string.staged_line_gone, gone), StretchIcons.Warn, stagedLook(true))
         }
         BasicText(comment.body, Modifier.weight(1f), style = Stretch.type.bodySm.merge(TextStyle(color = c.ink)), maxLines = 1, overflow = TextOverflow.Ellipsis)
