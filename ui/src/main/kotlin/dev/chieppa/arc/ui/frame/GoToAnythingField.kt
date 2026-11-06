@@ -17,9 +17,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.action_go_to_anything
-import dev.chieppa.arc.ui.actions.ArcKeys
 import dev.chieppa.arc.ui.util.ArcSizes
-import dev.chieppa.stretch.frame.caps
 import dev.chieppa.stretch.theme.Icon
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
@@ -28,9 +26,9 @@ import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Kbd
 import org.jetbrains.compose.resources.stringResource
 
-/** The top bar's "Go to anything" field: a search field look with its key, which opens the palette. */
+/** The top bar's "Go to anything" field: a search field look with the palette's [keys], which opens the palette. */
 @Composable
-fun GoToAnythingField(onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun GoToAnythingField(keys: List<String>?, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = Stretch.colors
     val shape = Stretch.shapes.ctlShape
     Row(
@@ -47,6 +45,6 @@ fun GoToAnythingField(onClick: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         Icon(StretchIcons.Search, c.inkMuted)
         BasicText(stringResource(Res.string.action_go_to_anything), Modifier.weight(1f), style = Stretch.type.bodySm.merge(TextStyle(color = c.inkSubtle)), maxLines = 1)
-        Kbd(ArcKeys.GO_TO_ANYTHING.caps())
+        if (keys != null) Kbd(keys)
     }
 }

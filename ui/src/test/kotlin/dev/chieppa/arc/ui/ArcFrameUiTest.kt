@@ -15,10 +15,19 @@ import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.test.setStretchContent
 import dev.chieppa.stretch.theme.StretchThemes
 import kotlin.test.Test
+import androidx.compose.ui.test.getBoundsInRoot
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.runDesktopComposeUiTest
+import kotlin.math.abs
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class ArcFrameUiTest {
+    private companion object {
+        const val WIDE = 1440
+        const val TALL = 900
+    }
+
     private val drawerNames = listOf(
         "Files", "Outline", "Search", "Notes", "Conversation", "Revisions", "Console", "Pull requests", "Checks", "Staged comments",
     )
@@ -49,5 +58,16 @@ class ArcFrameUiTest {
         onRoot().performKeyInput { withKeyDown(shortcutKey) { pressKey(Key.K) } }
         waitForIdle()
         assertTrue(workbench.paletteOpen)
+    }
+
+    @Test
+    fun goToAnythingSitsInTheMiddleOfTheWholeBar() = runDesktopComposeUiTest(WIDE, TALL) {
+        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(Workbench()) }
+        waitForIdle()
+        val root = onRoot().getBoundsInRoot()
+        val field = onNodeWithText("Go to anything").getBoundsInRoot()
+        val middle = (field.left + field.right) / 2
+        val rootMiddle = (root.left + root.right) / 2
+        assertTrue(abs((middle - rootMiddle).value) <= 1f, "field centre $middle, bar centre $rootMiddle")
     }
 }
