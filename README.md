@@ -16,9 +16,15 @@ The repo and the binary are named `arc-review`.
 
 ## Status
 
-Foundations. The window opens on Stretch's frame with Arc's drawers on both rails, an empty pane grid, the command
-palette (Ctrl K) and a settings popover for the theme and interface size, which are kept between runs. The review
-model, source refs and GitHub link reading are built and tested. Nothing reads git or talks to GitHub yet.
+Reading local repos. Add a repo by its folder and sources in it by ref (`@sha`, `@sha..sha`, `:branch...base`);
+switch the active source from the strip under the top bar, and each source keeps its own panes, scroll and open
+folders. The Files drawer groups every source's changed files with their status, line counts and reviewed marks, a
+folder or selection marks at once, and a source's tree can be scoped to one commit. Panes show a file's diff (split or
+unified), the whole file with its changes marked, or rendered Markdown, with find in file; any file at any revision of
+any repo can be opened and pinned beside the rest. Marks survive a rebase that keeps the change. The keyboard covers
+next and previous file and change, mark and advance, find and the file finder, all in the palette (Ctrl K). Reviews,
+repos and layouts are saved locally. Nothing talks to GitHub yet; threads and staged comments are drawn only from the
+dev-only sample (`-Pdemo`).
 
 ## Build and run
 
@@ -28,6 +34,7 @@ by `stretch.dir` in `~/.gradle/gradle.properties`).
 ```
 ./gradlew build        # compile and test
 ./gradlew :app:run     # run the app
+./gradlew :app:run -Pdemo   # run it with sample threads and staged comments
 ```
 
 ## Links

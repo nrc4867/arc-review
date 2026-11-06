@@ -19,12 +19,13 @@ Gradle needs JDK 25 as `JAVA_HOME` (`~/.jdks/corretto-25.0.1` on this machine); 
 ./gradlew :core:test                 # one module's tests; run only the module being changed while working
 ./gradlew :app:run                   # the app
 ./gradlew :app:run -Pdevtools=47811  # the app, with window screenshots at curl 127.0.0.1:47811/capture
+./gradlew :app:run -Pdemo            # the app with the dev-only sample threads and staged comments
 ./gradlew :design:generateIcons      # ArcIcons.kt from design/icons/*.svg
 ```
 
 Stop a running app before rebuilding; a rebuild under a running app breaks it. To see the running app, use Stretch's screenshot endpoint as described in `../stretch/.claude/skills/app-screenshot/SKILL.md`. Keyboard and mouse input cannot be sent to the window from a session; check input in a UI test (`runComposeUiTest`, `performKeyInput`).
 
-Settings are kept in `settings.properties` in the app's data folder (`%LOCALAPPDATA%\dev.chieppa.arc` on Windows, `~/Library/Application Support/dev.chieppa.arc` on macOS).
+The app's data folder is `%LOCALAPPDATA%\dev.chieppa.arc` on Windows and `~/Library/Application Support/dev.chieppa.arc` on macOS. It holds `settings.properties` (theme, size, last open review), `repos.json` (each repo's name and the folder of its clone, shared by every review) and `reviews/<id>.json` (a review's sources, panes, marks, each source's view and each pane's state). The window opens on a review whatever state that folder is in, so a screen can be set up by writing those files before `:app:run`.
 
 CI (`.github/workflows/ci.yml`) checks Stretch out beside the app and runs `build` on Windows and macOS. Linux builds too but is unsupported, so it cannot fail the run.
 
@@ -34,15 +35,20 @@ Each module is a Gradle subproject in package `dev.chieppa.arc.<module>`. A modu
 
 | Layer | Module | Holds |
 | --- | --- | --- |
-| App | `app` | `main`, the window, the macOS menu bar, loading and saving settings |
-| Interface | `ui` | The main window on Stretch's frame: `Workbench` (the window's state and actions), drawers, menus, the pane grid viewport, the palette, the settings popover |
+| App | `app` | `main`, the window, the macOS menu bar, `AppSession` (the data folder: settings, reviews, repos) and saving the open review as it changes |
+| Interface | `ui` | The main window on Stretch's frame. `workbench` (the window's state and actions), `review` (`ReviewState` and the source, pane and mark controllers), `services` (`ReviewData`, what the window reads, and its git implementation), `tree`, `files`, `sources`, `panes`, `find`, `finder`, `status`, `conversation` (threads and staged comments), `actions`, `menus`, `drawers`, `frame`, `settings` |
 | Presentation | `design` | Arc's icons (generated from `design/icons`), Arc's colors beside Stretch's tokens, every user-facing string |
-| Data | `host` | The `Host` interface and GitHub: reading a pasted link as a source |
-| Data | `git` | The git layer: reading files by revision from app-owned blobless clones. Interface only so far |
-| Data | `store` | Local state: the settings file. Plain JVM, no Stretch |
-| Core | `core` | The review model as plain immutable data: `Review`, `Source` and its ref syntax, `Pane`, file marks and progress. No dependencies |
+| Data | `host` | The `Host` interface and GitHub: reading a pasted link as a source. `ReviewConversation`, the threads and staged comments the store and the host will provide |
+| Data | `git` | The git layer through the installed git CLI: one process per whole-source operation, one long-running `cat-file --batch` per repo, never a lazy blob fetch (a partial clone gets its trees in one batch). Sources, fingerprints, the mark replay. Repos are found through `RepoLocator` |
+| Data | `store` | Local state as files: settings, the repo registry and one JSON file per review (kotlinx.serialization). Plain JVM, no Stretch |
+| Core | `core` | The review model as plain immutable data: `Review`, `Source` and its ref syntax, `Pane`, changes, file marks with their fingerprint and `MarkRules`, progress, the conversation model. No dependencies |
+| Dev only | `demo` | A sample `ReviewConversation`, on the app's classpath only with `-Pdemo` |
 
-Everything below `ui` is plain Kotlin, unit tested without a window. A test lives with the module it tests.
+Everything below `ui` is plain Kotlin, unit tested without a window. A test lives with the module it tests. Git tests build small repos in temp folders through the git CLI; UI tests read from `FakeReviewData`.
+
+Marks follow `docs/research/review-marks.md`: a mark holds the file's fingerprint (candidate B) and the reviewed head and merge-base; `MarkRules` keeps or clears it by the replay (candidate F) that `MarkReplayer` runs when a source has moved, falling back to the fingerprint where the replay conflicts or the reviewed commits are gone.
+
+Drawer content sits in a scrolling column, so a list inside a drawer builds every row rather than only those on screen.
 
 ## Rules
 
