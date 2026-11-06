@@ -10,16 +10,21 @@ import dev.chieppa.arc.design.generated.settings_size
 import dev.chieppa.arc.design.generated.settings_size_percent
 import dev.chieppa.arc.design.generated.settings_theme
 import dev.chieppa.arc.design.generated.settings_title
+import dev.chieppa.arc.design.generated.settings_wrap
 import dev.chieppa.stretch.frame.Dropdown
 import dev.chieppa.stretch.frame.Popover
 import dev.chieppa.stretch.frame.SettingRow
 import dev.chieppa.stretch.ui.Segmented
+import dev.chieppa.stretch.ui.Toggle
 import org.jetbrains.compose.resources.stringResource
 
 private val WIDTH = 340.dp
 private val THEME_FIELD = 200.dp
 
-/** What the top bar's Settings button opens: the theme and the interface size, applied as they change. */
+/**
+ * What the top bar's Settings button opens: the theme, the interface size and whether panes wrap long lines unless set
+ * otherwise, applied as they change.
+ */
 @Composable
 fun SettingsPopover(open: Boolean, preferences: UiPreferences, onChange: (UiPreferences) -> Unit, onDismiss: () -> Unit) {
     val theme = stringResource(Res.string.settings_theme)
@@ -39,6 +44,11 @@ fun SettingsPopover(open: Boolean, preferences: UiPreferences, onChange: (UiPref
         SettingRow(stringResource(Res.string.settings_size)) {
             Spacer(Modifier.weight(1f))
             Segmented(InterfaceSizes.all, preferences.interfaceSize, { onChange(preferences.copy(interfaceSize = it)) }, { sizes.getValue(it) })
+        }
+        val wrap = stringResource(Res.string.settings_wrap)
+        SettingRow(wrap) {
+            Spacer(Modifier.weight(1f))
+            Toggle(preferences.wrapLines, { onChange(preferences.copy(wrapLines = it)) }, wrap)
         }
     }
 }

@@ -147,6 +147,9 @@ class Workbench(
         state.active?.let(::activateSource)
     }
 
+    /** Whether the pane [id] wraps long lines: as it was set, or as the settings say. */
+    fun wrap(id: String): Boolean = state.paneState(id).wrap ?: preferences.wrapLines
+
     /** Runs [command] on the focused pane, if it is on screen. */
     fun onFocusedPane(command: suspend PaneCommands.() -> Unit) {
         state.paneLayout.activeTab?.let { runOnPane(it, command) }

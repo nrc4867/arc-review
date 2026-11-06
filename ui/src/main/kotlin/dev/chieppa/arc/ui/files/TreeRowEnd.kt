@@ -41,8 +41,8 @@ fun TreeRowEnd(item: FileTreeItem, workbench: Workbench) {
             }
             is FileTreeItem.FileRow -> {
                 val counts = LineCounts.of(item.file)
-                counts.added?.let { BasicText(it, style = mono.merge(TextStyle(color = c.diffAddStrong))) }
-                counts.removed?.let { BasicText(it, style = mono.merge(TextStyle(color = c.diffDelStrong))) }
+                counts.added?.let { BasicText(it, style = mono.merge(TextStyle(color = c.diffAddInk))) }
+                counts.removed?.let { BasicText(it, style = mono.merge(TextStyle(color = c.diffDelInk))) }
                 if (item.state != FileReviewState.SetAside) {
                     MarkBox(
                         checked = item.state == FileReviewState.Reviewed,

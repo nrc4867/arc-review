@@ -8,34 +8,40 @@ import dev.chieppa.arc.core.mark.FileReviewState
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.pane_mark_reviewed
-import dev.chieppa.arc.ui.actions.ArcKeys
+import dev.chieppa.arc.ui.actions.ArcActionIds
 import dev.chieppa.arc.ui.workbench.Workbench
-import dev.chieppa.stretch.frame.caps
+import dev.chieppa.stretch.frame.capsFor
 import dev.chieppa.stretch.theme.StretchIcons
+import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
-import dev.chieppa.stretch.ui.Button
-import dev.chieppa.stretch.ui.ButtonKind
 import dev.chieppa.stretch.ui.Kbd
+import dev.chieppa.stretch.ui.ToggleButton
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The file header's button that marks the pane's file reviewed and opens the next one to read, with its key. Once the
- * file is reviewed it shows on.
+ * The pane header's Mark reviewed button, with its key: it stays on while the file is reviewed. Turning it on marks
+ * the file and opens the next one to read; turning it off clears the mark.
  */
 @Composable
 fun MarkReviewedButton(pane: Pane, workbench: Workbench) {
     val source = pane.source ?: return
     val reviewed = workbench.state.states(source)[pane.path] == FileReviewState.Reviewed
+    val keys = workbench.registry[ArcActionIds.MARK_AND_ADVANCE]?.let(workbench.keymap::capsFor)
     Row(horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space4), verticalAlignment = Alignment.CenterVertically) {
-        Button(
+        ToggleButton(
             stringResource(Res.string.pane_mark_reviewed),
-            {
-                workbench.paneLayout = workbench.paneLayout.activate(pane.id.value)
-                workbench.marks.markAndAdvance()
+            reviewed,
+            { on ->
+                if (on) {
+                    workbench.paneLayout = workbench.paneLayout.activate(pane.id.value)
+                    workbench.marks.markAndAdvance()
+                } else {
+                    workbench.marks.setReviewed(source, listOf(pane.path), false)
+                }
             },
-            kind = if (reviewed) ButtonKind.Default else ButtonKind.Quiet,
             icon = StretchIcons.Check,
+            height = StretchSizes.seg,
         )
-        Kbd(ArcKeys.MARK_AND_ADVANCE.caps())
+        keys?.let { Kbd(it) }
     }
 }

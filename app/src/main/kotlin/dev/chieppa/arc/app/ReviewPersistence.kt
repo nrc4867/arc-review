@@ -25,7 +25,7 @@ internal object ReviewPersistence {
             val commit = view.commit?.let { runCatching { ObjectId(it) }.getOrNull() }
             source to SourceView(layout ?: dev.chieppa.stretch.frame.PaneLayout(), view.expanded.toSet(), commit)
         }.toMap()
-        val paneStates = stored.paneStates.filterKeys { it in panes }.mapValues { (_, s) -> PaneUiState(s.split, s.line) }
+        val paneStates = stored.paneStates.filterKeys { it in panes }.mapValues { (_, s) -> PaneUiState(s.split, s.line, s.wrap) }
         return ReviewState(review, repos, views, paneStates)
     }
 
@@ -42,7 +42,7 @@ internal object ReviewPersistence {
         }
         val paneStates = state.review.panes.associate { pane ->
             val id = pane.id.value
-            id to StoredPaneState(state.paneState(id).split, state.paneLines[id] ?: 0)
+            id to state.paneState(id).let { StoredPaneState(it.split, state.paneLines[id] ?: 0, it.wrap) }
         }
         return ReviewMapping.toStored(state.review, views, paneStates)
     }

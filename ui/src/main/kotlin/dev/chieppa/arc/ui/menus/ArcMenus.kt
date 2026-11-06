@@ -11,11 +11,11 @@ import dev.chieppa.arc.ui.drawers.ArcDrawerSlots
 /** The menus, holding the actions Arc has so far. */
 object ArcMenus {
     val all: List<ArcMenu> = listOf(
-        ArcMenu(Res.string.menu_file, listOf(ArcActionIds.ADD_SOURCE, ArcActionIds.OPEN_FILE, null, ArcActionIds.SETTINGS, null, ArcActionIds.QUIT)),
+        ArcMenu(Res.string.menu_file, listOf(ArcActionIds.ADD_SOURCE, ArcActionIds.REMOVE_SOURCE, ArcActionIds.OPEN_FILE, null, ArcActionIds.SETTINGS, null, ArcActionIds.QUIT)),
         ArcMenu(
             Res.string.menu_view,
             ArcDrawerSlots.all.map { ArcActionIds.toggleDrawer(it.id) } + null +
-                listOf(ArcActionIds.TOGGLE_FULL_FILE, ArcActionIds.TOGGLE_SPLIT, ArcActionIds.TOGGLE_PIN, ArcActionIds.CLOSE_PANE, null, ArcActionIds.RESET_LAYOUT),
+                listOf(ArcActionIds.TOGGLE_FULL_FILE, ArcActionIds.TOGGLE_SPLIT, ArcActionIds.TOGGLE_WRAP, ArcActionIds.TOGGLE_PIN, ArcActionIds.CLOSE_PANE, null, ArcActionIds.RESET_LAYOUT),
         ),
         ArcMenu(
             Res.string.menu_review,

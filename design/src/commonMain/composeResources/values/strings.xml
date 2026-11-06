@@ -25,6 +25,7 @@
     <string name="settings_theme">Theme</string>
     <string name="settings_size">Size</string>
     <string name="settings_size_percent">%1$d%</string>
+    <string name="settings_wrap">Wrap long lines</string>
     <string name="menu_review">Review</string>
 
     <string name="action_add_source">Add source</string>
@@ -106,6 +107,12 @@
     <string name="pane_mark_reviewed">Mark reviewed</string>
     <string name="pane_revision_range">%1$s → %2$s</string>
     <string name="pane_binary">Binary file</string>
+    <string name="pane_kind_added">Added</string>
+    <string name="pane_kind_deleted">Deleted</string>
+    <string name="pane_kind_unchanged">Unchanged</string>
+    <string name="pane_kind_binary">Binary</string>
+    <string name="pane_repo_separator">%1$s ·</string>
+    <string name="pane_wrap">Wrap long lines</string>
 
     <string name="find_placeholder">Find</string>
     <string name="find_match_case">Match case</string>

@@ -24,7 +24,8 @@ import dev.chieppa.stretch.ui.Divider
 
 /**
  * One pane: its tool row over its file, shown as the pane's view asks once its text is read, with the find bar
- * floating at the top right while it is open. Ctrl F in the pane opens find. Until the text arrives the pane is plain.
+ * floating at the top right while it is open. A file with no changed lines, added or deleted, shows whole, filling the
+ * pane. Ctrl F in the pane opens find. Until the text arrives the pane is plain.
  */
 @Composable
 fun PaneContent(pane: Pane, workbench: Workbench, modifier: Modifier = Modifier) {
@@ -36,14 +37,18 @@ fun PaneContent(pane: Pane, workbench: Workbench, modifier: Modifier = Modifier)
             true
         },
     ) {
-        PaneToolRow(pane, workbench, find)
-        Divider()
         key(pane.id, pane.path, pane.revision, pane.base) {
             val text = produceState<PaneText?>(null, pane) { value = workbench.texts.load(pane) }.value
+            val kind = text?.let { FileKind.of(pane, it) }
+            PaneToolRow(pane, kind, text?.binary == true, workbench, find)
+            Divider()
             Box(Modifier.weight(1f).fillMaxWidth()) {
-                if (text != null) PaneBody(pane, text, workbench, find)
-                if (find.open && pane.view != PaneView.Rendered) {
-                    ArcFindBar(find, { step -> workbench.runOnPane(pane.id.value) { moveMatch(step) } }, Modifier.align(Alignment.TopEnd).padding(StretchSpacing.space8))
+                if (text != null && kind != null) {
+                    val view = PaneViews.shown(pane, kind, text.binary)
+                    PaneBody(pane, text, kind, view, workbench, find)
+                    if (find.open && view != PaneView.Rendered && !text.binary) {
+                        ArcFindBar(find, { step -> workbench.runOnPane(pane.id.value) { moveMatch(step) } }, Modifier.align(Alignment.TopEnd).padding(StretchSpacing.space8))
+                    }
                 }
             }
         }

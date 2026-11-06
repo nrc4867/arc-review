@@ -6,4 +6,5 @@ internal object SettingsKeys {
     const val INTERFACE_SIZE = "interface.size"
     const val COMMENT = "Arc settings"
     const val LAST_REVIEW = "review.last"
+    const val WRAP_LINES = "panes.wrap"
 }

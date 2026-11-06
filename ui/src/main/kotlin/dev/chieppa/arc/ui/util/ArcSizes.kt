@@ -28,7 +28,7 @@ object ArcSizes {
     val threadMaxWidth = 720.dp
     val avatar = 18.dp
     val gutterDot = 7.dp
-    val gutterBar = 3.dp
+    val binaryIcon = 32.dp
     val stagedChip = 92.dp
     val stagedSource = 150.dp
     val stagedLocation = 300.dp

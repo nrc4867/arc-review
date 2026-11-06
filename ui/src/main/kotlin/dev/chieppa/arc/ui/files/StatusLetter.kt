@@ -16,8 +16,8 @@ import dev.chieppa.stretch.theme.Stretch
 fun StatusLetter(status: ChangeStatus, modifier: Modifier = Modifier) {
     val c = Stretch.colors
     val color = when (status) {
-        ChangeStatus.Added -> c.diffAddStrong
-        ChangeStatus.Deleted -> c.diffDelStrong
+        ChangeStatus.Added -> c.diffAddInk
+        ChangeStatus.Deleted -> c.diffDelInk
         ChangeStatus.Modified -> c.warnInk
         else -> c.inkMuted
     }

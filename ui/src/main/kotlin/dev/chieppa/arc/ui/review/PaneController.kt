@@ -100,6 +100,10 @@ class PaneController(private val state: ReviewState) {
         state.setPaneState(id, state.paneState(id).copy(split = split))
     }
 
+    fun setWrap(id: String, wrap: Boolean) {
+        state.setPaneState(id, state.paneState(id).copy(wrap = wrap))
+    }
+
     private fun placePinned() {
         val pinned = state.review.panes.filter { it.pinned }.map { it.id.value }
         state.views = state.views.mapValues { (source, view) ->
