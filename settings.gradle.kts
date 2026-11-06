@@ -39,3 +39,6 @@ val stretchDir = providers.gradleProperty("stretch.dir").orNull
 includeBuild(stretchDir)
 
 include(":core")
+include(":git")
+include(":host")
+include(":store")
