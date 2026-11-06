@@ -65,13 +65,12 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
         if (!opened) treeState.expanded += treeParents(roots.filter { it.item.source == active }) { it.key }
     }
     val reading = workbench.marks.current
-    LaunchedEffect(reading) {
+    LaunchedEffect(reading, loaded) {
         val (source, path) = reading ?: return@LaunchedEffect
+        if (!loaded) return@LaunchedEffect
         val key = TreeKeys.file(source, path)
-        if (key !in treeState.selection) {
-            treeState.expandTo(roots, key) { it.key }
-            treeState.selection = setOf(key)
-        }
+        treeState.expandTo(roots, key) { it.key }
+        if (key !in treeState.selection) treeState.selection = setOf(key)
     }
     val reviewKeys = remember { ArcKeys.REVIEW_KEYS }
     Box(modifier) {
