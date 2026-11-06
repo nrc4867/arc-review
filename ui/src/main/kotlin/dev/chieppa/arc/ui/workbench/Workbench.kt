@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.workbench
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import dev.chieppa.arc.core.source.Source
@@ -68,7 +69,7 @@ class Workbench(
     val threadViews = ThreadViews()
 
     /** What each pane on screen offers the window's commands, by pane id. */
-    val paneCommands = mutableMapOf<String, PaneCommands>()
+    val paneCommands = mutableStateMapOf<String, PaneCommands>()
 
     /** The active source's panes in the viewport. */
     var paneLayout: PaneLayout

@@ -121,7 +121,6 @@
     <string name="thread_draft">Draft</string>
     <string name="thread_guest">Guest suggestion</string>
     <string name="thread_fold">Fold thread</string>
-    <string name="thread_replies">%1$d replies</string>
     <string name="thread_reply">Reply</string>
     <string name="thread_resolve">Resolve</string>
     <string name="thread_adopt">Adopt as draft</string>
@@ -134,4 +133,8 @@
     <string name="age_minutes">%1$d min ago</string>
     <string name="age_hours">%1$d h ago</string>
     <string name="age_days">%1$d d ago</string>
+    <plurals name="thread_replies">
+        <item quantity="one">%1$d reply</item>
+        <item quantity="other">%1$d replies</item>
+    </plurals>
 </resources>

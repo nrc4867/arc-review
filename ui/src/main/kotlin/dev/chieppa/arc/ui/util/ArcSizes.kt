@@ -21,7 +21,7 @@ object ArcSizes {
     val statusLetter = 14.dp
 
     /** The floating find bar. */
-    val findWidth = 440.dp
+    val findWidth = 500.dp
     val findField = 200.dp
 
     val threadMaxWidth = 720.dp
@@ -29,7 +29,7 @@ object ArcSizes {
     val gutterDot = 7.dp
     val gutterBar = 3.dp
     val stagedChip = 92.dp
-    val stagedSource = 72.dp
+    val stagedSource = 150.dp
     val stagedLocation = 300.dp
     val finderWidth = 560.dp
     val finderTop = 96

@@ -26,6 +26,7 @@ import dev.chieppa.arc.design.generated.staged_line_gone
 import dev.chieppa.arc.design.generated.staged_menu
 import dev.chieppa.arc.design.generated.staged_state
 import dev.chieppa.arc.ui.util.ArcSizes
+import dev.chieppa.arc.ui.util.SourceLabels
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSizes
@@ -53,7 +54,7 @@ fun StagedRow(comment: StagedComment, modifier: Modifier = Modifier) {
             }
         }
         val mono = Stretch.type.valueSm
-        BasicText(comment.source.ref, Modifier.width(ArcSizes.stagedSource), style = mono.merge(TextStyle(color = c.inkMuted)), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        BasicText(SourceLabels.of(comment.source), Modifier.width(ArcSizes.stagedSource), style = mono.merge(TextStyle(color = c.inkMuted)), maxLines = 1, overflow = TextOverflow.Ellipsis)
         Row(Modifier.width(ArcSizes.stagedLocation), horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space6), verticalAlignment = Alignment.CenterVertically) {
             val location = "${comment.path.substringAfterLast('/')}:${comment.line}"
             val style = if (gone != null) mono.merge(TextStyle(color = c.warnInk, textDecoration = TextDecoration.LineThrough)) else mono.merge(TextStyle(color = c.inkStrong))

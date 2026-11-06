@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui.files
 
+import dev.chieppa.arc.ui.util.SourceLabels
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -20,12 +21,14 @@ import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.chord
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.ui.Tree
+import dev.chieppa.stretch.ui.treeParents
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.stringResource
 
 /**
  * Every source's changed files, grouped by source and folder. Selecting one file opens its change; Enter or a
- * double-click opens it in a new tab. The review keys act on the selection while the tree has the keyboard.
+ * double-click opens it in a new tab. The file being read is kept selected, and a source shown with no folder open
+ * opens them all. The review keys act on the selection while the tree has the keyboard.
  */
 @Composable
 fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
@@ -39,6 +42,22 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
             SourceRefs.parse(ref)?.let { workbench.panes.openChange(it, path) }
         }
     }
+    val active = state.active
+    val loaded = active?.let(state::snapshot) != null
+    LaunchedEffect(active, loaded) {
+        if (active == null || !loaded) return@LaunchedEffect
+        val opened = treeState.expanded.any { it is String && it != TreeKeys.source(active) && TreeKeys.belongsTo(it, active) }
+        if (!opened) treeState.expanded += treeParents(roots.filter { it.item.source == active }) { it.key }
+    }
+    val reading = workbench.marks.current
+    LaunchedEffect(reading) {
+        val (source, path) = reading ?: return@LaunchedEffect
+        val key = TreeKeys.file(source, path)
+        if (key !in treeState.selection) {
+            treeState.expandTo(roots, key) { it.key }
+            treeState.selection = setOf(key)
+        }
+    }
     val reviewKeys = remember { ArcKeys.REVIEW_KEYS }
     Tree(
         roots = roots,
@@ -46,7 +65,7 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
         key = { it.key },
         label = { item ->
             when (item) {
-                is FileTreeItem.SourceRow -> item.source.ref + if (item.title.isEmpty()) "" else "  " + item.title
+                is FileTreeItem.SourceRow -> SourceLabels.of(item.source) + if (item.title.isEmpty()) "" else "  " + item.title
                 is FileTreeItem.FolderRow -> item.label
                 is FileTreeItem.FileRow -> item.file.name
                 is FileTreeItem.AsideRow -> aside

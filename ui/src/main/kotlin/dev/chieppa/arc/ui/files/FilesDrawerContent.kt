@@ -7,11 +7,14 @@ import androidx.compose.ui.Modifier
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.ui.Divider
 
-/** The Files drawer: the head for the active source over the tree of every source's files. Empty while there are none. */
+/**
+ * The Files drawer: the head for the active source over the tree of every source's files. The drawer scrolls, so the
+ * tree builds every row. Empty while there are none.
+ */
 @Composable
 fun ColumnScope.FilesDrawerContent(workbench: Workbench) {
     if (workbench.state.review.sources.isEmpty()) return
     FilesHeader(workbench)
     Divider()
-    FileTree(workbench, Modifier.weight(1f).fillMaxWidth())
+    FileTree(workbench, Modifier.fillMaxWidth())
 }

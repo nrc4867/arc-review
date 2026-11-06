@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui.sources
 
+import dev.chieppa.arc.ui.util.SourceLabels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -68,7 +69,7 @@ fun SourceChip(
     ) {
         val ink = if (failed) c.errorInk else if (active) c.inkStrong else c.ink
         Icon(sourceIcon(source), ink)
-        BasicText(source.ref, style = Stretch.type.valueSm.merge(TextStyle(color = ink, fontWeight = FontWeight.SemiBold)), maxLines = 1)
+        BasicText(SourceLabels.of(source), style = Stretch.type.valueSm.merge(TextStyle(color = ink, fontWeight = FontWeight.SemiBold)), maxLines = 1)
         if (title.isNotEmpty()) {
             BasicText(
                 title,

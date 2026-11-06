@@ -26,6 +26,7 @@ import dev.chieppa.arc.design.generated.thread_replies
 import dev.chieppa.arc.design.generated.thread_reply
 import dev.chieppa.arc.design.generated.thread_resolve
 import dev.chieppa.arc.ui.util.ArcSizes
+import dev.chieppa.arc.ui.util.SourceLabels
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSizes
@@ -35,6 +36,7 @@ import dev.chieppa.stretch.ui.ButtonKind
 import dev.chieppa.stretch.ui.Divider
 import dev.chieppa.stretch.ui.IconButton
 import dev.chieppa.stretch.ui.framedSurface
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -71,11 +73,11 @@ fun ThreadCard(
             val muted = Stretch.type.valueSm.merge(TextStyle(color = c.inkMuted))
             val first = thread.messages.firstOrNull()
             val line = stringResource(Res.string.thread_line, thread.line)
-            val summary = if (expanded || first == null) "$line · ${thread.source.ref}" else "$line  ${first.author}: ${first.body}"
+            val summary = if (expanded || first == null) "$line · ${SourceLabels.of(thread.source)}" else "$line  ${first.author}: ${first.body}"
             BasicText(summary, Modifier.weight(1f), style = muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             thread.changedIn?.let { BasicText(stringResource(Res.string.thread_lines_changed, it), style = muted.merge(TextStyle(color = look.ink))) }
             val replies = thread.messages.size - 1
-            if (!expanded && replies > 0) BasicText(stringResource(Res.string.thread_replies, replies), style = muted)
+            if (!expanded && replies > 0) BasicText(pluralStringResource(Res.plurals.thread_replies, replies, replies), style = muted)
             IconButton(if (expanded) StretchIcons.ChevronDown else StretchIcons.ChevronRight, stringResource(Res.string.thread_fold), onToggle, size = StretchSizes.seg)
         }
         if (!expanded) return@Column

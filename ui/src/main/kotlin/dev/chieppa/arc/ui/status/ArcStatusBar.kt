@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui.status
 
+import dev.chieppa.arc.ui.util.SourceLabels
 import androidx.compose.runtime.Composable
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.status_commit
@@ -24,7 +25,7 @@ fun ArcStatusBar(workbench: Workbench) {
     val pane = workbench.panes.focused
     StatusBar(
         start = {
-            if (source != null) StatusItem(source.ref, sourceIcon(source))
+            if (source != null) StatusItem(SourceLabels.of(source), sourceIcon(source))
             if (snapshot != null) {
                 val head = snapshot.revisions.head.short()
                 val count = snapshot.commits.size
