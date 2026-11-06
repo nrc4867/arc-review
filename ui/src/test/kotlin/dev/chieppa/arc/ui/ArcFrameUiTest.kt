@@ -42,11 +42,11 @@ class ArcFrameUiTest {
     }
 
     @Test
-    fun ctrlKFromTheKeyboardOpensThePalette() = runComposeUiTest {
+    fun ctrlKOrCmdKFromTheKeyboardOpensThePalette() = runComposeUiTest {
         val workbench = Workbench()
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         waitForIdle()
-        onRoot().performKeyInput { withKeyDown(Key.CtrlLeft) { pressKey(Key.K) } }
+        onRoot().performKeyInput { withKeyDown(shortcutKey) { pressKey(Key.K) } }
         waitForIdle()
         assertTrue(workbench.paletteOpen)
     }
