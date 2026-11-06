@@ -16,7 +16,21 @@ The repo and the binary are named `arc-review`.
 
 ## Status
 
-Design stage. No code yet.
+Foundations. The window opens on Stretch's frame with Arc's drawers on both rails, an empty pane grid, the command
+palette (Ctrl K) and a settings popover for the theme and interface size, which are kept between runs. The review
+model, source refs and GitHub link reading are built and tested. Nothing reads git or talks to GitHub yet.
+
+## Build and run
+
+Needs JDK 25 as `JAVA_HOME` and a checkout of [Stretch](https://github.com/nrc4867/stretch) beside this one (or named
+by `stretch.dir` in `~/.gradle/gradle.properties`).
+
+```
+./gradlew build        # compile and test
+./gradlew :app:run     # run the app
+```
+
+## Links
 
 - Design: https://claude.ai/artifact/Bq6CtuCH27F79TC1CLLhtQ
 - Design boards: https://claude.ai/artifact/3xbBdkCrd2zhjZw7bYSGVs
