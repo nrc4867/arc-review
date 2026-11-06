@@ -25,7 +25,7 @@ Gradle needs JDK 25 as `JAVA_HOME` (`~/.jdks/corretto-25.0.1` on this machine); 
 
 Stop a running app before rebuilding; a rebuild under a running app breaks it. To see the running app, use Stretch's screenshot endpoint as described in `../stretch/.claude/skills/app-screenshot/SKILL.md`. Keyboard and mouse input cannot be sent to the window from a session; check input in a UI test (`runComposeUiTest`, `performKeyInput`).
 
-The app's data folder is `%LOCALAPPDATA%\dev.chieppa.arc` on Windows and `~/Library/Application Support/dev.chieppa.arc` on macOS. It holds `settings.properties` (theme, size, last open review), `repos.json` (each repo's name and the folder of its clone, shared by every review) and `reviews/<id>.json` (a review's sources, panes, marks, each source's view and each pane's state). The window opens on a review whatever state that folder is in, so a screen can be set up by writing those files before `:app:run`.
+The app's data folder is `%LOCALAPPDATA%\dev.chieppa.arc` on Windows and `~/Library/Application Support/dev.chieppa.arc` on macOS. It holds `settings.properties` (theme, size, whether panes wrap long lines, last open review), `repos.json` (each repo's name and the folder of its clone, shared by every review) and `reviews/<id>.json` (a review's sources, panes, marks, each source's view and each pane's state, its wrapping among it). The window opens on a review whatever state that folder is in, so a screen can be set up by writing those files before `:app:run`.
 
 CI (`.github/workflows/ci.yml`) checks Stretch out beside the app and runs `build` on Windows and macOS. Linux builds too but is unsupported, so it cannot fail the run.
 
@@ -44,11 +44,9 @@ Each module is a Gradle subproject in package `dev.chieppa.arc.<module>`. A modu
 | Core | `core` | The review model as plain immutable data: `Review`, `Source` and its ref syntax, `Pane`, changes, file marks with their fingerprint and `MarkRules`, progress, the conversation model. No dependencies |
 | Dev only | `demo` | A sample `ReviewConversation`, on the app's classpath only with `-Pdemo` |
 
-Everything below `ui` is plain Kotlin, unit tested without a window. A test lives with the module it tests. Git tests build small repos in temp folders through the git CLI; UI tests read from `FakeReviewData`.
+Everything below `ui` is plain Kotlin, unit tested without a window. In `ui`, every action is registered once and runs from the palette, the menus, its key and the context menus alike; a context menu item runs it on the menu's target through `Workbench.withTarget`, and `ActionTargets` says what an action acts on. A test lives with the module it tests. Git tests build small repos in temp folders through the git CLI; UI tests read from `FakeReviewData`.
 
 Marks follow `docs/research/review-marks.md`: a mark holds the file's fingerprint (candidate B) and the reviewed head and merge-base; `MarkRules` keeps or clears it by the replay (candidate F) that `MarkReplayer` runs when a source has moved, falling back to the fingerprint where the replay conflicts or the reviewed commits are gone.
-
-Drawer content sits in a scrolling column, so a list inside a drawer builds every row rather than only those on screen.
 
 ## Rules
 

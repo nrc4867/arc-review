@@ -17,14 +17,17 @@ The repo and the binary are named `arc-review`.
 ## Status
 
 Reading local repos. Add a repo by its folder and sources in it by ref (`@sha`, `@sha..sha`, `:branch...base`);
-switch the active source from the strip under the top bar, and each source keeps its own panes, scroll and open
-folders. The Files drawer groups every source's changed files with their status, line counts and reviewed marks, a
-folder or selection marks at once, and a source's tree can be scoped to one commit. Panes show a file's diff (split or
-unified), the whole file with its changes marked, or rendered Markdown, with find in file; any file at any revision of
-any repo can be opened and pinned beside the rest. Marks survive a rebase that keeps the change. The keyboard covers
-next and previous file and change, mark and advance, find and the file finder, all in the palette (Ctrl K). Reviews,
-repos and layouts are saved locally. Nothing talks to GitHub yet; threads and staged comments are drawn only from the
-dev-only sample (`-Pdemo`).
+switch the active source from the strip under the top bar, where each source's chip also removes it (its marks stay,
+so adding it again restores them), and each source keeps its own panes, scroll and open folders. The Files drawer
+groups every source's changed files with their status, line counts and reviewed marks, a folder or selection marks at
+once, and a source's tree can be scoped to one commit. Right-clicking a file, folder, source or tab offers what can be
+done to it, and files drag from the tree onto a pane, an edge or out into a window of their own. Panes show a file's
+diff (split or unified), the whole file with its changes marked, or rendered Markdown, with find in file and wrapping
+of long lines; an added, deleted or unchanged file shows whole under a chip saying so. Any file at any revision of any
+repo can be opened and pinned beside the rest. Marks survive a rebase that keeps the change. The keyboard covers next
+and previous file and change, mark and advance, find, wrapping and the file finder, all in the palette (Ctrl K).
+Reviews, repos and layouts are saved locally. Nothing talks to GitHub yet; threads and staged comments are drawn only
+from the dev-only sample (`-Pdemo`).
 
 ## Build and run
 
