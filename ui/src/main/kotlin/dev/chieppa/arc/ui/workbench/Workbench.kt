@@ -65,8 +65,11 @@ class Workbench(
     /** What the tree's files drag into the pane grid through. */
     val dropTarget = PaneDropTarget()
 
+    /** Works out where a pane opened in a window of its own goes, once the window is on screen; null where panes cannot open windows. */
+    var windowBounds: (() -> WindowBounds)? = null
+
     /** Where a pane opened in a window of its own goes, over the viewport; null where panes cannot open windows. */
-    var newWindowBounds: WindowBounds? = null
+    val newWindowBounds: WindowBounds? get() = windowBounds?.invoke()
 
     /** What the context menu item being checked or run acts on; null for the palette and keys. */
     var menuTarget: MenuTarget? = null

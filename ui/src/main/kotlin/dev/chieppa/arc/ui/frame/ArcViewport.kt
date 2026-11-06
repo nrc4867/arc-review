@@ -26,11 +26,14 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
         onChange = { workbench.paneLayout = it },
         item = { id -> paneTab(id, workbench.state.pane(id)) },
         modifier = modifier.onGloballyPositioned { coordinates ->
-            workbench.newWindowBounds = host?.let {
-                val topLeft = coordinates.positionInWindow()
-                val corner = it.screenPosition(topLeft)
-                val far = it.screenPosition(topLeft + Offset(coordinates.size.width.toFloat(), coordinates.size.height.toFloat()))
-                WindowBounds(corner.x + WINDOW_INSET, corner.y + WINDOW_INSET, far.x - corner.x, far.y - corner.y)
+            val topLeft = coordinates.positionInWindow()
+            val size = Offset(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
+            workbench.windowBounds = host?.let {
+                {
+                    val corner = it.screenPosition(topLeft)
+                    val far = it.screenPosition(topLeft + size)
+                    WindowBounds(corner.x + WINDOW_INSET, corner.y + WINDOW_INSET, far.x - corner.x, far.y - corner.y)
+                }
             }
         },
         onClose = workbench.panes::close,
