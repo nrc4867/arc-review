@@ -25,4 +25,113 @@
     <string name="settings_theme">Theme</string>
     <string name="settings_size">Size</string>
     <string name="settings_size_percent">%1$d%</string>
+    <string name="menu_review">Review</string>
+
+    <string name="action_add_source">Add source</string>
+    <string name="action_next_file">Next file</string>
+    <string name="action_previous_file">Previous file</string>
+    <string name="action_next_change">Next change</string>
+    <string name="action_previous_change">Previous change</string>
+    <string name="action_mark_and_advance">Mark reviewed and go to next</string>
+    <string name="action_toggle_reviewed">Mark or unmark reviewed</string>
+    <string name="action_set_aside">Set aside</string>
+    <string name="action_find_in_file">Find in file</string>
+    <string name="action_open_file">Open file</string>
+    <string name="action_toggle_pin">Pin or unpin pane</string>
+    <string name="action_toggle_full_file">Diff or full file</string>
+    <string name="action_toggle_split">Split or unified</string>
+    <string name="action_close_pane">Close pane</string>
+
+    <string name="review_default_name">Review</string>
+    <string name="review_new">New review</string>
+    <string name="review_choose">Review</string>
+
+    <string name="sources_add">Add source</string>
+    <string name="sources_changed_since">Changed since you reviewed</string>
+    <string name="sources_progress">%1$d/%2$d</string>
+    <string name="sources_remove">Remove source</string>
+
+    <string name="add_source_title">Add source</string>
+    <string name="add_source_repo">Repository</string>
+    <string name="add_source_ref">Source</string>
+    <string name="add_source_ref_hint">@sha, @sha..sha or :branch...base</string>
+    <string name="add_source_folder">Folder of a git repository</string>
+    <string name="add_source_add_repo">Add repository</string>
+    <string name="add_source_add">Add</string>
+    <string name="add_source_choose_folder">Choose folder</string>
+
+    <string name="files_scope">Scope</string>
+    <string name="files_scope_whole">Whole source</string>
+    <string name="files_since_review">Since my review</string>
+    <string name="files_reviewed_count">%1$d/%2$d reviewed</string>
+    <string name="files_changed_since_count">%1$d changed since</string>
+    <string name="files_set_aside_count">%1$d set aside</string>
+    <string name="files_set_aside">Set aside</string>
+    <string name="files_reviewed">Reviewed</string>
+    <string name="files_tree">Changed files</string>
+
+    <string name="pane_view">View</string>
+    <string name="pane_diff">Diff</string>
+    <string name="pane_full_file">Full file</string>
+    <string name="pane_rendered">Rendered</string>
+    <string name="pane_source">Source</string>
+    <string name="pane_split">Split</string>
+    <string name="pane_unified">Unified</string>
+    <string name="pane_pin">Pin</string>
+    <string name="pane_unpin">Unpin</string>
+    <string name="pane_mark_reviewed">Mark reviewed</string>
+    <string name="pane_revision_range">%1$s → %2$s</string>
+    <string name="pane_binary">Binary file</string>
+
+    <string name="find_placeholder">Find</string>
+    <string name="find_match_case">Match case</string>
+    <string name="find_whole_word">Whole word</string>
+    <string name="find_regex">Regular expression</string>
+    <string name="find_match_case_glyph">Aa</string>
+    <string name="find_whole_word_glyph">W</string>
+    <string name="find_regex_glyph">.*</string>
+    <string name="find_count">%1$d of %2$d</string>
+    <string name="find_none">No matches</string>
+    <string name="find_previous">Previous match</string>
+    <string name="find_next">Next match</string>
+    <string name="find_close">Close find</string>
+
+    <string name="finder_placeholder">Open a file at %1$s</string>
+
+    <string name="status_commits">%1$d commits · head %2$s</string>
+    <string name="status_commit">1 commit · head %1$s</string>
+    <string name="status_matches">%1$d of %2$d matches</string>
+    <string name="status_guest_notes">Guest notes · %1$d</string>
+
+    <string name="staged_count">%1$d staged</string>
+    <string name="staged_state">Staged</string>
+    <string name="staged_in_summary">In summary</string>
+    <string name="staged_line_gone">Line gone in %1$s</string>
+    <string name="staged_edit">Edit comment</string>
+    <string name="staged_menu">Comment menu</string>
+    <string name="staged_verdict">Verdict</string>
+    <string name="verdict_comment">Comment</string>
+    <string name="verdict_approve">Approve</string>
+    <string name="verdict_request_changes">Request changes</string>
+    <string name="push_review">Push review</string>
+
+    <string name="thread_open">Open</string>
+    <string name="thread_addressed">Addressed</string>
+    <string name="thread_resolved">Resolved</string>
+    <string name="thread_draft">Draft</string>
+    <string name="thread_guest">Guest suggestion</string>
+    <string name="thread_fold">Fold thread</string>
+    <string name="thread_replies">%1$d replies</string>
+    <string name="thread_reply">Reply</string>
+    <string name="thread_resolve">Resolve</string>
+    <string name="thread_adopt">Adopt as draft</string>
+    <string name="thread_dismiss">Dismiss</string>
+    <string name="thread_lines_changed">lines changed in %1$s</string>
+    <string name="thread_guest_author">guest</string>
+    <string name="thread_local">local</string>
+    <string name="thread_line">R %1$d</string>
+    <string name="age_now">now</string>
+    <string name="age_minutes">%1$d min ago</string>
+    <string name="age_hours">%1$d h ago</string>
+    <string name="age_days">%1$d d ago</string>
 </resources>

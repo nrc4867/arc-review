@@ -1,0 +1,107 @@
+package dev.chieppa.arc.ui.review
+
+import dev.chieppa.arc.core.change.ObjectId
+import dev.chieppa.arc.core.mark.ReplayOutcome
+import dev.chieppa.arc.core.source.RepoName
+import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.core.source.SourceRefs
+import dev.chieppa.arc.ui.services.ReviewData
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import java.nio.file.Path
+
+/**
+ * The review's repos and sources: adding them, switching the active one, scoping its tree to one commit, and reading
+ * each from its repo in the background. A new read of a source cancels the one before it; the old view stays until
+ * the new one is ready.
+ */
+class SourceController(private val state: ReviewState, private val data: ReviewData, private val scope: CoroutineScope) {
+    private val jobs = mutableMapOf<Pair<Source, Boolean>, Job>()
+
+    /** Adds the repo in [dir] under its folder's name, made unique; null when [dir] holds no repo. */
+    suspend fun addRepo(dir: Path): RepoName? {
+        val folder = dir.toAbsolutePath().normalize()
+        state.repos.entries.firstOrNull { it.value == folder }?.let { return it.key }
+        if (!data.isRepo(folder)) return null
+        val base = RepoNames.fromFolder(folder.fileName?.toString().orEmpty())
+        val name = RepoNames.unique(base, state.repos.keys)
+        state.repos = state.repos + (name to folder)
+        return name
+    }
+
+    /** Adds the source [ref] names, if its repo is known, and makes it active. Returns whether it did. */
+    fun addSource(ref: String): Boolean {
+        val source = SourceRefs.parse(ref) ?: return false
+        if (source.repo !in state.repos || source is Source.PullRequest) return false
+        state.review = state.review.add(source)
+        activate(source)
+        load(source)
+        return true
+    }
+
+    fun removeSource(source: Source) {
+        state.review = state.review.remove(source)
+        state.views = state.views - source
+        state.loads = state.loads - source
+        state.scoped = state.scoped - source
+        state.review.active?.let(::activate)
+    }
+
+    fun activate(source: Source) {
+        val (review, views) = SourceSwitching.activate(state.review, state.views, source)
+        state.review = review
+        state.views = views
+    }
+
+    /** Scopes [source]'s tree to [commit], or back to the whole source with null. */
+    fun setScope(source: Source, commit: ObjectId?) {
+        state.views = state.views + (source to state.viewOf(source).copy(commit = commit))
+        if (commit == null) state.scoped = state.scoped - source else loadScope(source)
+    }
+
+    /** Reads every source not read yet, and the scoped commit of each that has one. */
+    fun loadAll() {
+        for (source in state.review.sources) {
+            if (state.loads[source] == null) load(source)
+            if (state.viewOf(source).commit != null && state.scoped[source] == null) loadScope(source)
+        }
+    }
+
+    /** Reads [source]'s whole change again, with the replays its marks need. */
+    fun load(source: Source) = launch(source, scoped = false) {
+        val snapshot = data.read(source)
+        SourceLoad.Ready(snapshot, replays(source, snapshot))
+    }
+
+    private fun loadScope(source: Source) {
+        val commit = state.viewOf(source).commit ?: return
+        launch(source, scoped = true) { SourceLoad.Ready(data.readCommit(source, commit)) }
+    }
+
+    private suspend fun replays(source: Source, snapshot: dev.chieppa.arc.core.change.SourceSnapshot): List<ReplayOutcome> =
+        state.review.marksIn(source).values.mapNotNull { it.reviewed }.distinct()
+            .filter { it.head != snapshot.revisions.head || it.mergeBase != snapshot.revisions.base }
+            .mapNotNull { data.replay(source.repo, it, snapshot.revisions) }
+
+    private fun launch(source: Source, scoped: Boolean, read: suspend () -> SourceLoad) {
+        val key = source to scoped
+        jobs[key]?.cancel()
+        fun put(load: SourceLoad) {
+            if (scoped) state.scoped = state.scoped + (source to load) else state.loads = state.loads + (source to load)
+        }
+        val current = if (scoped) state.scoped[source] else state.loads[source]
+        if (current == null) put(SourceLoad.Loading)
+        jobs[key] = scope.launch {
+            val result = try {
+                read()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                SourceLoad.Failed(e.message.orEmpty())
+            }
+            if (source in state.review.sources) put(result)
+        }
+    }
+}
