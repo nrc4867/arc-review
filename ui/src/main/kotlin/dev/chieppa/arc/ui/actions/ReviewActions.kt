@@ -1,6 +1,8 @@
 package dev.chieppa.arc.ui.actions
 
 import dev.chieppa.arc.core.pane.PaneView
+import dev.chieppa.arc.core.mark.FileReviewState
+import dev.chieppa.arc.ui.workbench.ActionTargets
 import dev.chieppa.arc.ui.workbench.ReviewTargets
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.core.Action
@@ -33,12 +35,12 @@ fun registerReviewActions(registry: ActionRegistry, workbench: Workbench) {
         }
     }
     action(ArcActionIds.TOGGLE_REVIEWED, ArcKeys.TOGGLE_REVIEWED, hasSource) {
-        ReviewTargets.of(workbench).forEach { (source, paths) -> workbench.marks.toggle(source, paths) }
+        ActionTargets.files(workbench).forEach { (source, paths) -> workbench.marks.toggle(source, paths) }
     }
-    action(ArcActionIds.SET_ASIDE, available = hasSource) {
-        ReviewTargets.of(workbench).forEach { (source, paths) -> workbench.marks.setAside(source, paths) }
+    action(ArcActionIds.SET_ASIDE, available = { hasSource() && ActionTargets.files(workbench).any { (source, paths) -> paths.any { state.states(source)[it] != FileReviewState.SetAside } } }) {
+        ActionTargets.files(workbench).forEach { (source, paths) -> workbench.marks.setAside(source, paths) }
     }
-    action(ArcActionIds.TOGGLE_PIN, available = hasPane) { workbench.panes.focused?.let { workbench.panes.togglePin(it.id.value) } }
+    action(ArcActionIds.TOGGLE_PIN, available = { ActionTargets.pane(workbench) != null }) { ActionTargets.pane(workbench)?.let { workbench.panes.togglePin(it.id.value) } }
     action(ArcActionIds.CLOSE_PANE, ArcKeys.CLOSE_PANE, hasPane) { workbench.panes.focused?.let { workbench.panes.close(it.id.value) } }
     action(ArcActionIds.TOGGLE_FULL_FILE, available = { workbench.panes.focused?.hasChange == true }) {
         val pane = workbench.panes.focused ?: return@action

@@ -14,6 +14,7 @@ object ArcKeys {
     val FIND_IN_FILE: KeyChord = KeyChord.parse("Ctrl F")
     val OPEN_FILE: KeyChord = KeyChord.parse("Ctrl P")
     val CLOSE_PANE: KeyChord = KeyChord.parse("Ctrl W")
+    val TOGGLE_WRAP: KeyChord = KeyChord.parse("Alt Z")
 
     /** The keys that act on the file tree's selection, so the tree must not take them as typing. */
     val REVIEW_KEYS: Set<KeyChord> = setOf(MARK_AND_ADVANCE, TOGGLE_REVIEWED)

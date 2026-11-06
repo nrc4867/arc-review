@@ -41,12 +41,29 @@ class SourceController(private val state: ReviewState, private val data: ReviewD
         return true
     }
 
+    /**
+     * Takes [source] out of the review with its view and its unpinned panes. Its marks stay with the review, so adding
+     * it again brings them back; pinned panes stay, in the next source's layout or the loose one.
+     */
     fun removeSource(source: Source) {
-        state.review = state.review.remove(source)
+        if (source !in state.review.sources) return
+        jobs.keys.filter { it.first == source }.forEach { jobs.remove(it)?.cancel() }
+        val shown = state.viewOf(source).layout.tabs.toSet()
+        val closing = state.review.panes.filter { !it.pinned && (it.source == source || it.id.value in shown) }.map { it.id }
+        state.review = closing.fold(state.review.remove(source)) { review, id -> review.withoutPane(id) }
+        val ids = closing.map { it.value }.toSet()
+        state.paneStates = state.paneStates - ids
+        ids.forEach(state.paneLines::remove)
         state.views = state.views - source
         state.loads = state.loads - source
         state.scoped = state.scoped - source
-        state.review.active?.let(::activate)
+        val next = state.review.active
+        if (next != null) {
+            activate(next)
+        } else {
+            val pinned = state.review.panes.filter { it.pinned }.map { it.id.value }
+            state.looseLayout = SourceSwitching.withPinned(state.looseLayout, pinned)
+        }
     }
 
     fun activate(source: Source) {

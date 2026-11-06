@@ -8,6 +8,7 @@ import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.host.conversation.NoConversation
 import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.ui.actions.registerArcActions
+import dev.chieppa.arc.ui.actions.registerContextActions
 import dev.chieppa.arc.ui.actions.registerReviewActions
 import dev.chieppa.arc.ui.drawers.defaultFrameLayout
 import dev.chieppa.arc.ui.conversation.ThreadViews
@@ -19,12 +20,15 @@ import dev.chieppa.arc.ui.review.ReviewState
 import dev.chieppa.arc.ui.review.SourceController
 import dev.chieppa.arc.ui.services.NoRepos
 import dev.chieppa.arc.ui.services.ReviewData
+import dev.chieppa.arc.ui.services.SystemClipboard
+import dev.chieppa.arc.ui.services.TextClipboard
 import dev.chieppa.arc.ui.settings.UiPreferences
 import dev.chieppa.arc.ui.tree.TreeKeys
 import dev.chieppa.stretch.core.ActionRegistry
 import dev.chieppa.stretch.core.Keymap
 import dev.chieppa.stretch.frame.FrameLayout
 import dev.chieppa.stretch.frame.PaneLayout
+import dev.chieppa.stretch.frame.WindowBounds
 import dev.chieppa.stretch.ui.TreeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +39,8 @@ import kotlinx.coroutines.launch
  * The main window's state: the look the person chose, where the drawers are, the open review and its panes, which
  * overlays are open, and the actions that change them. Views read it and recompose when it changes. Sources are read
  * through [data] on [scope]; threads and staged comments come from [conversation]. [reviews] are the saved reviews the
- * top bar offers, and [onOpenReview] opens one by id, or a new one for null. [onQuit] closes the app.
+ * top bar offers, and [onOpenReview] opens one by id, or a new one for null. [onQuit] closes the app. Copied paths and
+ * refs go to [clipboard].
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -46,6 +51,7 @@ class Workbench(
     val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
     val reviews: List<ReviewChoice> = emptyList(),
     val onOpenReview: (String?) -> Unit = {},
+    val clipboard: TextClipboard = SystemClipboard,
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -53,6 +59,24 @@ class Workbench(
     var settingsOpen by mutableStateOf(false)
     var finderOpen by mutableStateOf(false)
     var addSourceOpen by mutableStateOf(false)
+
+    /** Where a pane opened in a window of its own goes, over the viewport; null where panes cannot open windows. */
+    var newWindowBounds: WindowBounds? = null
+
+    /** What the context menu item being checked or run acts on; null for the palette and keys. */
+    var menuTarget: MenuTarget? = null
+        private set
+
+    /** Runs [block] with [target] as what actions act on, as a context menu item does. */
+    fun <T> withTarget(target: MenuTarget?, block: () -> T): T {
+        val before = menuTarget
+        menuTarget = target
+        try {
+            return block()
+        } finally {
+            menuTarget = before
+        }
+    }
 
     /** Whether the Staged comments drawer has been opened for the staged comments it holds. */
     var stagedShown = false
@@ -87,6 +111,7 @@ class Workbench(
     init {
         registerArcActions(registry, this, onQuit)
         registerReviewActions(registry, this)
+        registerContextActions(registry, this)
     }
 
     fun toggleDrawer(id: String) {
@@ -109,6 +134,17 @@ class Workbench(
         if (!sources.addSource(ref)) return false
         state.active?.let(::activateSource)
         return true
+    }
+
+    /**
+     * Takes [source] out of the review, closing its unpinned panes and its open tree rows; its marks stay, so adding it
+     * again restores them.
+     */
+    fun removeSource(source: Source) {
+        sources.removeSource(source)
+        treeState.expanded = treeState.expanded.filterNot { it is String && TreeKeys.belongsTo(it, source) }.toSet()
+        treeState.selection = treeState.selection.filterNot { it is String && TreeKeys.belongsTo(it, source) }.toSet()
+        state.active?.let(::activateSource)
     }
 
     /** Runs [command] on the focused pane, if it is on screen. */

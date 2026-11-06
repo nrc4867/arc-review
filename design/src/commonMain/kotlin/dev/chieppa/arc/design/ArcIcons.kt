@@ -286,4 +286,12 @@ object ArcIcons {
             stroke("M5.5 8h5")
         }
     }
+    val Wrap: ImageVector by lazy {
+        icon("wrap") {
+            stroke("M2 3.5h12")
+            stroke("M2 8h9.5a2.25 2.25 0 0 1 0 4.5H8")
+            stroke("M9.5 11 8 12.5 9.5 14")
+            stroke("M2 12.5h3")
+        }
+    }
 }

@@ -6,6 +6,10 @@ import dev.chieppa.arc.core.pane.PaneView
 import dev.chieppa.arc.core.pane.Revision
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
+import dev.chieppa.stretch.frame.PaneDrop
+import dev.chieppa.stretch.frame.PaneEdge
+import dev.chieppa.stretch.frame.PaneItemDrop
+import dev.chieppa.stretch.frame.place
 
 /**
  * The review's panes: opening a changed file or any file at a revision, closing, pinning, and switching what a pane
@@ -18,27 +22,46 @@ class PaneController(private val state: ReviewState) {
 
     /** Opens [path] of [source]'s change; false when the source is not read yet or does not change [path]. */
     fun openChange(source: Source, path: String, newTab: Boolean = false): Boolean {
-        val load = state.shown(source) ?: return false
-        val snapshot = load.ready ?: return false
-        val file = snapshot.file(path) ?: return false
+        val id = changePane(source, path, newTab) ?: return false
+        val layout = state.paneLayout
+        state.paneLayout = if (layout.leafOf(id) != null) layout.activate(id) else layout.open(id)
+        return true
+    }
+
+    /**
+     * The id of the pane for [path] of [source]'s change, with [source] made active: the pane already showing it, the
+     * focused unpinned diff taken over unless [newTab], or a new pane not yet in the layout. Null when the source is
+     * not read yet or does not change [path].
+     */
+    fun changePane(source: Source, path: String, newTab: Boolean = false): String? {
+        val load = state.shown(source) ?: return null
+        val snapshot = load.ready ?: return null
+        val file = snapshot.file(path) ?: return null
         if (source != state.active) {
             val (review, views) = SourceSwitching.activate(state.review, state.views, source)
             state.review = review
             state.views = views
         }
         val existing = state.review.panes.firstOrNull { it.source == source && it.path == path && it.hasChange && it.revision.value == snapshot.revisions.head.value }
-        if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) {
-            state.paneLayout = state.paneLayout.activate(existing.id.value)
-            return true
-        }
+        if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) return existing.id.value
         val reuse = focused?.takeIf { !newTab && !it.pinned && it.hasChange && it.source == source }
         val id = reuse?.id ?: PaneFactory.nextId(state.review)
         val pane = PaneFactory.forChange(id, snapshot, file).copy(view = reuse?.view?.takeIf { it != PaneView.Rendered } ?: PaneView.Diff)
         state.review = state.review.withPane(pane)
         if (reuse != null) state.paneLines.remove(id.value)
-        state.paneLayout = state.paneLayout.open(id.value)
+        return id.value
+    }
+
+    /** Opens [path] of [source]'s change in its own pane wherever [drop] says: a pane, an edge or a window. */
+    fun openChangeAt(source: Source, path: String, drop: PaneItemDrop): Boolean {
+        val id = changePane(source, path, newTab = true) ?: return false
+        state.paneLayout = state.paneLayout.place(id, drop)
         return true
     }
+
+    /** Opens [path] of [source]'s change in a new pane split off the focused one at its end. */
+    fun openChangeToSide(source: Source, path: String): Boolean =
+        openChangeAt(source, path, PaneItemDrop.InPane(PaneDrop.Edge(state.paneLayout.focusedLeaf.id, PaneEdge.End)))
 
     /** Opens [path] in [repo] at [revision] whole, in a new tab; [pinned] keeps it when the source changes. */
     fun openFile(repo: RepoName, revision: Revision, path: String, source: Source? = null, pinned: Boolean = false): PaneId {

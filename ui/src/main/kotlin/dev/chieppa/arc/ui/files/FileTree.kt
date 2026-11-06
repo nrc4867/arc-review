@@ -1,7 +1,16 @@
 package dev.chieppa.arc.ui.files
 
 import dev.chieppa.arc.ui.util.SourceLabels
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import dev.chieppa.arc.ui.menus.TreeRowMenu
+import dev.chieppa.arc.ui.workbench.MenuTarget
+import dev.chieppa.stretch.frame.ContextMenuPopup
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -28,7 +37,8 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * Every source's changed files, grouped by source and folder. Selecting one file opens its change; Enter or a
  * double-click opens it in a new tab. The file being read is kept selected, and a source shown with no folder open
- * opens them all. The review keys act on the selection while the tree has the keyboard.
+ * opens them all. The review keys act on the selection while the tree has the keyboard. A right-click, or Shift F10,
+ * opens the row's menu.
  */
 @Composable
 fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
@@ -36,8 +46,10 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
     val roots = ReviewTree.roots(state, workbench.sinceReview)
     val aside = stringResource(Res.string.files_set_aside)
     val treeState = workbench.treeState
+    var menu by remember { mutableStateOf<Pair<MenuTarget.OfRows, Offset>?>(null) }
     LaunchedEffect(treeState) {
         snapshotFlow { treeState.selection }.distinctUntilChanged().collect { keys ->
+            if (menu != null) return@collect
             val (ref, path) = keys.singleOrNull()?.let(TreeKeys::fileOf) ?: return@collect
             SourceRefs.parse(ref)?.let { workbench.panes.openChange(it, path) }
         }
@@ -59,42 +71,46 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
         }
     }
     val reviewKeys = remember { ArcKeys.REVIEW_KEYS }
-    Tree(
-        roots = roots,
-        state = treeState,
-        key = { it.key },
-        label = { item ->
-            when (item) {
-                is FileTreeItem.SourceRow -> SourceLabels.of(item.source) + if (item.title.isEmpty()) "" else "  " + item.title
-                is FileTreeItem.FolderRow -> item.label
-                is FileTreeItem.FileRow -> item.file.name
-                is FileTreeItem.AsideRow -> aside
-            }
-        },
-        modifier = modifier
-            .onFocusChanged { workbench.treeFocused = it.hasFocus }
-            .onPreviewKeyEvent { event ->
-                val chord = event.chord() ?: return@onPreviewKeyEvent false
-                if (chord !in reviewKeys) return@onPreviewKeyEvent false
-                workbench.keymap.resolve(chord, null)?.run()
-                true
+    Box(modifier) {
+        Tree(
+            roots = roots,
+            state = treeState,
+            key = { it.key },
+            label = { item ->
+                when (item) {
+                    is FileTreeItem.SourceRow -> SourceLabels.of(item.source) + if (item.title.isEmpty()) "" else "  " + item.title
+                    is FileTreeItem.FolderRow -> item.label
+                    is FileTreeItem.FileRow -> item.file.name
+                    is FileTreeItem.AsideRow -> aside
+                }
             },
-        icon = { item ->
-            when (item) {
-                is FileTreeItem.SourceRow -> sourceIcon(item.source)
-                is FileTreeItem.FolderRow -> if (item.key in treeState.expanded) ArcIcons.FolderOpen else StretchIcons.Folder
-                is FileTreeItem.FileRow -> null
-                is FileTreeItem.AsideRow -> ArcIcons.SetAside
-            }
-        },
-        onActivate = { item ->
-            when (item) {
-                is FileTreeItem.FileRow -> workbench.panes.openChange(item.source, item.file.path, newTab = true)
-                is FileTreeItem.SourceRow -> workbench.activateSource(item.source)
-                else -> Unit
-            }
-        },
-        leading = { item -> if (item is FileTreeItem.FileRow) StatusLetter(item.file.status) },
-        trailing = { item -> TreeRowEnd(item, workbench) },
-    )
+            modifier = Modifier.fillMaxSize()
+                .onFocusChanged { workbench.treeFocused = it.hasFocus }
+                .onPreviewKeyEvent { event ->
+                    val chord = event.chord() ?: return@onPreviewKeyEvent false
+                    if (chord !in reviewKeys) return@onPreviewKeyEvent false
+                    workbench.keymap.resolve(chord, null)?.run()
+                    true
+                },
+            icon = { item ->
+                when (item) {
+                    is FileTreeItem.SourceRow -> sourceIcon(item.source)
+                    is FileTreeItem.FolderRow -> if (item.key in treeState.expanded) ArcIcons.FolderOpen else StretchIcons.Folder
+                    is FileTreeItem.FileRow -> null
+                    is FileTreeItem.AsideRow -> ArcIcons.SetAside
+                }
+            },
+            onActivate = { item ->
+                when (item) {
+                    is FileTreeItem.FileRow -> workbench.panes.openChange(item.source, item.file.path, newTab = true)
+                    is FileTreeItem.SourceRow -> workbench.activateSource(item.source)
+                    else -> Unit
+                }
+            },
+            onContextMenu = { item, at -> menu = MenuTarget.OfRows(item, treeState.selection) to at },
+            leading = { item -> if (item is FileTreeItem.FileRow) StatusLetter(item.file.status) },
+            trailing = { item -> TreeRowEnd(item, workbench) },
+        )
+        ContextMenuPopup(menu?.second, { menu = null }) { close -> menu?.first?.let { TreeRowMenu(workbench, it, close) } }
+    }
 }

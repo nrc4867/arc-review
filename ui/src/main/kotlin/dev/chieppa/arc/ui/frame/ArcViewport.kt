@@ -2,6 +2,7 @@ package dev.chieppa.arc.ui.frame
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import dev.chieppa.arc.ui.menus.TabMenu
 import dev.chieppa.arc.ui.panes.PaneContent
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.arc.ui.workbench.paneTab
@@ -16,6 +17,7 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
         item = { id -> paneTab(id, workbench.state.pane(id)) },
         modifier = modifier,
         onClose = workbench.panes::close,
+        tabMenu = { id, close -> TabMenu(workbench, id, close) },
     ) { id ->
         workbench.state.pane(id)?.let { PaneContent(it, workbench) }
     }

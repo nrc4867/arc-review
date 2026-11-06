@@ -20,6 +20,21 @@ import dev.chieppa.arc.design.generated.action_toggle_full_file
 import dev.chieppa.arc.design.generated.action_toggle_pin
 import dev.chieppa.arc.design.generated.action_toggle_reviewed
 import dev.chieppa.arc.design.generated.action_toggle_split
+import dev.chieppa.arc.design.generated.action_remove_source
+import dev.chieppa.arc.design.generated.action_activate_source
+import dev.chieppa.arc.design.generated.action_copy_source_ref
+import dev.chieppa.arc.design.generated.action_open_change
+import dev.chieppa.arc.design.generated.action_open_in_new_tab
+import dev.chieppa.arc.design.generated.action_open_to_side
+import dev.chieppa.arc.design.generated.action_open_in_new_window
+import dev.chieppa.arc.design.generated.action_open_pinned
+import dev.chieppa.arc.design.generated.action_open_full_file
+import dev.chieppa.arc.design.generated.action_restore
+import dev.chieppa.arc.design.generated.action_copy_path
+import dev.chieppa.arc.design.generated.action_copy_file_ref
+import dev.chieppa.arc.design.generated.action_expand_all
+import dev.chieppa.arc.design.generated.action_collapse_all
+import dev.chieppa.arc.design.generated.action_toggle_wrap
 import dev.chieppa.arc.ui.drawers.ArcDrawerSlots
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -43,6 +58,21 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.TOGGLE_FULL_FILE.value to Res.string.action_toggle_full_file,
     ArcActionIds.TOGGLE_SPLIT.value to Res.string.action_toggle_split,
     ArcActionIds.CLOSE_PANE.value to Res.string.action_close_pane,
+    ArcActionIds.REMOVE_SOURCE.value to Res.string.action_remove_source,
+    ArcActionIds.ACTIVATE_SOURCE.value to Res.string.action_activate_source,
+    ArcActionIds.COPY_SOURCE_REF.value to Res.string.action_copy_source_ref,
+    ArcActionIds.OPEN_CHANGE.value to Res.string.action_open_change,
+    ArcActionIds.OPEN_IN_NEW_TAB.value to Res.string.action_open_in_new_tab,
+    ArcActionIds.OPEN_TO_SIDE.value to Res.string.action_open_to_side,
+    ArcActionIds.OPEN_IN_NEW_WINDOW.value to Res.string.action_open_in_new_window,
+    ArcActionIds.OPEN_PINNED.value to Res.string.action_open_pinned,
+    ArcActionIds.OPEN_FULL_FILE.value to Res.string.action_open_full_file,
+    ArcActionIds.RESTORE.value to Res.string.action_restore,
+    ArcActionIds.COPY_PATH.value to Res.string.action_copy_path,
+    ArcActionIds.COPY_FILE_REF.value to Res.string.action_copy_file_ref,
+    ArcActionIds.EXPAND_ALL.value to Res.string.action_expand_all,
+    ArcActionIds.COLLAPSE_ALL.value to Res.string.action_collapse_all,
+    ArcActionIds.TOGGLE_WRAP.value to Res.string.action_toggle_wrap,
 ) + ArcDrawerSlots.all.associate { ArcActionIds.toggleDrawer(it.id).value to it.title }
 
 /** Turns an action's text key into its label, for Stretch's `LocalActionText`. */

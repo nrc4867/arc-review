@@ -23,6 +23,21 @@ object ArcActionIds {
     val TOGGLE_FULL_FILE = ActionId("toggle-full-file")
     val TOGGLE_SPLIT = ActionId("toggle-split")
     val CLOSE_PANE = ActionId("close-pane")
+    val REMOVE_SOURCE = ActionId("remove-source")
+    val ACTIVATE_SOURCE = ActionId("activate-source")
+    val COPY_SOURCE_REF = ActionId("copy-source-ref")
+    val OPEN_CHANGE = ActionId("open-change")
+    val OPEN_IN_NEW_TAB = ActionId("open-in-new-tab")
+    val OPEN_TO_SIDE = ActionId("open-to-side")
+    val OPEN_IN_NEW_WINDOW = ActionId("open-in-new-window")
+    val OPEN_PINNED = ActionId("open-pinned")
+    val OPEN_FULL_FILE = ActionId("open-full-file")
+    val RESTORE = ActionId("restore")
+    val COPY_PATH = ActionId("copy-path")
+    val COPY_FILE_REF = ActionId("copy-file-ref")
+    val EXPAND_ALL = ActionId("expand-all")
+    val COLLAPSE_ALL = ActionId("collapse-all")
+    val TOGGLE_WRAP = ActionId("toggle-wrap")
 
     private const val DRAWER_PREFIX = "drawer-"
 

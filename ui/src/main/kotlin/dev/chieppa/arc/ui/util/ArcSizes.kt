@@ -8,6 +8,7 @@ object ArcSizes {
     val sourceStrip = 36.dp
     val sourceChipHeight = 28.dp
     val sourceTitleMax = 180.dp
+    val chipClose = 20.dp
     val ring = 12.dp
     val ringStroke = 2.dp
 

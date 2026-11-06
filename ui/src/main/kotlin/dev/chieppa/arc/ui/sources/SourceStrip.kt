@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import dev.chieppa.arc.core.mark.FileReviewState
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.sources_add
+import dev.chieppa.arc.ui.menus.SourceMenu
 import dev.chieppa.arc.ui.review.SourceLoad
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -52,6 +53,8 @@ fun SourceStrip(workbench: Workbench, modifier: Modifier = Modifier) {
                         active = source == state.active,
                         failed = load is SourceLoad.Failed,
                         onClick = { workbench.activateSource(source) },
+                        onRemove = { workbench.removeSource(source) },
+                        menu = { close -> SourceMenu(workbench, source, close) },
                     )
                 }
             }
