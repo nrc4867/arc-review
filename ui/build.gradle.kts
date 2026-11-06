@@ -24,6 +24,7 @@ dependencies {
     testImplementation("dev.chieppa.stretch:stretch-test")
     testImplementation(compose.desktop.currentOs)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlinx.coroutines.swing)
 }
 
 tasks.test {
