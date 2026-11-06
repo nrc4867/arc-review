@@ -27,9 +27,9 @@ class WorkbenchTest {
     }
 
     @Test
-    fun theDefaultLayoutOpensFilesAndStagedCommentsAsTheBoardDoes() {
+    fun theDefaultLayoutOpensFilesAndKeepsStagedCommentsClosedUntilItHasContent() {
         val layout = Workbench().frameLayout
-        assertEquals(setOf(DrawerIds.FILES, DrawerIds.STAGED_COMMENTS), layout.drawers.filter { it.open }.map { it.id }.toSet())
+        assertEquals(setOf(DrawerIds.FILES), layout.drawers.filter { it.open }.map { it.id }.toSet())
         assertEquals(
             listOf(DrawerIds.FILES, DrawerIds.OUTLINE, DrawerIds.SEARCH, DrawerIds.NOTES, DrawerIds.CONVERSATION, DrawerIds.REVISIONS, DrawerIds.CONSOLE),
             layout.on(Side.Left).map { it.id },

@@ -61,7 +61,9 @@
     <string name="add_source_choose_folder">Choose folder</string>
 
     <string name="files_scope">Scope</string>
-    <string name="files_scope_whole">Whole source</string>
+    <string name="files_scope_whole">All changes</string>
+    <string name="files_scope_commit">%1$s %2$s</string>
+    <string name="files_scope_tooltip">What the tree shows: every commit's changes, or one commit's</string>
     <string name="files_since_review">Since my review</string>
     <string name="files_reviewed_count">%1$d/%2$d reviewed</string>
     <string name="files_changed_since_count">%1$d changed since</string>

@@ -27,7 +27,7 @@ object ArcDrawerSlots {
         DrawerSlot(DrawerIds.CONSOLE, Res.string.drawer_console, StretchIcons.Command, Side.Left, bottom = true),
         DrawerSlot(DrawerIds.PULL_REQUESTS, Res.string.drawer_pull_requests, ArcIcons.Filter, Side.Right),
         DrawerSlot(DrawerIds.CHECKS, Res.string.drawer_checks, ArcIcons.CheckRun, Side.Right),
-        DrawerSlot(DrawerIds.STAGED_COMMENTS, Res.string.drawer_staged_comments, ArcIcons.Stage, Side.Right, bottom = true, openByDefault = true),
+        DrawerSlot(DrawerIds.STAGED_COMMENTS, Res.string.drawer_staged_comments, ArcIcons.Stage, Side.Right, bottom = true),
     )
 
     fun byId(id: String): DrawerSlot? = all.firstOrNull { it.id == id }

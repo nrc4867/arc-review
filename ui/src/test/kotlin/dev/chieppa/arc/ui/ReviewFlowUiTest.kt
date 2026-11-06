@@ -66,7 +66,7 @@ class ReviewFlowUiTest {
     @Test
     fun markAndAdvanceByKeyMarksTheFileAndOpensTheNextOne() = runComposeUiTest {
         val workbench = open()
-        onNodeWithText("Main.kt").performClick()
+        workbench.panes.openChange(data.source, "app/Main.kt")
         waitUntil { workbench.panes.focused != null }
         workbench.registry[dev.chieppa.arc.ui.actions.ArcActionIds.MARK_AND_ADVANCE]!!.run()
         waitForIdle()

@@ -1,6 +1,5 @@
 package dev.chieppa.arc.ui.frame
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -9,6 +8,7 @@ import dev.chieppa.arc.design.ArcTheme
 import dev.chieppa.arc.ui.actions.ArcActionIds
 import dev.chieppa.arc.ui.actions.actionIcon
 import dev.chieppa.arc.ui.actions.actionText
+import dev.chieppa.arc.ui.conversation.OpenStagedWhenFilled
 import dev.chieppa.arc.ui.drawers.arcDrawerSpecs
 import dev.chieppa.arc.ui.finder.FileFinder
 import dev.chieppa.arc.ui.sources.SourceStrip
@@ -20,13 +20,14 @@ import dev.chieppa.stretch.frame.StretchApp
 import dev.chieppa.stretch.frame.actionKeys
 
 /**
- * The main window's content: the top bar with the source strip under it, Arc's drawers on both rails, the pane grid in
+ * The main window's content: the top bar, the source strip under it across the window, Arc's drawers on both rails, the pane grid in
  * the viewport, the status bar, and the palette and file finder over them, all on [workbench]'s state. Every source
  * not read yet is read when it opens.
  */
 @Composable
 fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
     LaunchedEffect(workbench) { workbench.sources.loadAll() }
+    OpenStagedWhenFilled(workbench)
     ArcTheme {
         CompositionLocalProvider(LocalActionText provides actionText()) {
             StretchApp(
@@ -36,12 +37,8 @@ fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
                 onResetLayout = workbench::resetLayout,
                 modifier = modifier.actionKeys(workbench.keymap, null),
                 statusBar = { ArcStatusBar(workbench) },
-                topBar = {
-                    Column {
-                        ArcTopBar(workbench)
-                        SourceStrip(workbench)
-                    }
-                },
+                topStrip = { SourceStrip(workbench) },
+                topBar = { ArcTopBar(workbench) },
             ) {
                 ArcViewport(workbench)
             }

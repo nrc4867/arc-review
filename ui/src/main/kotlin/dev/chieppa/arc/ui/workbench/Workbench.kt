@@ -54,6 +54,9 @@ class Workbench(
     var finderOpen by mutableStateOf(false)
     var addSourceOpen by mutableStateOf(false)
 
+    /** Whether the Staged comments drawer has been opened for the staged comments it holds. */
+    var stagedShown = false
+
     /** Whether the tree shows only the files changed since they were reviewed. */
     var sinceReview by mutableStateOf(false)
 

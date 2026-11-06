@@ -12,7 +12,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun arcDrawerSpecs(workbench: Workbench): List<DrawerSpec> = ArcDrawerSlots.all.map { slot ->
     when (slot.id) {
-        DrawerIds.FILES -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon) { FilesDrawerContent(workbench) }
+        DrawerIds.FILES -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false) { FilesDrawerContent(workbench) }
         DrawerIds.STAGED_COMMENTS -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, actions = { StagedActions(workbench) }) {
             StagedCommentsContent(workbench)
         }

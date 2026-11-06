@@ -11,25 +11,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import dev.chieppa.arc.core.change.CommitInfo
 import dev.chieppa.arc.core.mark.FileReviewState
+import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.files_changed_since_count
 import dev.chieppa.arc.design.generated.files_reviewed_count
-import dev.chieppa.arc.design.generated.files_scope
-import dev.chieppa.arc.design.generated.files_scope_whole
 import dev.chieppa.arc.design.generated.files_set_aside_count
 import dev.chieppa.arc.design.generated.files_since_review
 import dev.chieppa.arc.ui.workbench.Workbench
-import dev.chieppa.stretch.frame.Dropdown
 import dev.chieppa.stretch.theme.Stretch
+import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
-import dev.chieppa.stretch.ui.OptionChip
+import dev.chieppa.stretch.ui.ToggleButton
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The head of the Files drawer for the active source: the scope (the whole source or one of its commits), the
- * changed-since filter, and how far the review has got.
+ * The head of the Files drawer for the active source: one compact row with what the tree shows (all changes or one
+ * commit) and the changed-since filter, over how far the review has got.
  */
 @Composable
 fun FilesHeader(workbench: Workbench, modifier: Modifier = Modifier) {
@@ -37,21 +35,21 @@ fun FilesHeader(workbench: Workbench, modifier: Modifier = Modifier) {
     val source = state.active ?: return
     val snapshot = state.snapshot(source)
     val c = Stretch.colors
-    Column(modifier.fillMaxWidth().padding(StretchSpacing.space10), verticalArrangement = Arrangement.spacedBy(StretchSpacing.space8)) {
+    Column(
+        modifier.fillMaxWidth().padding(horizontal = StretchSpacing.space8, vertical = StretchSpacing.space6),
+        verticalArrangement = Arrangement.spacedBy(StretchSpacing.space4),
+    ) {
         Row(horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space6), verticalAlignment = Alignment.CenterVertically) {
-            val commits: List<CommitInfo?> = listOf<CommitInfo?>(null) + snapshot?.commits.orEmpty().takeIf { it.size > 1 }.orEmpty()
+            val commits = snapshot?.commits.orEmpty()
             val scoped = state.viewOf(source).commit
-            val selected = commits.firstOrNull { it?.id == scoped }
-            val whole = stringResource(Res.string.files_scope_whole)
-            Dropdown(
-                commits,
-                selected,
-                { workbench.sources.setScope(source, it?.id) },
-                { it?.let { commit -> "${commit.id.short()} ${commit.subject}" } ?: whole },
-                stringResource(Res.string.files_scope),
-                Modifier.weight(1f),
+            ScopeMenu(commits, commits.firstOrNull { it.id == scoped }, { workbench.sources.setScope(source, it?.id) }, Modifier.weight(1f))
+            ToggleButton(
+                stringResource(Res.string.files_since_review),
+                workbench.sinceReview,
+                { workbench.sinceReview = it },
+                icon = ArcIcons.ChangedSince,
+                height = StretchSizes.seg,
             )
-            OptionChip(stringResource(Res.string.files_since_review), workbench.sinceReview, { workbench.sinceReview = it })
         }
         val states = state.states(source).values
         val progress = state.progress(source)
