@@ -20,6 +20,11 @@ dependencies {
     testImplementation("dev.chieppa.stretch:stretch-test")
 }
 
+// -Pdemo puts the dev-only sample conversation on the classpath, so threads and staged comments show sample data.
+if (providers.gradleProperty("demo").isPresent) {
+    dependencies { runtimeOnly(project(":demo")) }
+}
+
 tasks.test {
     useJUnitPlatform()
     jvmArgs("--enable-native-access=ALL-UNNAMED")

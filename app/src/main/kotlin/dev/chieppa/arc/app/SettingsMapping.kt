@@ -9,5 +9,5 @@ import dev.chieppa.arc.ui.settings.UiPreferences
 internal fun AppSettings.toPreferences(): UiPreferences =
     UiPreferences(ThemeChoices.byId(themeId), InterfaceSizes.nearest(interfaceSize))
 
-/** The look as settings to store. */
-internal fun UiPreferences.toSettings(): AppSettings = AppSettings(theme.id, interfaceSize)
+/** The look as settings to store, over [base]'s other settings. */
+internal fun UiPreferences.toSettings(base: AppSettings = AppSettings()): AppSettings = base.copy(themeId = theme.id, interfaceSize = interfaceSize)

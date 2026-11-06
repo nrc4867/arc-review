@@ -45,3 +45,6 @@ include(":store")
 include(":design")
 include(":ui")
 include(":app")
+
+// Dev only: sample threads and staged comments, on the classpath only with -Pdemo.
+include(":demo")
