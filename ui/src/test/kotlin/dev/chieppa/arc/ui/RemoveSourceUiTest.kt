@@ -1,6 +1,12 @@
 package dev.chieppa.arc.ui
 
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.isRoot
+import androidx.compose.ui.test.onLast
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -68,5 +74,25 @@ class RemoveSourceUiTest {
         waitForIdle()
         onNodeWithText("Copy source ref").performClick()
         assertEquals(data.source.ref, copied.last)
+    }
+
+    @Test
+    fun hoveringAChipShowsItsRemoveButtonEvenAfterTheReviewSelectorWasOpened() = runComposeUiTest {
+        val workbench = openReview(data)
+        val other = "demo@" + "c".repeat(40)
+        assertTrue(workbench.addSource(other))
+        workbench.activateSource(data.source)
+        waitForIdle()
+        val enabledRemoves = { onAllNodesWithContentDescription("Remove source").fetchSemanticsNodes().count { SemanticsProperties.Disabled !in it.config } }
+        assertEquals(1, enabledRemoves())
+        onAllNodesWithContentDescription("Review").onFirst().performClick()
+        waitForIdle()
+        assertEquals(2, onAllNodes(isRoot()).fetchSemanticsNodes().size)
+        onAllNodes(isRoot()).onLast().performKeyInput { pressKey(Key.Escape) }
+        waitForIdle()
+        assertEquals(1, onAllNodes(isRoot()).fetchSemanticsNodes().size)
+        onNodeWithContentDescription(other).performMouseInput { moveTo(center) }
+        waitForIdle()
+        assertEquals(2, enabledRemoves())
     }
 }
