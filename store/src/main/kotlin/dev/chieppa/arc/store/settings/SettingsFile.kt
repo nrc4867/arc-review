@@ -1,9 +1,10 @@
 package dev.chieppa.arc.store.settings
 
+import dev.chieppa.arc.store.files.AtomicFile
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
+import java.io.StringWriter
 import java.util.Properties
 
 /**
@@ -23,6 +24,7 @@ class SettingsFile(private val path: Path) {
         return AppSettings(
             themeId = properties.getProperty(SettingsKeys.THEME)?.trim()?.ifEmpty { null },
             interfaceSize = properties.getProperty(SettingsKeys.INTERFACE_SIZE)?.trim()?.toFloatOrNull()?.takeIf { it.isFinite() && it > 0f },
+            lastReviewId = properties.getProperty(SettingsKeys.LAST_REVIEW)?.trim()?.ifEmpty { null },
         )
     }
 
@@ -30,9 +32,8 @@ class SettingsFile(private val path: Path) {
         val properties = Properties()
         settings.themeId?.let { properties.setProperty(SettingsKeys.THEME, it) }
         settings.interfaceSize?.let { properties.setProperty(SettingsKeys.INTERFACE_SIZE, it.toString()) }
-        path.toAbsolutePath().parent?.let(Files::createDirectories)
-        val temp = path.resolveSibling(path.fileName.toString() + SettingsKeys.TEMP_SUFFIX)
-        Files.newBufferedWriter(temp).use { properties.store(it, SettingsKeys.COMMENT) }
-        Files.move(temp, path, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
+        settings.lastReviewId?.let { properties.setProperty(SettingsKeys.LAST_REVIEW, it) }
+        val text = StringWriter().also { properties.store(it, SettingsKeys.COMMENT) }.toString()
+        AtomicFile.write(path, text)
     }
 }

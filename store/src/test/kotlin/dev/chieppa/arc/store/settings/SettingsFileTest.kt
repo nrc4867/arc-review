@@ -26,7 +26,7 @@ class SettingsFileTest {
 
     @Test
     fun savedSettingsLoadBack() {
-        val settings = AppSettings(themeId = "workshop-light", interfaceSize = 1.25f)
+        val settings = AppSettings(themeId = "workshop-light", interfaceSize = 1.25f, lastReviewId = "r-1")
         SettingsFile(path).save(settings)
         assertEquals(settings, SettingsFile(path).load())
         assertFalse(path.resolveSibling("settings.properties.tmp").exists())

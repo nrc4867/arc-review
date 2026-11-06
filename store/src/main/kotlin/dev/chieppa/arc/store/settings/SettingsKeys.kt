@@ -5,5 +5,5 @@ internal object SettingsKeys {
     const val THEME = "theme"
     const val INTERFACE_SIZE = "interface.size"
     const val COMMENT = "Arc settings"
-    const val TEMP_SUFFIX = ".tmp"
+    const val LAST_REVIEW = "review.last"
 }

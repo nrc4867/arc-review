@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -7,6 +8,9 @@ kotlin {
 }
 
 dependencies {
+    api(project(":core"))
+    implementation(libs.kotlinx.serialization.json)
+
     testImplementation(kotlin("test"))
 }
 
