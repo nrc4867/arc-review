@@ -11,6 +11,8 @@ import androidx.compose.ui.geometry.Offset
 import dev.chieppa.arc.ui.menus.TreeRowMenu
 import dev.chieppa.arc.ui.workbench.MenuTarget
 import dev.chieppa.stretch.frame.ContextMenuPopup
+import dev.chieppa.stretch.frame.TabItem
+import dev.chieppa.stretch.frame.paneDragSource
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -38,7 +40,8 @@ import org.jetbrains.compose.resources.stringResource
  * Every source's changed files, grouped by source and folder. Selecting one file opens its change; Enter or a
  * double-click opens it in a new tab. The file being read is kept selected, and a source shown with no folder open
  * opens them all. The review keys act on the selection while the tree has the keyboard. A right-click, or Shift F10,
- * opens the row's menu.
+ * opens the row's menu. A file drags into the pane grid as a tab: onto a pane, an edge to split it, or away into a
+ * window of its own.
  */
 @Composable
 fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
@@ -105,6 +108,13 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
                     is FileTreeItem.FileRow -> workbench.panes.openChange(item.source, item.file.path, newTab = true)
                     is FileTreeItem.SourceRow -> workbench.activateSource(item.source)
                     else -> Unit
+                }
+            },
+            rowModifier = { item ->
+                if (item is FileTreeItem.FileRow) {
+                    Modifier.paneDragSource(workbench.dropTarget) { TabItem(item.key, item.file.name, StretchIcons.File, subtitle = item.source.repo.value) }
+                } else {
+                    Modifier
                 }
             },
             onContextMenu = { item, at -> menu = MenuTarget.OfRows(item, treeState.selection) to at },

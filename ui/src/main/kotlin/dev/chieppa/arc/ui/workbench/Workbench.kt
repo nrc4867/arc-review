@@ -27,6 +27,8 @@ import dev.chieppa.arc.ui.tree.TreeKeys
 import dev.chieppa.stretch.core.ActionRegistry
 import dev.chieppa.stretch.core.Keymap
 import dev.chieppa.stretch.frame.FrameLayout
+import dev.chieppa.stretch.frame.PaneDropTarget
+import dev.chieppa.stretch.frame.PaneItemDrop
 import dev.chieppa.stretch.frame.PaneLayout
 import dev.chieppa.stretch.frame.WindowBounds
 import dev.chieppa.stretch.ui.TreeState
@@ -59,6 +61,9 @@ class Workbench(
     var settingsOpen by mutableStateOf(false)
     var finderOpen by mutableStateOf(false)
     var addSourceOpen by mutableStateOf(false)
+
+    /** What the tree's files drag into the pane grid through. */
+    val dropTarget = PaneDropTarget()
 
     /** Where a pane opened in a window of its own goes, over the viewport; null where panes cannot open windows. */
     var newWindowBounds: WindowBounds? = null
@@ -149,6 +154,16 @@ class Workbench(
 
     /** Whether the pane [id] wraps long lines: as it was set, or as the settings say. */
     fun wrap(id: String): Boolean = state.paneState(id).wrap ?: preferences.wrapLines
+
+    /**
+     * Opens the file the tree row [key] stands for where it was dropped on the grid. A file of another source opens in
+     * that source's own layout, in a new tab, since the drop was aimed at the layout being left.
+     */
+    fun dropFile(key: String, drop: PaneItemDrop) {
+        val (ref, path) = TreeKeys.fileOf(key) ?: return
+        val source = state.review.sources.firstOrNull { it.ref == ref } ?: return
+        if (source == state.active || drop is PaneItemDrop.InWindow) panes.openChangeAt(source, path, drop) else panes.openChange(source, path, newTab = true)
+    }
 
     /** Runs [command] on the focused pane, if it is on screen. */
     fun onFocusedPane(command: suspend PaneCommands.() -> Unit) {
