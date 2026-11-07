@@ -6,6 +6,7 @@ import dev.chieppa.arc.core.mark.MarkKind
 import dev.chieppa.arc.core.mark.PatchFingerprint
 import dev.chieppa.arc.core.mark.PatchHash
 import dev.chieppa.arc.core.mark.ReviewedRevisions
+import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
 import dev.chieppa.arc.core.pane.PaneView
@@ -26,18 +27,22 @@ object ReviewMapping {
         marks = review.marks.map(::toStored),
         views = views,
         paneStates = paneStates,
+        pages = review.pages.map(::toStored),
     )
 
     fun toReview(stored: StoredReview): Review {
         val sources = stored.sources.mapNotNull(SourceRefs::parse).distinct()
         val active = stored.active?.let(SourceRefs::parse)?.takeIf { it in sources } ?: sources.firstOrNull()
+        val panes = stored.panes.mapNotNull(::toPane).distinctBy { it.id }
+        val paneIds = panes.map { it.id }.toSet()
         return Review(
             id = ReviewId(stored.id),
             name = stored.name,
             sources = sources,
             active = active,
-            panes = stored.panes.mapNotNull(::toPane).distinctBy { it.id },
+            panes = panes,
             marks = stored.marks.mapNotNull(::toMark).distinctBy { it.source to it.path },
+            pages = stored.pages.mapNotNull(::toPage).distinctBy { it.id }.filter { it.id !in paneIds },
         )
     }
 
@@ -52,6 +57,16 @@ object ReviewMapping {
         oldPath = pane.oldPath,
         source = pane.source?.ref,
     )
+
+    private fun toStored(page: Page): StoredPage = when (page) {
+        is Page.Filter -> StoredPage.Filter(page.id.value, page.filter)
+    }
+
+    private fun toPage(stored: StoredPage): Page? = readOrNull {
+        when (stored) {
+            is StoredPage.Filter -> Page.Filter(PaneId(stored.id), stored.filter)
+        }
+    }
 
     private fun toStored(mark: FileMark) = StoredMark(
         source = mark.source.ref,

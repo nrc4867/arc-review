@@ -6,6 +6,7 @@ import dev.chieppa.arc.core.mark.MarkKind
 import dev.chieppa.arc.core.mark.PatchFingerprint
 import dev.chieppa.arc.core.mark.PatchHash
 import dev.chieppa.arc.core.mark.ReviewedRevisions
+import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
 import dev.chieppa.arc.core.pane.PaneView
@@ -27,6 +28,7 @@ class ReviewStoreTest {
         .add(range).add(branch).activate(branch)
         .withPane(Pane(PaneId("p1"), RepoName("stretch"), "a/B.kt", Revision("5678abcd"), PaneView.FullFile, base = Revision("1234abcd"), source = range))
         .withPane(Pane(PaneId("p2"), RepoName("squash"), "README.md", Revision("main"), PaneView.Rendered, pinned = true))
+        .withPage(Page.Filter(PaneId("p3"), "f1"))
         .mark(
             FileMark(
                 range, "a/B.kt", PatchFingerprint(PatchHash("m"), PatchHash("e"), listOf(PatchHash("h1"))), MarkKind.Reviewed,

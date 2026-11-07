@@ -1,13 +1,15 @@
 package dev.chieppa.arc.core.review
 
 import dev.chieppa.arc.core.mark.FileMark
+import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
 import dev.chieppa.arc.core.source.Source
 
 /**
- * A saved, named workspace: the [sources] under review, the [panes] open on them and the [marks] made so far. While it
- * has sources, one of them is [active] and drives the file tree. Every change returns a new review.
+ * A saved, named workspace: the [sources] under review, the [panes] open on them, the [pages] open beside them, and
+ * the [marks] made so far. While it has sources, one of them is [active] and drives the file tree. Every change returns
+ * a new review.
  */
 data class Review(
     val id: ReviewId,
@@ -16,11 +18,12 @@ data class Review(
     val active: Source? = sources.firstOrNull(),
     val panes: List<Pane> = emptyList(),
     val marks: List<FileMark> = emptyList(),
+    val pages: List<Page> = emptyList(),
 ) {
     init {
         require(sources.toSet().size == sources.size) { "A source is in a review once" }
         require(if (sources.isEmpty()) active == null else active in sources) { "The active source is one of the review's" }
-        require(panes.map { it.id }.toSet().size == panes.size) { "Pane ids are unique in a review" }
+        require((panes.map { it.id } + pages.map { it.id }).toSet().size == panes.size + pages.size) { "Pane and page ids are unique in a review" }
         require(marks.map { it.source to it.path }.toSet().size == marks.size) { "A file has one mark in a source" }
     }
 
@@ -70,4 +73,16 @@ data class Review(
 
     /** The review without the pane [id]. */
     fun withoutPane(id: PaneId): Review = copy(panes = panes.filterNot { it.id == id })
+
+    /** The review with [page] added, or in place of the page with its id. */
+    fun withPage(page: Page): Review = copy(pages = pages.filterNot { it.id == page.id } + page)
+
+    /** The review without the page [id]. */
+    fun withoutPage(id: PaneId): Review = copy(pages = pages.filterNot { it.id == id })
+
+    /** The ids of every pinned pane and page, which follow into each source's layout. */
+    val pinnedIds: List<String> get() = panes.filter { it.pinned }.map { it.id.value } + pages.filter { it.pinned }.map { it.id.value }
+
+    /** The ids of every pane and page. */
+    val tabIds: Set<String> get() = (panes.map { it.id.value } + pages.map { it.id.value }).toSet()
 }
