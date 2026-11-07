@@ -16,6 +16,7 @@ import dev.chieppa.arc.host.conversation.NoConversation
 import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.ui.actions.registerArcActions
 import dev.chieppa.arc.ui.actions.registerContextActions
+import dev.chieppa.arc.ui.actions.registerPullActions
 import dev.chieppa.arc.ui.actions.registerReviewActions
 import dev.chieppa.arc.ui.drawers.defaultFrameLayout
 import dev.chieppa.arc.ui.conversation.ThreadViews
@@ -32,6 +33,8 @@ import dev.chieppa.arc.ui.revisions.RevisionController
 import dev.chieppa.arc.ui.services.NoRepos
 import dev.chieppa.arc.ui.services.ReviewData
 import dev.chieppa.arc.ui.services.SystemClipboard
+import dev.chieppa.arc.ui.services.LinkOpener
+import dev.chieppa.arc.ui.services.SystemBrowser
 import dev.chieppa.arc.ui.services.TextClipboard
 import dev.chieppa.arc.ui.settings.UiPreferences
 import dev.chieppa.arc.ui.tree.TreeKeys
@@ -54,8 +57,8 @@ import kotlinx.coroutines.launch
  * overlays are open, and the actions that change them. Views read it and recompose when it changes. Sources are read
  * through [data] on [scope]; threads and staged comments come from [conversation]. [reviews] are the saved reviews the
  * top bar offers, and [onOpenReview] opens one by id, or a new one for null; [onNewReviewWith] opens a new one holding
- * the source a ref names. [onQuit] closes the app. Copied paths and refs go to [clipboard]. [watch] holds the saved
- * filters and notification rules, which every review shares.
+ * the source a ref names. [onQuit] closes the app. Copied paths and refs go to [clipboard], and web links open through
+ * [links]. [watch] holds the saved filters and notification rules, which every review shares.
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -69,6 +72,7 @@ class Workbench(
     val clipboard: TextClipboard = SystemClipboard,
     val watch: PullWatch = PullWatch(),
     val onNewReviewWith: (String) -> Unit = {},
+    val links: LinkOpener = SystemBrowser,
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -142,6 +146,7 @@ class Workbench(
         registerArcActions(registry, this, onQuit)
         registerReviewActions(registry, this)
         registerContextActions(registry, this)
+        registerPullActions(registry, this)
     }
 
     /** Opens the Pull requests drawer and counts every notification as seen. */
@@ -158,6 +163,19 @@ class Workbench(
     fun reviewHolding(source: Source): String? {
         if (source in state.review.sources) return state.review.name
         return reviews.firstOrNull { it.id != state.review.id.value && source.ref in it.sources }?.name
+    }
+
+    /** The saved review other than the open one that holds [source], if any. */
+    fun otherReviewHolding(source: Source): ReviewChoice? =
+        reviews.firstOrNull { it.id != null && it.id != state.review.id.value && source.ref in it.sources }
+
+    /** Makes [source] active, adding it to the open review first when it is not in it; false when its repo is unknown. */
+    fun openSource(source: Source): Boolean {
+        if (source in state.review.sources) {
+            activateSource(source)
+            return true
+        }
+        return addSource(source.ref)
     }
 
     /** Makes [source] active and shows its revision matrix, opening it when it is not open. */

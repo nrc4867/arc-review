@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.pulls
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,7 @@ import dev.chieppa.arc.core.watch.FilterGrouping
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.pull_ref
 import dev.chieppa.arc.host.github.pulls.WaitingOnRule
+import dev.chieppa.arc.ui.workbench.MenuTarget
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.ui.Divider
 import org.jetbrains.compose.resources.stringResource
@@ -26,7 +28,8 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * A saved filter's tab: its tool row over its pull requests, grouped as the filter says, each group folding under its
  * head. While it shows, the filter counts as looked at, and what changed since it was last looked at stays marked.
- * A page whose filter is gone is plain.
+ * A page whose filter is gone is plain. Columns that do not fit beside a readable title are left out; a click on a pull
+ * request opens it in this review, and a right-click offers what else can be done with it.
  */
 @Composable
 fun FilterPage(page: Page.Filter, workbench: Workbench, modifier: Modifier = Modifier) {
@@ -43,28 +46,33 @@ fun FilterPage(page: Page.Filter, workbench: Workbench, modifier: Modifier = Mod
     Column(modifier.fillMaxSize()) {
         FilterToolRow(filter, watch, now)
         Divider()
-        LazyColumn(Modifier.weight(1f).fillMaxWidth(), rememberLazyListState()) {
-            item(HEADER) { PullHeaderRow() }
-            for (group in groups) {
-                val open = group.name !in folded
-                if (filter.grouping != FilterGrouping.None) {
-                    item(GROUP + group.name) {
-                        PullGroupRow(group, !open) { folded = if (open) folded + group.name else folded - group.name }
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+            val columns = PullColumns.fit(maxWidth)
+            LazyColumn(Modifier.fillMaxSize(), rememberLazyListState()) {
+                item(HEADER) { PullHeaderRow(columns) }
+                for (group in groups) {
+                    val open = group.name !in folded
+                    if (filter.grouping != FilterGrouping.None) {
+                        item(GROUP + group.name) {
+                            PullGroupRow(group, !open) { folded = if (open) folded + group.name else folded - group.name }
+                        }
                     }
-                }
-                if (open) {
-                    items(group.pulls, key = { group.name + it.key }) { pull ->
-                        val source = workbench.sourceOf(pull)
-                        val holding = source?.let(workbench::reviewHolding)
-                        PullRow(
-                            pull = pull,
-                            ref = stringResource(Res.string.pull_ref, source?.repo?.value ?: pull.repo.name, pull.number),
-                            isNew = watch.isNew(filter.id, pull),
-                            waiting = WaitingOnRule.of(pull, watch.viewer),
-                            now = now,
-                            holding = holding,
-                            onAdd = source?.takeIf { holding == null }?.let { { workbench.addSource(it.ref) } },
-                        )
+                    if (open) {
+                        items(group.pulls, key = { group.name + it.key }) { pull ->
+                            val source = workbench.sourceOf(pull)
+                            val holding = source?.let(workbench::reviewHolding)
+                            PullRow(
+                                pull = pull,
+                                ref = stringResource(Res.string.pull_ref, source?.repo?.value ?: pull.repo.name, pull.number),
+                                isNew = watch.isNew(filter.id, pull),
+                                waiting = WaitingOnRule.of(pull, watch.viewer),
+                                now = now,
+                                holding = holding,
+                                onAdd = source?.takeIf { holding == null }?.let { { workbench.addSource(it.ref) } },
+                                columns = columns,
+                                onOpen = source?.let { { workbench.openSource(it) } },
+                            ) { close -> PullMenu(workbench, MenuTarget.OfPull(pull, source), close) }
+                        }
                     }
                 }
             }

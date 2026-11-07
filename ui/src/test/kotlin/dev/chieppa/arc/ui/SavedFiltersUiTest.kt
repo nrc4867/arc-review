@@ -6,6 +6,9 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performMouseInput
+import androidx.compose.ui.test.rightClick
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.v2.runComposeUiTest
 import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.review.Review
@@ -19,6 +22,7 @@ import dev.chieppa.arc.ui.FakePulls.pull
 import dev.chieppa.arc.ui.drawers.DrawerIds
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.pulls.FilterResult
+import dev.chieppa.arc.ui.pulls.PullColumns
 import dev.chieppa.arc.ui.pulls.PullWatch
 import dev.chieppa.arc.ui.review.ReviewState
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -27,6 +31,7 @@ import dev.chieppa.stretch.theme.StretchThemes
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
@@ -43,8 +48,17 @@ class SavedFiltersUiTest {
         )
     }
 
+    private val copied = mutableListOf<String>()
+    private val opened = mutableListOf<String>()
+
     private fun androidx.compose.ui.test.ComposeUiTest.open(): Workbench {
-        val workbench = Workbench(data = data, state = ReviewState(Review(ReviewId("r1"), REVIEW), repos = mapOf(data.repo to Path.of("."))), watch = watch)
+        val workbench = Workbench(
+            data = data,
+            state = ReviewState(Review(ReviewId("r1"), REVIEW), repos = mapOf(data.repo to Path.of("."))),
+            watch = watch,
+            clipboard = { copied += it },
+            links = { opened += it },
+        )
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         waitForIdle()
         workbench.gitHubRepos = mapOf(data.repo to FakePulls.api)
@@ -82,6 +96,47 @@ class SavedFiltersUiTest {
         assertTrue(workbench.state.review.pages.single().id.value in workbench.paneLayout.tabs, "the filter's tab follows into the new source's layout")
         assertEquals(1, onAllNodesWithText("Add").fetchSemanticsNodes().size)
         assertEquals(2, onAllNodesWithText(REVIEW).fetchSemanticsNodes().size, "the review selector and the added pull request's chip")
+    }
+
+    @Test
+    fun clickingAPullRequestOpensItInTheReview() = runComposeUiTest {
+        val workbench = open()
+        workbench.panes.openFilter("f1")
+        waitForIdle()
+        onNodeWithText("Rate-limit /auth/token by family").performClick()
+        waitForIdle()
+        assertEquals(Source.PullRequest(data.repo, 415), workbench.state.active)
+    }
+
+    @Test
+    fun aPullRequestsMenuOpensItOnGitHubAndCopiesItsLink() = runComposeUiTest {
+        val workbench = open()
+        workbench.panes.openFilter("f1")
+        waitForIdle()
+        onNodeWithText("Rotate refresh tokens on every use").performMouseInput { rightClick() }
+        waitForIdle()
+        assertTrue(shows("Open in a new review"))
+        assertTrue(shows("Add to this review"))
+        onNodeWithText("Open on GitHub").performClick()
+        waitForIdle()
+        onNodeWithText("Rotate refresh tokens on every use").performMouseInput { rightClick() }
+        waitForIdle()
+        onNodeWithText("Copy link").performClick()
+        waitForIdle()
+        val url = watch.results.getValue("f1").pulls.first().url
+        assertEquals(listOf(url), opened)
+        assertEquals(listOf(url), copied)
+        assertTrue(workbench.state.review.sources.isEmpty())
+    }
+
+    @Test
+    fun theTitleKeepsItsRoomAndColumnsGiveWayAsTheListNarrows() {
+        assertEquals(PullColumns.ALL, PullColumns.fit(1400.dp))
+        val narrow = PullColumns.fit(760.dp)
+        assertFalse(narrow.labels)
+        assertTrue(narrow.waiting)
+        assertFalse(narrow.updated)
+        assertEquals(PullColumns(labels = false, waiting = false, comments = false, updated = false), PullColumns.fit(400.dp))
     }
 
     @Test

@@ -60,6 +60,13 @@
     <string name="action_collapse_all">Collapse all</string>
     <string name="action_toggle_wrap">Wrap long lines</string>
     <string name="action_open_revisions">Revision matrix</string>
+    <string name="action_open_pull">Open</string>
+    <string name="action_add_pull">Add to this review</string>
+    <string name="action_open_pull_in_new_review">Open in a new review</string>
+    <string name="action_open_pull_review">Open the review holding it</string>
+    <string name="pull_open_review">Open in %1$s</string>
+    <string name="action_open_pull_on_github">Open on GitHub</string>
+    <string name="action_copy_pull_link">Copy link</string>
     <string name="menu_mark_reviewed">Mark reviewed</string>
     <string name="menu_unmark_reviewed">Unmark reviewed</string>
     <string name="menu_mark_all_reviewed">Mark all reviewed</string>

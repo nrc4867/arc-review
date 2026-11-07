@@ -26,9 +26,9 @@ import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchSpacing
 import org.jetbrains.compose.resources.stringResource
 
-/** The column heads over a saved filter's list, lined up with [PullRow]'s columns. */
+/** The column heads over a saved filter's list, lined up with [PullRow]'s [columns]. */
 @Composable
-fun PullHeaderRow() {
+fun PullHeaderRow(columns: PullColumns) {
     val c = Stretch.colors
     Row(
         Modifier.fillMaxWidth().heightIn(min = ArcSizes.pullHeader).background(c.surfacePanel).bottomRule(c.chartGrid).padding(horizontal = StretchSpacing.space12),
@@ -38,11 +38,11 @@ fun PullHeaderRow() {
         Box(Modifier.width(ArcSizes.newDot))
         Box(Modifier.width(ArcSizes.pullIcon))
         Eyebrow(stringResource(Res.string.col_pull_request), Modifier.weight(1f))
-        Eyebrow(stringResource(Res.string.col_labels), Modifier.width(ArcSizes.labelsColumn))
-        Eyebrow(stringResource(Res.string.col_waiting), Modifier.width(ArcSizes.waitingColumn))
+        if (columns.labels) Eyebrow(stringResource(Res.string.col_labels), Modifier.width(ArcSizes.labelsColumn))
+        if (columns.waiting) Eyebrow(stringResource(Res.string.col_waiting), Modifier.width(ArcSizes.waitingColumn))
         Spacer(ArcSizes.checkColumn)
-        Spacer(ArcSizes.commentsColumn)
-        Eyebrow(stringResource(Res.string.col_updated), Modifier.width(ArcSizes.updatedColumn), TextAlign.End)
+        if (columns.comments) Spacer(ArcSizes.commentsColumn)
+        if (columns.updated) Eyebrow(stringResource(Res.string.col_updated), Modifier.width(ArcSizes.updatedColumn), TextAlign.End)
         Spacer(ArcSizes.actionColumn)
     }
 }

@@ -60,6 +60,7 @@ object ArcSizes {
     val pullGroup = 30.dp
     val newDot = 6.dp
     val pullIcon = 16.dp
+    val pullTitleMin = 320.dp
     val labelsColumn = 170.dp
     val waitingColumn = 160.dp
     val checkColumn = 22.dp

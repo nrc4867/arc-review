@@ -22,7 +22,7 @@ object ActionTargets {
     fun file(workbench: Workbench): Pair<Source, String>? = when (val target = workbench.menuTarget) {
         is MenuTarget.OfRows -> (target.item as? FileTreeItem.FileRow)?.let { it.source to it.file.path }
         is MenuTarget.OfPane -> workbench.state.pane(target.id)?.let(::changeOf)
-        is MenuTarget.OfSource -> null
+        is MenuTarget.OfSource, is MenuTarget.OfPull -> null
         null -> selectedFile(workbench) ?: workbench.marks.current
     }
 
@@ -30,13 +30,16 @@ object ActionTargets {
     fun files(workbench: Workbench): Map<Source, List<String>> = when (val target = workbench.menuTarget) {
         is MenuTarget.OfRows -> ReviewTargets.selected(ReviewTree.roots(workbench.state), target.selection + target.item.key)
         is MenuTarget.OfPane -> workbench.state.pane(target.id)?.let(::changeOf)?.let { (source, path) -> mapOf(source to listOf(path)) }.orEmpty()
-        is MenuTarget.OfSource -> emptyMap()
+        is MenuTarget.OfSource, is MenuTarget.OfPull -> emptyMap()
         null -> ReviewTargets.of(workbench)
     }
 
     /** The pane: the tab's, else the focused one. */
     fun pane(workbench: Workbench): Pane? =
         (workbench.menuTarget as? MenuTarget.OfPane)?.let { workbench.state.pane(it.id) } ?: workbench.panes.focused
+
+    /** The pull request row the menu is open on, if it is one. */
+    fun pull(workbench: Workbench): MenuTarget.OfPull? = workbench.menuTarget as? MenuTarget.OfPull
 
     /** The folder row the menu is open on, if it is one. */
     fun folder(workbench: Workbench): FileTreeItem.FolderRow? =

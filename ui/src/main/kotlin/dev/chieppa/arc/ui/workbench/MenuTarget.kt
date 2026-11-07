@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.workbench
 
 import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.ui.tree.FileTreeItem
 
 /** What an open context menu acts on, so its actions, which the palette also runs, know their target. */
@@ -13,4 +14,7 @@ sealed interface MenuTarget {
 
     /** The pane [id], by its tab. */
     data class OfPane(val id: String) : MenuTarget
+
+    /** A pull request's row in a saved filter's list; [source] is it in a local clone, when there is one. */
+    data class OfPull(val pull: PullRequestSummary, val source: Source.PullRequest?) : MenuTarget
 }

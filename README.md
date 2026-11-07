@@ -36,7 +36,9 @@ starts a new review with it.
 Reviews, repos and layouts are saved locally. Pull requests are read from GitHub with the `gh` login (read-only): a
 pull request (`#412`) is added as a source whose head is fetched from the clone's origin, and saved GitHub searches,
 polled every five minutes in the Pull requests drawer, open as tabs listing each pull request's labels, who it waits on,
-checks and comments, with an Add button that puts it in the open review. Rules raise desktop notifications for
+checks and comments, the title keeping its room as columns give way in a narrow pane. Clicking a pull request opens it
+in the open review, and right-clicking it opens it in a new review or
+the review holding it, on GitHub, or copies its link. Rules raise desktop notifications for
 comments on the person's pull requests, mentions, and new pull requests in a filter or with a label; the bell counts
 them. Every head a source is read at is recorded and kept under a private ref, and a pull request also takes the heads
 GitHub knows of (force pushes and reviewed commits); the revision matrix sets the source's files against those
