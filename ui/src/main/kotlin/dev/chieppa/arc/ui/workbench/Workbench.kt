@@ -165,6 +165,34 @@ class Workbench(
         return reviews.firstOrNull { it.id != state.review.id.value && source.ref in it.sources }?.name
     }
 
+    /** The GitHub repos being cloned for a pull request, and those whose clone failed. */
+    var cloning by mutableStateOf(emptySet<GitHubRepo>())
+    var cloneFailed by mutableStateOf(emptySet<GitHubRepo>())
+
+    /**
+     * Runs [then] with [pull] as a source here: in the clone of its repo that is known, or else in the app's own clone,
+     * made first and added to the repos. Nothing runs while its repo is being cloned or when it cannot be cloned.
+     */
+    fun withPullSource(pull: PullRequestSummary, then: (Source.PullRequest) -> Unit) {
+        sourceOf(pull)?.let { return then(it) }
+        if (pull.repo in cloning) return
+        scope.launch {
+            cloning = cloning + pull.repo
+            cloneFailed = cloneFailed - pull.repo
+            try {
+                val name = data.clone(pull.repo)?.let { sources.addRepo(it) }
+                if (name == null) {
+                    cloneFailed = cloneFailed + pull.repo
+                } else {
+                    gitHubRepos = gitHubRepos + (name to pull.repo)
+                    then(Source.PullRequest(name, pull.number))
+                }
+            } finally {
+                cloning = cloning - pull.repo
+            }
+        }
+    }
+
     /** The saved review other than the open one that holds [source], if any. */
     fun otherReviewHolding(source: Source): ReviewChoice? =
         reviews.firstOrNull { it.id != null && it.id != state.review.id.value && source.ref in it.sources }

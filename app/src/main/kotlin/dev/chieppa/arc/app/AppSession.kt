@@ -21,8 +21,8 @@ import java.nio.file.Path
 
 /**
  * What the app keeps between runs, in [dataDir]: the settings, every review, and the repos, saved filters and
- * notification rules, which all reviews share. Repos are read through git for the review open in [current], and pull
- * requests through [github].
+ * notification rules, which all reviews share, and the app's own clones of GitHub repos. Repos are read through git for
+ * the review open in [current], and pull requests through [github].
  */
 class AppSession(dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub()) : Closeable {
     private val settingsFile = SettingsFile(dataDir.resolve(AppConstants.SETTINGS_FILE))
@@ -41,7 +41,7 @@ class AppSession(dataDir: Path, val conversation: ReviewConversation, val github
     var current: ReviewState? = null
 
     private val git = GitRepositories({ name -> (current?.repos ?: repos)[name] })
-    val data: ReviewData = GitReviewData(git, GitHubPulls(github))
+    val data: ReviewData = GitReviewData(git, GitHubPulls(github), dataDir.resolve(AppConstants.CLONES_FOLDER))
 
     /** Every saved review, by name, with its sources. */
     fun reviews(): List<ReviewChoice> = reviewStore.all().map { ReviewChoice(it.id, it.name, it.sources.toSet()) }

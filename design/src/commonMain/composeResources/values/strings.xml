@@ -66,7 +66,15 @@
     <string name="action_open_pull_review">Open the review holding it</string>
     <string name="pull_open_review">Open in %1$s</string>
     <string name="action_open_pull_on_github">Open on GitHub</string>
-    <string name="action_copy_pull_link">Copy link</string>
+    <string name="action_copy_pull_link">Link</string>
+    <string name="action_copy_pull_number">Number</string>
+    <string name="action_copy_pull_reference">Reference</string>
+    <string name="action_copy_pull_branch">Branch</string>
+    <string name="action_copy_pull_head">Head commit</string>
+    <string name="action_copy_pull_title">Title</string>
+    <string name="pull_copy">Copy</string>
+    <string name="pull_cloning">Cloning %1$s</string>
+    <string name="pull_clone_failed">Could not clone %1$s</string>
     <string name="menu_mark_reviewed">Mark reviewed</string>
     <string name="menu_unmark_reviewed">Unmark reviewed</string>
     <string name="menu_mark_all_reviewed">Mark all reviewed</string>

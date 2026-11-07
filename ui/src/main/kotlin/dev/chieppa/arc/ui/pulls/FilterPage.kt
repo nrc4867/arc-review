@@ -29,7 +29,8 @@ import org.jetbrains.compose.resources.stringResource
  * A saved filter's tab: its tool row over its pull requests, grouped as the filter says, each group folding under its
  * head. While it shows, the filter counts as looked at, and what changed since it was last looked at stays marked.
  * A page whose filter is gone is plain. Columns that do not fit beside a readable title are left out; a click on a pull
- * request opens it in this review, and a right-click offers what else can be done with it.
+ * request opens it in this review, cloning its repo first when there is no clone of it here, and a right-click offers
+ * what else can be done with it.
  */
 @Composable
 fun FilterPage(page: Page.Filter, workbench: Workbench, modifier: Modifier = Modifier) {
@@ -68,9 +69,14 @@ fun FilterPage(page: Page.Filter, workbench: Workbench, modifier: Modifier = Mod
                                 waiting = WaitingOnRule.of(pull, watch.viewer),
                                 now = now,
                                 holding = holding,
-                                onAdd = source?.takeIf { holding == null }?.let { { workbench.addSource(it.ref) } },
+                                onAdd = if (holding == null) ({ workbench.withPullSource(pull) { workbench.addSource(it.ref) } }) else null,
                                 columns = columns,
-                                onOpen = source?.let { { workbench.openSource(it) } },
+                                onOpen = { workbench.withPullSource(pull) { workbench.openSource(it) } },
+                                clone = when (pull.repo) {
+                                    in workbench.cloning -> CloneState.Cloning
+                                    in workbench.cloneFailed -> CloneState.Failed
+                                    else -> null
+                                },
                             ) { close -> PullMenu(workbench, MenuTarget.OfPull(pull, source), close) }
                         }
                     }

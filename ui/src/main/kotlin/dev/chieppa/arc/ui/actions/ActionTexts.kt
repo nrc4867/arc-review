@@ -43,6 +43,11 @@ import dev.chieppa.arc.design.generated.action_open_pull_in_new_review
 import dev.chieppa.arc.design.generated.action_open_pull_review
 import dev.chieppa.arc.design.generated.action_open_pull_on_github
 import dev.chieppa.arc.design.generated.action_copy_pull_link
+import dev.chieppa.arc.design.generated.action_copy_pull_number
+import dev.chieppa.arc.design.generated.action_copy_pull_reference
+import dev.chieppa.arc.design.generated.action_copy_pull_branch
+import dev.chieppa.arc.design.generated.action_copy_pull_head
+import dev.chieppa.arc.design.generated.action_copy_pull_title
 import dev.chieppa.arc.ui.drawers.ArcDrawerSlots
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -89,6 +94,11 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.OPEN_PULL_REVIEW.value to Res.string.action_open_pull_review,
     ArcActionIds.OPEN_PULL_ON_GITHUB.value to Res.string.action_open_pull_on_github,
     ArcActionIds.COPY_PULL_LINK.value to Res.string.action_copy_pull_link,
+    ArcActionIds.COPY_PULL_NUMBER.value to Res.string.action_copy_pull_number,
+    ArcActionIds.COPY_PULL_REFERENCE.value to Res.string.action_copy_pull_reference,
+    ArcActionIds.COPY_PULL_BRANCH.value to Res.string.action_copy_pull_branch,
+    ArcActionIds.COPY_PULL_HEAD.value to Res.string.action_copy_pull_head,
+    ArcActionIds.COPY_PULL_TITLE.value to Res.string.action_copy_pull_title,
 ) + ArcDrawerSlots.all.associate { ArcActionIds.toggleDrawer(it.id).value to it.title }
 
 /** Turns an action's text key into its label, for Stretch's `LocalActionText`. */

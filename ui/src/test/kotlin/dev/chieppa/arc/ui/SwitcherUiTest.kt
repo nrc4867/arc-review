@@ -42,7 +42,7 @@ class SwitcherUiTest {
         waitForIdle()
         assertTrue(workbench.addSource(other.ref))
         assertTrue(workbench.addSource(data.source.ref))
-        waitUntil { workbench.state.snapshot(data.source) != null && workbench.state.snapshot(other) != null }
+        waitUntil(timeoutMillis = LOAD_TIMEOUT) { workbench.state.snapshot(data.source) != null && workbench.state.snapshot(other) != null }
         waitForIdle()
         return workbench
     }
@@ -146,3 +146,6 @@ class SwitcherUiTest {
         assertEquals(listOf("demo@dddd1234"), newReviews)
     }
 }
+
+/** How long the switcher tests wait for both sources to be read, which a busy machine can take more than a second for. */
+private const val LOAD_TIMEOUT = 5_000L

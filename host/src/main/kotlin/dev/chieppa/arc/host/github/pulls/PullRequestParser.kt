@@ -41,6 +41,7 @@ object PullRequestParser {
             lastCommitAt = commit.instant("committedDate"),
             baseBranch = node.string("baseRefName"),
             headOid = node.string("headRefOid"),
+            headBranch = node.string("headRefName"),
             baseOid = node.string("baseRefOid"),
         )
     }

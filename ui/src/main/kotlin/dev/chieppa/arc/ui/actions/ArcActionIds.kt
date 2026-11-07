@@ -46,6 +46,11 @@ object ArcActionIds {
     val OPEN_PULL_REVIEW = ActionId("open-pull-review")
     val OPEN_PULL_ON_GITHUB = ActionId("open-pull-on-github")
     val COPY_PULL_LINK = ActionId("copy-pull-link")
+    val COPY_PULL_NUMBER = ActionId("copy-pull-number")
+    val COPY_PULL_REFERENCE = ActionId("copy-pull-reference")
+    val COPY_PULL_BRANCH = ActionId("copy-pull-branch")
+    val COPY_PULL_HEAD = ActionId("copy-pull-head")
+    val COPY_PULL_TITLE = ActionId("copy-pull-title")
 
     private const val DRAWER_PREFIX = "drawer-"
 

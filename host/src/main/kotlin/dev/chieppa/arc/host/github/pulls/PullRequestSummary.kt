@@ -29,6 +29,7 @@ data class PullRequestSummary(
     val baseBranch: String? = null,
     val headOid: String? = null,
     val baseOid: String? = null,
+    val headBranch: String? = null,
 ) {
     /** What names it across repos: `owner/name#412`. */
     val key: String get() = "${repo.fullName}#$number"

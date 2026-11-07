@@ -37,6 +37,9 @@ private val icons: Map<String, ImageVector> = mapOf(
     ArcActionIds.OPEN_PULL_REVIEW.value to StretchIcons.Layers,
     ArcActionIds.OPEN_PULL_ON_GITHUB.value to StretchIcons.ExternalLink,
     ArcActionIds.COPY_PULL_LINK.value to StretchIcons.Link,
+    ArcActionIds.COPY_PULL_BRANCH.value to ArcIcons.Branch,
+    ArcActionIds.COPY_PULL_HEAD.value to ArcIcons.Commit,
+    ArcActionIds.COPY_PULL_REFERENCE.value to ArcIcons.PullRequest,
 )
 
 /** The icon for an action's icon key: a drawer action shows its drawer's icon. */

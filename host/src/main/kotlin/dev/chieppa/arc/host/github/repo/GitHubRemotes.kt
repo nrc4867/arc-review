@@ -11,6 +11,9 @@ object GitHubRemotes {
     private val SCP = Regex("^[^@/]+@([^:/]+):(.+)$")
     private val URL = Regex("^[a-zA-Z+]+://(?:[^@/]+@)?([^/:]+)(?::\\d+)?/(.+)$")
 
+    /** The HTTPS URL [repo] is cloned from, which [parse] reads back to it. */
+    fun url(repo: GitHubRepo): String = "https://$HOST/${repo.fullName}$GIT_SUFFIX"
+
     fun parse(url: String): GitHubRepo? {
         val text = url.trim()
         val match = URL.matchEntire(text) ?: SCP.matchEntire(text) ?: return null

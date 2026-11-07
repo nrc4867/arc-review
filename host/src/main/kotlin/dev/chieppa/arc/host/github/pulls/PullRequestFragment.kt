@@ -6,7 +6,7 @@ object PullRequestFragment {
 
     val TEXT = """
         fragment $NAME on PullRequest {
-          number title url isDraft createdAt updatedAt baseRefName headRefOid baseRefOid
+          number title url isDraft createdAt updatedAt baseRefName headRefName headRefOid baseRefOid
           repository { nameWithOwner }
           author { login }
           labels(first: 10) { nodes { name color } }

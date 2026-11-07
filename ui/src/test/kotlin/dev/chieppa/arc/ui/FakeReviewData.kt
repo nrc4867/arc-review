@@ -33,6 +33,15 @@ import java.nio.file.Path
  * PNG `img/photo.png` from 30 by 20 pixels to 40 by 20 and adds the SVG `img/icon.svg`, 16 pixels square.
  */
 class FakeReviewData(more: Boolean = false, pictures: Boolean = false) : ReviewData {
+    /** What [clone] answers: the folder of the app's own clone, or null as when cloning fails. */
+    var cloneTo: Path? = null
+    val cloned = mutableListOf<GitHubRepo>()
+
+    override suspend fun clone(repo: GitHubRepo): Path? {
+        cloned += repo
+        return cloneTo
+    }
+
     val repo = RepoName("demo")
     val base = ObjectId("a".repeat(40))
     val head = ObjectId("b".repeat(40))

@@ -121,12 +121,59 @@ class SavedFiltersUiTest {
         waitForIdle()
         onNodeWithText("Rotate refresh tokens on every use").performMouseInput { rightClick() }
         waitForIdle()
-        onNodeWithText("Copy link").performClick()
+        onNodeWithText("Copy").performClick()
+        waitForIdle()
+        onNodeWithText("Link").performClick()
         waitForIdle()
         val url = watch.results.getValue("f1").pulls.first().url
         assertEquals(listOf(url), opened)
         assertEquals(listOf(url), copied)
         assertTrue(workbench.state.review.sources.isEmpty())
+    }
+
+    @Test
+    fun theCopyMenuCopiesThePullRequestsNumberReferenceAndTitle() = runComposeUiTest {
+        val workbench = open()
+        workbench.panes.openFilter("f1")
+        waitForIdle()
+        for (item in listOf("Number", "Reference", "Title")) {
+            onNodeWithText("Rotate refresh tokens on every use").performMouseInput { rightClick() }
+            waitForIdle()
+            onNodeWithText("Copy").performClick()
+            waitForIdle()
+            onNodeWithText(item).performClick()
+            waitForIdle()
+        }
+        assertEquals(listOf("#412", "lumen/api#412", "Rotate refresh tokens on every use"), copied)
+    }
+
+    @Test
+    fun openingAPullRequestWithNoCloneClonesItsRepoFirst() = runComposeUiTest {
+        data.cloneTo = Path.of("clones", "lumen", "web")
+        val workbench = open()
+        workbench.panes.openFilter("f1")
+        waitForIdle()
+        workbench.gitHubRepos = emptyMap()
+        waitForIdle()
+        onNodeWithText("Rate-limit /auth/token by family").performClick()
+        waitForIdle()
+        assertEquals(listOf(FakePulls.api), data.cloned)
+        val active = workbench.state.active as Source.PullRequest
+        assertEquals(415, active.number)
+        assertEquals(Path.of("clones", "lumen", "web").toAbsolutePath().normalize(), workbench.state.repos[active.repo])
+    }
+
+    @Test
+    fun aRepoThatCannotBeClonedIsMarkedOnItsRows() = runComposeUiTest {
+        val workbench = open()
+        workbench.panes.openFilter("f1")
+        waitForIdle()
+        workbench.gitHubRepos = emptyMap()
+        waitForIdle()
+        onNodeWithText("Rate-limit /auth/token by family").performClick()
+        waitForIdle()
+        assertTrue(workbench.state.review.sources.isEmpty())
+        assertEquals(setOf(FakePulls.api), workbench.cloneFailed)
     }
 
     @Test
