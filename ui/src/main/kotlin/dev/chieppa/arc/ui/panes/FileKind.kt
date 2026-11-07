@@ -33,6 +33,7 @@ enum class FileKind {
             return when {
                 !before && after -> Added
                 before && !after -> Deleted
+                text.binary -> if (text.binaryChanged) Changed else Unchanged
                 diff == null || diff.hunks.none { hunk -> hunk.lines.any { it.kind != LineKind.Context } } -> Unchanged
                 else -> Changed
             }

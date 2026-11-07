@@ -15,14 +15,18 @@ import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.source.SourceRefs
 import dev.chieppa.arc.ui.services.ReviewData
+import org.jetbrains.skia.Color
+import org.jetbrains.skia.EncodedImageFormat
+import org.jetbrains.skia.Surface
 import java.nio.file.Path
 
 /**
  * A repo held in memory: one range source, `demo@aaaa..bbbb`, changing `app/Main.kt` and `app/util/Text.kt` and
  * adding `docs/Guide.md`, with every file's text at both revisions. With [more], it also deletes `old/Gone.kt`, changes
- * `scripts/run.sh` without changing a line, and adds the binary `img/logo.png`.
+ * `scripts/run.sh` without changing a line, and adds the binary `img/logo.png`. With [pictures], it also changes the
+ * PNG `img/photo.png` from 30 by 20 pixels to 40 by 20 and adds the SVG `img/icon.svg`, 16 pixels square.
  */
-class FakeReviewData(more: Boolean = false) : ReviewData {
+class FakeReviewData(more: Boolean = false, pictures: Boolean = false) : ReviewData {
     val repo = RepoName("demo")
     val base = ObjectId("a".repeat(40))
     val head = ObjectId("b".repeat(40))
@@ -42,7 +46,9 @@ class FakeReviewData(more: Boolean = false) : ReviewData {
         "scripts/run.sh" to "echo run\n",
     )
 
-    private val binary = mapOf("img/logo.png" to byteArrayOf(0x89.toByte(), 0x50, 0, 0, 0x1a))
+    private val binary = mapOf("img/logo.png" to byteArrayOf(0x89.toByte(), 0x50, 0, 0, 0x1a), "img/photo.png" to png(40, 20))
+    private val oldBinary = mapOf("img/photo.png" to png(30, 20))
+    private val svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\"><circle cx=\"8\" cy=\"8\" r=\"6\"/></svg>"
 
     val files = listOf(
         ChangedFile("app/Main.kt", ChangeStatus.Modified, added = 3, removed = 1),
@@ -52,6 +58,9 @@ class FakeReviewData(more: Boolean = false) : ReviewData {
         ChangedFile("old/Gone.kt", ChangeStatus.Deleted, added = 0, removed = 2),
         ChangedFile("scripts/run.sh", ChangeStatus.TypeChanged, added = 0, removed = 0),
         ChangedFile("img/logo.png", ChangeStatus.Added, added = null, removed = null),
+    ) + if (!pictures) emptyList() else listOf(
+        ChangedFile("img/photo.png", ChangeStatus.Modified, added = null, removed = null),
+        ChangedFile("img/icon.svg", ChangeStatus.Added, added = 1, removed = 0),
     )
 
     override suspend fun read(source: Source): SourceSnapshot = SourceSnapshot(
@@ -69,6 +78,8 @@ class FakeReviewData(more: Boolean = false) : ReviewData {
 
     override suspend fun readFile(repo: RepoName, revision: Revision, path: String): ByteArray? {
         if (revision.value == head.value) binary[path]?.let { return it }
+        if (revision.value == base.value) oldBinary[path]?.let { return it }
+        if (revision.value == head.value && path == "img/icon.svg") return svg.toByteArray()
         val texts = if (revision.value == base.value) oldTexts else newTexts
         return texts[path]?.toByteArray()
     }
@@ -76,4 +87,13 @@ class FakeReviewData(more: Boolean = false) : ReviewData {
     override suspend fun listFiles(repo: RepoName, revision: Revision): List<String> = newTexts.keys.sorted()
 
     override suspend fun isRepo(dir: Path): Boolean = true
+
+    private companion object {
+        /** A PNG of one color, [width] by [height] pixels. */
+        fun png(width: Int, height: Int): ByteArray {
+            val surface = Surface.makeRasterN32Premul(width, height)
+            surface.canvas.clear(Color.BLUE)
+            return surface.makeImageSnapshot().encodeToData(EncodedImageFormat.PNG)!!.bytes
+        }
+    }
 }

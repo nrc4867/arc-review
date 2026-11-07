@@ -26,6 +26,7 @@
     <string name="settings_size">Size</string>
     <string name="settings_size_percent">%1$d%</string>
     <string name="settings_wrap">Wrap long lines</string>
+    <string name="settings_gutter_highlight">Highlight changes in the gutter only</string>
     <string name="menu_review">Review</string>
 
     <string name="action_add_source">Add source</string>
@@ -107,6 +108,9 @@
     <string name="pane_mark_reviewed">Mark reviewed</string>
     <string name="pane_revision_range">%1$s → %2$s</string>
     <string name="pane_binary">Binary file</string>
+    <string name="pane_image_size">%1$d × %2$d</string>
+    <string name="pane_image_before">Before</string>
+    <string name="pane_image_after">After</string>
     <string name="pane_kind_added">Added</string>
     <string name="pane_kind_deleted">Deleted</string>
     <string name="pane_kind_unchanged">Unchanged</string>

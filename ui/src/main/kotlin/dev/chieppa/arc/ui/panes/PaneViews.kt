@@ -6,17 +6,17 @@ import dev.chieppa.arc.ui.review.PaneFactory
 
 /**
  * The ways a pane can show its file: the diff only when it has changed lines, the whole file for a change or for
- * Markdown, and Markdown rendered. A binary file has none.
+ * Markdown and SVG, and Markdown or SVG rendered. A binary file has none.
  */
 object PaneViews {
     fun of(pane: Pane, kind: FileKind, binary: Boolean = false): List<PaneView> = buildList {
         if (binary) return@buildList
-        val markdown = PaneFactory.isMarkdown(pane.path)
+        val rendered = PaneFactory.rendersFirst(pane.path)
         if (pane.hasChange) {
             if (kind.hasDiff) add(PaneView.Diff)
             add(PaneView.FullFile)
-            if (markdown) add(PaneView.Rendered)
-        } else if (markdown) {
+            if (rendered) add(PaneView.Rendered)
+        } else if (rendered) {
             add(PaneView.Rendered)
             add(PaneView.FullFile)
         }

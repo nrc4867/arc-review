@@ -33,6 +33,9 @@ object ArcSizes {
     val avatar = 18.dp
     val gutterDot = 7.dp
     val binaryIcon = 32.dp
+
+    /** The bar over each side of a changed picture, in the removed or added color. */
+    val imageSideBar = 2.dp
     val stagedChip = 92.dp
     val stagedSource = 150.dp
     val stagedLocation = 300.dp

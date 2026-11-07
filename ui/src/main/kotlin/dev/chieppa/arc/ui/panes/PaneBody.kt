@@ -9,18 +9,20 @@ import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.workbench.Workbench
 
 /**
- * The pane's file as [view] says: the change, the whole file, or rendered Markdown, filling the pane. A file of [kind]
- * with no changed lines shows whole, a deleted one as it was with every line removed. A binary file shows its kind.
+ * The pane's file as [view] says: the change, the whole file, or rendered Markdown or SVG, filling the pane. A file of
+ * [kind] with no changed lines shows whole, a deleted one as it was with every line removed. A binary picture shows
+ * drawn, any other binary file its kind.
  */
 @Composable
 fun PaneBody(pane: Pane, text: PaneText, kind: FileKind, view: PaneView, workbench: Workbench, find: FindState) {
     val modifier = Modifier.fillMaxSize()
     if (text.binary) {
-        BinaryBody(modifier)
+        if (text.image) ImageBody(text, modifier) else BinaryBody(modifier)
         return
     }
     val whole = text.new ?: text.old.orEmpty()
     when {
+        view == PaneView.Rendered && text.image -> ImageBody(text, modifier)
         view == PaneView.Rendered -> MarkdownBody(whole, modifier)
         view == PaneView.Diff && kind.hasDiff && text.diff != null -> DiffBody(pane, text.diff, workbench, find, modifier)
         else -> FullFileBody(pane, whole, text.diff, workbench, find, modifier, removed = kind == FileKind.Deleted)

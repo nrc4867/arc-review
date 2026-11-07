@@ -14,6 +14,7 @@ import dev.chieppa.arc.core.source.Source
 object PaneFactory {
     private const val PREFIX = "p"
     private const val MARKDOWN = ".md"
+    private const val SVG = ".svg"
 
     /** [file]'s change in [snapshot], shown as a diff. */
     fun forChange(id: PaneId, snapshot: SourceSnapshot, file: ChangedFile): Pane = Pane(
@@ -27,11 +28,16 @@ object PaneFactory {
         source = snapshot.source,
     )
 
-    /** [path] in [repo] at [revision], whole: Markdown rendered, anything else as its text. */
+    /** [path] in [repo] at [revision], whole: Markdown and SVG rendered, anything else as its text. */
     fun forFile(id: PaneId, repo: RepoName, revision: Revision, path: String, source: Source? = null): Pane =
-        Pane(id, repo, path, revision, if (isMarkdown(path)) PaneView.Rendered else PaneView.FullFile, source = source)
+        Pane(id, repo, path, revision, if (rendersFirst(path)) PaneView.Rendered else PaneView.FullFile, source = source)
 
     fun isMarkdown(path: String): Boolean = path.lowercase().endsWith(MARKDOWN)
+
+    fun isSvg(path: String): Boolean = path.lowercase().endsWith(SVG)
+
+    /** Whether a file at [path] has a rendered view, which a pane opened on it alone shows first. */
+    fun rendersFirst(path: String): Boolean = isMarkdown(path) || isSvg(path)
 
     /** An id no pane in [review] has yet. */
     fun nextId(review: Review): PaneId {
