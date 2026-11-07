@@ -45,6 +45,7 @@
     <string name="action_toggle_split">Split or unified</string>
     <string name="action_close_pane">Close pane</string>
     <string name="action_remove_source">Remove source</string>
+    <string name="action_close_ended_pulls">Close merged and closed pull requests</string>
     <string name="action_activate_source">Make active</string>
     <string name="action_copy_source_ref">Copy source ref</string>
     <string name="action_open_change">Open</string>
@@ -83,7 +84,7 @@
     <string name="sources_add">Add source</string>
     <string name="sources_changed_since">Changed since you reviewed</string>
     <string name="sources_progress">%1$d/%2$d</string>
-    <string name="sources_remove">Remove source</string>
+    <string name="sources_close">Close source</string>
 
     <string name="add_source_title">Add source</string>
     <string name="add_source_repo">Repository</string>
@@ -293,6 +294,8 @@
     <string name="col_updated">Updated</string>
     <string name="pull_ref">%1$s#%2$d</string>
     <string name="pull_open">Open</string>
+    <string name="pull_state_merged">Merged</string>
+    <string name="pull_state_closed">Closed</string>
     <string name="pull_comments">Comments</string>
 
     <string name="waiting_you">You</string>

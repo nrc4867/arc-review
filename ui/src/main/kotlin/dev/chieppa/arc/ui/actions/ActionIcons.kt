@@ -24,6 +24,7 @@ private val icons: Map<String, ImageVector> = mapOf(
     ArcActionIds.TOGGLE_SPLIT.value to StretchIcons.SplitView,
     ArcActionIds.TOGGLE_WRAP.value to ArcIcons.Wrap,
     ArcActionIds.REMOVE_SOURCE.value to StretchIcons.Close,
+    ArcActionIds.CLOSE_ENDED_PULLS.value to StretchIcons.Close,
     ArcActionIds.OPEN_CHANGE.value to StretchIcons.File,
     ArcActionIds.OPEN_TO_SIDE.value to StretchIcons.SplitView,
     ArcActionIds.OPEN_IN_NEW_WINDOW.value to ArcIcons.TearOut,

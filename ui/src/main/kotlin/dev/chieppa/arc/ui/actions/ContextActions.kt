@@ -33,6 +33,7 @@ fun registerContextActions(registry: ActionRegistry, workbench: Workbench) {
     action(ArcActionIds.REMOVE_SOURCE, { ActionTargets.source(workbench) != null }) {
         ActionTargets.source(workbench)?.let(workbench::removeSource)
     }
+    action(ArcActionIds.CLOSE_ENDED_PULLS, { workbench.endedPulls.isNotEmpty() }, workbench::closeEndedPulls)
     action(ArcActionIds.COPY_SOURCE_REF, { ActionTargets.source(workbench) != null }) {
         ActionTargets.source(workbench)?.let { workbench.clipboard.copy(it.ref) }
     }

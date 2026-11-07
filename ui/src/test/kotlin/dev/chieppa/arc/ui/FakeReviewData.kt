@@ -108,6 +108,11 @@ class FakeReviewData(more: Boolean = false, pictures: Boolean = false) : ReviewD
     var openPullList: List<PullRequestSummary>? = null
     var origin: GitHubRepo? = null
 
+    /** What GitHub says of each pull request source, as read. */
+    val pulls = mutableMapOf<Source.PullRequest, PullRequestSummary>()
+
+    override fun pullRequest(source: Source.PullRequest): PullRequestSummary? = pulls[source]
+
     /** How many times GitHub was asked for open pull requests. */
     var openPullQueries = 0
 

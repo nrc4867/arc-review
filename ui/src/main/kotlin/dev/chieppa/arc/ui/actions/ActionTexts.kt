@@ -22,6 +22,7 @@ import dev.chieppa.arc.design.generated.action_toggle_pin
 import dev.chieppa.arc.design.generated.action_toggle_reviewed
 import dev.chieppa.arc.design.generated.action_toggle_split
 import dev.chieppa.arc.design.generated.action_remove_source
+import dev.chieppa.arc.design.generated.action_close_ended_pulls
 import dev.chieppa.arc.design.generated.action_activate_source
 import dev.chieppa.arc.design.generated.action_copy_source_ref
 import dev.chieppa.arc.design.generated.action_open_change
@@ -71,6 +72,7 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.TOGGLE_SPLIT.value to Res.string.action_toggle_split,
     ArcActionIds.CLOSE_PANE.value to Res.string.action_close_pane,
     ArcActionIds.REMOVE_SOURCE.value to Res.string.action_remove_source,
+    ArcActionIds.CLOSE_ENDED_PULLS.value to Res.string.action_close_ended_pulls,
     ArcActionIds.ACTIVATE_SOURCE.value to Res.string.action_activate_source,
     ArcActionIds.COPY_SOURCE_REF.value to Res.string.action_copy_source_ref,
     ArcActionIds.OPEN_CHANGE.value to Res.string.action_open_change,

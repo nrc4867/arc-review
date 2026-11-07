@@ -10,8 +10,11 @@ sealed interface FileTreeItem {
     val key: String
     val source: Source
 
-    /** A source, heading its files: its title and progress once read, and whether reading it failed. */
-    data class SourceRow(override val source: Source, val title: String, val progress: ReviewProgress?, val failed: Boolean) : FileTreeItem {
+    /**
+     * A source, heading its files: its title and progress once read, whether reading it failed, and whether it is a
+     * merged or closed pull request.
+     */
+    data class SourceRow(override val source: Source, val title: String, val progress: ReviewProgress?, val failed: Boolean, val ended: Boolean = false) : FileTreeItem {
         override val key: String get() = TreeKeys.source(source)
     }
 

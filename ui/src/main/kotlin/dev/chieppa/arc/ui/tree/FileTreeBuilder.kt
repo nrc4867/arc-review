@@ -20,7 +20,7 @@ object FileTreeBuilder {
             val fold = FileTreeItem.AsideRow(rows.source, aside.size, aside.map { it.name })
             children += TreeNode(fold, aside.map { TreeNode(fileRow(rows, it)) })
         }
-        TreeNode(FileTreeItem.SourceRow(rows.source, rows.title, rows.progress, rows.failed), children)
+        TreeNode(FileTreeItem.SourceRow(rows.source, rows.title, rows.progress, rows.failed, rows.ended), children)
     }
 
     private fun folder(rows: SourceRows, prefix: String, files: List<ChangedFile>): List<TreeNode<FileTreeItem>> {

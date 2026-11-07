@@ -25,6 +25,7 @@ object ArcActionIds {
     val TOGGLE_SPLIT = ActionId("toggle-split")
     val CLOSE_PANE = ActionId("close-pane")
     val REMOVE_SOURCE = ActionId("remove-source")
+    val CLOSE_ENDED_PULLS = ActionId("close-ended-pulls")
     val ACTIVATE_SOURCE = ActionId("activate-source")
     val COPY_SOURCE_REF = ActionId("copy-source-ref")
     val OPEN_CHANGE = ActionId("open-change")

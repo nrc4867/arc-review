@@ -1,12 +1,6 @@
 package dev.chieppa.arc.ui
 
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.isRoot
-import androidx.compose.ui.test.onLast
-import androidx.compose.ui.test.performKeyInput
-import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -34,7 +28,7 @@ class RemoveSourceUiTest {
         workbench.panes.openChange(data.source, "app/util/Text.kt")
         val pinned = workbench.panes.openFile(data.repo, Revision(data.head.value), "docs/Guide.md", data.source, pinned = true)
         waitForIdle()
-        onNodeWithContentDescription("Remove source").performClick()
+        onNodeWithContentDescription("Close source").performClick()
         waitForIdle()
 
         assertTrue(workbench.state.workspace.sources.isEmpty())
@@ -74,5 +68,20 @@ class RemoveSourceUiTest {
         waitForIdle()
         onNodeWithText("Copy source ref").performClick()
         assertEquals(data.source.ref, copied.last)
+    }
+
+    @Test
+    fun everyChipHasACloseButtonThatTakesItsSourceOutOfTheStrip() = runComposeUiTest {
+        val workbench = openReview(data)
+        val other = "demo@" + "c".repeat(40)
+        assertTrue(workbench.addSource(other))
+        workbench.activateSource(data.source)
+        waitForIdle()
+        val closes = onAllNodesWithContentDescription("Close source")
+        assertEquals(2, closes.fetchSemanticsNodes().size)
+        closes[1].performClick()
+        waitForIdle()
+        assertEquals(listOf(data.source), workbench.state.workspace.sources)
+        assertEquals(1, onAllNodesWithContentDescription("Close source").fetchSemanticsNodes().size)
     }
 }

@@ -4,9 +4,6 @@ import dev.chieppa.arc.ui.util.SourceLabels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -15,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,15 +26,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import dev.chieppa.arc.core.mark.ReviewProgress
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.host.github.pulls.CheckState
+import dev.chieppa.arc.host.github.pulls.PullState
+import dev.chieppa.arc.ui.util.ArcAlphas
 import dev.chieppa.arc.ui.pulls.CheckMark
 import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.sources_changed_since
 import dev.chieppa.arc.design.generated.sources_progress
-import dev.chieppa.arc.design.generated.sources_remove
+import dev.chieppa.arc.design.generated.sources_close
 import dev.chieppa.stretch.frame.ContextMenuArea
 import dev.chieppa.stretch.theme.StretchIcons
-import dev.chieppa.stretch.ui.IconButton
+import dev.chieppa.stretch.ui.FieldIcon
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.stretch.theme.Icon
 import dev.chieppa.stretch.theme.Stretch
@@ -50,8 +47,8 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * One source in the strip: its kind, ref and title, how much of it is reviewed and how many files changed since they
  * were reviewed, and for a pull request its [checks]. The [active] source is outlined; a source that could not be read
- * is edged in the error color. Its
- * remove button shows while it is active or under the pointer, and a right-click opens [menu].
+ * is edged in the error color, and a pull request whose [pullState] is merged or closed is dimmed, its ref's tooltip
+ * saying which. Its close button runs [onClose], and a right-click opens [menu].
  */
 @Composable
 fun SourceChip(
@@ -62,13 +59,12 @@ fun SourceChip(
     active: Boolean,
     failed: Boolean,
     checks: CheckState?,
+    pullState: PullState?,
     onClick: () -> Unit,
-    onRemove: () -> Unit,
+    onClose: () -> Unit,
     menu: @Composable ColumnScope.(close: () -> Unit) -> Unit,
 ) {
     val c = Stretch.colors
-    val hover = remember { MutableInteractionSource() }
-    val hovered by hover.collectIsHoveredAsState()
     val shape = Stretch.shapes.ctlShape
     val edge = when {
         failed -> c.errorEdge
@@ -78,7 +74,7 @@ fun SourceChip(
     ContextMenuArea(menu) {
         Row(
             Modifier
-                .hoverable(hover)
+                .alpha(if (pullState?.ended == true) ArcAlphas.ENDED else 1f)
                 .height(ArcSizes.sourceChipHeight)
                 .clip(shape)
                 .background(if (active) c.onFill else c.surfaceRail)
@@ -91,7 +87,8 @@ fun SourceChip(
         ) {
             val ink = if (failed) c.errorInk else if (active) c.inkStrong else c.ink
             Icon(sourceIcon(source), ink)
-            BasicText(SourceLabels.of(source), style = Stretch.type.valueSm.merge(TextStyle(color = ink, fontWeight = FontWeight.SemiBold)), maxLines = 1)
+            val label = @Composable { BasicText(SourceLabels.of(source), style = Stretch.type.valueSm.merge(TextStyle(color = ink, fontWeight = FontWeight.SemiBold)), maxLines = 1) }
+            pullStateText(pullState)?.let { Tooltip(it, content = label) } ?: label()
             if (title.isNotEmpty()) {
                 BasicText(
                     title,
@@ -117,15 +114,7 @@ fun SourceChip(
                 }
             }
             checks?.let { CheckMark(it) }
-            val removable = active || hovered
-            IconButton(
-                StretchIcons.Close,
-                stringResource(Res.string.sources_remove),
-                onRemove,
-                Modifier.alpha(if (removable) 1f else 0f),
-                size = ArcSizes.chipClose,
-                enabled = removable,
-            )
+            FieldIcon(StretchIcons.Close, contentDescription = stringResource(Res.string.sources_close), onClick = onClose)
         }
     }
 }

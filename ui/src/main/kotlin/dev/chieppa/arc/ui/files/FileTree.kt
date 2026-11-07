@@ -1,6 +1,8 @@
 package dev.chieppa.arc.ui.files
 
+import dev.chieppa.arc.ui.util.ArcAlphas
 import dev.chieppa.arc.ui.util.SourceLabels
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -39,7 +41,7 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * Every source's changed files, grouped by source and folder. Selecting one file opens its change; Enter or a
  * double-click opens it in a new tab. The file being read is kept selected, and a source shown with no folder open
- * opens them all. The review keys act on the selection while the tree has the keyboard. A right-click, or Shift F10,
+ * opens them all. The marking keys act on the selection while the tree has the keyboard. A right-click, or Shift F10,
  * opens the row's menu. A file drags into the pane grid as a tab: onto a pane, an edge to split it, or away into a
  * window of its own.
  */
@@ -110,10 +112,11 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
                 }
             },
             rowModifier = { item ->
-                if (item is FileTreeItem.FileRow) {
-                    Modifier.paneDragSource(workbench.dropTarget) { TabItem(item.key, item.file.name, StretchIcons.File, subtitle = item.source.repo.value) }
-                } else {
-                    Modifier
+                when {
+                    item is FileTreeItem.FileRow ->
+                        Modifier.paneDragSource(workbench.dropTarget) { TabItem(item.key, item.file.name, StretchIcons.File, subtitle = item.source.repo.value) }
+                    item is FileTreeItem.SourceRow && item.ended -> Modifier.alpha(ArcAlphas.ENDED)
+                    else -> Modifier
                 }
             },
             onContextMenu = { item, at -> menu = MenuTarget.OfRows(item, treeState.selection) to at },

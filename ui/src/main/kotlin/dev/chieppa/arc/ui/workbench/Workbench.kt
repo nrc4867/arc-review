@@ -253,6 +253,14 @@ class Workbench(
         state.active?.let(::activateSource)
     }
 
+    /** The pull requests in the strip that GitHub says are merged or closed. */
+    val endedPulls: List<Source> get() = state.workspace.sources.filter { state.pulls[it]?.state?.ended == true }
+
+    /** Takes every merged and closed pull request out of the strip; their marks stay. */
+    fun closeEndedPulls() {
+        endedPulls.forEach(::removeSource)
+    }
+
     /** Whether the pane [id] wraps long lines: as it was set, or as the settings say. */
     fun wrap(id: String): Boolean = state.paneState(id).wrap ?: preferences.wrapLines
 

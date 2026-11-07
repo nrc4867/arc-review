@@ -28,7 +28,7 @@ import dev.chieppa.stretch.ui.Divider
 import dev.chieppa.stretch.ui.IconButton
 import org.jetbrains.compose.resources.stringResource
 
-/** The strip under the top bar: every source in the review, the active one outlined, and the button to add one. */
+/** The strip under the top bar: every source open in the workspace, the active one outlined, and the button to open one. */
 @Composable
 fun SourceStrip(workbench: Workbench, modifier: Modifier = Modifier) {
     val state = workbench.state
@@ -53,8 +53,9 @@ fun SourceStrip(workbench: Workbench, modifier: Modifier = Modifier) {
                         active = source == state.active,
                         failed = load is SourceLoad.Failed,
                         checks = state.pulls[source]?.checks?.state,
+                        pullState = state.pulls[source]?.state,
                         onClick = { workbench.activateSource(source) },
-                        onRemove = { workbench.removeSource(source) },
+                        onClose = { workbench.removeSource(source) },
                         menu = { close -> SourceMenu(workbench, source, close) },
                     )
                 }
