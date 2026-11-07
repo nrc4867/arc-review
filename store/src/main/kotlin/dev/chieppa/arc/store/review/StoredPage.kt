@@ -12,4 +12,9 @@ sealed interface StoredPage {
     @Serializable
     @SerialName("filter")
     data class Filter(override val id: String, val filter: String) : StoredPage
+
+    /** A source's revision matrix, by the source's ref. */
+    @Serializable
+    @SerialName("revisions")
+    data class RevisionMatrix(override val id: String, val source: String, val pinned: Boolean = false) : StoredPage
 }

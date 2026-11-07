@@ -1,5 +1,6 @@
 package dev.chieppa.arc.demo
 
+import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.conversation.LineSide
 import dev.chieppa.arc.core.conversation.ReviewThread
 import dev.chieppa.arc.core.conversation.StagedComment
@@ -45,6 +46,9 @@ class SampleConversation(private val now: () -> Long = { System.currentTimeMilli
         sources.entries.drop(1).firstOrNull()?.let { (source, paths) -> rows += StagedComment("s5", source, paths.first(), Samples.LINE_40, Samples.STAGED_RETRY) }
         return rows
     }
+
+    override fun revisionThreads(source: Source, paths: List<String>, heads: List<ObjectId>): List<ReviewThread> =
+        SampleRevisionThreads.place(source, paths, heads, now())
 
     private fun message(author: String, body: String, at: Long) = ThreadMessage(author, body, at)
 

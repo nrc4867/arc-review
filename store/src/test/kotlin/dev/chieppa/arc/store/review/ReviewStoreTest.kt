@@ -13,6 +13,7 @@ import dev.chieppa.arc.core.pane.PaneView
 import dev.chieppa.arc.core.pane.Revision
 import dev.chieppa.arc.core.review.Review
 import dev.chieppa.arc.core.review.ReviewId
+import dev.chieppa.arc.core.revision.RecordedHead
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.SourceRefs
 import java.nio.file.Files
@@ -29,6 +30,8 @@ class ReviewStoreTest {
         .withPane(Pane(PaneId("p1"), RepoName("stretch"), "a/B.kt", Revision("5678abcd"), PaneView.FullFile, base = Revision("1234abcd"), source = range))
         .withPane(Pane(PaneId("p2"), RepoName("squash"), "README.md", Revision("main"), PaneView.Rendered, pinned = true))
         .withPage(Page.Filter(PaneId("p3"), "f1"))
+        .withPage(Page.RevisionMatrix(PaneId("p4"), branch))
+        .record(branch, RecordedHead(ObjectId("c".repeat(40)), ObjectId("d".repeat(40)), 1_700_000_000))
         .mark(
             FileMark(
                 range, "a/B.kt", PatchFingerprint(PatchHash("m"), PatchHash("e"), listOf(PatchHash("h1"))), MarkKind.Reviewed,

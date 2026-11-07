@@ -30,6 +30,10 @@ class GitRepository(val dir: Path, private val runner: GitRunner = GitRunner()) 
         return result.text.trim().takeIf { result.exitCode == 0 && it.isNotEmpty() }?.let(::ObjectId)
     }
 
+    /** Whether [ancestor] is [commit] or one of its ancestors. */
+    suspend fun isAncestor(ancestor: ObjectId, commit: ObjectId): Boolean =
+        git(listOf("merge-base", "--is-ancestor", ancestor.value, commit.value), accept = setOf(0, GitSettings.EXIT_SOME)).exitCode == 0
+
     /** The first parent of [commit], or null for a root commit. */
     suspend fun firstParent(commit: ObjectId): ObjectId? = resolveCommit("$commit^1")
 
@@ -97,6 +101,13 @@ class GitRepository(val dir: Path, private val runner: GitRunner = GitRunner()) 
     /** Points [ref] at [commit], creating it if need be. */
     suspend fun updateRef(ref: String, commit: ObjectId) {
         git(listOf("update-ref", ref, commit.value))
+    }
+
+    /** Points each ref of [refs] at its commit, in one process. */
+    suspend fun updateRefs(refs: Map<String, ObjectId>) {
+        if (refs.isEmpty()) return
+        val input = refs.entries.joinToString("") { (ref, commit) -> "update $ref ${commit.value}\n" }
+        git(listOf("update-ref", "--stdin"), input.toByteArray())
     }
 
     /** Whether the repo is a partial clone, whose blobs arrive from its remote when fetched. */

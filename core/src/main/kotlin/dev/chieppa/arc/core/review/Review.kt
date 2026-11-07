@@ -4,12 +4,13 @@ import dev.chieppa.arc.core.mark.FileMark
 import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
+import dev.chieppa.arc.core.revision.RecordedHead
 import dev.chieppa.arc.core.source.Source
 
 /**
  * A saved, named workspace: the [sources] under review, the [panes] open on them, the [pages] open beside them, and
- * the [marks] made so far. While it has sources, one of them is [active] and drives the file tree. Every change returns
- * a new review.
+ * the [marks] made so far. While it has sources, one of them is [active] and drives the file tree. [heads] are the
+ * heads Arc has read each source at, oldest first, which its revisions are made from. Every change returns a new review.
  */
 data class Review(
     val id: ReviewId,
@@ -19,6 +20,7 @@ data class Review(
     val panes: List<Pane> = emptyList(),
     val marks: List<FileMark> = emptyList(),
     val pages: List<Page> = emptyList(),
+    val heads: Map<Source, List<RecordedHead>> = emptyMap(),
 ) {
     init {
         require(sources.toSet().size == sources.size) { "A source is in a review once" }
@@ -79,6 +81,16 @@ data class Review(
 
     /** The review without the page [id]. */
     fun withoutPage(id: PaneId): Review = copy(pages = pages.filterNot { it.id == id })
+
+    /** The heads Arc has read [source] at, oldest first. */
+    fun headsOf(source: Source): List<RecordedHead> = heads[source].orEmpty()
+
+    /** The review with [head] recorded for [source], unless a head with its commit is recorded already. */
+    fun record(source: Source, head: RecordedHead): Review {
+        val known = headsOf(source)
+        if (known.any { it.head == head.head }) return this
+        return copy(heads = heads + (source to known + head))
+    }
 
     /** The ids of every pinned pane and page, which follow into each source's layout. */
     val pinnedIds: List<String> get() = panes.filter { it.pinned }.map { it.id.value } + pages.filter { it.pinned }.map { it.id.value }

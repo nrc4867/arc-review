@@ -14,6 +14,8 @@ import dev.chieppa.arc.core.pane.Revision
 import dev.chieppa.arc.core.review.Review
 import dev.chieppa.arc.core.review.ReviewId
 import dev.chieppa.arc.core.source.RepoName
+import dev.chieppa.arc.core.revision.RecordedHead
+import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.source.SourceRefs
 
 /** Turns a [Review] into what the store writes and back. A stored entry that does not parse is left out. */
@@ -28,6 +30,7 @@ object ReviewMapping {
         views = views,
         paneStates = paneStates,
         pages = review.pages.map(::toStored),
+        heads = review.heads.map { (source, heads) -> StoredHeads(source.ref, heads.map { StoredHead(it.head.value, it.base.value, it.at) }) },
     )
 
     fun toReview(stored: StoredReview): Review {
@@ -43,6 +46,7 @@ object ReviewMapping {
             panes = panes,
             marks = stored.marks.mapNotNull(::toMark).distinctBy { it.source to it.path },
             pages = stored.pages.mapNotNull(::toPage).distinctBy { it.id }.filter { it.id !in paneIds },
+            heads = stored.heads.mapNotNull(::toHeads).toMap(),
         )
     }
 
@@ -60,12 +64,20 @@ object ReviewMapping {
 
     private fun toStored(page: Page): StoredPage = when (page) {
         is Page.Filter -> StoredPage.Filter(page.id.value, page.filter)
+        is Page.RevisionMatrix -> StoredPage.RevisionMatrix(page.id.value, page.source.ref, page.pinned)
     }
 
     private fun toPage(stored: StoredPage): Page? = readOrNull {
         when (stored) {
             is StoredPage.Filter -> Page.Filter(PaneId(stored.id), stored.filter)
+            is StoredPage.RevisionMatrix -> SourceRefs.parse(stored.source)?.let { Page.RevisionMatrix(PaneId(stored.id), it, stored.pinned) }
         }
+    }
+
+    private fun toHeads(stored: StoredHeads): Pair<Source, List<RecordedHead>>? {
+        val source = SourceRefs.parse(stored.source) ?: return null
+        val heads = stored.heads.mapNotNull { head -> readOrNull { RecordedHead(ObjectId(head.head), ObjectId(head.base), head.at) } }
+        return source to heads.distinctBy { it.head }
     }
 
     private fun toStored(mark: FileMark) = StoredMark(

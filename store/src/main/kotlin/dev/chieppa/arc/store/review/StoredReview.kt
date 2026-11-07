@@ -3,8 +3,8 @@ package dev.chieppa.arc.store.review
 import kotlinx.serialization.Serializable
 
 /**
- * A review as written: its sources by ref, the active one, its panes, pages and marks, each source's view and each
- * pane's own state, by pane id.
+ * A review as written: its sources by ref, the active one, its panes, pages and marks, each source's view, each
+ * pane's own state, by pane id, and the heads each source was read at.
  */
 @Serializable
 data class StoredReview(
@@ -17,4 +17,5 @@ data class StoredReview(
     val views: List<StoredSourceView> = emptyList(),
     val paneStates: Map<String, StoredPaneState> = emptyMap(),
     val pages: List<StoredPage> = emptyList(),
+    val heads: List<StoredHeads> = emptyList(),
 )

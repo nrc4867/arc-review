@@ -1,9 +1,11 @@
 package dev.chieppa.arc.core.review
 
+import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.mark.FileMark
 import dev.chieppa.arc.core.mark.MarkKind
 import dev.chieppa.arc.core.mark.PatchFingerprint
 import dev.chieppa.arc.core.mark.PatchHash
+import dev.chieppa.arc.core.revision.RecordedHead
 import dev.chieppa.arc.core.source.SourceRefs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -60,5 +62,15 @@ class ReviewTest {
     @Test
     fun theActiveSourceMustBeInTheReview() {
         assertFailsWith<IllegalArgumentException> { Review(ReviewId("r"), "x", listOf(prA), active = prB) }
+    }
+
+    @Test
+    fun aHeadIsRecordedOncePerSource() {
+        val one = ObjectId("1".repeat(40))
+        val base = ObjectId("b".repeat(40))
+        val head = RecordedHead(one, base, 10)
+        val review = empty.add(prA).record(prA, head).record(prA, head.copy(at = 20))
+        assertEquals(listOf(head), review.headsOf(prA))
+        assertEquals(emptyList(), review.headsOf(prB))
     }
 }

@@ -1,10 +1,12 @@
 package dev.chieppa.arc.core.conversation
 
+import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.source.Source
 
 /**
  * A thread on one line of a file in a source. [changedIn] is the short sha of the revision that changed its lines,
  * for an addressed thread; [link] names what the thread ties to elsewhere, such as a section of a design doc.
+ * [madeOn] is the source's head when the thread was started, where the host says.
  */
 data class ReviewThread(
     val id: String,
@@ -16,4 +18,5 @@ data class ReviewThread(
     val messages: List<ThreadMessage>,
     val changedIn: String? = null,
     val link: String? = null,
+    val madeOn: ObjectId? = null,
 )

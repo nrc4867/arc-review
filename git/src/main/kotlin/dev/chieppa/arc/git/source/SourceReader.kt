@@ -9,11 +9,13 @@ import dev.chieppa.arc.git.parse.PatchFingerprinter
 import dev.chieppa.arc.git.process.GitSettings
 import dev.chieppa.arc.git.repo.BlobPrefetcher
 import dev.chieppa.arc.git.repo.GitRepository
+import dev.chieppa.arc.git.revision.RevisionRefNames
 
 /**
  * Reads a source from its repo: its revisions, commits, changed files and their fingerprints. The whole change is one
  * `git diff` process; a partial clone first fetches both trees' blobs in one batch. A pull request is read through
- * what [pulls] says of it, and takes its title from there.
+ * what [pulls] says of it, and takes its title from there. The head read is pinned under [RevisionRefNames], so it
+ * stays a revision of the source after a rebase or force push.
  */
 class SourceReader(private val repo: GitRepository, private val pulls: PullRequestLookup = PullRequestLookup.NONE) {
     private val resolver = SourceResolver(repo, pulls)
@@ -28,6 +30,7 @@ class SourceReader(private val repo: GitRepository, private val pulls: PullReque
             else -> repo.commits(revisions.base.takeUnless(::isEmptyTree), revisions.head)
         }
         val title = pull?.title ?: commits.lastOrNull()?.subject ?: repo.commit(revisions.head)?.subject.orEmpty()
+        repo.updateRef(RevisionRefNames.pin(revisions.head), revisions.head)
         return snapshot(source, revisions, title, commits)
     }
 

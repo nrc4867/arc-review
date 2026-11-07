@@ -1,5 +1,6 @@
 package dev.chieppa.arc.host.conversation
 
+import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.conversation.ReviewThread
 import dev.chieppa.arc.core.conversation.StagedComment
 import dev.chieppa.arc.core.conversation.ThreadContext
@@ -15,4 +16,10 @@ interface ReviewConversation {
 
     /** Every staged comment on [changes]' sources, placed against the files each source changes now. */
     fun staged(changes: Map<Source, List<String>>): List<StagedComment>
+
+    /**
+     * The threads on [paths] of [source] that were started on one of its [heads] (oldest first), each naming that
+     * head in [ReviewThread.madeOn], for counting them by revision.
+     */
+    fun revisionThreads(source: Source, paths: List<String>, heads: List<ObjectId>): List<ReviewThread> = emptyList()
 }

@@ -36,6 +36,18 @@ class SourceResolver(private val repo: GitRepository, private val pulls: PullReq
         return SourceRevisions(repo.mergeBase(base, head) ?: base, head)
     }
 
+    /**
+     * The tip of the branch [source] is compared against now, which every head's merge-base is taken with: a pull
+     * request's kept base or a branch's base branch. Null for a commit or a range, whose base never moves.
+     */
+    suspend fun baseTip(source: Source): ObjectId? = when (source) {
+        is Source.PullRequest -> repo.resolveCommit(PullRequestRefNames.base(source.number))
+        is Source.BranchAgainstBase -> (source.base?.value ?: repo.defaultBranch())?.let { name ->
+            repo.resolveCommit(name) ?: repo.resolveCommit("$REMOTE/$name")
+        }
+        is Source.Commit, is Source.CommitRange -> null
+    }
+
     /** [ref] at [oid] when the clone has it, else fetched from [remoteRef] on `origin`. */
     private suspend fun keep(source: Source, ref: String, oid: String?, remoteRef: String): ObjectId {
         val known = oid?.let { repo.resolveCommit(it) }
