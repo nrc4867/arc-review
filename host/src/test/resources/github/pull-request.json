@@ -1,0 +1,63 @@
+{
+ "data": {
+  "repository": {
+   "pullRequest": {
+    "number": 14941,
+    "title": "Add `gh pr revert`",
+    "url": "https://github.com/cli/cli/pull/14941",
+    "isDraft": false,
+    "state": "MERGED",
+    "createdAt": "2026-11-02T09:12:40Z",
+    "updatedAt": "2026-11-05T16:30:02Z",
+    "baseRefName": "trunk",
+    "headRefName": "pr-revert",
+    "headRefOid": "4b1f0c2a9e8d7c6b5a493827160f5e4d3c2b1a09",
+    "baseRefOid": "eeb44bc432c0107de002dadd34a61b4e2bd15882",
+    "repository": {
+     "nameWithOwner": "cli/cli"
+    },
+    "author": {
+     "login": "babakks"
+    },
+    "labels": {
+     "nodes": []
+    },
+    "totalCommentsCount": 4,
+    "reviewDecision": "APPROVED",
+    "mergeable": "UNKNOWN",
+    "reviewRequests": {
+     "nodes": []
+    },
+    "latestReviews": {
+     "nodes": [
+      {
+       "author": {
+        "login": "williammartin"
+       },
+       "state": "APPROVED",
+       "submittedAt": "2026-11-05T15:58:11Z"
+      }
+     ]
+    },
+    "reviewThreads": {
+     "nodes": []
+    },
+    "commits": {
+     "nodes": [
+      {
+       "commit": {
+        "committedDate": "2026-11-05T15:40:27Z",
+        "statusCheckRollup": {
+         "state": "SUCCESS",
+         "contexts": {
+          "nodes": []
+         }
+        }
+       }
+      }
+     ]
+    }
+   }
+  }
+ }
+}

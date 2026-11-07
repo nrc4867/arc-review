@@ -51,6 +51,7 @@ class SearchPollTest {
         assertEquals(CheckState.Passed, first.checks.state)
         assertEquals(listOf(ReviewRequest.User("babakks")), first.requests)
         assertEquals("trunk", first.baseBranch)
+        assertEquals(PullState.Open, first.state)
 
         val failing = pulls[2]
         assertEquals(CheckState.Failed, failing.checks.state)

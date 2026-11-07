@@ -43,6 +43,7 @@ object PullRequestParser {
             headOid = node.string("headRefOid"),
             headBranch = node.string("headRefName"),
             baseOid = node.string("baseRefOid"),
+            state = PullState.parse(node.string("state")),
         )
     }
 

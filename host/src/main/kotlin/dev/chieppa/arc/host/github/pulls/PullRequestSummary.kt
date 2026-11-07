@@ -6,7 +6,8 @@ import java.time.Instant
 /**
  * A pull request as GitHub reports it: what a list of them shows, and the facts its "waiting on" is worked out from.
  * [reviewDecision] and [mergeable] are GitHub's enum names, such as `APPROVED` and `MERGEABLE`; [lastCommitAt] is when
- * its head commit was made; [unresolvedThreads] counts the review threads not resolved yet.
+ * its head commit was made; [unresolvedThreads] counts the review threads not resolved yet; [state] is whether it is
+ * open, merged or closed.
  */
 data class PullRequestSummary(
     val repo: GitHubRepo,
@@ -30,6 +31,7 @@ data class PullRequestSummary(
     val headOid: String? = null,
     val baseOid: String? = null,
     val headBranch: String? = null,
+    val state: PullState = PullState.Open,
 ) {
     /** What names it across repos: `owner/name#412`. */
     val key: String get() = "${repo.fullName}#$number"
