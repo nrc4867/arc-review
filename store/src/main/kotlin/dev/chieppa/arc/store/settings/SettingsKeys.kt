@@ -7,5 +7,5 @@ internal object SettingsKeys {
     const val COMMENT = "Arc settings"
     const val LAST_REVIEW = "review.last"
     const val WRAP_LINES = "panes.wrap"
-    const val GUTTER_HIGHLIGHT = "panes.highlight.gutter"
+    const val LINE_HIGHLIGHT = "panes.highlight.lines"
 }

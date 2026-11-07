@@ -30,13 +30,13 @@ class SettingsPopoverUiTest {
     }
 
     @Test
-    fun theGutterHighlightToggleMovesChangeWashesToTheGutter() = runComposeUiTest {
+    fun turningOffWholeLineHighlightMovesChangeWashesToTheGutter() = runComposeUiTest {
         val workbench = Workbench()
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         workbench.settingsOpen = true
         waitForIdle()
         assertEquals(ChangeWash.Line, workbench.preferences.changeWash)
-        onNodeWithContentDescription("Highlight changes in the gutter only").performClick()
+        onNodeWithContentDescription("Highlight whole changed lines").performClick()
         waitForIdle()
         assertEquals(ChangeWash.Gutter, workbench.preferences.changeWash)
     }

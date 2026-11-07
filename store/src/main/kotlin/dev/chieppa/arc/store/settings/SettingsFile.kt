@@ -26,7 +26,7 @@ class SettingsFile(private val path: Path) {
             interfaceSize = properties.getProperty(SettingsKeys.INTERFACE_SIZE)?.trim()?.toFloatOrNull()?.takeIf { it.isFinite() && it > 0f },
             lastReviewId = properties.getProperty(SettingsKeys.LAST_REVIEW)?.trim()?.ifEmpty { null },
             wrapLines = properties.getProperty(SettingsKeys.WRAP_LINES)?.trim()?.toBooleanStrictOrNull(),
-            gutterHighlight = properties.getProperty(SettingsKeys.GUTTER_HIGHLIGHT)?.trim()?.toBooleanStrictOrNull(),
+            wholeLineHighlight = properties.getProperty(SettingsKeys.LINE_HIGHLIGHT)?.trim()?.toBooleanStrictOrNull(),
         )
     }
 
@@ -36,7 +36,7 @@ class SettingsFile(private val path: Path) {
         settings.interfaceSize?.let { properties.setProperty(SettingsKeys.INTERFACE_SIZE, it.toString()) }
         settings.lastReviewId?.let { properties.setProperty(SettingsKeys.LAST_REVIEW, it) }
         settings.wrapLines?.let { properties.setProperty(SettingsKeys.WRAP_LINES, it.toString()) }
-        settings.gutterHighlight?.let { properties.setProperty(SettingsKeys.GUTTER_HIGHLIGHT, it.toString()) }
+        settings.wholeLineHighlight?.let { properties.setProperty(SettingsKeys.LINE_HIGHLIGHT, it.toString()) }
         val text = StringWriter().also { properties.store(it, SettingsKeys.COMMENT) }.toString()
         AtomicFile.write(path, text)
     }

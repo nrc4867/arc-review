@@ -25,7 +25,7 @@ done to it, and files drag from the tree onto a pane, an edge or out into a wind
 diff (split or unified), the whole file with its changes marked, or rendered Markdown, with find in file and wrapping
 of long lines; an added, deleted or unchanged file shows whole under a chip saying so. Pictures (PNG, JPEG, GIF, WebP,
 BMP, ICO) show drawn, a changed one before and after side by side, and an SVG can show drawn or as its text. A setting
-highlights changed lines in the gutter only, leaving the code plain. Any file at any revision of any
+highlights changed lines whole or in the gutter only, leaving the code plain. Any file at any revision of any
 repo can be opened and pinned beside the rest. Marks survive a rebase that keeps the change. The keyboard covers next
 and previous file and change, mark and advance, find, wrapping and the file finder, all in the palette (Ctrl K).
 Reviews, repos and layouts are saved locally. Nothing talks to GitHub yet; threads and staged comments are drawn only

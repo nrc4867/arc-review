@@ -26,7 +26,7 @@
     <string name="settings_size">Size</string>
     <string name="settings_size_percent">%1$d%</string>
     <string name="settings_wrap">Wrap long lines</string>
-    <string name="settings_gutter_highlight">Highlight changes in the gutter only</string>
+    <string name="settings_line_highlight">Highlight whole changed lines</string>
     <string name="menu_review">Review</string>
 
     <string name="action_add_source">Add source</string>
