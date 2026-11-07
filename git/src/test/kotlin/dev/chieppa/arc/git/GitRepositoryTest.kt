@@ -62,6 +62,21 @@ class GitRepositoryTest {
     }
 
     @Test
+    fun branchesListNewestFirstWithTheirLastAuthor() = runTest {
+        repo.git("branch", "spike/token-binding", first.value)
+        repo.git("checkout", "-q", "-b", "later")
+        repo.commitAt(4_000_000_000, "Later")
+        repo.git("checkout", "-q", "main")
+        GitRepository(repo.dir).use { git ->
+            val branches = git.branches()
+            assertEquals("later", branches.first().name)
+            assertEquals(4_000_000_000, branches.first().committed)
+            assertEquals(setOf("later", "main", "spike/token-binding"), branches.map { it.name }.toSet())
+            assertEquals("Test", branches.single { it.name == "spike/token-binding" }.author)
+        }
+    }
+
+    @Test
     fun revisionsResolveToCommitsOrNothing() = runTest {
         GitRepository(repo.dir).use { git ->
             assertEquals(second, git.resolveCommit("main"))

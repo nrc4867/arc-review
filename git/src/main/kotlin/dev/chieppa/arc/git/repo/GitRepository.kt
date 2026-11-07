@@ -2,6 +2,7 @@ package dev.chieppa.arc.git.repo
 
 import dev.chieppa.arc.core.change.CommitInfo
 import dev.chieppa.arc.core.change.ObjectId
+import dev.chieppa.arc.git.parse.BranchListParser
 import dev.chieppa.arc.git.parse.CommitLogParser
 import dev.chieppa.arc.git.parse.DiffFileOutput
 import dev.chieppa.arc.git.parse.DiffOutputParser
@@ -69,6 +70,10 @@ class GitRepository(val dir: Path, private val runner: GitRunner = GitRunner()) 
     suspend fun commit(commit: ObjectId): CommitInfo? =
         CommitLogParser.parse(git(listOf("log", "-1", "--no-color", CommitLogParser.FORMAT, commit.value, "--")).text).firstOrNull()
 
+    /** The clone's own branches, newest commit first. */
+    suspend fun branches(): List<LocalBranch> =
+        BranchListParser.parse(git(listOf("for-each-ref", "--sort=-committerdate", BranchListParser.FORMAT, HEADS)).text)
+
     /** Every file path in [rev]'s tree, changed or not, in git's order. */
     suspend fun listFiles(rev: String): List<String> {
         val reader = NulReader(git(listOf("ls-tree", "-r", "-z", "--name-only", "--full-tree", rev)).stdout)
@@ -125,6 +130,7 @@ class GitRepository(val dir: Path, private val runner: GitRunner = GitRunner()) 
         const val BLOB = "blob"
         const val REMOTE = "origin"
         const val REMOTE_HEAD = "refs/remotes/origin/HEAD"
+        const val HEADS = "refs/heads"
         val DEFAULT_BRANCHES = listOf("main", "master")
     }
 }
