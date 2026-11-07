@@ -30,6 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import dev.chieppa.arc.core.mark.ReviewProgress
 import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.host.github.pulls.CheckState
+import dev.chieppa.arc.ui.pulls.CheckMark
 import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.sources_changed_since
@@ -47,7 +49,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * One source in the strip: its kind, ref and title, how much of it is reviewed and how many files changed since they
- * were reviewed. The [active] source is outlined; a source that could not be read is edged in the error color. Its
+ * were reviewed, and for a pull request its [checks]. The [active] source is outlined; a source that could not be read
+ * is edged in the error color. Its
  * remove button shows while it is active or under the pointer, and a right-click opens [menu].
  */
 @Composable
@@ -58,6 +61,7 @@ fun SourceChip(
     changedSince: Int,
     active: Boolean,
     failed: Boolean,
+    checks: CheckState?,
     onClick: () -> Unit,
     onRemove: () -> Unit,
     menu: @Composable ColumnScope.(close: () -> Unit) -> Unit,
@@ -112,6 +116,7 @@ fun SourceChip(
                     }
                 }
             }
+            checks?.let { CheckMark(it) }
             val removable = active || hovered
             IconButton(
                 StretchIcons.Close,

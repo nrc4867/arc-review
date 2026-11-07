@@ -2,6 +2,7 @@ package dev.chieppa.arc.ui.status
 
 import dev.chieppa.arc.ui.util.SourceLabels
 import androidx.compose.runtime.Composable
+import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.status_commit
 import dev.chieppa.arc.design.generated.status_commits
@@ -15,7 +16,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The status bar: the active source, its commits and head; at the end, the focused pane's find matches while it is
- * finding, and its file's language.
+ * finding, and its file's language. A saved filter's tab shows the filter's own instead.
  */
 @Composable
 fun ArcStatusBar(workbench: Workbench) {
@@ -23,6 +24,11 @@ fun ArcStatusBar(workbench: Workbench) {
     val source = state.active
     val snapshot = source?.let(state::snapshot)
     val pane = workbench.panes.focused
+    val filter = (state.paneLayout.activeTab?.let(state::page) as? Page.Filter)?.let { workbench.watch.watchlist.filter(it.filter) }
+    if (filter != null) {
+        StatusBar(start = { FilterStatusStart(filter, workbench.watch) }, end = { FilterStatusEnd(workbench.watch) })
+        return
+    }
     StatusBar(
         start = {
             if (source != null) StatusItem(SourceLabels.of(source), sourceIcon(source))

@@ -10,7 +10,10 @@ import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.MenuDivider
 import org.jetbrains.compose.resources.stringResource
 
-/** Arc's items in a tab's context menu, after Stretch's own: pin or unpin, mark its file, copy its path or ref. */
+/**
+ * Arc's items in a tab's context menu, after Stretch's own: pin or unpin, mark its file, copy its path or ref. A page's
+ * tab has Stretch's own only.
+ */
 @Composable
 fun TabMenu(workbench: Workbench, id: String, close: () -> Unit) {
     val pane = workbench.state.pane(id) ?: return

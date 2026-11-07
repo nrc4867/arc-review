@@ -1,0 +1,68 @@
+package dev.chieppa.arc.ui.pulls
+
+import dev.chieppa.arc.host.github.GitHub
+import dev.chieppa.arc.host.github.api.GitHubException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
+
+/**
+ * Polls GitHub for [watch] while it runs: every saved search in one request every [PullTimes.POLL_MINUTES] minutes,
+ * or at once when asked, and the person's notifications as often as GitHub allows. What a poll sets off goes to
+ * [notifier].
+ */
+class PullPoller(private val watch: PullWatch, private val github: GitHub, private val notifier: WatchNotifier) {
+    /** Polls until cancelled. */
+    suspend fun run() = coroutineScope {
+        launch { searches() }
+        launch { notifications() }
+    }
+
+    /** One poll of every search, with what it sets off. */
+    suspend fun pollOnce() {
+        if (!withContext(Dispatchers.IO) { github.hasToken() }) {
+            watch.status = WatchStatus.Unavailable
+            return
+        }
+        try {
+            if (watch.viewer == null) watch.viewer = github.viewer()
+            val searches = WatchSearches.of(watch.watchlist)
+            if (searches.isEmpty()) {
+                watch.results = emptyMap()
+                watch.status = WatchStatus.Live
+                return
+            }
+            val poll = github.search(searches)
+            val now = watch.now()
+            val events = WatchEvents.newPulls(watch.watchlist.rules, watch.results, poll.results.mapValues { it.value.pulls })
+            watch.results = poll.results.mapValues { (_, result) -> FilterResult(result.total, result.pulls, now) }
+            poll.budget?.let { watch.budget = it }
+            watch.status = WatchStatus.Live
+            events.forEach { notifier.tell(it) }
+        } catch (e: GitHubException) {
+            watch.status = if (e.reason == GitHubException.Reason.Failed) WatchStatus.Failed else WatchStatus.Unavailable
+        }
+    }
+
+    private suspend fun searches() {
+        while (true) {
+            pollOnce()
+            withTimeoutOrNull(PullTimes.POLL_MILLIS) { watch.refreshRequests.receive() }
+        }
+    }
+
+    private suspend fun notifications() {
+        while (true) {
+            try {
+                if (withContext(Dispatchers.IO) { github.hasToken() }) {
+                    WatchEvents.threads(watch.watchlist.rules, github.notifications.poll()).forEach { notifier.tell(it) }
+                }
+            } catch (_: GitHubException) {
+            }
+            delay(github.notifications.pollSeconds * PullTimes.MILLIS_PER_SECOND)
+        }
+    }
+}

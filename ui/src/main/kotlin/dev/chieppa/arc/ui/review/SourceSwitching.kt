@@ -14,7 +14,7 @@ object SourceSwitching {
     fun activate(review: Review, views: Map<Source, SourceView>, source: Source): Pair<Review, Map<Source, SourceView>> {
         if (source !in review.sources) return review to views
         val view = views[source] ?: SourceView()
-        val layout = withPinned(view.layout, review.panes.filter { it.pinned }.map { it.id.value })
+        val layout = withPinned(view.layout, review.pinnedIds)
         return review.activate(source) to views + (source to view.copy(layout = layout))
     }
 

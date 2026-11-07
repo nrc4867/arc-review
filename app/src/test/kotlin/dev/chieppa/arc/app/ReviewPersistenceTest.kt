@@ -1,6 +1,7 @@
 package dev.chieppa.arc.app
 
 import dev.chieppa.arc.core.change.ObjectId
+import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
 import dev.chieppa.arc.core.pane.Revision
@@ -27,8 +28,8 @@ class ReviewPersistenceTest {
 
     @Test
     fun eachSourcesViewAndEachPanesStateComeBack() {
-        val review = Review(ReviewId("r1"), "Auth").add(source).add(other).withPane(pane("p1")).withPane(pane("p2"))
-        val layout = PaneLayout().open("p1").open("p2").splitWith("p2", PaneLayout.FIRST_LEAF, PaneEdge.End)
+        val review = Review(ReviewId("r1"), "Auth").add(source).add(other).withPane(pane("p1")).withPane(pane("p2")).withPage(Page.Filter(PaneId("p3"), "f1"))
+        val layout = PaneLayout().open("p1").open("p2").open("p3").splitWith("p2", PaneLayout.FIRST_LEAF, PaneEdge.End)
         val state = ReviewState(review, repos, mapOf(source to SourceView(layout, emptySet(), ObjectId("c".repeat(40)))), mapOf("p1" to PaneUiState(split = false)))
         state.paneLines["p2"] = 42
         val expanded = setOf<Any>(TreeKeys.source(source), TreeKeys.folder(source, "src"), TreeKeys.folder(other, "lib"))

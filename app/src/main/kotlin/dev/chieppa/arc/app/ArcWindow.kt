@@ -15,6 +15,8 @@ import dev.chieppa.arc.design.generated.review_default_name
 import dev.chieppa.arc.ui.actions.actionText
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.menus.appMenus
+import dev.chieppa.arc.ui.pulls.PullWatch
+import dev.chieppa.arc.ui.services.DesktopNotifier
 import dev.chieppa.arc.ui.settings.UiPreferences
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.LocalActionText
@@ -26,11 +28,19 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Arc's main window on [session]'s saved state, opening with the [initial] look and the last review. Each change to
- * the look goes to [onPreferencesChange], and the review is saved as it changes and when it is left. [onExit] ends the
- * app.
+ * the look goes to [onPreferencesChange], and the review is saved as it changes and when it is left. The saved
+ * filters and rules in [watch] outlive any one review: they are polled while the window is open, with notifications
+ * through [notifier], and saved as they change. [onExit] ends the app.
  */
 @Composable
-fun ArcWindow(session: AppSession, initial: UiPreferences, onPreferencesChange: suspend (UiPreferences) -> Unit, onExit: () -> Unit) {
+fun ArcWindow(
+    session: AppSession,
+    initial: UiPreferences,
+    watch: PullWatch,
+    notifier: DesktopNotifier,
+    onPreferencesChange: suspend (UiPreferences) -> Unit,
+    onExit: () -> Unit,
+) {
     val exit by rememberUpdatedState(onExit)
     val defaultName = stringResource(Res.string.review_default_name)
     var reviewId by remember { mutableStateOf<String?>(null) }
@@ -46,6 +56,7 @@ fun ArcWindow(session: AppSession, initial: UiPreferences, onPreferencesChange: 
             state = state,
             conversation = session.conversation,
             reviews = session.reviews(),
+            watch = watch,
             onOpenReview = { id ->
                 current?.let(::save)
                 reviewId = id ?: session.create(defaultName).review.id.value
@@ -60,6 +71,8 @@ fun ArcWindow(session: AppSession, initial: UiPreferences, onPreferencesChange: 
     ) {
         SavePreferences(workbench) { preferences = it; onPreferencesChange(it) }
         SaveReview(workbench, ::save)
+        SaveWatchlist(watch, session::saveWatchlist)
+        WatchPolling(watch, session.github, notifier)
         CompositionLocalProvider(LocalActionText provides actionText()) {
             MacMenuBar(appMenus(), workbench.registry, workbench.keymap, null, onSettings = { workbench.settingsOpen = true }, onQuit = { save(workbench); onExit() })
         }

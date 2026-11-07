@@ -31,10 +31,10 @@ class SourceController(private val state: ReviewState, private val data: ReviewD
         return name
     }
 
-    /** Adds the source [ref] names, if its repo is known, and makes it active. Returns whether it did. */
+    /** Adds the source [ref] names, if its repo is known, and makes it active. Returns whether it did. A pull request is read through GitHub. */
     fun addSource(ref: String): Boolean {
         val source = SourceRefs.parse(ref) ?: return false
-        if (source.repo !in state.repos || source is Source.PullRequest) return false
+        if (source.repo !in state.repos) return false
         state.review = state.review.add(source)
         activate(source)
         load(source)
@@ -57,11 +57,12 @@ class SourceController(private val state: ReviewState, private val data: ReviewD
         state.views = state.views - source
         state.loads = state.loads - source
         state.scoped = state.scoped - source
+        state.pulls = state.pulls - source
         val next = state.review.active
         if (next != null) {
             activate(next)
         } else {
-            val pinned = state.review.panes.filter { it.pinned }.map { it.id.value }
+            val pinned = state.review.pinnedIds
             state.looseLayout = SourceSwitching.withPinned(state.looseLayout, pinned)
         }
     }
@@ -89,6 +90,7 @@ class SourceController(private val state: ReviewState, private val data: ReviewD
     /** Reads [source]'s whole change again, with the replays its marks need. */
     fun load(source: Source) = launch(source, scoped = false) {
         val snapshot = data.read(source)
+        (source as? Source.PullRequest)?.let(data::pullRequest)?.let { state.pulls = state.pulls + (source to it) }
         SourceLoad.Ready(snapshot, replays(source, snapshot))
     }
 

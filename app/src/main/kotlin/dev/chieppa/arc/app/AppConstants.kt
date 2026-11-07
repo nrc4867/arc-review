@@ -8,6 +8,7 @@ internal object AppConstants {
     const val SETTINGS_FILE = "settings.properties"
     const val REVIEWS_FOLDER = "reviews"
     const val REPOS_FILE = "repos.json"
+    const val WATCHLIST_FILE = "filters.json"
 
     /** How long the open review waits after a change before it is saved. */
     const val SAVE_DELAY_MILLIS = 400L

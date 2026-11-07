@@ -78,7 +78,7 @@
     <string name="add_source_title">Add source</string>
     <string name="add_source_repo">Repository</string>
     <string name="add_source_ref">Source</string>
-    <string name="add_source_ref_hint">@sha, @sha..sha or :branch...base</string>
+    <string name="add_source_ref_hint">#412, @sha, @sha..sha or :branch...base</string>
     <string name="add_source_folder">Folder of a git repository</string>
     <string name="add_source_add_repo">Add repository</string>
     <string name="add_source_add">Add</string>
@@ -173,4 +173,101 @@
         <item quantity="one">%1$d reply</item>
         <item quantity="other">%1$d replies</item>
     </plurals>
+
+    <string name="checks_passed">Checks passed</string>
+    <string name="checks_failed">Checks failed</string>
+    <string name="checks_running">Checks running</string>
+
+    <string name="notifications">Notifications</string>
+
+    <string name="filters_paste">Paste a GitHub search URL</string>
+    <string name="filters_new">New filter</string>
+    <string name="filters_new_count">%1$d new</string>
+    <string name="filters_notify">Notify me</string>
+    <string name="filters_add_rule">Add rule</string>
+    <plurals name="filters_footer">
+        <item quantity="one">Polls GitHub search every %1$d min · %2$d live filter</item>
+        <item quantity="other">Polls GitHub search every %1$d min · %2$d live filters</item>
+    </plurals>
+    <string name="filter_review_requested">Review requested</string>
+    <string name="filter_mine">My PRs</string>
+    <string name="filter_default_name">New filter</string>
+    <string name="filter_rename">Rename</string>
+    <string name="filter_rename_title">Rename filter</string>
+    <string name="filter_name">Name</string>
+    <string name="filter_save">Save</string>
+    <string name="filter_remove">Remove filter</string>
+
+    <string name="rule_comments">Comments on my PRs</string>
+    <string name="rule_mentions">@mentions</string>
+    <string name="rule_any_repo">Any repo</string>
+    <string name="rule_new_in_filter">New PR in %1$s</string>
+    <string name="rule_saved_filter">Saved filter</string>
+    <string name="rule_new_labelled">New PR labelled %1$s</string>
+    <string name="rule_remove">Remove rule</string>
+    <string name="rule_add_title">Add rule</string>
+    <string name="rule_kind_filter">New PR in a saved filter</string>
+    <string name="rule_kind_label">New PR with a label</string>
+    <string name="rule_label">Label</string>
+    <string name="rule_repos">Repos, as owner/name, comma separated</string>
+    <string name="rule_add">Add</string>
+
+    <string name="filter_query">GitHub search query</string>
+    <string name="filter_group_label">Group by label</string>
+    <string name="filter_group_repo">Group by repo</string>
+    <string name="filter_group_none">No grouping</string>
+    <string name="filter_updated">updated %1$s</string>
+    <string name="filter_refresh">Refresh now</string>
+    <string name="filter_no_label">No label</string>
+    <string name="filter_new_since">New since you looked</string>
+    <string name="col_pull_request">Pull request</string>
+    <string name="col_labels">Labels</string>
+    <string name="col_waiting">Waiting on</string>
+    <string name="col_updated">Updated</string>
+    <string name="pull_ref">%1$s#%2$d</string>
+    <string name="pull_add">Add</string>
+    <string name="pull_add_to_review">Add to this review</string>
+    <string name="pull_comments">Comments</string>
+
+    <string name="waiting_you">You</string>
+    <string name="waiting_you_again">You · re-review</string>
+    <string name="waiting_author">Author</string>
+    <plurals name="waiting_author_threads">
+        <item quantity="one">Author · %1$d thread</item>
+        <item quantity="other">Author · %1$d threads</item>
+    </plurals>
+    <string name="waiting_ci">CI</string>
+    <string name="waiting_ci_check">CI · %1$s failed</string>
+    <string name="waiting_merge">Merge · approved</string>
+    <plurals name="waiting_reviewers">
+        <item quantity="one">%1$d reviewer</item>
+        <item quantity="other">%1$d reviewers</item>
+    </plurals>
+
+    <string name="age_short_now">now</string>
+    <string name="age_short_minutes">%1$d min</string>
+    <string name="age_short_hours">%1$d h</string>
+    <string name="age_yesterday">yesterday</string>
+    <string name="age_short_days">%1$d days</string>
+
+    <plurals name="status_open_pulls">
+        <item quantity="one">%1$d open PR</item>
+        <item quantity="other">%1$d open PRs</item>
+    </plurals>
+    <plurals name="status_labels">
+        <item quantity="one">%1$d label</item>
+        <item quantity="other">%1$d labels</item>
+    </plurals>
+    <string name="status_pair">%1$s · %2$s</string>
+    <string name="status_budget">GitHub search · %1$d of %2$d points left this hour</string>
+    <plurals name="status_rules">
+        <item quantity="one">%1$d rule, %2$d on</item>
+        <item quantity="other">%1$d rules, %2$d on</item>
+    </plurals>
+
+    <string name="notify_new_in_filter">New PR in %1$s</string>
+    <string name="notify_new_labelled">New PR labelled %1$s</string>
+    <string name="notify_comment">New comment on %1$s</string>
+    <string name="notify_mention">Mentioned in %1$s</string>
+    <string name="notify_pull">%1$s · %2$s</string>
 </resources>

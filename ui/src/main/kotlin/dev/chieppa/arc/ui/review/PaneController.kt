@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui.review
 
+import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
 import dev.chieppa.arc.core.pane.PaneView
@@ -72,9 +73,28 @@ class PaneController(private val state: ReviewState) {
         return id
     }
 
-    /** Closes the pane [id] everywhere it shows; a pane no layout shows any more leaves the review. */
+    /** Opens the page for saved filter [filter], or shows its tab when one is open already. */
+    fun openFilter(filter: String) {
+        val existing = state.review.pages.firstOrNull { it is Page.Filter && it.filter == filter }
+        if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) {
+            state.paneLayout = state.paneLayout.activate(existing.id.value)
+            return
+        }
+        val page = existing ?: Page.Filter(PaneFactory.nextId(state.review), filter)
+        state.review = state.review.withPage(page)
+        state.paneLayout = state.paneLayout.open(page.id.value)
+        placePinned()
+    }
+
+    /** Closes the pane or page [id] everywhere it shows; one no layout shows any more leaves the review. */
     fun close(id: String) {
         state.paneLayout = state.paneLayout.close(id)
+        state.page(id)?.let { page ->
+            if (page.pinned) state.views = SourceSwitching.withoutEverywhere(state.views, id, null)
+            state.looseLayout = state.looseLayout.close(id)
+            state.review = state.review.withoutPage(page.id)
+            return
+        }
         val pane = state.pane(id) ?: return
         if (pane.pinned) state.views = SourceSwitching.withoutEverywhere(state.views, id, null)
         val shown = state.views.values.any { it.layout.leafOf(id) != null } || state.looseLayout.leafOf(id) != null
@@ -105,7 +125,7 @@ class PaneController(private val state: ReviewState) {
     }
 
     private fun placePinned() {
-        val pinned = state.review.panes.filter { it.pinned }.map { it.id.value }
+        val pinned = state.review.pinnedIds
         state.views = state.views.mapValues { (source, view) ->
             if (source == state.active) view else view.copy(layout = SourceSwitching.withPinned(view.layout, pinned))
         }

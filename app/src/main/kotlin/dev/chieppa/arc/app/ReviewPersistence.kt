@@ -18,7 +18,7 @@ import java.nio.file.Path
 internal object ReviewPersistence {
     fun toState(stored: StoredReview, repos: Map<RepoName, Path>): ReviewState {
         val review = ReviewMapping.toReview(stored)
-        val panes = review.panes.map { it.id.value }.toSet()
+        val panes = review.tabIds
         val views = stored.views.mapNotNull { view ->
             val source = review.sources.firstOrNull { it.ref == view.source } ?: return@mapNotNull null
             val layout = view.layout?.let { LayoutMapping.toLayout(it, panes) }

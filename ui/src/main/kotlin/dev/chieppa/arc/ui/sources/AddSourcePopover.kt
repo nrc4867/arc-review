@@ -35,7 +35,7 @@ import java.nio.file.InvalidPathException
 import java.nio.file.Path
 
 /**
- * What the strip's add button opens: pick a repo and type a source in it (`@sha`, `@sha..sha` or `:branch...base`),
+ * What the strip's add button opens: pick a repo and type a source in it (`#412`, `@sha`, `@sha..sha` or `:branch...base`),
  * or add a repo by its folder. A field whose text names nothing is edged in the error color.
  */
 @Composable

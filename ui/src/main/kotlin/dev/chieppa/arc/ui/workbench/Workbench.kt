@@ -4,7 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import dev.chieppa.arc.core.pane.Page
+import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.host.github.pulls.PullRequestSummary
+import dev.chieppa.arc.host.github.repo.GitHubRepo
+import dev.chieppa.arc.ui.drawers.DrawerIds
+import dev.chieppa.arc.ui.pulls.PullWatch
 import dev.chieppa.arc.host.conversation.NoConversation
 import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.ui.actions.registerArcActions
@@ -42,7 +48,7 @@ import kotlinx.coroutines.launch
  * overlays are open, and the actions that change them. Views read it and recompose when it changes. Sources are read
  * through [data] on [scope]; threads and staged comments come from [conversation]. [reviews] are the saved reviews the
  * top bar offers, and [onOpenReview] opens one by id, or a new one for null. [onQuit] closes the app. Copied paths and
- * refs go to [clipboard].
+ * refs go to [clipboard]. [watch] holds the saved filters and notification rules, which every review shares.
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -54,6 +60,7 @@ class Workbench(
     val reviews: List<ReviewChoice> = emptyList(),
     val onOpenReview: (String?) -> Unit = {},
     val clipboard: TextClipboard = SystemClipboard,
+    val watch: PullWatch = PullWatch(),
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -103,6 +110,9 @@ class Workbench(
     val texts = PaneTexts(data)
     val threadViews = ThreadViews()
 
+    /** The GitHub repo each of the review's repos was cloned from, for those cloned from GitHub. */
+    var gitHubRepos by mutableStateOf<Map<RepoName, GitHubRepo>>(emptyMap())
+
     /** What each pane on screen offers the window's commands, by pane id. */
     val paneCommands = mutableStateMapOf<String, PaneCommands>()
 
@@ -120,6 +130,28 @@ class Workbench(
         registerArcActions(registry, this, onQuit)
         registerReviewActions(registry, this)
         registerContextActions(registry, this)
+    }
+
+    /** Opens the Pull requests drawer and counts every notification as seen. */
+    fun openPullRequests() {
+        watch.unseen = 0
+        if (frameLayout.drawers.firstOrNull { it.id == DrawerIds.PULL_REQUESTS }?.open != true) toggleDrawer(DrawerIds.PULL_REQUESTS)
+    }
+
+    /** The source [pull] is in a local clone of its repo, or null when no repo here was cloned from it. */
+    fun sourceOf(pull: PullRequestSummary): Source.PullRequest? =
+        gitHubRepos.entries.firstOrNull { it.value == pull.repo }?.let { Source.PullRequest(it.key, pull.number) }
+
+    /** The name of the review that holds [source]: the open one, else the first saved one with it. */
+    fun reviewHolding(source: Source): String? {
+        if (source in state.review.sources) return state.review.name
+        return reviews.firstOrNull { it.id != state.review.id.value && source.ref in it.sources }?.name
+    }
+
+    /** Removes saved filter [id], with its rules and its tab in this review. */
+    fun removeFilter(id: String) {
+        state.review.pages.filter { it is Page.Filter && it.filter == id }.forEach { panes.close(it.id.value) }
+        watch.removeFilter(id)
     }
 
     fun toggleDrawer(id: String) {

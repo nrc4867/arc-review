@@ -4,15 +4,20 @@ import androidx.compose.runtime.Composable
 import dev.chieppa.arc.ui.conversation.StagedActions
 import dev.chieppa.arc.ui.conversation.StagedCommentsContent
 import dev.chieppa.arc.ui.files.FilesDrawerContent
+import dev.chieppa.arc.ui.pulls.PullRequestsDrawer
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.DrawerSpec
 import org.jetbrains.compose.resources.stringResource
 
-/** The frame's drawers, one per [DrawerSlot]: Files and Staged comments hold the review; the others open plain. */
+/**
+ * The frame's drawers, one per [DrawerSlot]: Files and Staged comments hold the review, Pull requests the saved filters
+ * and notification rules; the others open plain.
+ */
 @Composable
 fun arcDrawerSpecs(workbench: Workbench): List<DrawerSpec> = ArcDrawerSlots.all.map { slot ->
     when (slot.id) {
         DrawerIds.FILES -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false) { FilesDrawerContent(workbench) }
+        DrawerIds.PULL_REQUESTS -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon) { PullRequestsDrawer(workbench) }
         DrawerIds.STAGED_COMMENTS -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, actions = { StagedActions(workbench) }) {
             StagedCommentsContent(workbench)
         }

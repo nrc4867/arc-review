@@ -1,6 +1,10 @@
 package dev.chieppa.arc.app
 
 import dev.chieppa.arc.core.source.RepoName
+import dev.chieppa.arc.core.watch.Watchlist
+import dev.chieppa.arc.host.github.GitHub
+import dev.chieppa.arc.store.watch.WatchlistFile
+import dev.chieppa.arc.ui.services.GitHubPulls
 import dev.chieppa.arc.git.repo.GitRepositories
 import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.store.repos.RepoRegistryFile
@@ -16,13 +20,15 @@ import java.io.Closeable
 import java.nio.file.Path
 
 /**
- * What the app keeps between runs, in [dataDir]: the settings, every review, and the repos they read from, which all
- * reviews share. Repos are read through git for the review open in [current].
+ * What the app keeps between runs, in [dataDir]: the settings, every review, and the repos, saved filters and
+ * notification rules, which all reviews share. Repos are read through git for the review open in [current], and pull
+ * requests through [github].
  */
-class AppSession(dataDir: Path, val conversation: ReviewConversation) : Closeable {
+class AppSession(dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub()) : Closeable {
     private val settingsFile = SettingsFile(dataDir.resolve(AppConstants.SETTINGS_FILE))
     private val reviewStore = ReviewStore(dataDir.resolve(AppConstants.REVIEWS_FOLDER))
     private val registry = RepoRegistryFile(dataDir.resolve(AppConstants.REPOS_FILE))
+    private val watchlistFile = WatchlistFile(dataDir.resolve(AppConstants.WATCHLIST_FILE))
 
     var settings: AppSettings = settingsFile.load()
         private set
@@ -35,10 +41,20 @@ class AppSession(dataDir: Path, val conversation: ReviewConversation) : Closeabl
     var current: ReviewState? = null
 
     private val git = GitRepositories({ name -> (current?.repos ?: repos)[name] })
-    val data: ReviewData = GitReviewData(git)
+    val data: ReviewData = GitReviewData(git, GitHubPulls(github))
 
-    /** Every saved review, by name. */
-    fun reviews(): List<ReviewChoice> = reviewStore.all().map { ReviewChoice(it.id, it.name) }
+    /** Every saved review, by name, with its sources. */
+    fun reviews(): List<ReviewChoice> = reviewStore.all().map { ReviewChoice(it.id, it.name, it.sources.toSet()) }
+
+    /** The saved filters and rules; on a first run, those [seeds] makes, saved at once. */
+    fun watchlist(seeds: () -> Watchlist): Watchlist {
+        if (watchlistFile.exists()) return watchlistFile.load()
+        return seeds().also(watchlistFile::save)
+    }
+
+    fun saveWatchlist(watchlist: Watchlist) {
+        watchlistFile.save(watchlist)
+    }
 
     /** The review [id], or the last one open, or a new one named [defaultName] when there is none. */
     fun open(id: String?, defaultName: String): ReviewState {

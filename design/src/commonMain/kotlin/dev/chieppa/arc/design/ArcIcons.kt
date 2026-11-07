@@ -204,6 +204,12 @@ object ArcIcons {
             stroke("M6 8h.01M8 8h.01M10 8h.01")
         }
     }
+    val Refresh: ImageVector by lazy {
+        icon("refresh") {
+            stroke("M13 8a5 5 0 1 1-1.5-3.5")
+            stroke("M13 2.5v3h-3")
+        }
+    }
     val Repo: ImageVector by lazy {
         icon("repo") {
             stroke("M12.5 11.5H5a1.5 1.5 0 0 0 0 3h7.5v-13H5A1.5 1.5 0 0 0 3.5 3v10")

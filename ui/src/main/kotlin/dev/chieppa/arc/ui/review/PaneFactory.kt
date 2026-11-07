@@ -41,7 +41,7 @@ object PaneFactory {
 
     /** An id no pane in [review] has yet. */
     fun nextId(review: Review): PaneId {
-        val taken = review.panes.mapNotNull { it.id.value.removePrefix(PREFIX).toIntOrNull() }
+        val taken = review.tabIds.mapNotNull { it.removePrefix(PREFIX).toIntOrNull() }
         return PaneId(PREFIX + ((taken.maxOrNull() ?: 0) + 1))
     }
 }

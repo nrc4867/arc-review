@@ -28,8 +28,12 @@ BMP, ICO) show drawn, a changed one before and after side by side, and an SVG ca
 highlights changed lines whole or in the gutter only, leaving the code plain. Any file at any revision of any
 repo can be opened and pinned beside the rest. Marks survive a rebase that keeps the change. The keyboard covers next
 and previous file and change, mark and advance, find, wrapping and the file finder, all in the palette (Ctrl K).
-Reviews, repos and layouts are saved locally. Nothing talks to GitHub yet; threads and staged comments are drawn only
-from the dev-only sample (`-Pdemo`).
+Reviews, repos and layouts are saved locally. Pull requests are read from GitHub with the `gh` login (read-only): a
+pull request (`#412`) is added as a source whose head is fetched from the clone's origin, and saved GitHub searches,
+polled every five minutes in the Pull requests drawer, open as tabs listing each pull request's labels, who it waits on,
+checks and comments, with an Add button that puts it in the open review. Rules raise desktop notifications for
+comments on the person's pull requests, mentions, and new pull requests in a filter or with a label; the bell counts
+them. Threads and staged comments are drawn only from the dev-only sample (`-Pdemo`).
 
 ## Build and run
 

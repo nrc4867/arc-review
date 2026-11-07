@@ -12,6 +12,7 @@ import dev.chieppa.arc.design.generated.drawer_pull_requests
 import dev.chieppa.arc.design.generated.drawer_revisions
 import dev.chieppa.arc.design.generated.drawer_search
 import dev.chieppa.arc.design.generated.drawer_staged_comments
+import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.stretch.frame.Side
 import dev.chieppa.stretch.theme.StretchIcons
 
@@ -25,7 +26,7 @@ object ArcDrawerSlots {
         DrawerSlot(DrawerIds.CONVERSATION, Res.string.drawer_conversation, ArcIcons.Comment, Side.Left),
         DrawerSlot(DrawerIds.REVISIONS, Res.string.drawer_revisions, ArcIcons.Matrix, Side.Left),
         DrawerSlot(DrawerIds.CONSOLE, Res.string.drawer_console, StretchIcons.Command, Side.Left, bottom = true),
-        DrawerSlot(DrawerIds.PULL_REQUESTS, Res.string.drawer_pull_requests, ArcIcons.Filter, Side.Right),
+        DrawerSlot(DrawerIds.PULL_REQUESTS, Res.string.drawer_pull_requests, ArcIcons.Filter, Side.Right, width = ArcSizes.pullRequestsDrawer),
         DrawerSlot(DrawerIds.CHECKS, Res.string.drawer_checks, ArcIcons.CheckRun, Side.Right),
         DrawerSlot(DrawerIds.STAGED_COMMENTS, Res.string.drawer_staged_comments, ArcIcons.Stage, Side.Right, bottom = true),
     )

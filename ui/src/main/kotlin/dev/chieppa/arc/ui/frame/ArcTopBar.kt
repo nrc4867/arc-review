@@ -2,7 +2,11 @@ package dev.chieppa.arc.ui.frame
 
 import androidx.compose.runtime.Composable
 import dev.chieppa.arc.design.generated.Res
+import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.app_name
+import dev.chieppa.arc.design.generated.notifications
+import dev.chieppa.stretch.frame.BarAction
+import dev.chieppa.stretch.ui.badgeCount
 import dev.chieppa.arc.ui.actions.ArcActionIds
 import dev.chieppa.arc.ui.menus.ArcBarMenus
 import dev.chieppa.arc.ui.settings.SettingsPopover
@@ -14,7 +18,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The window's top bar: the app's name and menus, the review selector after them, "Go to anything" centred on the
- * whole bar, and the palette and settings at the end, each showing the palette's own key.
+ * whole bar, and at the end the notifications bell, its badge counting notifications not seen yet, which opens the
+ * Pull requests drawer, then the palette, showing its own key, and settings.
  */
 @Composable
 fun ArcTopBar(workbench: Workbench) {
@@ -31,6 +36,7 @@ fun ArcTopBar(workbench: Workbench) {
                 onRedo = null,
                 onCommands = { workbench.paletteOpen = true },
                 onSettings = { workbench.settingsOpen = true },
+                leading = listOf(BarAction(ArcIcons.Bell, stringResource(Res.string.notifications), workbench::openPullRequests, badge = badgeCount(workbench.watch.unseen))),
                 settingsOpen = workbench.settingsOpen,
                 commandsKeys = paletteKeys,
                 settingsPopup = {

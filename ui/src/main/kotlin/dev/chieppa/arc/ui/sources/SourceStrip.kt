@@ -52,6 +52,7 @@ fun SourceStrip(workbench: Workbench, modifier: Modifier = Modifier) {
                         changedSince = state.states(source).values.count { it == FileReviewState.ChangedSinceReviewed },
                         active = source == state.active,
                         failed = load is SourceLoad.Failed,
+                        checks = state.pulls[source]?.checks?.state,
                         onClick = { workbench.activateSource(source) },
                         onRemove = { workbench.removeSource(source) },
                         menu = { close -> SourceMenu(workbench, source, close) },
