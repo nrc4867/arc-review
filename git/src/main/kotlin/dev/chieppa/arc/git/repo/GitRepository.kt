@@ -83,6 +83,22 @@ class GitRepository(val dir: Path, private val runner: GitRunner = GitRunner()) 
     /** The bytes of [path] at [rev], or null when there is no such file. */
     suspend fun readFile(rev: String, path: String): ByteArray? = objects.read("$rev:$path")?.takeIf { it.type == BLOB }?.bytes
 
+    /** The URL of the remote [name], or null when there is no such remote. */
+    suspend fun remoteUrl(name: String = REMOTE): String? {
+        val result = git(listOf("config", "--get", "remote.$name.url"), accept = setOf(0, GitSettings.EXIT_SOME))
+        return result.text.trim().takeIf { result.exitCode == 0 && it.isNotEmpty() }
+    }
+
+    /** Fetches [refspecs] from the remote [remote], without tags and without touching `FETCH_HEAD`. */
+    suspend fun fetch(refspecs: List<String>, remote: String = REMOTE) {
+        git(listOf("fetch", "--quiet", "--no-tags", "--no-write-fetch-head", "--recurse-submodules=no", remote) + refspecs)
+    }
+
+    /** Points [ref] at [commit], creating it if need be. */
+    suspend fun updateRef(ref: String, commit: ObjectId) {
+        git(listOf("update-ref", ref, commit.value))
+    }
+
     /** Whether the repo is a partial clone, whose blobs arrive from its remote when fetched. */
     suspend fun isPartial(): Boolean {
         val result = git(listOf("config", "--get", "remote.origin.promisor"), accept = setOf(0, GitSettings.EXIT_SOME))
@@ -96,6 +112,7 @@ class GitRepository(val dir: Path, private val runner: GitRunner = GitRunner()) 
     private companion object {
         const val FATAL = 128
         const val BLOB = "blob"
+        const val REMOTE = "origin"
         const val REMOTE_HEAD = "refs/remotes/origin/HEAD"
         val DEFAULT_BRANCHES = listOf("main", "master")
     }
