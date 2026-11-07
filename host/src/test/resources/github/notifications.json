@@ -1,0 +1,30 @@
+[
+  {
+    "id": "101",
+    "unread": true,
+    "reason": "author",
+    "updated_at": "2026-11-06T10:00:00Z",
+    "last_read_at": null,
+    "subject": {
+      "title": "Rotate refresh tokens on every use",
+      "url": "https://api.github.com/repos/lumen/api/pulls/412",
+      "latest_comment_url": "https://api.github.com/repos/lumen/api/issues/comments/1",
+      "type": "PullRequest"
+    },
+    "repository": { "full_name": "lumen/api" }
+  },
+  {
+    "id": "102",
+    "unread": true,
+    "reason": "mention",
+    "updated_at": "2026-11-06T11:00:00Z",
+    "last_read_at": null,
+    "subject": {
+      "title": "Token expiry banner",
+      "url": "https://api.github.com/repos/lumen/web/pulls/91",
+      "latest_comment_url": null,
+      "type": "PullRequest"
+    },
+    "repository": { "full_name": "lumen/web" }
+  }
+]

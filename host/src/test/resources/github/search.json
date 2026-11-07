@@ -1,0 +1,284 @@
+{
+ "data": {
+  "rateLimit": {
+   "limit": 5000,
+   "remaining": 4997,
+   "resetAt": "2026-11-07T05:57:17Z",
+   "cost": 2
+  },
+  "s0": {
+   "issueCount": 59,
+   "nodes": [
+    {
+     "number": 14964,
+     "title": "chore(deps): Bump the codeql-actions group with 3 updates",
+     "url": "https://github.com/cli/cli/pull/14964",
+     "isDraft": false,
+     "createdAt": "2026-11-06T14:03:12Z",
+     "updatedAt": "2026-11-07T04:48:09Z",
+     "baseRefName": "trunk",
+     "headRefOid": "dab49c4e4a2c5b75c27cd8bae26fbb0970316364",
+     "baseRefOid": "eeb44bc432c0107de002dadd34a61b4e2bd15882",
+     "repository": {
+      "nameWithOwner": "cli/cli"
+     },
+     "author": {
+      "login": "dependabot"
+     },
+     "labels": {
+      "nodes": [
+       {
+        "name": "dependencies",
+        "color": "0366d6"
+       },
+       {
+        "name": "github_actions",
+        "color": "000000"
+       }
+      ]
+     },
+     "totalCommentsCount": 31,
+     "reviewDecision": "REVIEW_REQUIRED",
+     "mergeable": "MERGEABLE",
+     "reviewRequests": {
+      "nodes": [
+       {
+        "requestedReviewer": null
+       },
+       {
+        "requestedReviewer": {
+         "__typename": "User",
+         "login": "babakks"
+        }
+       }
+      ]
+     },
+     "latestReviews": {
+      "nodes": [
+       {
+        "author": {
+         "login": "copilot-pull-request-reviewer"
+        },
+        "state": "COMMENTED",
+        "submittedAt": "2026-11-06T14:04:52Z"
+       }
+      ]
+     },
+     "reviewThreads": {
+      "nodes": []
+     },
+     "commits": {
+      "nodes": [
+       {
+        "commit": {
+         "committedDate": "2026-11-06T14:03:06Z",
+         "statusCheckRollup": {
+          "state": "SUCCESS",
+          "contexts": {
+           "nodes": [
+            {
+             "__typename": "CheckRun",
+             "name": "label-external",
+             "conclusion": "SKIPPED",
+             "status": "COMPLETED"
+            },
+            {
+             "__typename": "CheckRun",
+             "name": "label-external",
+             "conclusion": "SKIPPED",
+             "status": "COMPLETED"
+            }
+           ]
+          }
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "number": 14963,
+     "title": "chore(deps): Bump github.com/spf13/pflag from 1.0.10 to 1.1.0",
+     "url": "https://github.com/cli/cli/pull/14963",
+     "isDraft": false,
+     "createdAt": "2026-11-06T14:03:11Z",
+     "updatedAt": "2026-11-07T04:53:50Z",
+     "baseRefName": "trunk",
+     "headRefOid": "af2d65ef9846c62d16f0d7b41d11abc45104ee68",
+     "baseRefOid": "eeb44bc432c0107de002dadd34a61b4e2bd15882",
+     "repository": {
+      "nameWithOwner": "cli/cli"
+     },
+     "author": {
+      "login": "dependabot"
+     },
+     "labels": {
+      "nodes": [
+       {
+        "name": "dependencies",
+        "color": "0366d6"
+       },
+       {
+        "name": "go",
+        "color": "16e2e2"
+       }
+      ]
+     },
+     "totalCommentsCount": 32,
+     "reviewDecision": "REVIEW_REQUIRED",
+     "mergeable": "MERGEABLE",
+     "reviewRequests": {
+      "nodes": [
+       {
+        "requestedReviewer": null
+       },
+       {
+        "requestedReviewer": {
+         "__typename": "User",
+         "login": "babakks"
+        }
+       }
+      ]
+     },
+     "latestReviews": {
+      "nodes": [
+       {
+        "author": {
+         "login": "copilot-pull-request-reviewer"
+        },
+        "state": "COMMENTED",
+        "submittedAt": "2026-11-06T14:06:45Z"
+       }
+      ]
+     },
+     "reviewThreads": {
+      "nodes": [
+       {
+        "isResolved": false
+       }
+      ]
+     },
+     "commits": {
+      "nodes": [
+       {
+        "commit": {
+         "committedDate": "2026-11-06T14:03:06Z",
+         "statusCheckRollup": {
+          "state": "SUCCESS",
+          "contexts": {
+           "nodes": [
+            {
+             "__typename": "CheckRun",
+             "name": "label-external",
+             "conclusion": "SKIPPED",
+             "status": "COMPLETED"
+            },
+            {
+             "__typename": "CheckRun",
+             "name": "label-external",
+             "conclusion": "SKIPPED",
+             "status": "COMPLETED"
+            }
+           ]
+          }
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "number": 14927,
+     "title": "Add guided multi-account setup and evaluation",
+     "url": "https://github.com/cli/cli/pull/14927",
+     "isDraft": true,
+     "createdAt": "2026-11-03T21:20:00Z",
+     "updatedAt": "2026-11-03T21:29:03Z",
+     "baseRefName": "williammartin-multiaccount-draft-07-explain",
+     "headRefOid": "d43c4e3ad3c34332c803a568f85f116e3ee58f19",
+     "baseRefOid": "c70a8cddf12c7352e64e4a93e8155c96bee7e38e",
+     "repository": {
+      "nameWithOwner": "cli/cli"
+     },
+     "author": {
+      "login": "williammartin"
+     },
+     "labels": {
+      "nodes": []
+     },
+     "totalCommentsCount": 5,
+     "reviewDecision": "REVIEW_REQUIRED",
+     "mergeable": "MERGEABLE",
+     "reviewRequests": {
+      "nodes": []
+     },
+     "latestReviews": {
+      "nodes": [
+       {
+        "author": {
+         "login": "copilot-pull-request-reviewer"
+        },
+        "state": "COMMENTED",
+        "submittedAt": "2026-11-03T21:27:59Z"
+       }
+      ]
+     },
+     "reviewThreads": {
+      "nodes": [
+       {
+        "isResolved": false
+       },
+       {
+        "isResolved": false
+       },
+       {
+        "isResolved": false
+       },
+       {
+        "isResolved": false
+       }
+      ]
+     },
+     "commits": {
+      "nodes": [
+       {
+        "commit": {
+         "committedDate": "2026-11-03T21:19:35Z",
+         "statusCheckRollup": {
+          "state": "FAILURE",
+          "contexts": {
+           "nodes": [
+            {
+             "__typename": "CheckRun",
+             "name": "build (windows-latest)",
+             "conclusion": "FAILURE",
+             "status": "COMPLETED"
+            },
+            {
+             "__typename": "CheckRun",
+             "name": "label-external",
+             "conclusion": "SKIPPED",
+             "status": "COMPLETED"
+            },
+            {
+             "__typename": "CheckRun",
+             "name": "CodeQL-Build (go, manual, ./.github/codeql/codeql-config.yml)",
+             "conclusion": "SUCCESS",
+             "status": "COMPLETED"
+            }
+           ]
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "s1": {
+   "issueCount": 0,
+   "nodes": []
+  }
+ }
+}
