@@ -5,15 +5,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.design.generated.Res
+import dev.chieppa.arc.design.generated.revisions_tab
 import dev.chieppa.arc.ui.menus.TabMenu
 import dev.chieppa.arc.ui.panes.PageContent
 import dev.chieppa.arc.ui.panes.PaneContent
+import dev.chieppa.arc.ui.util.SourceLabels
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.arc.ui.workbench.pageTab
 import dev.chieppa.arc.ui.workbench.paneTab
 import dev.chieppa.stretch.frame.LocalPaneWindows
 import dev.chieppa.stretch.frame.PaneGrid
 import dev.chieppa.stretch.frame.WindowBounds
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * The viewport: the active source's panes, and every pinned pane and page, such as a saved filter's, in a grid of tabs. Empty while there are none.
@@ -23,10 +28,12 @@ import dev.chieppa.stretch.frame.WindowBounds
 @Composable
 fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
     val host = LocalPaneWindows.current
+    val revisionsTitle = stringResource(Res.string.revisions_tab)
+    val titleOf = { source: Source -> revisionsTitle.replace(TITLE_ARG, SourceLabels.of(source)) }
     PaneGrid(
         layout = workbench.paneLayout,
         onChange = { workbench.paneLayout = it },
-        item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist) } ?: paneTab(id, workbench.state.pane(id)) },
+        item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf) } ?: paneTab(id, workbench.state.pane(id)) },
         modifier = modifier.onGloballyPositioned { coordinates ->
             val topLeft = coordinates.positionInWindow()
             val size = Offset(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
@@ -46,6 +53,9 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
         workbench.state.pane(id)?.let { PaneContent(it, workbench) } ?: workbench.state.page(id)?.let { PageContent(it, workbench) }
     }
 }
+
+/** Where a revision matrix's tab title takes its source. */
+private const val TITLE_ARG = "%1${'$'}s"
 
 /** How far in from the viewport's corner a pane opened in a window of its own goes, in dp. */
 private const val WINDOW_INSET = 32f

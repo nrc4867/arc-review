@@ -38,6 +38,7 @@ object ArcActionIds {
     val EXPAND_ALL = ActionId("expand-all")
     val COLLAPSE_ALL = ActionId("collapse-all")
     val TOGGLE_WRAP = ActionId("toggle-wrap")
+    val OPEN_REVISIONS = ActionId("open-revisions")
 
     private const val DRAWER_PREFIX = "drawer-"
 

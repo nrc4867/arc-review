@@ -73,6 +73,36 @@ class PaneController(private val state: ReviewState) {
         return id
     }
 
+    /**
+     * Opens [path] in [repo]'s change from [base] to [revision] in a new tab, or returns the pane already showing that
+     * change in the layout. [source] is the source it belongs to.
+     */
+    fun openDiff(repo: RepoName, path: String, base: Revision, revision: Revision, source: Source?): PaneId {
+        val existing = state.review.panes.firstOrNull { it.repo == repo && it.path == path && it.base == base && it.revision == revision }
+        if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) return existing.id
+        val id = PaneFactory.nextId(state.review)
+        state.review = state.review.withPane(Pane(id, repo, path, revision, PaneView.Diff, base = base, source = source))
+        state.paneLayout = state.paneLayout.open(id.value)
+        return id
+    }
+
+    /** Shows the tab [id] in its part of the grid. */
+    fun show(id: String) {
+        if (state.paneLayout.leafOf(id) != null) state.paneLayout = state.paneLayout.activate(id)
+    }
+
+    /** Opens the revision matrix of [source], or shows its tab when one is open already. */
+    fun openRevisions(source: Source) {
+        val existing = state.review.pages.firstOrNull { it is Page.RevisionMatrix && it.source == source }
+        if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) {
+            state.paneLayout = state.paneLayout.activate(existing.id.value)
+            return
+        }
+        val page = existing ?: Page.RevisionMatrix(PaneFactory.nextId(state.review), source)
+        state.review = state.review.withPage(page)
+        state.paneLayout = state.paneLayout.open(page.id.value)
+    }
+
     /** Opens the page for saved filter [filter], or shows its tab when one is open already. */
     fun openFilter(filter: String) {
         val existing = state.review.pages.firstOrNull { it is Page.Filter && it.filter == filter }

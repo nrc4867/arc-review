@@ -2,6 +2,8 @@ package dev.chieppa.arc.ui.review
 
 import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.mark.ReplayOutcome
+import dev.chieppa.arc.core.pane.Page
+import dev.chieppa.arc.core.revision.RecordedHead
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.source.SourceRefs
@@ -17,7 +19,12 @@ import java.nio.file.Path
  * each from its repo in the background. A new read of a source cancels the one before it; the old view stays until
  * the new one is ready.
  */
-class SourceController(private val state: ReviewState, private val data: ReviewData, private val scope: CoroutineScope) {
+class SourceController(
+    private val state: ReviewState,
+    private val data: ReviewData,
+    private val scope: CoroutineScope,
+    private val now: () -> Long = { System.currentTimeMillis() / MILLIS_PER_SECOND },
+) {
     private val jobs = mutableMapOf<Pair<Source, Boolean>, Job>()
 
     /** Adds the repo in [dir] under its folder's name, made unique; null when [dir] holds no repo. */
@@ -50,7 +57,10 @@ class SourceController(private val state: ReviewState, private val data: ReviewD
         jobs.keys.filter { it.first == source }.forEach { jobs.remove(it)?.cancel() }
         val shown = state.viewOf(source).layout.tabs.toSet()
         val closing = state.review.panes.filter { !it.pinned && (it.source == source || it.id.value in shown) }.map { it.id }
-        state.review = closing.fold(state.review.remove(source)) { review, id -> review.withoutPane(id) }
+        val pages = state.review.pages.filter { it is Page.RevisionMatrix && it.source == source && !it.pinned }.map { it.id }
+        state.review = (closing.fold(state.review.remove(source)) { review, id -> review.withoutPane(id) }).let { review ->
+            pages.fold(review) { r, id -> r.withoutPage(id) }
+        }
         val ids = closing.map { it.value }.toSet()
         state.paneStates = state.paneStates - ids
         ids.forEach(state.paneLines::remove)
@@ -58,6 +68,7 @@ class SourceController(private val state: ReviewState, private val data: ReviewD
         state.loads = state.loads - source
         state.scoped = state.scoped - source
         state.pulls = state.pulls - source
+        state.revisions = state.revisions - source
         val next = state.review.active
         if (next != null) {
             activate(next)
@@ -87,9 +98,10 @@ class SourceController(private val state: ReviewState, private val data: ReviewD
         }
     }
 
-    /** Reads [source]'s whole change again, with the replays its marks need. */
+    /** Reads [source]'s whole change again, with the replays its marks need, and records the head it was read at. */
     fun load(source: Source) = launch(source, scoped = false) {
         val snapshot = data.read(source)
+        state.review = state.review.record(source, RecordedHead(snapshot.revisions.head, snapshot.revisions.base, now()))
         (source as? Source.PullRequest)?.let(data::pullRequest)?.let { state.pulls = state.pulls + (source to it) }
         SourceLoad.Ready(snapshot, replays(source, snapshot))
     }
@@ -124,3 +136,5 @@ class SourceController(private val state: ReviewState, private val data: ReviewD
         }
     }
 }
+
+private const val MILLIS_PER_SECOND = 1000L

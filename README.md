@@ -33,7 +33,12 @@ pull request (`#412`) is added as a source whose head is fetched from the clone'
 polled every five minutes in the Pull requests drawer, open as tabs listing each pull request's labels, who it waits on,
 checks and comments, with an Add button that puts it in the open review. Rules raise desktop notifications for
 comments on the person's pull requests, mentions, and new pull requests in a filter or with a label; the bell counts
-them. Threads and staged comments are drawn only from the dev-only sample (`-Pdemo`).
+them. Every head a source is read at is recorded and kept under a private ref, and a pull request also takes the heads
+GitHub knows of (force pushes and reviewed commits); the revision matrix sets the source's files against those
+revisions, showing which file changed in which, compared through rebases, where each was reviewed and where it changed
+after, with arrow keys to move and Enter to open a file at a revision, and the Commits drawer picks any two commits to
+open the files whose change differs between them. Threads and staged comments are drawn only from the dev-only sample
+(`-Pdemo`).
 
 ## Build and run
 

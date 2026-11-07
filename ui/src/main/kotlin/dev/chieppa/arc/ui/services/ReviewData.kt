@@ -6,8 +6,11 @@ import dev.chieppa.arc.core.change.SourceSnapshot
 import dev.chieppa.arc.core.mark.ReplayOutcome
 import dev.chieppa.arc.core.mark.ReviewedRevisions
 import dev.chieppa.arc.core.pane.Revision
+import dev.chieppa.arc.core.revision.RecordedHead
+import dev.chieppa.arc.core.revision.RevisionHistory
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.host.github.pulls.CheckState
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.repo.GitHubRepo
 import java.nio.file.Path
@@ -37,4 +40,16 @@ interface ReviewData {
 
     /** The GitHub repo [repo]'s clone comes from, or null when it comes from elsewhere. */
     suspend fun gitHubRepo(repo: RepoName): GitHubRepo? = null
+
+    /**
+     * The revisions [source] has had: the heads Arc [recorded] reading it, and those its host knows, each pinned in
+     * the clone. Heads that cannot be read are left out.
+     */
+    suspend fun revisions(source: Source, recorded: List<RecordedHead>): RevisionHistory = RevisionHistory(source, emptyList())
+
+    /** The overall checks on each of [heads] in [repo] that the host has checks for. */
+    suspend fun checks(repo: RepoName, heads: List<ObjectId>): Map<ObjectId, CheckState> = emptyMap()
+
+    /** The paths in [repo] whose change differs between [a] and [b], each taken from its own base. */
+    suspend fun differingFiles(repo: RepoName, a: SourceRevisions, b: SourceRevisions): Set<String> = emptySet()
 }

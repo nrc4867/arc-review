@@ -35,6 +35,7 @@ import dev.chieppa.arc.design.generated.action_copy_file_ref
 import dev.chieppa.arc.design.generated.action_expand_all
 import dev.chieppa.arc.design.generated.action_collapse_all
 import dev.chieppa.arc.design.generated.action_toggle_wrap
+import dev.chieppa.arc.design.generated.action_open_revisions
 import dev.chieppa.arc.ui.drawers.ArcDrawerSlots
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -73,6 +74,7 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.EXPAND_ALL.value to Res.string.action_expand_all,
     ArcActionIds.COLLAPSE_ALL.value to Res.string.action_collapse_all,
     ArcActionIds.TOGGLE_WRAP.value to Res.string.action_toggle_wrap,
+    ArcActionIds.OPEN_REVISIONS.value to Res.string.action_open_revisions,
 ) + ArcDrawerSlots.all.associate { ArcActionIds.toggleDrawer(it.id).value to it.title }
 
 /** Turns an action's text key into its label, for Stretch's `LocalActionText`. */

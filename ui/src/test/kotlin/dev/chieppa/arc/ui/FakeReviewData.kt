@@ -11,6 +11,9 @@ import dev.chieppa.arc.core.mark.PatchHash
 import dev.chieppa.arc.core.mark.ReplayOutcome
 import dev.chieppa.arc.core.mark.ReviewedRevisions
 import dev.chieppa.arc.core.pane.Revision
+import dev.chieppa.arc.core.revision.RecordedHead
+import dev.chieppa.arc.core.revision.RevisionHistory
+import dev.chieppa.arc.core.revision.SourceRevision
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.source.SourceRefs
@@ -87,6 +90,30 @@ class FakeReviewData(more: Boolean = false, pictures: Boolean = false) : ReviewD
     override suspend fun listFiles(repo: RepoName, revision: Revision): List<String> = newTexts.keys.sorted()
 
     override suspend fun isRepo(dir: Path): Boolean = true
+
+    /** The first head the source had, before [head]: it changed only `app/Main.kt`, as it does now. */
+    val firstHead = ObjectId("c".repeat(40))
+
+    /** The commits picked and compared, older first, by the last call to [differingFiles]. */
+    var compared: Pair<SourceRevisions, SourceRevisions>? = null
+
+    /** Two revisions: the first changes `app/Main.kt`; the second, the head, changes every file. */
+    override suspend fun revisions(source: Source, recorded: List<RecordedHead>): RevisionHistory {
+        val now = read(source)
+        val first = SourceRevision(
+            1, firstHead, base, 100,
+            commits = listOf(CommitInfo(firstHead, "Start rotating", "Test", 100)),
+            fingerprints = mapOf("app/Main.kt" to now.fingerprints.getValue("app/Main.kt")),
+            pinned = true,
+        )
+        val second = SourceRevision(2, head, base, 200, commits = now.commits, fingerprints = now.fingerprints, pinned = true)
+        return RevisionHistory(source, listOf(first, second))
+    }
+
+    override suspend fun differingFiles(repo: RepoName, a: SourceRevisions, b: SourceRevisions): Set<String> {
+        compared = a to b
+        return files.map { it.path }.filter { it != "app/Main.kt" }.toSet()
+    }
 
     private companion object {
         /** A PNG of one color, [width] by [height] pixels. */

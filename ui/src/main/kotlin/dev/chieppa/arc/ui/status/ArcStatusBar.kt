@@ -16,7 +16,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The status bar: the active source, its commits and head; at the end, the focused pane's find matches while it is
- * finding, and its file's language. A saved filter's tab shows the filter's own instead.
+ * finding, and its file's language. A saved filter's tab and a revision matrix's show their own instead.
  */
 @Composable
 fun ArcStatusBar(workbench: Workbench) {
@@ -27,6 +27,11 @@ fun ArcStatusBar(workbench: Workbench) {
     val filter = (state.paneLayout.activeTab?.let(state::page) as? Page.Filter)?.let { workbench.watch.watchlist.filter(it.filter) }
     if (filter != null) {
         StatusBar(start = { FilterStatusStart(filter, workbench.watch) }, end = { FilterStatusEnd(workbench.watch) })
+        return
+    }
+    val matrix = state.paneLayout.activeTab?.let(state::page) as? Page.RevisionMatrix
+    if (matrix != null) {
+        StatusBar(start = { RevisionStatusStart(matrix.source, workbench) }, end = { RevisionStatusEnd(matrix.source, workbench) })
         return
     }
     StatusBar(

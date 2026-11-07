@@ -58,6 +58,7 @@
     <string name="action_expand_all">Expand all</string>
     <string name="action_collapse_all">Collapse all</string>
     <string name="action_toggle_wrap">Wrap long lines</string>
+    <string name="action_open_revisions">Revision matrix</string>
     <string name="menu_mark_reviewed">Mark reviewed</string>
     <string name="menu_unmark_reviewed">Unmark reviewed</string>
     <string name="menu_mark_all_reviewed">Mark all reviewed</string>
@@ -270,4 +271,78 @@
     <string name="notify_comment">New comment on %1$s</string>
     <string name="notify_mention">Mentioned in %1$s</string>
     <string name="notify_pull">%1$s · %2$s</string>
+    <string name="drawer_commits">Commits</string>
+    <plurals name="revisions_commits">
+        <item quantity="one">%1$d commit</item>
+        <item quantity="other">%1$d commits</item>
+    </plurals>
+    <plurals name="revisions_pushes">
+        <item quantity="one">%1$d push</item>
+        <item quantity="other">%1$d pushes</item>
+    </plurals>
+    <plurals name="revisions_revisions">
+        <item quantity="one">%1$d revision</item>
+        <item quantity="other">%1$d revisions</item>
+    </plurals>
+    <plurals name="revisions_rebases">
+        <item quantity="one">%1$d rebase</item>
+        <item quantity="other">%1$d rebases</item>
+    </plurals>
+    <plurals name="revisions_force_pushes">
+        <item quantity="one">%1$d force push</item>
+        <item quantity="other">%1$d force pushes</item>
+    </plurals>
+    <string name="revisions_separator"> · </string>
+    <string name="revisions_pick">Pick for compare</string>
+    <string name="revisions_number">r%1$d</string>
+    <plurals name="revisions_files_differ">
+        <item quantity="one">%1$d file differs</item>
+        <item quantity="other">%1$d files differ</item>
+    </plurals>
+    <string name="revisions_through_rebase">patches compared through the rebase</string>
+    <string name="revisions_compare">Compare</string>
+    <string name="revisions_tab">Revisions · %1$s</string>
+    <plurals name="matrix_files">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    <plurals name="matrix_threads_open">
+        <item quantity="one">%1$d thread open</item>
+        <item quantity="other">%1$d threads open</item>
+    </plurals>
+    <string name="matrix_only_changed">Only files changed after my review</string>
+    <string name="matrix_with_threads">With threads</string>
+    <string name="matrix_file">File</string>
+    <string name="matrix_rebased">rebased</string>
+    <string name="matrix_rebased_onto">Force-pushed: rebased onto %1$s</string>
+    <string name="matrix_rebased_tip">Force-pushed: rebased</string>
+    <string name="matrix_force_pushed_tip">Force-pushed</string>
+    <string name="matrix_head">head</string>
+    <string name="matrix_today">today %1$s</string>
+    <string name="matrix_cell_reviewed">Changed, reviewed</string>
+    <string name="matrix_cell_changed">Changed, not reviewed</string>
+    <string name="matrix_cell_after_review">Changed after your review</string>
+    <string name="matrix_cell_unchanged">Unchanged</string>
+    <string name="matrix_count_open">%1$d open</string>
+    <string name="matrix_count_addressed">%1$d addressed</string>
+    <string name="matrix_count_resolved">%1$d resolved</string>
+    <string name="matrix_count_separator">, </string>
+    <string name="matrix_selected">Selected</string>
+    <string name="matrix_selected_cell">%1$s @ r%2$d</string>
+    <string name="matrix_changed_since">changed since r%1$d</string>
+    <string name="matrix_changed_in">changed in r%1$d</string>
+    <string name="matrix_unchanged_since">unchanged since r%1$d</string>
+    <string name="matrix_unchanged">unchanged</string>
+    <string name="matrix_open_diff">Open diff r%1$d → r%2$d</string>
+    <string name="matrix_open_diff_base">Open diff base → r%1$d</string>
+    <string name="matrix_open_at">Open at r%1$d</string>
+    <string name="key_enter">↵</string>
+    <string name="matrix_legend_changed">Changed</string>
+    <string name="matrix_legend_reviewed">Reviewed there</string>
+    <string name="matrix_legend_after_review">Changed after review</string>
+    <string name="status_pinned">pinned: %1$s</string>
+    <plurals name="status_commits_picked">
+        <item quantity="one">%1$d commit picked</item>
+        <item quantity="other">%1$d commits picked</item>
+    </plurals>
 </resources>

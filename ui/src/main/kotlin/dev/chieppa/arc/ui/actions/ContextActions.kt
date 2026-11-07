@@ -36,6 +36,9 @@ fun registerContextActions(registry: ActionRegistry, workbench: Workbench) {
     action(ArcActionIds.COPY_SOURCE_REF, { ActionTargets.source(workbench) != null }) {
         ActionTargets.source(workbench)?.let { workbench.clipboard.copy(it.ref) }
     }
+    action(ArcActionIds.OPEN_REVISIONS, { ActionTargets.source(workbench) != null }) {
+        ActionTargets.source(workbench)?.let(workbench::openRevisions)
+    }
 
     action(ArcActionIds.OPEN_CHANGE, hasFile, withFile { source, path -> workbench.panes.openChange(source, path) })
     action(ArcActionIds.OPEN_IN_NEW_TAB, hasFile, withFile { source, path -> workbench.panes.openChange(source, path, newTab = true) })

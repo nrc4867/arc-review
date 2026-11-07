@@ -74,4 +74,22 @@ object ArcSizes {
     val newFilterButton = 28.dp
     val notifyHeader = 28.dp
     val drawerFooter = 6.dp
+
+    /** The Commits drawer and the revision matrix: its tool row, columns, rows, cells and their marks. */
+    const val commitsDrawer = 280f
+    val commitRow = 44.dp
+    val matrixToolRow = 36.dp
+    val matrixToggle = 24.dp
+    val matrixFileColumn = 260.dp
+    val matrixColumn = 104.dp
+    val matrixRow = 34.dp
+    val matrixCell = 24.dp
+    val matrixCellIcon = 12.dp
+    val matrixRing = 2.dp
+    val threadDot = 7.dp
+    val threadDotEdge = 1.5.dp
+    val threadCountGap = 3.dp
+    val unchangedDot = 5.dp
+    val legendSwatchWidth = 22.dp
+    val legendSwatchHeight = 16.dp
 }

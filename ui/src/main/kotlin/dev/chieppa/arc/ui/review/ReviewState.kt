@@ -14,6 +14,7 @@ import dev.chieppa.arc.core.review.ReviewId
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
+import dev.chieppa.arc.ui.revisions.RevisionsRead
 import dev.chieppa.stretch.frame.PaneLayout
 import java.nio.file.Path
 
@@ -43,6 +44,9 @@ class ReviewState(
 
     /** Each source's change in the one commit its tree is scoped to, as read. */
     var scoped by mutableStateOf<Map<Source, SourceLoad>>(emptyMap())
+
+    /** Each source's revisions as last read, with the checks on their heads. */
+    var revisions by mutableStateOf<Map<Source, RevisionsRead>>(emptyMap())
 
     /** What the host said of each pull request source when it was last read. */
     var pulls by mutableStateOf<Map<Source, PullRequestSummary>>(emptyMap())

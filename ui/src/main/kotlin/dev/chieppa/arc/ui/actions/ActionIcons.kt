@@ -29,6 +29,7 @@ private val icons: Map<String, ImageVector> = mapOf(
     ArcActionIds.OPEN_PINNED.value to StretchIcons.Pin,
     ArcActionIds.OPEN_FULL_FILE.value to ArcIcons.FullFile,
     ArcActionIds.RESTORE.value to StretchIcons.Restore,
+    ArcActionIds.OPEN_REVISIONS.value to ArcIcons.Matrix,
 )
 
 /** The icon for an action's icon key: a drawer action shows its drawer's icon. */

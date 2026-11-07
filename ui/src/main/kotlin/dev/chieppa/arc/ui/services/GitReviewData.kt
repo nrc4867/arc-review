@@ -6,20 +6,29 @@ import dev.chieppa.arc.core.change.SourceSnapshot
 import dev.chieppa.arc.core.mark.ReplayOutcome
 import dev.chieppa.arc.core.mark.ReviewedRevisions
 import dev.chieppa.arc.core.pane.Revision
+import dev.chieppa.arc.core.revision.RecordedHead
+import dev.chieppa.arc.core.revision.RevisionHistory
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.git.marks.MarkReplayer
 import dev.chieppa.arc.git.repo.GitRepositories
 import dev.chieppa.arc.git.repo.GitRepository
 import dev.chieppa.arc.git.repo.UnknownRepoException
+import dev.chieppa.arc.git.revision.PushHistoryLookup
+import dev.chieppa.arc.git.revision.RevisionReader
 import dev.chieppa.arc.git.source.PullRequestLookup
 import dev.chieppa.arc.git.source.SourceReader
+import dev.chieppa.arc.git.source.SourceResolver
+import dev.chieppa.arc.host.github.pulls.CheckState
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.repo.GitHubRepo
 import java.nio.file.Files
 import java.nio.file.Path
 
-/** [ReviewData] from the repos [repos] knows, read through the git CLI, with pull requests asked of GitHub through [pulls]. */
+/**
+ * [ReviewData] from the repos [repos] knows, read through the git CLI, with pull requests, their pushes and the checks
+ * on commits asked of GitHub through [pulls].
+ */
 class GitReviewData(private val repos: GitRepositories, private val pulls: GitHubPulls? = null) : ReviewData {
     override suspend fun read(source: Source): SourceSnapshot = reader(source).read(source)
 
@@ -34,6 +43,23 @@ class GitReviewData(private val repos: GitRepositories, private val pulls: GitHu
     }
 
     private fun reader(source: Source) = SourceReader(repos.repository(source.repo), pulls ?: PullRequestLookup.NONE)
+
+    private fun revisionReader(repo: RepoName): RevisionReader {
+        val git = repos.repository(repo)
+        return RevisionReader(git, SourceResolver(git, pulls ?: PullRequestLookup.NONE), pulls ?: PushHistoryLookup.NONE)
+    }
+
+    override suspend fun revisions(source: Source, recorded: List<RecordedHead>): RevisionHistory =
+        revisionReader(source.repo).read(source, recorded)
+
+    override suspend fun checks(repo: RepoName, heads: List<ObjectId>): Map<ObjectId, CheckState> {
+        val github = pulls ?: return emptyMap()
+        val byOid = heads.associateBy { it.value }
+        return github.checks(repos.repository(repo), heads.map { it.value }).mapNotNull { (oid, state) -> byOid[oid]?.let { it to state } }.toMap()
+    }
+
+    override suspend fun differingFiles(repo: RepoName, a: SourceRevisions, b: SourceRevisions): Set<String> =
+        revisionReader(repo).differing(a, b)
 
     override suspend fun replay(repo: RepoName, reviewed: ReviewedRevisions, now: SourceRevisions): ReplayOutcome? =
         MarkReplayer(repos.repository(repo)).replay(reviewed, now)

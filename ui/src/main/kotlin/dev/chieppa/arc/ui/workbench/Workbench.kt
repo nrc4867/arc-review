@@ -24,6 +24,7 @@ import dev.chieppa.arc.ui.review.MarkController
 import dev.chieppa.arc.ui.review.PaneController
 import dev.chieppa.arc.ui.review.ReviewState
 import dev.chieppa.arc.ui.review.SourceController
+import dev.chieppa.arc.ui.revisions.RevisionController
 import dev.chieppa.arc.ui.services.NoRepos
 import dev.chieppa.arc.ui.services.ReviewData
 import dev.chieppa.arc.ui.services.SystemClipboard
@@ -106,6 +107,7 @@ class Workbench(
     val sources = SourceController(state, data, scope)
     val panes = PaneController(state)
     val marks = MarkController(state, panes)
+    val revisions = RevisionController(state, data, scope, panes)
 
     val texts = PaneTexts(data)
     val threadViews = ThreadViews()
@@ -146,6 +148,12 @@ class Workbench(
     fun reviewHolding(source: Source): String? {
         if (source in state.review.sources) return state.review.name
         return reviews.firstOrNull { it.id != state.review.id.value && source.ref in it.sources }?.name
+    }
+
+    /** Makes [source] active and shows its revision matrix, opening it when it is not open. */
+    fun openRevisions(source: Source) {
+        if (source != state.active) activateSource(source)
+        panes.openRevisions(source)
     }
 
     /** Removes saved filter [id], with its rules and its tab in this review. */

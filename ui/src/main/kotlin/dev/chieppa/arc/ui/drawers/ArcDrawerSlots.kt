@@ -24,7 +24,7 @@ object ArcDrawerSlots {
         DrawerSlot(DrawerIds.SEARCH, Res.string.drawer_search, StretchIcons.Search, Side.Left),
         DrawerSlot(DrawerIds.NOTES, Res.string.drawer_notes, ArcIcons.Note, Side.Left),
         DrawerSlot(DrawerIds.CONVERSATION, Res.string.drawer_conversation, ArcIcons.Comment, Side.Left),
-        DrawerSlot(DrawerIds.REVISIONS, Res.string.drawer_revisions, ArcIcons.Matrix, Side.Left),
+        DrawerSlot(DrawerIds.REVISIONS, Res.string.drawer_revisions, ArcIcons.Matrix, Side.Left, width = ArcSizes.commitsDrawer),
         DrawerSlot(DrawerIds.CONSOLE, Res.string.drawer_console, StretchIcons.Command, Side.Left, bottom = true),
         DrawerSlot(DrawerIds.PULL_REQUESTS, Res.string.drawer_pull_requests, ArcIcons.Filter, Side.Right, width = ArcSizes.pullRequestsDrawer),
         DrawerSlot(DrawerIds.CHECKS, Res.string.drawer_checks, ArcIcons.CheckRun, Side.Right),
