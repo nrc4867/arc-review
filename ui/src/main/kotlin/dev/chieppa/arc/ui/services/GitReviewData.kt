@@ -11,16 +11,29 @@ import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.git.marks.MarkReplayer
 import dev.chieppa.arc.git.repo.GitRepositories
 import dev.chieppa.arc.git.repo.GitRepository
+import dev.chieppa.arc.git.repo.UnknownRepoException
+import dev.chieppa.arc.git.source.PullRequestLookup
 import dev.chieppa.arc.git.source.SourceReader
+import dev.chieppa.arc.host.github.pulls.PullRequestSummary
+import dev.chieppa.arc.host.github.repo.GitHubRepo
 import java.nio.file.Files
 import java.nio.file.Path
 
-/** [ReviewData] from the repos [repos] knows, read through the git CLI. */
-class GitReviewData(private val repos: GitRepositories) : ReviewData {
-    override suspend fun read(source: Source): SourceSnapshot = SourceReader(repos.repository(source.repo)).read(source)
+/** [ReviewData] from the repos [repos] knows, read through the git CLI, with pull requests asked of GitHub through [pulls]. */
+class GitReviewData(private val repos: GitRepositories, private val pulls: GitHubPulls? = null) : ReviewData {
+    override suspend fun read(source: Source): SourceSnapshot = reader(source).read(source)
 
-    override suspend fun readCommit(source: Source, commit: ObjectId): SourceSnapshot =
-        SourceReader(repos.repository(source.repo)).readCommit(source, commit)
+    override suspend fun readCommit(source: Source, commit: ObjectId): SourceSnapshot = reader(source).readCommit(source, commit)
+
+    override fun pullRequest(source: Source.PullRequest): PullRequestSummary? = pulls?.known(source)
+
+    override suspend fun gitHubRepo(repo: RepoName): GitHubRepo? = try {
+        pulls?.gitHubRepo(repos.repository(repo))
+    } catch (_: UnknownRepoException) {
+        null
+    }
+
+    private fun reader(source: Source) = SourceReader(repos.repository(source.repo), pulls ?: PullRequestLookup.NONE)
 
     override suspend fun replay(repo: RepoName, reviewed: ReviewedRevisions, now: SourceRevisions): ReplayOutcome? =
         MarkReplayer(repos.repository(repo)).replay(reviewed, now)

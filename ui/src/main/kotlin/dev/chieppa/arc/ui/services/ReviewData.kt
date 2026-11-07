@@ -8,6 +8,8 @@ import dev.chieppa.arc.core.mark.ReviewedRevisions
 import dev.chieppa.arc.core.pane.Revision
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.host.github.pulls.PullRequestSummary
+import dev.chieppa.arc.host.github.repo.GitHubRepo
 import java.nio.file.Path
 
 /** Everything the window reads from repos. Every call runs off the UI thread and stops when its caller is cancelled. */
@@ -29,4 +31,10 @@ interface ReviewData {
 
     /** Whether [dir] holds a git repo with at least one commit. */
     suspend fun isRepo(dir: Path): Boolean
+
+    /** What the host said of pull request [source] when it was last read; null before that or with no host. */
+    fun pullRequest(source: Source.PullRequest): PullRequestSummary? = null
+
+    /** The GitHub repo [repo]'s clone comes from, or null when it comes from elsewhere. */
+    suspend fun gitHubRepo(repo: RepoName): GitHubRepo? = null
 }

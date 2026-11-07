@@ -2,7 +2,7 @@ package dev.chieppa.arc.host.github.pulls
 
 /**
  * One GraphQL document holding every search to poll, each as an aliased `search` field, with the rate budget: GitHub
- * charges the whole document about one point. Searches are by key, in order; [aliases] maps each alias back to its
+ * charges the whole document as one request, a few points for five searches. Searches are by key, in order; [aliases] maps each alias back to its
  * key. A query that names no type gets `is:pr`, so it finds pull requests only.
  */
 class SearchDocument(searches: Map<String, String>, first: Int = FIRST) {
