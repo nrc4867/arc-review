@@ -2,6 +2,7 @@ package dev.chieppa.arc.ui.actions
 
 import dev.chieppa.arc.core.pane.PaneView
 import dev.chieppa.arc.core.mark.FileReviewState
+import dev.chieppa.arc.ui.switcher.SwitcherScope
 import dev.chieppa.arc.ui.workbench.ActionTargets
 import dev.chieppa.arc.ui.workbench.ReviewTargets
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -20,7 +21,7 @@ fun registerReviewActions(registry: ActionRegistry, workbench: Workbench) {
     val hasPane = { workbench.panes.focused != null }
 
     action(ArcActionIds.ADD_SOURCE) { workbench.addSourceOpen = true }
-    action(ArcActionIds.OPEN_FILE, ArcKeys.OPEN_FILE, hasSource) { workbench.finderOpen = true }
+    action(ArcActionIds.OPEN_FILE, ArcKeys.OPEN_FILE, hasSource) { workbench.switcher.show(SwitcherScope.Files) }
     action(ArcActionIds.NEXT_FILE, ArcKeys.NEXT_FILE, hasSource) { workbench.marks.step(1) }
     action(ArcActionIds.PREVIOUS_FILE, ArcKeys.PREVIOUS_FILE, hasSource) { workbench.marks.step(-1) }
     action(ArcActionIds.NEXT_CHANGE, ArcKeys.NEXT_CHANGE, hasPane) { workbench.onFocusedPane { nextChange() } }

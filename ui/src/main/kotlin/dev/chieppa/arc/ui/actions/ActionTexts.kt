@@ -6,6 +6,7 @@ import dev.chieppa.arc.design.generated.action_add_source
 import dev.chieppa.arc.design.generated.action_close_pane
 import dev.chieppa.arc.design.generated.action_find_in_file
 import dev.chieppa.arc.design.generated.action_go_to_anything
+import dev.chieppa.arc.design.generated.action_commands
 import dev.chieppa.arc.design.generated.action_mark_and_advance
 import dev.chieppa.arc.design.generated.action_next_change
 import dev.chieppa.arc.design.generated.action_next_file
@@ -42,6 +43,7 @@ import org.jetbrains.compose.resources.stringResource
 
 private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.GO_TO_ANYTHING.value to Res.string.action_go_to_anything,
+    ArcActionIds.COMMANDS.value to Res.string.action_commands,
     ArcActionIds.SETTINGS.value to Res.string.action_settings,
     ArcActionIds.RESET_LAYOUT.value to Res.string.action_reset_layout,
     ArcActionIds.QUIT.value to Res.string.action_quit,

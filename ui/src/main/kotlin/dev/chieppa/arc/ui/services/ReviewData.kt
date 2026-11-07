@@ -10,6 +10,7 @@ import dev.chieppa.arc.core.revision.RecordedHead
 import dev.chieppa.arc.core.revision.RevisionHistory
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.git.repo.LocalBranch
 import dev.chieppa.arc.host.github.pulls.CheckState
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.repo.GitHubRepo
@@ -37,6 +38,12 @@ interface ReviewData {
 
     /** What the host said of pull request [source] when it was last read; null before that or with no host. */
     fun pullRequest(source: Source.PullRequest): PullRequestSummary? = null
+
+    /** The branches of [repo]'s clone, newest commit first; none for a repo not known. */
+    suspend fun branches(repo: RepoName): List<LocalBranch> = emptyList()
+
+    /** The open pull requests in [repos] whose titles hold [text]; null when the host cannot be asked, as without a token. */
+    suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? = null
 
     /** The GitHub repo [repo]'s clone comes from, or null when it comes from elsewhere. */
     suspend fun gitHubRepo(repo: RepoName): GitHubRepo? = null

@@ -39,9 +39,13 @@ object ArcSizes {
     val stagedChip = 92.dp
     val stagedSource = 150.dp
     val stagedLocation = 300.dp
-    val finderWidth = 560.dp
-    val finderTop = 96
-    val finderRows = 14
+
+    /** The switcher: how wide it is, how far down the window, the widest a row's ref grows, its rows' progress ring. */
+    val switcherWidth = 640.dp
+    val switcherTop = 52.dp
+    val switcherRef = 220.dp
+    val switcherRing = 14.dp
+    val linkCardIndent = 24.dp
     val popoverWidth = 380.dp
     val reviewSelector = 200.dp
     val goToAnything = 260.dp

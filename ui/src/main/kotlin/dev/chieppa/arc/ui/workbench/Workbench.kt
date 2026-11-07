@@ -4,6 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
@@ -24,6 +25,9 @@ import dev.chieppa.arc.ui.review.MarkController
 import dev.chieppa.arc.ui.review.PaneController
 import dev.chieppa.arc.ui.review.ReviewState
 import dev.chieppa.arc.ui.review.SourceController
+import dev.chieppa.arc.ui.review.SourceLoad
+import dev.chieppa.arc.ui.switcher.FollowedLookup
+import dev.chieppa.arc.ui.switcher.SwitcherState
 import dev.chieppa.arc.ui.revisions.RevisionController
 import dev.chieppa.arc.ui.services.NoRepos
 import dev.chieppa.arc.ui.services.ReviewData
@@ -42,14 +46,16 @@ import dev.chieppa.stretch.ui.TreeState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
  * The main window's state: the look the person chose, where the drawers are, the open review and its panes, which
  * overlays are open, and the actions that change them. Views read it and recompose when it changes. Sources are read
  * through [data] on [scope]; threads and staged comments come from [conversation]. [reviews] are the saved reviews the
- * top bar offers, and [onOpenReview] opens one by id, or a new one for null. [onQuit] closes the app. Copied paths and
- * refs go to [clipboard]. [watch] holds the saved filters and notification rules, which every review shares.
+ * top bar offers, and [onOpenReview] opens one by id, or a new one for null; [onNewReviewWith] opens a new one holding
+ * the source a ref names. [onQuit] closes the app. Copied paths and refs go to [clipboard]. [watch] holds the saved
+ * filters and notification rules, which every review shares.
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -62,12 +68,12 @@ class Workbench(
     val onOpenReview: (String?) -> Unit = {},
     val clipboard: TextClipboard = SystemClipboard,
     val watch: PullWatch = PullWatch(),
+    val onNewReviewWith: (String) -> Unit = {},
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
     var paletteOpen by mutableStateOf(false)
     var settingsOpen by mutableStateOf(false)
-    var finderOpen by mutableStateOf(false)
     var addSourceOpen by mutableStateOf(false)
 
     /** What the tree's files drag into the pane grid through. */
@@ -108,6 +114,10 @@ class Workbench(
     val panes = PaneController(state)
     val marks = MarkController(state, panes)
     val revisions = RevisionController(state, data, scope, panes)
+
+    /** The switcher over the window, and what followed repos hold, asked as it searches. */
+    val switcher = SwitcherState()
+    val followed = FollowedLookup(data)
 
     val texts = PaneTexts(data)
     val threadViews = ThreadViews()
@@ -182,6 +192,22 @@ class Workbench(
         if (!sources.addSource(ref)) return false
         state.active?.let(::activateSource)
         return true
+    }
+
+    /** Adds the source [ref] names without leaving the active one; false when it names none or its repo is unknown. */
+    fun addSourceBeside(ref: String): Boolean {
+        val before = state.active
+        if (!sources.addSource(ref)) return false
+        (before ?: state.active)?.let(::activateSource)
+        return true
+    }
+
+    /** Opens [source]'s first changed file in a new pane once the source is read; nothing when it cannot be read. */
+    fun openFirstChange(source: Source) {
+        scope.launch {
+            val load = snapshotFlow { state.loads[source] }.first { it is SourceLoad.Ready || it is SourceLoad.Failed }
+            load?.ready?.files?.firstOrNull()?.let { panes.openChange(source, it.path, newTab = true) }
+        }
     }
 
     /**

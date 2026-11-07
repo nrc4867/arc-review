@@ -5,6 +5,7 @@ import dev.chieppa.stretch.core.KeyChord
 /** Arc's default shortcuts. Ctrl is Cmd on macOS. */
 object ArcKeys {
     val GO_TO_ANYTHING: KeyChord = KeyChord.parse("Ctrl K")
+    val COMMANDS: KeyChord = KeyChord.parse("Ctrl Shift P")
     val NEXT_FILE: KeyChord = KeyChord.parse("Alt Down")
     val PREVIOUS_FILE: KeyChord = KeyChord.parse("Alt Up")
     val NEXT_CHANGE: KeyChord = KeyChord.parse("F7")

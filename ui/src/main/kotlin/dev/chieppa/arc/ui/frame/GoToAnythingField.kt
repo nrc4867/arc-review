@@ -14,9 +14,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.action_go_to_anything
+import dev.chieppa.arc.design.generated.switcher_open
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.stretch.theme.Icon
 import dev.chieppa.stretch.theme.Stretch
@@ -26,11 +29,12 @@ import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Kbd
 import org.jetbrains.compose.resources.stringResource
 
-/** The top bar's "Go to anything" field: a search field look with the palette's [keys], which opens the palette. */
+/** The top bar's "Go to anything" field: a search field look with the switcher's [keys], which opens the switcher. */
 @Composable
 fun GoToAnythingField(keys: List<String>?, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = Stretch.colors
     val shape = Stretch.shapes.ctlShape
+    val description = stringResource(Res.string.switcher_open)
     Row(
         modifier
             .width(ArcSizes.goToAnything)
@@ -39,6 +43,7 @@ fun GoToAnythingField(keys: List<String>?, onClick: () -> Unit, modifier: Modifi
             .background(c.surfaceWell)
             .border(Stretch.stroke, c.lineControl, shape)
             .clickable(role = Role.Button, onClick = onClick)
+            .semantics { contentDescription = description }
             .padding(horizontal = StretchSpacing.space8),
         horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space6),
         verticalAlignment = Alignment.CenterVertically,

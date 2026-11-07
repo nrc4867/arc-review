@@ -27,7 +27,8 @@ import kotlinx.coroutines.cancel
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Arc's main window on [session]'s saved state, opening with the [initial] look and the last review. Each change to
+ * Arc's main window on [session]'s saved state, opening with the [initial] look and the last review. A new review
+ * opened with a source starts holding it. Each change to
  * the look goes to [onPreferencesChange], and the review is saved as it changes and when it is left. The saved
  * filters and rules in [watch] outlive any one review: they are polled while the window is open, with notifications
  * through [notifier], and saved as they change. [onExit] ends the app.
@@ -46,6 +47,7 @@ fun ArcWindow(
     var reviewId by remember { mutableStateOf<String?>(null) }
     var preferences by remember { mutableStateOf(initial) }
     var current by remember { mutableStateOf<Workbench?>(null) }
+    val seeds = remember { mutableListOf<String>() }
     fun save(workbench: Workbench) = session.save(workbench.state, workbench.treeState.expanded)
     val workbench = remember(reviewId) {
         val state = session.open(reviewId, defaultName)
@@ -61,7 +63,16 @@ fun ArcWindow(
                 current?.let(::save)
                 reviewId = id ?: session.create(defaultName).review.id.value
             },
-        ).also { current = it }
+            onNewReviewWith = { ref ->
+                current?.let(::save)
+                seeds += ref
+                reviewId = session.create(defaultName).review.id.value
+            },
+        ).also { opened ->
+            current = opened
+            seeds.forEach(opened::addSource)
+            seeds.clear()
+        }
     }
     DisposableEffect(workbench) { onDispose { workbench.scope.cancel() } }
     StretchWindow(

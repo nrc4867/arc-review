@@ -7,6 +7,7 @@ import dev.chieppa.stretch.theme.StretchIcons
 
 private val icons: Map<String, ImageVector> = mapOf(
     ArcActionIds.GO_TO_ANYTHING.value to StretchIcons.Search,
+    ArcActionIds.COMMANDS.value to StretchIcons.Command,
     ArcActionIds.SETTINGS.value to StretchIcons.Settings,
     ArcActionIds.ADD_SOURCE.value to StretchIcons.Plus,
     ArcActionIds.NEXT_CHANGE.value to StretchIcons.ChevronRight,

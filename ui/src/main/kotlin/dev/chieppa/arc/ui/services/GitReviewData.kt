@@ -13,6 +13,7 @@ import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.git.marks.MarkReplayer
 import dev.chieppa.arc.git.repo.GitRepositories
 import dev.chieppa.arc.git.repo.GitRepository
+import dev.chieppa.arc.git.repo.LocalBranch
 import dev.chieppa.arc.git.repo.UnknownRepoException
 import dev.chieppa.arc.git.revision.PushHistoryLookup
 import dev.chieppa.arc.git.revision.RevisionReader
@@ -41,6 +42,14 @@ class GitReviewData(private val repos: GitRepositories, private val pulls: GitHu
     } catch (_: UnknownRepoException) {
         null
     }
+
+    override suspend fun branches(repo: RepoName): List<LocalBranch> = try {
+        repos.repository(repo).branches()
+    } catch (_: UnknownRepoException) {
+        emptyList()
+    }
+
+    override suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? = pulls?.openPulls(repos, text)
 
     private fun reader(source: Source) = SourceReader(repos.repository(source.repo), pulls ?: PullRequestLookup.NONE)
 

@@ -17,6 +17,9 @@ import dev.chieppa.arc.core.revision.SourceRevision
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.source.SourceRefs
+import dev.chieppa.arc.git.repo.LocalBranch
+import dev.chieppa.arc.host.github.pulls.PullRequestSummary
+import dev.chieppa.arc.host.github.repo.GitHubRepo
 import dev.chieppa.arc.ui.services.ReviewData
 import org.jetbrains.skia.Color
 import org.jetbrains.skia.EncodedImageFormat
@@ -90,6 +93,23 @@ class FakeReviewData(more: Boolean = false, pictures: Boolean = false) : ReviewD
     override suspend fun listFiles(repo: RepoName, revision: Revision): List<String> = newTexts.keys.sorted()
 
     override suspend fun isRepo(dir: Path): Boolean = true
+
+    /** The clone's branches, the open pull requests GitHub finds (null as without a token), and where the clone comes from. */
+    var branchList: List<LocalBranch> = emptyList()
+    var openPullList: List<PullRequestSummary>? = null
+    var origin: GitHubRepo? = null
+
+    /** How many times GitHub was asked for open pull requests. */
+    var openPullQueries = 0
+
+    override suspend fun branches(repo: RepoName): List<LocalBranch> = branchList
+
+    override suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? {
+        openPullQueries++
+        return openPullList
+    }
+
+    override suspend fun gitHubRepo(repo: RepoName): GitHubRepo? = origin
 
     /** The first head the source had, before [head]: it changed only `app/Main.kt`, as it does now. */
     val firstHead = ObjectId("c".repeat(40))

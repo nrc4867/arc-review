@@ -12,7 +12,8 @@ fun registerArcActions(registry: ActionRegistry, workbench: Workbench, onQuit: (
     fun action(id: ActionId, keys: List<KeyChord> = emptyList(), run: () -> Unit) =
         registry.register(Action(id, id.value, id.value, keys, run = run))
 
-    action(ArcActionIds.GO_TO_ANYTHING, listOf(ArcKeys.GO_TO_ANYTHING)) { workbench.paletteOpen = true }
+    action(ArcActionIds.GO_TO_ANYTHING, listOf(ArcKeys.GO_TO_ANYTHING)) { workbench.switcher.show() }
+    action(ArcActionIds.COMMANDS, listOf(ArcKeys.COMMANDS)) { workbench.paletteOpen = true }
     action(ArcActionIds.SETTINGS) { workbench.settingsOpen = true }
     action(ArcActionIds.RESET_LAYOUT) { workbench.resetLayout() }
     action(ArcActionIds.QUIT, run = onQuit)

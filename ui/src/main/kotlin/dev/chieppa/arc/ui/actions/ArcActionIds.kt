@@ -5,6 +5,7 @@ import dev.chieppa.stretch.core.ActionId
 /** The ids of Arc's actions. An action's text key and icon key are its id. */
 object ArcActionIds {
     val GO_TO_ANYTHING = ActionId("go-to-anything")
+    val COMMANDS = ActionId("commands")
     val SETTINGS = ActionId("settings")
     val RESET_LAYOUT = ActionId("reset-layout")
     val QUIT = ActionId("quit")

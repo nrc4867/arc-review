@@ -13,10 +13,20 @@ import kotlin.test.assertTrue
 
 class WorkbenchTest {
     @Test
-    fun ctrlKGoesToAnythingWhichOpensThePalette() {
+    fun ctrlKGoesToAnythingWhichOpensTheSwitcher() {
         val workbench = Workbench()
         val action = workbench.keymap.resolve(ArcKeys.GO_TO_ANYTHING, null)
         assertEquals(ArcActionIds.GO_TO_ANYTHING, action?.id)
+        action!!.run()
+        assertTrue(workbench.switcher.open)
+        assertFalse(workbench.paletteOpen)
+    }
+
+    @Test
+    fun commandsHaveTheirOwnKey() {
+        val workbench = Workbench()
+        val action = workbench.keymap.resolve(ArcKeys.COMMANDS, null)
+        assertEquals(ArcActionIds.COMMANDS, action?.id)
         action!!.run()
         assertTrue(workbench.paletteOpen)
     }

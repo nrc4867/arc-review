@@ -17,6 +17,8 @@ import dev.chieppa.stretch.theme.StretchThemes
 import kotlin.test.Test
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.runDesktopComposeUiTest
 import kotlin.math.abs
 import kotlin.test.assertTrue
@@ -42,22 +44,31 @@ class ArcFrameUiTest {
     }
 
     @Test
-    fun goingToAnythingOpensThePaletteOfCommands() = runComposeUiTest {
+    fun commandsOpenThePaletteOfCommands() = runComposeUiTest {
         val workbench = Workbench()
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
-        workbench.registry[ArcActionIds.GO_TO_ANYTHING]!!.run()
+        workbench.registry[ArcActionIds.COMMANDS]!!.run()
         waitForIdle()
         assertTrue(onAllNodesWithText("Reset layout").fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test
-    fun ctrlKOrCmdKFromTheKeyboardOpensThePalette() = runComposeUiTest {
+    fun ctrlKOrCmdKFromTheKeyboardOpensTheSwitcher() = runComposeUiTest {
         val workbench = Workbench()
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         waitForIdle()
         onRoot().performKeyInput { withKeyDown(shortcutKey) { pressKey(Key.K) } }
         waitForIdle()
-        assertTrue(workbench.paletteOpen)
+        assertTrue(workbench.switcher.open)
+    }
+
+    @Test
+    fun theTopBarFieldOpensTheSwitcher() = runComposeUiTest {
+        val workbench = Workbench()
+        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
+        onNodeWithContentDescription("Open switcher").performClick()
+        waitForIdle()
+        assertTrue(workbench.switcher.open)
     }
 
     @Test

@@ -27,7 +27,12 @@ of long lines; an added, deleted or unchanged file shows whole under a chip sayi
 BMP, ICO) show drawn, a changed one before and after side by side, and an SVG can show drawn or as its text. A setting
 highlights changed lines whole or in the gutter only, leaving the code plain. Any file at any revision of any
 repo can be opened and pinned beside the rest. Marks survive a rebase that keeps the change. The keyboard covers next
-and previous file and change, mark and advance, find, wrapping and the file finder, all in the palette (Ctrl K).
+and previous file and change, mark and advance, find and wrapping, all in the command palette (Ctrl Shift P). Go to
+anything (Ctrl K, or Ctrl P for files) searches the review's sources, the files they change and the active source's
+other files, and the open pull requests (by title, on GitHub) and local branches of every registered repo that the
+review does not hold: Enter switches, Ctrl Enter opens in a new pane, Alt Enter adds to the review. A pasted github.com
+link or a ref shows what it points at, with the pull request a commit sits in, and adds it, its whole pull request, or
+starts a new review with it.
 Reviews, repos and layouts are saved locally. Pull requests are read from GitHub with the `gh` login (read-only): a
 pull request (`#412`) is added as a source whose head is fetched from the clone's origin, and saved GitHub searches,
 polled every five minutes in the Pull requests drawer, open as tabs listing each pull request's labels, who it waits on,

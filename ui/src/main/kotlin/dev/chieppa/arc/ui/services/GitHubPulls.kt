@@ -12,6 +12,8 @@ import dev.chieppa.arc.host.github.pulls.CheckState
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.repo.GitHubRemotes
 import dev.chieppa.arc.host.github.repo.GitHubRepo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -59,6 +61,16 @@ class GitHubPulls(private val github: GitHub) : PullRequestLookup, PushHistoryLo
             github.commitChecks(remote, oids)
         } catch (_: GitHubException) {
             emptyMap()
+        }
+    }
+
+    /** The open pull requests in [repos] whose titles hold [text]; null without a token or when GitHub gives no answer. */
+    suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? {
+        if (!withContext(Dispatchers.IO) { github.hasToken() }) return null
+        return try {
+            github.openPulls(repos, text)
+        } catch (_: GitHubException) {
+            null
         }
     }
 

@@ -6,6 +6,7 @@
     <string name="menu_go">Go</string>
 
     <string name="action_go_to_anything">Go to anything</string>
+    <string name="action_commands">Commands</string>
     <string name="action_settings">Settings</string>
     <string name="action_reset_layout">Reset layout</string>
     <string name="action_quit">Quit</string>
@@ -132,7 +133,69 @@
     <string name="find_next">Next match</string>
     <string name="find_close">Close find</string>
 
-    <string name="finder_placeholder">Open a file at %1$s</string>
+    <string name="switcher_open">Open switcher</string>
+    <string name="switcher_placeholder">Switch to a source, file or pull request, or paste a link</string>
+    <string name="switcher_files_placeholder">Open a file at %1$s</string>
+    <plurals name="switcher_results">
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
+    </plurals>
+    <string name="switcher_scope">Search in</string>
+    <string name="switcher_scope_all">All</string>
+    <string name="switcher_scope_sources">Sources</string>
+    <string name="switcher_scope_files">Files</string>
+    <string name="switcher_in_review">In this review</string>
+    <string name="switcher_files_in">Files in %1$s</string>
+    <string name="switcher_refs_two">%1$s and %2$s</string>
+    <string name="switcher_refs_more">%1$s, %2$s and %3$d more</string>
+    <string name="switcher_file_place">%1$s · %2$s</string>
+    <string name="switcher_followed">Followed repos</string>
+    <string name="switcher_followed_note">not in this review</string>
+    <plurals name="switcher_commits">
+        <item quantity="one">%1$d commit</item>
+        <item quantity="other">%1$d commits</item>
+    </plurals>
+    <string name="switcher_waiting_you">waiting on you</string>
+    <string name="switcher_draft">draft</string>
+    <string name="switcher_meta">%1$s · %2$s</string>
+    <string name="switcher_hint_switch">Switch</string>
+    <string name="switcher_hint_new_pane">Open in new pane</string>
+    <string name="switcher_hint_add">Add to review</string>
+    <string name="switcher_hint_scope">Scope</string>
+    <string name="switcher_hint_add_source">Add as source</string>
+    <string name="switcher_hint_close">Close</string>
+    <string name="switcher_link_commit">GitHub commit</string>
+    <string name="switcher_link_pull">GitHub pull request</string>
+    <string name="switcher_link_branch">GitHub comparison</string>
+    <string name="switcher_link_range">GitHub commits</string>
+    <string name="switcher_ref_commit">Commit</string>
+    <string name="switcher_ref_pull">Pull request</string>
+    <string name="switcher_ref_branch">Branch</string>
+    <string name="switcher_ref_range">Commits</string>
+    <plurals name="switcher_files">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    <string name="switcher_added">+%1$d</string>
+    <string name="switcher_removed">−%1$d</string>
+    <string name="switcher_in_pull">in %1$s</string>
+    <string name="switcher_commit_of">commit %1$d of %2$d</string>
+    <string name="switcher_open_as">Open as</string>
+    <string name="switcher_as_commit">Commit %1$s</string>
+    <string name="switcher_as_range">Commits %1$s</string>
+    <string name="switcher_as_branch">Branch %1$s</string>
+    <string name="switcher_as_pull">Pull request: %1$s</string>
+    <string name="switcher_whole_pull">Whole PR: %1$s</string>
+    <string name="switcher_add_to">add to %1$s</string>
+    <string name="switcher_already_in">in this review</string>
+    <string name="switcher_new_review_commit">New review with this commit</string>
+    <string name="switcher_new_review_pull">New review with this pull request</string>
+    <string name="switcher_new_review_branch">New review with this branch</string>
+    <string name="switcher_new_review_range">New review with these commits</string>
+    <plurals name="age_days_ago">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
 
     <string name="status_commits">%1$d commits · head %2$s</string>
     <string name="status_commit">1 commit · head %1$s</string>

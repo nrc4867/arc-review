@@ -10,7 +10,7 @@ import dev.chieppa.arc.ui.actions.actionIcon
 import dev.chieppa.arc.ui.actions.actionText
 import dev.chieppa.arc.ui.conversation.OpenStagedWhenFilled
 import dev.chieppa.arc.ui.drawers.arcDrawerSpecs
-import dev.chieppa.arc.ui.finder.FileFinder
+import dev.chieppa.arc.ui.switcher.Switcher
 import dev.chieppa.arc.ui.sources.SourceStrip
 import dev.chieppa.arc.ui.status.ArcStatusBar
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -21,7 +21,7 @@ import dev.chieppa.stretch.frame.actionKeys
 
 /**
  * The main window's content: the top bar, the source strip under it across the window, Arc's drawers on both rails, the pane grid in
- * the viewport, the status bar, and the palette and file finder over them, all on [workbench]'s state. Every source
+ * the viewport, the status bar, and the command palette and the switcher over them, all on [workbench]'s state. Every source
  * not read yet is read when it opens, and each repo's GitHub origin is looked up.
  */
 @Composable
@@ -47,12 +47,12 @@ fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
             }
             CommandPalette(
                 visible = workbench.paletteOpen,
-                actions = workbench.registry.available(null).filter { it.id != ArcActionIds.GO_TO_ANYTHING },
+                actions = workbench.registry.available(null).filter { it.id != ArcActionIds.COMMANDS },
                 keymap = workbench.keymap,
                 onDismiss = { workbench.paletteOpen = false },
                 icons = ::actionIcon,
             )
-            FileFinder(workbench)
+            Switcher(workbench)
         }
     }
 }

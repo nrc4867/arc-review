@@ -1,0 +1,139 @@
+package dev.chieppa.arc.ui
+
+import dev.chieppa.arc.core.change.ChangeStatus
+import dev.chieppa.arc.core.change.ChangedFile
+import dev.chieppa.arc.core.source.BranchName
+import dev.chieppa.arc.core.source.CommitSha
+import dev.chieppa.arc.core.source.RepoName
+import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.git.repo.LocalBranch
+import dev.chieppa.arc.host.github.repo.GitHubRepo
+import dev.chieppa.arc.ui.switcher.FollowedLookup
+import dev.chieppa.arc.ui.switcher.FollowedResults
+import dev.chieppa.arc.ui.switcher.OpenAs
+import dev.chieppa.arc.ui.switcher.PastedTargets
+import dev.chieppa.arc.ui.switcher.SectionKind
+import dev.chieppa.arc.ui.switcher.SwitcherInputs
+import dev.chieppa.arc.ui.switcher.SwitcherItem
+import dev.chieppa.arc.ui.switcher.SwitcherLimits
+import dev.chieppa.arc.ui.switcher.SwitcherScope
+import dev.chieppa.arc.ui.switcher.SwitcherSearch
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
+class SwitcherLogicTest {
+    private val api = RepoName("api")
+    private val web = RepoName("web")
+    private val api412 = Source.PullRequest(api, 412)
+    private val web88 = Source.PullRequest(web, 88)
+    private val origins = mapOf(api to GitHubRepo("lumen", "api"), web to GitHubRepo("lumen", "web"))
+
+    private val inputs = SwitcherInputs(
+        sources = listOf(
+            SwitcherItem.InReview(api412, "Rotate refresh tokens on every use"),
+            SwitcherItem.InReview(web88, "Silent token refresh in useSession"),
+        ),
+        files = listOf(
+            SwitcherItem.Changed(api412, ChangedFile("auth/token/TokenService.kt", ChangeStatus.Modified, added = 48, removed = 19)),
+            SwitcherItem.Changed(api412, ChangedFile("auth/Login.java", ChangeStatus.Modified)),
+            SwitcherItem.Changed(web88, ChangedFile("src/hooks/useTokenRefresh.test.tsx", ChangeStatus.Modified)),
+        ),
+        headFiles = listOf(SwitcherItem.AtHead(api412, "tokens/README.md")),
+    )
+
+    @Test
+    fun everyScopeShowsSectionsInOrderWithTheirCounts() {
+        val sections = SwitcherSearch.sections("tok", SwitcherScope.All, inputs)
+        assertEquals(listOf(SectionKind.InReview, SectionKind.Files), sections.map { it.kind })
+        assertEquals(2, sections[0].total)
+        val files = sections[1].items.map { (it as? SwitcherItem.Changed)?.file?.path ?: (it as SwitcherItem.AtHead).path }
+        assertEquals(listOf("auth/token/TokenService.kt", "src/hooks/useTokenRefresh.test.tsx", "tokens/README.md"), files)
+    }
+
+    @Test
+    fun sourcesMatchOnTheirRefToo() {
+        val sections = SwitcherSearch.sections("web#", SwitcherScope.Sources, inputs)
+        assertEquals(listOf(web88), sections.single().items.map { (it as SwitcherItem.InReview).source })
+    }
+
+    @Test
+    fun oneScopeShowsOnlyItsSections() {
+        assertEquals(listOf(SectionKind.Files), SwitcherSearch.sections("", SwitcherScope.Files, inputs).map { it.kind })
+        assertEquals(listOf(SectionKind.InReview), SwitcherSearch.sections("", SwitcherScope.Sources, inputs).map { it.kind })
+    }
+
+    @Test
+    fun anEmptySearchLeavesFilesAtHeadOutUntilFilesIsTheScope() {
+        val all = SwitcherSearch.sections("", SwitcherScope.All, inputs).single { it.kind == SectionKind.Files }
+        assertTrue(all.items.none { it is SwitcherItem.AtHead })
+        val files = SwitcherSearch.sections("", SwitcherScope.Files, inputs).single()
+        assertTrue(files.items.any { it is SwitcherItem.AtHead })
+    }
+
+    @Test
+    fun tabCyclesThroughTheScopes() {
+        assertEquals(SwitcherScope.Sources, SwitcherScope.All.next())
+        assertEquals(SwitcherScope.All, SwitcherScope.Files.next())
+        assertEquals(SwitcherScope.Files, SwitcherScope.All.next(back = true))
+    }
+
+    @Test
+    fun followedReposLeaveOutWhatTheReviewHolds() {
+        val pulls = listOf(FakePulls.pull(398, "Remove legacy token table"), FakePulls.pull(412, "Rotate refresh tokens"), FakePulls.pull(5, "Elsewhere", repo = GitHubRepo("other", "repo")))
+        val branches = mapOf(api to listOf(LocalBranch("spike/token-binding", "mfischer", 0), LocalBranch("main", "x", 0), LocalBranch("held", "x", 0)))
+        val held = listOf(api412, Source.BranchAgainstBase(api, BranchName("held")))
+        val found = FollowedResults.of("tok", pulls, branches, origins, held)
+        assertEquals(listOf(Source.PullRequest(api, 398), Source.BranchAgainstBase(api, BranchName("spike/token-binding"))), found.map {
+            when (it) {
+                is SwitcherItem.FollowedPull -> it.source
+                is SwitcherItem.FollowedBranch -> it.source
+                else -> error("not followed")
+            }
+        })
+        assertEquals(emptyList(), FollowedResults.of(" ", pulls, branches, origins, held))
+    }
+
+    @Test
+    fun aPastedLinkLandsInTheCloneOfItsRepo() {
+        val target = PastedTargets.read("https://github.com/lumen/api/pull/398/commits/b7e19d2", origins, origins.keys)!!
+        assertTrue(target.link)
+        assertEquals(Source.Commit(api, CommitSha("b7e19d2")), target.source)
+        assertEquals(Source.PullRequest(api, 398), target.pullRequest)
+        assertTrue(target.withinPull)
+        assertEquals(3, OpenAs.of(target).size)
+    }
+
+    @Test
+    fun aLinkToARepoWithNoCloneHereHasNowhereToOpen() {
+        val target = PastedTargets.read("https://github.com/acme/other/pull/3", origins, origins.keys)!!
+        assertNull(target.source)
+        assertEquals(emptyList(), OpenAs.of(target))
+    }
+
+    @Test
+    fun aRefOfAKnownRepoReadsAsATargetAndASearchDoesNot() {
+        val target = PastedTargets.read("api#398", origins, origins.keys)!!
+        assertEquals(Source.PullRequest(api, 398), target.source)
+        assertEquals(2, OpenAs.of(target).size)
+        assertNull(PastedTargets.read("tok", origins, origins.keys))
+        assertNull(PastedTargets.read("nope#3", origins, origins.keys))
+        assertNull(PastedTargets.read("remove token", origins, origins.keys))
+    }
+
+    @Test
+    fun theLookupAsksGitHubOncePerQueryWhileItsAnswerIsFresh() = runTest {
+        val data = FakeReviewData().apply { openPullList = listOf(FakePulls.pull(398, "Remove legacy token table")) }
+        var now = 0L
+        val lookup = FollowedLookup(data) { now }
+        val repos = origins.values
+        lookup.pulls(repos, "tok")
+        lookup.pulls(repos, " TOK ")
+        assertEquals(1, data.openPullQueries)
+        now += SwitcherLimits.CACHE_MILLIS
+        lookup.pulls(repos, "tok")
+        assertEquals(2, data.openPullQueries)
+    }
+}

@@ -18,18 +18,19 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The window's top bar: the app's name and menus, the review selector after them, "Go to anything" centred on the
- * whole bar, and at the end the notifications bell, its badge counting notifications not seen yet, which opens the
- * Pull requests drawer, then the palette, showing its own key, and settings.
+ * whole bar, which opens the switcher, and at the end the notifications bell, its badge counting notifications not
+ * seen yet, which opens the Pull requests drawer, then the command palette, showing its own key, and settings.
  */
 @Composable
 fun ArcTopBar(workbench: Workbench) {
-    val paletteKeys = workbench.registry[ArcActionIds.GO_TO_ANYTHING]?.let(workbench.keymap::capsFor)
+    val switcherKeys = workbench.registry[ArcActionIds.GO_TO_ANYTHING]?.let(workbench.keymap::capsFor)
+    val commandsKeys = workbench.registry[ArcActionIds.COMMANDS]?.let(workbench.keymap::capsFor)
     WindowTopBar(
         appName = stringResource(Res.string.app_name),
         document = "",
         menus = { ArcBarMenus(workbench.registry, workbench.keymap) },
         leading = { ReviewSelector(workbench) },
-        center = { GoToAnythingField(paletteKeys, { workbench.paletteOpen = true }) },
+        center = { GoToAnythingField(switcherKeys, { workbench.switcher.show() }) },
         actions = {
             TopBarActions(
                 onUndo = null,
@@ -38,7 +39,7 @@ fun ArcTopBar(workbench: Workbench) {
                 onSettings = { workbench.settingsOpen = true },
                 leading = listOf(BarAction(ArcIcons.Bell, stringResource(Res.string.notifications), workbench::openPullRequests, badge = badgeCount(workbench.watch.unseen))),
                 settingsOpen = workbench.settingsOpen,
-                commandsKeys = paletteKeys,
+                commandsKeys = commandsKeys,
                 settingsPopup = {
                     SettingsPopover(
                         open = workbench.settingsOpen,
