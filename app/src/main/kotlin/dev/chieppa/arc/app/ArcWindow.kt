@@ -11,7 +11,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.rememberWindowState
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.app_name
-import dev.chieppa.arc.design.generated.review_default_name
 import dev.chieppa.arc.ui.actions.actionText
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.menus.appMenus
@@ -27,11 +26,10 @@ import kotlinx.coroutines.cancel
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Arc's main window on [session]'s saved state, opening with the [initial] look and the last review. A new review
- * opened with a source starts holding it. Each change to
- * the look goes to [onPreferencesChange], and the review is saved as it changes and when it is left. The saved
- * filters and rules in [watch] outlive any one review: they are polled while the window is open, with notifications
- * through [notifier], and saved as they change. [onExit] ends the app.
+ * Arc's main window on [session]'s saved state, opening with the [initial] look on the workspace. Each change to the
+ * look goes to [onPreferencesChange], and the workspace is saved as it changes and when the window closes. The saved
+ * filters and rules in [watch] are polled while the window is open, with notifications through [notifier], and saved
+ * as they change. [onExit] ends the app.
  */
 @Composable
 fun ArcWindow(
@@ -43,36 +41,18 @@ fun ArcWindow(
     onExit: () -> Unit,
 ) {
     val exit by rememberUpdatedState(onExit)
-    val defaultName = stringResource(Res.string.review_default_name)
-    var reviewId by remember { mutableStateOf<String?>(null) }
     var preferences by remember { mutableStateOf(initial) }
-    var current by remember { mutableStateOf<Workbench?>(null) }
-    val seeds = remember { mutableListOf<String>() }
     fun save(workbench: Workbench) = session.save(workbench.state, workbench.treeState.expanded)
-    val workbench = remember(reviewId) {
-        val state = session.open(reviewId, defaultName)
+    val workbench = remember {
+        lateinit var opened: Workbench
         Workbench(
             preferences = preferences,
-            onQuit = { current?.let(::save); exit() },
+            onQuit = { save(opened); exit() },
             data = session.data,
-            state = state,
+            state = session.open(),
             conversation = session.conversation,
-            reviews = session.reviews(),
             watch = watch,
-            onOpenReview = { id ->
-                current?.let(::save)
-                reviewId = id ?: session.create(defaultName).review.id.value
-            },
-            onNewReviewWith = { ref ->
-                current?.let(::save)
-                seeds += ref
-                reviewId = session.create(defaultName).review.id.value
-            },
-        ).also { opened ->
-            current = opened
-            seeds.forEach(opened::addSource)
-            seeds.clear()
-        }
+        ).also { opened = it }
     }
     DisposableEffect(workbench) { onDispose { workbench.scope.cancel() } }
     StretchWindow(
@@ -81,7 +61,7 @@ fun ArcWindow(
         state = rememberWindowState(width = AppConstants.WINDOW_WIDTH, height = AppConstants.WINDOW_HEIGHT),
     ) {
         SavePreferences(workbench) { preferences = it; onPreferencesChange(it) }
-        SaveReview(workbench, ::save)
+        SaveWorkspace(workbench, ::save)
         SaveWatchlist(watch, session::saveWatchlist)
         WatchPolling(watch, session.github, notifier)
         CompositionLocalProvider(LocalActionText provides actionText()) {

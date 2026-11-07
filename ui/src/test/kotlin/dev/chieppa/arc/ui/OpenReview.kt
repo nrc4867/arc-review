@@ -4,7 +4,7 @@ import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
 import dev.chieppa.arc.ui.frame.ArcFrame
-import dev.chieppa.arc.ui.review.ReviewState
+import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.services.TextClipboard
 import dev.chieppa.arc.ui.settings.UiPreferences
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -29,7 +29,7 @@ fun ComposeUiTest.openReview(
     clipboard: TextClipboard = CopiedText(),
     preferences: UiPreferences = UiPreferences(),
 ): Workbench {
-    val workbench = Workbench(preferences = preferences, data = data, state = ReviewState(repos = mapOf(data.repo to Path.of("."))), clipboard = clipboard)
+    val workbench = Workbench(preferences = preferences, data = data, state = WorkspaceState(repos = mapOf(data.repo to Path.of("."))), clipboard = clipboard)
     setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
     waitForIdle()
     assertTrue(workbench.addSource(data.source.ref))

@@ -39,8 +39,6 @@ import dev.chieppa.arc.design.generated.action_toggle_wrap
 import dev.chieppa.arc.design.generated.action_open_revisions
 import dev.chieppa.arc.design.generated.action_open_pull
 import dev.chieppa.arc.design.generated.action_add_pull
-import dev.chieppa.arc.design.generated.action_open_pull_in_new_review
-import dev.chieppa.arc.design.generated.action_open_pull_review
 import dev.chieppa.arc.design.generated.action_open_pull_on_github
 import dev.chieppa.arc.design.generated.action_copy_pull_link
 import dev.chieppa.arc.design.generated.action_copy_pull_number
@@ -90,8 +88,6 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.OPEN_REVISIONS.value to Res.string.action_open_revisions,
     ArcActionIds.OPEN_PULL.value to Res.string.action_open_pull,
     ArcActionIds.ADD_PULL.value to Res.string.action_add_pull,
-    ArcActionIds.OPEN_PULL_IN_NEW_REVIEW.value to Res.string.action_open_pull_in_new_review,
-    ArcActionIds.OPEN_PULL_REVIEW.value to Res.string.action_open_pull_review,
     ArcActionIds.OPEN_PULL_ON_GITHUB.value to Res.string.action_open_pull_on_github,
     ArcActionIds.COPY_PULL_LINK.value to Res.string.action_copy_pull_link,
     ArcActionIds.COPY_PULL_NUMBER.value to Res.string.action_copy_pull_number,

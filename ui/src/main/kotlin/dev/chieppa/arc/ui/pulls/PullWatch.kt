@@ -13,7 +13,7 @@ import dev.chieppa.arc.host.github.pulls.Viewer
 import kotlinx.coroutines.channels.Channel
 
 /**
- * The saved filters and notification rules, which every review shares, with what GitHub answered for them: each
+ * The saved filters and notification rules, with what GitHub answered for them: each
  * search's result by key, the rate budget, who the person is, and how polling stands. [unseen] counts notifications
  * since the bell was last opened. Views read it and recompose when it changes; edits that change what is polled ask
  * for a poll at once.

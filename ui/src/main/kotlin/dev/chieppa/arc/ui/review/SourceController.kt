@@ -15,12 +15,12 @@ import kotlinx.coroutines.launch
 import java.nio.file.Path
 
 /**
- * The review's repos and sources: adding them, switching the active one, scoping its tree to one commit, and reading
+ * The workspace's repos and sources: adding them, switching the active one, scoping its tree to one commit, and reading
  * each from its repo in the background. A new read of a source cancels the one before it; the old view stays until
  * the new one is ready.
  */
 class SourceController(
-    private val state: ReviewState,
+    private val state: WorkspaceState,
     private val data: ReviewData,
     private val scope: CoroutineScope,
     private val now: () -> Long = { System.currentTimeMillis() / MILLIS_PER_SECOND },
@@ -42,24 +42,24 @@ class SourceController(
     fun addSource(ref: String): Boolean {
         val source = SourceRefs.parse(ref) ?: return false
         if (source.repo !in state.repos) return false
-        state.review = state.review.add(source)
+        state.workspace = state.workspace.add(source)
         activate(source)
         load(source)
         return true
     }
 
     /**
-     * Takes [source] out of the review with its view and its unpinned panes. Its marks stay with the review, so adding
+     * Takes [source] out of the strip with its view and its unpinned panes. Its marks stay in the workspace, so adding
      * it again brings them back; pinned panes stay, in the next source's layout or the loose one.
      */
     fun removeSource(source: Source) {
-        if (source !in state.review.sources) return
+        if (source !in state.workspace.sources) return
         jobs.keys.filter { it.first == source }.forEach { jobs.remove(it)?.cancel() }
         val shown = state.viewOf(source).layout.tabs.toSet()
-        val closing = state.review.panes.filter { !it.pinned && (it.source == source || it.id.value in shown) }.map { it.id }
-        val pages = state.review.pages.filter { it is Page.RevisionMatrix && it.source == source && !it.pinned }.map { it.id }
-        state.review = (closing.fold(state.review.remove(source)) { review, id -> review.withoutPane(id) }).let { review ->
-            pages.fold(review) { r, id -> r.withoutPage(id) }
+        val closing = state.workspace.panes.filter { !it.pinned && (it.source == source || it.id.value in shown) }.map { it.id }
+        val pages = state.workspace.pages.filter { it is Page.RevisionMatrix && it.source == source && !it.pinned }.map { it.id }
+        state.workspace = (closing.fold(state.workspace.remove(source)) { workspace, id -> workspace.withoutPane(id) }).let { workspace ->
+            pages.fold(workspace) { w, id -> w.withoutPage(id) }
         }
         val ids = closing.map { it.value }.toSet()
         state.paneStates = state.paneStates - ids
@@ -69,18 +69,18 @@ class SourceController(
         state.scoped = state.scoped - source
         state.pulls = state.pulls - source
         state.revisions = state.revisions - source
-        val next = state.review.active
+        val next = state.workspace.active
         if (next != null) {
             activate(next)
         } else {
-            val pinned = state.review.pinnedIds
+            val pinned = state.workspace.pinnedIds
             state.looseLayout = SourceSwitching.withPinned(state.looseLayout, pinned)
         }
     }
 
     fun activate(source: Source) {
-        val (review, views) = SourceSwitching.activate(state.review, state.views, source)
-        state.review = review
+        val (workspace, views) = SourceSwitching.activate(state.workspace, state.views, source)
+        state.workspace = workspace
         state.views = views
     }
 
@@ -92,7 +92,7 @@ class SourceController(
 
     /** Reads every source not read yet, and the scoped commit of each that has one. */
     fun loadAll() {
-        for (source in state.review.sources) {
+        for (source in state.workspace.sources) {
             if (state.loads[source] == null) load(source)
             if (state.viewOf(source).commit != null && state.scoped[source] == null) loadScope(source)
         }
@@ -101,7 +101,7 @@ class SourceController(
     /** Reads [source]'s whole change again, with the replays its marks need, and records the head it was read at. */
     fun load(source: Source) = launch(source, scoped = false) {
         val snapshot = data.read(source)
-        state.review = state.review.record(source, RecordedHead(snapshot.revisions.head, snapshot.revisions.base, now()))
+        state.workspace = state.workspace.record(source, RecordedHead(snapshot.revisions.head, snapshot.revisions.base, now()))
         (source as? Source.PullRequest)?.let(data::pullRequest)?.let { state.pulls = state.pulls + (source to it) }
         SourceLoad.Ready(snapshot, replays(source, snapshot))
     }
@@ -112,7 +112,7 @@ class SourceController(
     }
 
     private suspend fun replays(source: Source, snapshot: dev.chieppa.arc.core.change.SourceSnapshot): List<ReplayOutcome> =
-        state.review.marksIn(source).values.mapNotNull { it.reviewed }.distinct()
+        state.workspace.marksIn(source).values.mapNotNull { it.reviewed }.distinct()
             .filter { it.head != snapshot.revisions.head || it.mergeBase != snapshot.revisions.base }
             .mapNotNull { data.replay(source.repo, it, snapshot.revisions) }
 
@@ -132,7 +132,7 @@ class SourceController(
             } catch (e: Exception) {
                 SourceLoad.Failed(e.message.orEmpty())
             }
-            if (source in state.review.sources) put(result)
+            if (source in state.workspace.sources) put(result)
         }
     }
 }

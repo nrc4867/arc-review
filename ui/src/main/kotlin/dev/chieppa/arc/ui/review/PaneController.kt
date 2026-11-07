@@ -13,11 +13,11 @@ import dev.chieppa.stretch.frame.PaneItemDrop
 import dev.chieppa.stretch.frame.place
 
 /**
- * The review's panes: opening a changed file or any file at a revision, closing, pinning, and switching what a pane
+ * The workspace's panes: opening a changed file or any file at a revision, closing, pinning, and switching what a pane
  * shows. Opening a changed file reuses the pane showing it, or takes over the focused pane's unpinned diff, so walking
  * the files keeps one pane; [newTab] opens it beside instead.
  */
-class PaneController(private val state: ReviewState) {
+class PaneController(private val state: WorkspaceState) {
     /** The pane showing in the focused part of the grid. */
     val focused: Pane? get() = state.paneLayout.activeTab?.let(state::pane)
 
@@ -39,16 +39,16 @@ class PaneController(private val state: ReviewState) {
         val snapshot = load.ready ?: return null
         val file = snapshot.file(path) ?: return null
         if (source != state.active) {
-            val (review, views) = SourceSwitching.activate(state.review, state.views, source)
-            state.review = review
+            val (workspace, views) = SourceSwitching.activate(state.workspace, state.views, source)
+            state.workspace = workspace
             state.views = views
         }
-        val existing = state.review.panes.firstOrNull { it.source == source && it.path == path && it.hasChange && it.revision.value == snapshot.revisions.head.value }
+        val existing = state.workspace.panes.firstOrNull { it.source == source && it.path == path && it.hasChange && it.revision.value == snapshot.revisions.head.value }
         if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) return existing.id.value
         val reuse = focused?.takeIf { !newTab && !it.pinned && it.hasChange && it.source == source }
-        val id = reuse?.id ?: PaneFactory.nextId(state.review)
+        val id = reuse?.id ?: PaneFactory.nextId(state.workspace)
         val pane = PaneFactory.forChange(id, snapshot, file).copy(view = reuse?.view?.takeIf { it != PaneView.Rendered } ?: PaneView.Diff)
-        state.review = state.review.withPane(pane)
+        state.workspace = state.workspace.withPane(pane)
         if (reuse != null) state.paneLines.remove(id.value)
         return id.value
     }
@@ -66,8 +66,8 @@ class PaneController(private val state: ReviewState) {
 
     /** Opens [path] in [repo] at [revision] whole, in a new tab; [pinned] keeps it when the source changes. */
     fun openFile(repo: RepoName, revision: Revision, path: String, source: Source? = null, pinned: Boolean = false): PaneId {
-        val id = PaneFactory.nextId(state.review)
-        state.review = state.review.withPane(PaneFactory.forFile(id, repo, revision, path, source).copy(pinned = pinned))
+        val id = PaneFactory.nextId(state.workspace)
+        state.workspace = state.workspace.withPane(PaneFactory.forFile(id, repo, revision, path, source).copy(pinned = pinned))
         state.paneLayout = state.paneLayout.open(id.value)
         if (pinned) placePinned()
         return id
@@ -78,10 +78,10 @@ class PaneController(private val state: ReviewState) {
      * change in the layout. [source] is the source it belongs to.
      */
     fun openDiff(repo: RepoName, path: String, base: Revision, revision: Revision, source: Source?): PaneId {
-        val existing = state.review.panes.firstOrNull { it.repo == repo && it.path == path && it.base == base && it.revision == revision }
+        val existing = state.workspace.panes.firstOrNull { it.repo == repo && it.path == path && it.base == base && it.revision == revision }
         if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) return existing.id
-        val id = PaneFactory.nextId(state.review)
-        state.review = state.review.withPane(Pane(id, repo, path, revision, PaneView.Diff, base = base, source = source))
+        val id = PaneFactory.nextId(state.workspace)
+        state.workspace = state.workspace.withPane(Pane(id, repo, path, revision, PaneView.Diff, base = base, source = source))
         state.paneLayout = state.paneLayout.open(id.value)
         return id
     }
@@ -93,43 +93,43 @@ class PaneController(private val state: ReviewState) {
 
     /** Opens the revision matrix of [source], or shows its tab when one is open already. */
     fun openRevisions(source: Source) {
-        val existing = state.review.pages.firstOrNull { it is Page.RevisionMatrix && it.source == source }
+        val existing = state.workspace.pages.firstOrNull { it is Page.RevisionMatrix && it.source == source }
         if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) {
             state.paneLayout = state.paneLayout.activate(existing.id.value)
             return
         }
-        val page = existing ?: Page.RevisionMatrix(PaneFactory.nextId(state.review), source)
-        state.review = state.review.withPage(page)
+        val page = existing ?: Page.RevisionMatrix(PaneFactory.nextId(state.workspace), source)
+        state.workspace = state.workspace.withPage(page)
         state.paneLayout = state.paneLayout.open(page.id.value)
     }
 
     /** Opens the page for saved filter [filter], or shows its tab when one is open already. */
     fun openFilter(filter: String) {
-        val existing = state.review.pages.firstOrNull { it is Page.Filter && it.filter == filter }
+        val existing = state.workspace.pages.firstOrNull { it is Page.Filter && it.filter == filter }
         if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) {
             state.paneLayout = state.paneLayout.activate(existing.id.value)
             return
         }
-        val page = existing ?: Page.Filter(PaneFactory.nextId(state.review), filter)
-        state.review = state.review.withPage(page)
+        val page = existing ?: Page.Filter(PaneFactory.nextId(state.workspace), filter)
+        state.workspace = state.workspace.withPage(page)
         state.paneLayout = state.paneLayout.open(page.id.value)
         placePinned()
     }
 
-    /** Closes the pane or page [id] everywhere it shows; one no layout shows any more leaves the review. */
+    /** Closes the pane or page [id] everywhere it shows; one no layout shows any more leaves the workspace. */
     fun close(id: String) {
         state.paneLayout = state.paneLayout.close(id)
         state.page(id)?.let { page ->
             if (page.pinned) state.views = SourceSwitching.withoutEverywhere(state.views, id, null)
             state.looseLayout = state.looseLayout.close(id)
-            state.review = state.review.withoutPage(page.id)
+            state.workspace = state.workspace.withoutPage(page.id)
             return
         }
         val pane = state.pane(id) ?: return
         if (pane.pinned) state.views = SourceSwitching.withoutEverywhere(state.views, id, null)
         val shown = state.views.values.any { it.layout.leafOf(id) != null } || state.looseLayout.leafOf(id) != null
         if (!shown) {
-            state.review = state.review.withoutPane(pane.id)
+            state.workspace = state.workspace.withoutPane(pane.id)
             state.paneStates = state.paneStates - id
         }
     }
@@ -137,13 +137,13 @@ class PaneController(private val state: ReviewState) {
     /** Pins the pane [id] so it stays when the source changes, or unpins it so it stays with this source only. */
     fun togglePin(id: String) {
         val pane = state.pane(id) ?: return
-        state.review = state.review.withPane(pane.copy(pinned = !pane.pinned))
+        state.workspace = state.workspace.withPane(pane.copy(pinned = !pane.pinned))
         if (pane.pinned) state.views = SourceSwitching.withoutEverywhere(state.views, id, state.active) else placePinned()
     }
 
     fun setView(id: String, view: PaneView) {
         val pane = state.pane(id) ?: return
-        state.review = state.review.withPane(pane.copy(view = view))
+        state.workspace = state.workspace.withPane(pane.copy(view = view))
     }
 
     fun setSplit(id: String, split: Boolean) {
@@ -155,7 +155,7 @@ class PaneController(private val state: ReviewState) {
     }
 
     private fun placePinned() {
-        val pinned = state.review.pinnedIds
+        val pinned = state.workspace.pinnedIds
         state.views = state.views.mapValues { (source, view) ->
             if (source == state.active) view else view.copy(layout = SourceSwitching.withPinned(view.layout, pinned))
         }

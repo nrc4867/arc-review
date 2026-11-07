@@ -25,7 +25,7 @@ fun SearchResults(workbench: Workbench, sections: List<SwitcherSection>, query: 
     Column(Modifier.padding(start = StretchSpacing.space6, end = StretchSpacing.space6, top = StretchSpacing.space4, bottom = StretchSpacing.space6)) {
         for (section in sections) {
             when (section.kind) {
-                SectionKind.InReview -> PaletteSection(stringResource(Res.string.switcher_in_review))
+                SectionKind.InWorkspace -> PaletteSection(stringResource(Res.string.switcher_in_review))
                 SectionKind.Files -> {
                     val refs = section.items.mapNotNull { (it as? SwitcherItem.Changed)?.source ?: (it as? SwitcherItem.AtHead)?.source }.distinct()
                     PaletteSection(stringResource(Res.string.switcher_files_in, refsText(refs.map(SourceLabels::of))))
@@ -36,7 +36,7 @@ fun SearchResults(workbench: Workbench, sections: List<SwitcherSection>, query: 
                 val highlighted = row++ == index
                 val pick = { onPick(item) }
                 when (item) {
-                    is SwitcherItem.InReview -> InReviewRow(item, workbench.state, query, highlighted, pick)
+                    is SwitcherItem.InWorkspace -> InWorkspaceRow(item, workbench.state, query, highlighted, pick)
                     is SwitcherItem.Changed -> FileResultRow(item.source, item.file.path, item.file, query, highlighted, pick)
                     is SwitcherItem.AtHead -> FileResultRow(item.source, item.path, null, query, highlighted, pick)
                     is SwitcherItem.FollowedPull -> FollowedPullRow(item, workbench.watch.viewer, query, highlighted, pick)

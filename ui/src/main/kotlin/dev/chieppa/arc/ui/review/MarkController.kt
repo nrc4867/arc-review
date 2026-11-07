@@ -10,7 +10,7 @@ import dev.chieppa.arc.ui.tree.TreeOrder
  * Marking files and walking them in the tree's order: the file being read is the focused pane's, when it shows a
  * change of the active source.
  */
-class MarkController(private val state: ReviewState, private val panes: PaneController) {
+class MarkController(private val state: WorkspaceState, private val panes: PaneController) {
     /** The active source and the path of the file being read in it, if any. */
     val current: Pair<Source, String>? get() {
         val pane = panes.focused ?: return null
@@ -50,6 +50,6 @@ class MarkController(private val state: ReviewState, private val panes: PaneCont
 
     private fun mark(source: Source, paths: Collection<String>, kind: MarkKind?) {
         val snapshot = state.snapshot(source) ?: return
-        state.review = Marking.mark(state.review, snapshot, paths, kind)
+        state.workspace = Marking.mark(state.workspace, snapshot, paths, kind)
     }
 }

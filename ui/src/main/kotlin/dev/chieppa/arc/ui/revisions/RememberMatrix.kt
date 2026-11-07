@@ -14,7 +14,7 @@ import dev.chieppa.arc.ui.workbench.Workbench
 @Composable
 fun rememberMatrix(workbench: Workbench, source: Source, read: RevisionsRead): RevisionMatrix {
     val state = workbench.state
-    val marks = state.review.marksIn(source)
+    val marks = state.workspace.marksIn(source)
     val states = state.states(source)
     val history = read.history
     val threads = remember(history) {

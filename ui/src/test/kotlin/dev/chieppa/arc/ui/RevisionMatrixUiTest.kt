@@ -35,7 +35,7 @@ class RevisionMatrixUiTest {
     @Test
     fun theMatrixShowsWhichFileChangedInWhichRevision() = runComposeUiTest {
         val workbench = openMatrix()
-        assertTrue(workbench.state.review.pages.single() is Page.RevisionMatrix)
+        assertTrue(workbench.state.workspace.pages.single() is Page.RevisionMatrix)
         assertTrue(shows("Revisions · "))
         assertTrue(shows("3 files"))
         assertTrue(shows("2 revisions"))
@@ -44,7 +44,7 @@ class RevisionMatrixUiTest {
         assertEquals(3, cells("Unchanged"))
         assertTrue(shows("Text.kt @ r2"))
         assertTrue(shows("changed in r2"))
-        waitUntil { workbench.state.review.headsOf(data.source).size == 1 }
+        waitUntil { workbench.state.workspace.headsOf(data.source).size == 1 }
     }
 
     @Test
@@ -98,7 +98,7 @@ class RevisionMatrixUiTest {
         assertEquals(data.firstHead, data.compared?.first?.head)
         onNodeWithText("Compare").performClick()
         waitForIdle()
-        val diffs = workbench.state.review.panes.filter { it.base?.value == data.firstHead.value }
+        val diffs = workbench.state.workspace.panes.filter { it.base?.value == data.firstHead.value }
         assertEquals(setOf("app/util/Text.kt", "docs/Guide.md"), diffs.map { it.path }.toSet())
         assertEquals("app/util/Text.kt", workbench.panes.focused?.path)
     }

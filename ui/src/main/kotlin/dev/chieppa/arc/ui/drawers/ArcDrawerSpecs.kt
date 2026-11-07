@@ -14,7 +14,7 @@ import dev.chieppa.stretch.frame.DrawerSpec
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The frame's drawers, one per [DrawerSlot]: Files and Staged comments hold the review, Pull requests the saved filters
+ * The frame's drawers, one per [DrawerSlot]: Files and Staged comments hold the workspace, Pull requests the saved filters
  * and notification rules, Revisions the active source's commits under the title Commits; the others open plain.
  */
 @Composable

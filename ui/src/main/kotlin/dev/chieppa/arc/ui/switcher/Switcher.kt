@@ -11,8 +11,8 @@ import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.pane.Revision
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.switcher_files_placeholder
-import dev.chieppa.arc.design.generated.switcher_hint_add
-import dev.chieppa.arc.design.generated.switcher_hint_add_source
+import dev.chieppa.arc.design.generated.switcher_hint_beside
+import dev.chieppa.arc.design.generated.switcher_hint_open
 import dev.chieppa.arc.design.generated.switcher_hint_close
 import dev.chieppa.arc.design.generated.switcher_hint_new_pane
 import dev.chieppa.arc.design.generated.switcher_hint_scope
@@ -46,10 +46,10 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The switcher over the dimmed window. Typing searches the review's sources, the files they change and the active
- * source's other files, and what followed repos hold that the review does not, in sections; Tab moves through the
+ * The switcher over the dimmed window. Typing searches the strip's sources, the files they change and the active
+ * source's other files, and what followed repos hold that the strip does not, in sections; Tab moves through the
  * scopes and Up and Down through the rows. Enter switches to a row, Ctrl Enter opens it in a new pane and Alt Enter
- * adds it to the review. A pasted github.com link or a source ref turns it into a card of what that points at, with
+ * opens it without switching from the active source. A pasted github.com link or a source ref turns it into a card of what that points at, with
  * the ways it can open.
  */
 @Composable
@@ -108,8 +108,8 @@ fun Switcher(workbench: Workbench) {
                 LinkCard(target, facts, now)
                 if (options.isNotEmpty()) PaletteSection(stringResource(Res.string.switcher_open_as))
                 options.forEachIndexed { i, option ->
-                    val held = option.source in state.review.sources
-                    OpenAsRow(option, facts, state.review.name, held, i == switcher.index) { commands.pick(option, SwitcherPick.Switch) }
+                    val held = option.source in state.workspace.sources
+                    OpenAsRow(option, facts, held, i == switcher.index) { commands.pick(option, SwitcherPick.Switch) }
                 }
             }
         }
@@ -130,13 +130,13 @@ private fun placeholder(workbench: Workbench, scope: SwitcherScope): String {
 private fun searchHints() = listOf(
     PaletteHint(SwitcherKeys.caps(SwitcherKeys.SWITCH), stringResource(Res.string.switcher_hint_switch)),
     PaletteHint(SwitcherKeys.caps(SwitcherKeys.NEW_PANE), stringResource(Res.string.switcher_hint_new_pane)),
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.ADD), stringResource(Res.string.switcher_hint_add)),
+    PaletteHint(SwitcherKeys.caps(SwitcherKeys.BESIDE), stringResource(Res.string.switcher_hint_beside)),
     PaletteHint(SwitcherKeys.caps(SwitcherKeys.SCOPE), stringResource(Res.string.switcher_hint_scope)),
 )
 
 @Composable
 private fun linkHints() = listOf(
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.SWITCH), stringResource(Res.string.switcher_hint_add_source)),
+    PaletteHint(SwitcherKeys.caps(SwitcherKeys.SWITCH), stringResource(Res.string.switcher_hint_open)),
     PaletteHint(SwitcherKeys.caps(SwitcherKeys.NEW_PANE), stringResource(Res.string.switcher_hint_new_pane)),
     PaletteHint(SwitcherKeys.caps(SwitcherKeys.CLOSE), stringResource(Res.string.switcher_hint_close)),
 )

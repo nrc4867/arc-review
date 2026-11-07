@@ -1,4 +1,4 @@
-package dev.chieppa.arc.store.review
+package dev.chieppa.arc.store.workspace
 
 import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.mark.FileMark
@@ -11,36 +11,31 @@ import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
 import dev.chieppa.arc.core.pane.PaneView
 import dev.chieppa.arc.core.pane.Revision
-import dev.chieppa.arc.core.review.Review
-import dev.chieppa.arc.core.review.ReviewId
+import dev.chieppa.arc.core.workspace.Workspace
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.revision.RecordedHead
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.source.SourceRefs
 
-/** Turns a [Review] into what the store writes and back. A stored entry that does not parse is left out. */
-object ReviewMapping {
-    fun toStored(review: Review, views: List<StoredSourceView> = emptyList(), paneStates: Map<String, StoredPaneState> = emptyMap()) = StoredReview(
-        id = review.id.value,
-        name = review.name,
-        sources = review.sources.map { it.ref },
-        active = review.active?.ref,
-        panes = review.panes.map(::toStored),
-        marks = review.marks.map(::toStored),
+/** Turns a [Workspace] into what the store writes and back. A stored entry that does not parse is left out. */
+object WorkspaceMapping {
+    fun toStored(workspace: Workspace, views: List<StoredSourceView> = emptyList(), paneStates: Map<String, StoredPaneState> = emptyMap()) = StoredWorkspace(
+        sources = workspace.sources.map { it.ref },
+        active = workspace.active?.ref,
+        panes = workspace.panes.map(::toStored),
+        marks = workspace.marks.map(::toStored),
         views = views,
         paneStates = paneStates,
-        pages = review.pages.map(::toStored),
-        heads = review.heads.map { (source, heads) -> StoredHeads(source.ref, heads.map { StoredHead(it.head.value, it.base.value, it.at) }) },
+        pages = workspace.pages.map(::toStored),
+        heads = workspace.heads.map { (source, heads) -> StoredHeads(source.ref, heads.map { StoredHead(it.head.value, it.base.value, it.at) }) },
     )
 
-    fun toReview(stored: StoredReview): Review {
+    fun toWorkspace(stored: StoredWorkspace): Workspace {
         val sources = stored.sources.mapNotNull(SourceRefs::parse).distinct()
         val active = stored.active?.let(SourceRefs::parse)?.takeIf { it in sources } ?: sources.firstOrNull()
         val panes = stored.panes.mapNotNull(::toPane).distinctBy { it.id }
         val paneIds = panes.map { it.id }.toSet()
-        return Review(
-            id = ReviewId(stored.id),
-            name = stored.name,
+        return Workspace(
             sources = sources,
             active = active,
             panes = panes,

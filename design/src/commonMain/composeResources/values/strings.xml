@@ -61,10 +61,7 @@
     <string name="action_toggle_wrap">Wrap long lines</string>
     <string name="action_open_revisions">Revision matrix</string>
     <string name="action_open_pull">Open</string>
-    <string name="action_add_pull">Add to this review</string>
-    <string name="action_open_pull_in_new_review">Open in a new review</string>
-    <string name="action_open_pull_review">Open the review holding it</string>
-    <string name="pull_open_review">Open in %1$s</string>
+    <string name="action_add_pull">Open without switching</string>
     <string name="action_open_pull_on_github">Open on GitHub</string>
     <string name="action_copy_pull_link">Link</string>
     <string name="action_copy_pull_number">Number</string>
@@ -82,10 +79,6 @@
     <string name="menu_set_aside_folder">Set aside folder</string>
     <string name="menu_pin">Pin</string>
     <string name="menu_unpin">Unpin</string>
-
-    <string name="review_default_name">Review</string>
-    <string name="review_new">New review</string>
-    <string name="review_choose">Review</string>
 
     <string name="sources_add">Add source</string>
     <string name="sources_changed_since">Changed since you reviewed</string>
@@ -159,13 +152,13 @@
     <string name="switcher_scope_all">All</string>
     <string name="switcher_scope_sources">Sources</string>
     <string name="switcher_scope_files">Files</string>
-    <string name="switcher_in_review">In this review</string>
+    <string name="switcher_in_review">Open</string>
     <string name="switcher_files_in">Files in %1$s</string>
     <string name="switcher_refs_two">%1$s and %2$s</string>
     <string name="switcher_refs_more">%1$s, %2$s and %3$d more</string>
     <string name="switcher_file_place">%1$s · %2$s</string>
     <string name="switcher_followed">Followed repos</string>
-    <string name="switcher_followed_note">not in this review</string>
+    <string name="switcher_followed_note">not open</string>
     <plurals name="switcher_commits">
         <item quantity="one">%1$d commit</item>
         <item quantity="other">%1$d commits</item>
@@ -175,9 +168,9 @@
     <string name="switcher_meta">%1$s · %2$s</string>
     <string name="switcher_hint_switch">Switch</string>
     <string name="switcher_hint_new_pane">Open in new pane</string>
-    <string name="switcher_hint_add">Add to review</string>
+    <string name="switcher_hint_beside">Open without switching</string>
     <string name="switcher_hint_scope">Scope</string>
-    <string name="switcher_hint_add_source">Add as source</string>
+    <string name="switcher_hint_open">Open</string>
     <string name="switcher_hint_close">Close</string>
     <string name="switcher_link_commit">GitHub commit</string>
     <string name="switcher_link_pull">GitHub pull request</string>
@@ -201,12 +194,7 @@
     <string name="switcher_as_branch">Branch %1$s</string>
     <string name="switcher_as_pull">Pull request: %1$s</string>
     <string name="switcher_whole_pull">Whole PR: %1$s</string>
-    <string name="switcher_add_to">add to %1$s</string>
-    <string name="switcher_already_in">in this review</string>
-    <string name="switcher_new_review_commit">New review with this commit</string>
-    <string name="switcher_new_review_pull">New review with this pull request</string>
-    <string name="switcher_new_review_branch">New review with this branch</string>
-    <string name="switcher_new_review_range">New review with these commits</string>
+    <string name="switcher_already_in">open</string>
     <plurals name="age_days_ago">
         <item quantity="one">%1$d day ago</item>
         <item quantity="other">%1$d days ago</item>
@@ -304,8 +292,7 @@
     <string name="col_waiting">Waiting on</string>
     <string name="col_updated">Updated</string>
     <string name="pull_ref">%1$s#%2$d</string>
-    <string name="pull_add">Add</string>
-    <string name="pull_add_to_review">Add to this review</string>
+    <string name="pull_open">Open</string>
     <string name="pull_comments">Comments</string>
 
     <string name="waiting_you">You</string>

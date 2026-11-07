@@ -7,8 +7,8 @@ import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 
 /** One thing the switcher finds. */
 sealed interface SwitcherItem {
-    /** A source the review holds, with its [title]. */
-    data class InReview(val source: Source, val title: String) : SwitcherItem
+    /** A source in the strip, with its [title]. */
+    data class InWorkspace(val source: Source, val title: String) : SwitcherItem
 
     /** A file [source]'s change touches. */
     data class Changed(val source: Source, val file: ChangedFile) : SwitcherItem
@@ -16,9 +16,9 @@ sealed interface SwitcherItem {
     /** A file in [source] at its head that its change does not touch. */
     data class AtHead(val source: Source, val path: String) : SwitcherItem
 
-    /** An open pull request in a followed repo, not in the review. */
+    /** An open pull request in a followed repo, not in the strip. */
     data class FollowedPull(val source: Source.PullRequest, val pull: PullRequestSummary) : SwitcherItem
 
-    /** A local branch of a followed repo, not in the review. */
+    /** A local branch of a followed repo, not in the strip. */
     data class FollowedBranch(val source: Source.BranchAgainstBase, val branch: LocalBranch) : SwitcherItem
 }

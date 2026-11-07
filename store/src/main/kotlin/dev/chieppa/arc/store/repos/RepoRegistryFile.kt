@@ -5,8 +5,8 @@ import dev.chieppa.arc.store.files.StoreJson
 import java.nio.file.Path
 
 /**
- * The repos Arc knows, by name, with the folder of each one's clone, kept in a JSON file at [path]. Every review shares
- * them. A missing file, or an entry whose name is not a repo name, reads as nothing.
+ * The repos Arc knows, by name, with the folder of each one's clone, kept in a JSON file at [path]. A missing file, or
+ * an entry whose name is not a repo name, reads as nothing.
  */
 class RepoRegistryFile(private val path: Path) {
     fun load(): Map<RepoName, Path> =

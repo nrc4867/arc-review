@@ -1,6 +1,6 @@
 package dev.chieppa.arc.ui.switcher
 
-/** What the switcher searches: everything, only sources (the review's and followed repos'), or only files. */
+/** What the switcher searches: everything, only sources (the strip's and followed repos'), or only files. */
 enum class SwitcherScope {
     All,
     Sources,

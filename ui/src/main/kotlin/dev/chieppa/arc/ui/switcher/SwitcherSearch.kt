@@ -14,7 +14,7 @@ object SwitcherSearch {
         val files = scope != SwitcherScope.Sources
         val heads = if (query.isBlank() && scope != SwitcherScope.Files) emptyList() else inputs.headFiles
         return buildList {
-            if (sources) add(section(SectionKind.InReview, rank(query, inputs.sources), if (one) SwitcherLimits.ONE_SCOPE else SwitcherLimits.SOURCES))
+            if (sources) add(section(SectionKind.InWorkspace, rank(query, inputs.sources), if (one) SwitcherLimits.ONE_SCOPE else SwitcherLimits.SOURCES))
             if (files) add(section(SectionKind.Files, rank(query, inputs.files + heads), if (one) SwitcherLimits.ONE_SCOPE else SwitcherLimits.FILES))
             if (sources) add(section(SectionKind.Followed, rank(query, inputs.followed), if (one) SwitcherLimits.ONE_SCOPE else SwitcherLimits.FOLLOWED))
         }.filter { it.items.isNotEmpty() }
@@ -22,7 +22,7 @@ object SwitcherSearch {
 
     /** How well [item] matches [query], lower is better, or null when it does not. */
     fun score(query: String, item: SwitcherItem): Int? = when (item) {
-        is SwitcherItem.InReview -> best(matchScore(query, item.title), matchScore(query, item.source.ref))
+        is SwitcherItem.InWorkspace -> best(matchScore(query, item.title), matchScore(query, item.source.ref))
         is SwitcherItem.Changed -> fileScore(query, item.file.path)
         is SwitcherItem.AtHead -> fileScore(query, item.path)
         is SwitcherItem.FollowedPull -> best(matchScore(query, item.pull.title), matchScore(query, item.source.ref))

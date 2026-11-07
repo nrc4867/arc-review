@@ -9,7 +9,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 /**
- * The saved filters and notification rules, which every review shares, kept in a JSON file at [path]. A filter or rule
+ * The saved filters and notification rules, kept in a JSON file at [path]. A filter or rule
  * that does not read is left out.
  */
 class WatchlistFile(private val path: Path) {

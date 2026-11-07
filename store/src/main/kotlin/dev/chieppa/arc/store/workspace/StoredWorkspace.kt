@@ -1,15 +1,13 @@
-package dev.chieppa.arc.store.review
+package dev.chieppa.arc.store.workspace
 
 import kotlinx.serialization.Serializable
 
 /**
- * A review as written: its sources by ref, the active one, its panes, pages and marks, each source's view, each
+ * The workspace as written: its sources by ref, the active one, its panes, pages and marks, each source's view, each
  * pane's own state, by pane id, and the heads each source was read at.
  */
 @Serializable
-data class StoredReview(
-    val id: String,
-    val name: String,
+data class StoredWorkspace(
     val sources: List<String> = emptyList(),
     val active: String? = null,
     val panes: List<StoredPane> = emptyList(),

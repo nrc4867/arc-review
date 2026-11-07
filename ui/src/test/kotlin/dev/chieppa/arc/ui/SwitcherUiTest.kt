@@ -18,7 +18,7 @@ import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.git.repo.LocalBranch
 import dev.chieppa.arc.host.github.repo.GitHubRepo
 import dev.chieppa.arc.ui.frame.ArcFrame
-import dev.chieppa.arc.ui.review.ReviewState
+import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.switcher.SwitcherScope
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.test.setStretchContent
@@ -34,10 +34,9 @@ class SwitcherUiTest {
     private val data = FakeReviewData()
     private val other = Source.Commit(data.repo, CommitSha("c".repeat(40)))
     private val field = "Switch to a source, file or pull request, or paste a link"
-    private val newReviews = mutableListOf<String>()
 
     private fun ComposeUiTest.open(): Workbench {
-        val workbench = Workbench(data = data, state = ReviewState(repos = mapOf(data.repo to Path.of("."))), onNewReviewWith = { newReviews += it })
+        val workbench = Workbench(data = data, state = WorkspaceState(repos = mapOf(data.repo to Path.of("."))))
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         waitForIdle()
         assertTrue(workbench.addSource(other.ref))
@@ -64,7 +63,7 @@ class SwitcherUiTest {
         val workbench = open()
         assertEquals(data.source, workbench.state.active)
         search("demo@c")
-        assertTrue(shows("IN THIS REVIEW"))
+        assertTrue(shows("OPEN"))
         assertTrue(shows("1 result"))
         press(Key.Enter)
         assertEquals(other, workbench.state.active)
@@ -96,16 +95,16 @@ class SwitcherUiTest {
     }
 
     @Test
-    fun followedBranchesShowAndAltEnterAddsOneWithoutSwitching() = runComposeUiTest {
+    fun followedBranchesShowAndAltEnterOpensOneWithoutSwitching() = runComposeUiTest {
         data.branchList = listOf(LocalBranch("spike/token-binding", "mfischer", 0))
         val workbench = open()
         search("binding")
         assertTrue(shows("FOLLOWED REPOS"))
-        assertTrue(shows("not in this review"))
+        assertTrue(shows("not open"))
         assertTrue(shows("mfischer"))
         press(Key.Enter, Key.AltLeft)
         val branch = Source.BranchAgainstBase(data.repo, BranchName("spike/token-binding"))
-        assertTrue(branch in workbench.state.review.sources)
+        assertTrue(branch in workbench.state.workspace.sources)
         assertEquals(data.source, workbench.state.active)
     }
 
@@ -120,7 +119,7 @@ class SwitcherUiTest {
     }
 
     @Test
-    fun aPastedLinkShowsWhatItPointsAtAndAddsIt() = runComposeUiTest {
+    fun aPastedLinkShowsWhatItPointsAtAndOpensIt() = runComposeUiTest {
         data.origin = GitHubRepo("lumen", "demo")
         val workbench = open()
         waitUntil { workbench.gitHubRepos.isNotEmpty() }
@@ -128,22 +127,11 @@ class SwitcherUiTest {
         assertTrue(shows("GitHub commit"))
         assertTrue(shows("OPEN AS"))
         assertTrue(shows("Commit dddd123"))
-        assertTrue(shows("New review with this commit"))
+        assertFalse(shows("New review"))
         press(Key.Enter)
         val commit = Source.Commit(data.repo, CommitSha("dddd1234"))
-        assertTrue(commit in workbench.state.review.sources)
+        assertTrue(commit in workbench.state.workspace.sources)
         assertEquals(commit, workbench.state.active)
-    }
-
-    @Test
-    fun aNewReviewCanStartWithTheLinkedSource() = runComposeUiTest {
-        data.origin = GitHubRepo("lumen", "demo")
-        val workbench = open()
-        waitUntil { workbench.gitHubRepos.isNotEmpty() }
-        search("https://github.com/lumen/demo/commit/dddd1234")
-        onNodeWithText("New review with this commit").performClick()
-        waitForIdle()
-        assertEquals(listOf("demo@dddd1234"), newReviews)
     }
 }
 

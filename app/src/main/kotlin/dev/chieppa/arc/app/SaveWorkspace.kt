@@ -13,16 +13,16 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.withContext
 
 /**
- * Hands [workbench]'s review to [save] a moment after each change to it: its sources, panes, marks, each source's
+ * Hands [workbench]'s workspace to [save] a moment after each change to it: its sources, panes, marks, each source's
  * view, the panes' own state, the repos and the open tree rows.
  */
 @OptIn(FlowPreview::class)
 @Composable
-fun SaveReview(workbench: Workbench, save: (Workbench) -> Unit) {
+fun SaveWorkspace(workbench: Workbench, save: (Workbench) -> Unit) {
     val current by rememberUpdatedState(save)
     LaunchedEffect(workbench) {
         val state = workbench.state
-        snapshotFlow { listOf(state.review, state.views, state.paneStates, state.repos, workbench.treeState.expanded) }
+        snapshotFlow { listOf(state.workspace, state.views, state.paneStates, state.repos, workbench.treeState.expanded) }
             .drop(1)
             .debounce(AppConstants.SAVE_DELAY_MILLIS)
             .collect { withContext(Dispatchers.IO) { current(workbench) } }

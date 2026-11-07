@@ -17,7 +17,7 @@ import androidx.compose.ui.test.withKeyDown
 import dev.chieppa.arc.core.mark.FileReviewState
 import dev.chieppa.arc.core.pane.PaneView
 import dev.chieppa.arc.ui.frame.ArcFrame
-import dev.chieppa.arc.ui.review.ReviewState
+import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.test.setStretchContent
 import dev.chieppa.stretch.theme.StretchThemes
@@ -31,7 +31,7 @@ class ReviewFlowUiTest {
     private val data = FakeReviewData()
 
     private fun ComposeUiTest.open(): Workbench {
-        val workbench = Workbench(data = data, state = ReviewState(repos = mapOf(data.repo to Path.of("."))))
+        val workbench = Workbench(data = data, state = WorkspaceState(repos = mapOf(data.repo to Path.of("."))))
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         waitForIdle()
         assertTrue(workbench.addSource(data.source.ref))

@@ -1,21 +1,21 @@
 package dev.chieppa.arc.ui.review
 
-import dev.chieppa.arc.core.review.Review
+import dev.chieppa.arc.core.workspace.Workspace
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.stretch.frame.PaneEdge
 import dev.chieppa.stretch.frame.PaneLayout
 
 /**
- * Switching the active source: each source keeps its own layout, and pinned panes, which belong to the review, follow
+ * Switching the active source: each source keeps its own layout, and pinned panes, which belong to the workspace, follow
  * into every source's layout, split off to the end the first time they arrive.
  */
 object SourceSwitching {
-    /** The review and views with [source] active and its layout holding every pinned pane. */
-    fun activate(review: Review, views: Map<Source, SourceView>, source: Source): Pair<Review, Map<Source, SourceView>> {
-        if (source !in review.sources) return review to views
+    /** The workspace and views with [source] active and its layout holding every pinned pane. */
+    fun activate(workspace: Workspace, views: Map<Source, SourceView>, source: Source): Pair<Workspace, Map<Source, SourceView>> {
+        if (source !in workspace.sources) return workspace to views
         val view = views[source] ?: SourceView()
-        val layout = withPinned(view.layout, review.pinnedIds)
-        return review.activate(source) to views + (source to view.copy(layout = layout))
+        val layout = withPinned(view.layout, workspace.pinnedIds)
+        return workspace.activate(source) to views + (source to view.copy(layout = layout))
     }
 
     /** [layout] with each of [pinned] that it lacks, together in one pane split off at the end. */

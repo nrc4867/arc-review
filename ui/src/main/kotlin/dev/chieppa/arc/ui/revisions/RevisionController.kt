@@ -10,7 +10,7 @@ import dev.chieppa.arc.core.revision.SourceRevision
 import dev.chieppa.arc.core.revision.TreePathOrder
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.ui.review.PaneController
-import dev.chieppa.arc.ui.review.ReviewState
+import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.services.ReviewData
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -18,12 +18,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
- * Each source's revisions: reading them in the background from the heads the review recorded, the two commits picked
+ * Each source's revisions: reading them in the background from the heads the workspace recorded, the two commits picked
  * in the Commits drawer and the files whose change differs between them, and opening a file at a revision or its
  * change between two. A new read of a source cancels the one before it; the old revisions stay until it is done.
  */
 class RevisionController(
-    private val state: ReviewState,
+    private val state: WorkspaceState,
     private val data: ReviewData,
     private val scope: CoroutineScope,
     private val panes: PaneController,
@@ -43,14 +43,14 @@ class RevisionController(
         jobs[source]?.cancel()
         jobs[source] = scope.launch {
             val read = try {
-                val history = data.revisions(source, state.review.headsOf(source))
+                val history = data.revisions(source, state.workspace.headsOf(source))
                 RevisionsRead(history, data.checks(source.repo, history.revisions.map { it.head }))
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
                 return@launch
             }
-            if (source in state.review.sources) state.revisions = state.revisions + (source to read)
+            if (source in state.workspace.sources) state.revisions = state.revisions + (source to read)
         }
     }
 

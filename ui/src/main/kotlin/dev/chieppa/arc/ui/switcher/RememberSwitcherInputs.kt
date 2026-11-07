@@ -7,7 +7,7 @@ import dev.chieppa.arc.ui.workbench.Workbench
 import kotlinx.coroutines.delay
 
 /**
- * What the switcher searches for [query] in [scope], kept current: the review's sources and their changed files, the
+ * What the switcher searches for [query] in [scope], kept current: the strip's sources and their changed files, the
  * active source's other files at its head, and once typing pauses, the open pull requests GitHub finds in followed
  * repos and their local branches. Without a token only the branches come back.
  */
@@ -33,11 +33,11 @@ fun rememberSwitcherInputs(workbench: Workbench, query: String, scope: SwitcherS
         delay(SwitcherLimits.DEBOUNCE_MILLIS)
         value = workbench.followed.pulls(workbench.gitHubRepos.values.toSet(), words).orEmpty()
     }.value
-    val sources = state.review.sources
+    val sources = state.workspace.sources
     val changed = sources.flatMap { source -> state.snapshot(source)?.files.orEmpty().map { SwitcherItem.Changed(source, it) } }
     val activeChanged = active?.let(state::snapshot)?.files.orEmpty().map { it.path }.toSet()
     return SwitcherInputs(
-        sources = sources.map { SwitcherItem.InReview(it, state.pulls[it]?.title ?: state.snapshot(it)?.title.orEmpty()) },
+        sources = sources.map { SwitcherItem.InWorkspace(it, state.pulls[it]?.title ?: state.snapshot(it)?.title.orEmpty()) },
         files = changed,
         headFiles = if (active == null) emptyList() else headPaths.filter { it !in activeChanged }.map { SwitcherItem.AtHead(active, it) },
         followed = FollowedResults.of(words, pulls, branches, workbench.gitHubRepos, sources),

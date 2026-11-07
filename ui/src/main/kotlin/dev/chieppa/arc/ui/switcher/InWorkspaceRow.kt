@@ -9,7 +9,7 @@ import dev.chieppa.arc.design.generated.sources_progress
 import dev.chieppa.arc.design.generated.switcher_commits
 import dev.chieppa.arc.design.generated.switcher_meta
 import dev.chieppa.arc.ui.pulls.CheckMark
-import dev.chieppa.arc.ui.review.ReviewState
+import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.sources.ProgressRing
 import dev.chieppa.arc.ui.sources.sourceIcon
 import dev.chieppa.arc.ui.util.ArcSizes
@@ -21,11 +21,11 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * A source of the review in the switcher: its kind, title and ref, who made it and how many commits it has, how much
+ * A source in the strip, in the switcher: its kind, title and ref, who made it and how many commits it has, how much
  * of it is reviewed, and its checks.
  */
 @Composable
-fun InReviewRow(item: SwitcherItem.InReview, state: ReviewState, query: String, highlighted: Boolean, onClick: () -> Unit) {
+fun InWorkspaceRow(item: SwitcherItem.InWorkspace, state: WorkspaceState, query: String, highlighted: Boolean, onClick: () -> Unit) {
     val c = Stretch.colors
     val source = item.source
     val snapshot = state.snapshot(source)

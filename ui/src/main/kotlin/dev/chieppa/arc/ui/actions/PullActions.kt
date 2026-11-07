@@ -10,7 +10,7 @@ import dev.chieppa.stretch.core.ActionRegistry
 
 /**
  * Registers the actions on a pull request's row in a saved filter's list. Each acts on the row the menu is open on,
- * so none is offered from the palette. Opening or adding one whose repo has no clone here clones it first.
+ * so none is offered from the palette. Opening one whose repo has no clone here clones it first.
  */
 fun registerPullActions(registry: ActionRegistry, workbench: Workbench) {
     fun action(id: ActionId, available: (MenuTarget.OfPull) -> Boolean, run: (MenuTarget.OfPull) -> Unit) =
@@ -27,12 +27,8 @@ fun registerPullActions(registry: ActionRegistry, workbench: Workbench) {
 
     val state = workbench.state
     action(ArcActionIds.OPEN_PULL, { true }) { target -> workbench.withPullSource(target.pull) { workbench.openSource(it) } }
-    action(ArcActionIds.ADD_PULL, { it.source == null || it.source !in state.review.sources }) { target ->
+    action(ArcActionIds.ADD_PULL, { it.source == null || it.source !in state.workspace.sources }) { target ->
         workbench.withPullSource(target.pull) { workbench.addSourceBeside(it.ref) }
-    }
-    action(ArcActionIds.OPEN_PULL_IN_NEW_REVIEW, { true }) { target -> workbench.withPullSource(target.pull) { workbench.onNewReviewWith(it.ref) } }
-    action(ArcActionIds.OPEN_PULL_REVIEW, { target -> target.source?.let(workbench::otherReviewHolding) != null }) { target ->
-        target.source?.let(workbench::otherReviewHolding)?.let { workbench.onOpenReview(it.id) }
     }
     action(ArcActionIds.OPEN_PULL_ON_GITHUB, { true }) { workbench.links.open(it.pull.url) }
     fun copy(id: ActionId, text: (PullRequestSummary) -> String?) =

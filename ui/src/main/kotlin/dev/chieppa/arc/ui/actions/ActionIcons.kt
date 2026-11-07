@@ -33,8 +33,6 @@ private val icons: Map<String, ImageVector> = mapOf(
     ArcActionIds.OPEN_REVISIONS.value to ArcIcons.Matrix,
     ArcActionIds.OPEN_PULL.value to ArcIcons.PullRequest,
     ArcActionIds.ADD_PULL.value to StretchIcons.Plus,
-    ArcActionIds.OPEN_PULL_IN_NEW_REVIEW.value to StretchIcons.Layers,
-    ArcActionIds.OPEN_PULL_REVIEW.value to StretchIcons.Layers,
     ArcActionIds.OPEN_PULL_ON_GITHUB.value to StretchIcons.ExternalLink,
     ArcActionIds.COPY_PULL_LINK.value to StretchIcons.Link,
     ArcActionIds.COPY_PULL_BRANCH.value to ArcIcons.Branch,

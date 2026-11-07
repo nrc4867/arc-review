@@ -6,7 +6,7 @@ import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
 import dev.chieppa.arc.core.pane.PaneView
 import dev.chieppa.arc.core.pane.Revision
-import dev.chieppa.arc.core.review.Review
+import dev.chieppa.arc.core.workspace.Workspace
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 
@@ -39,9 +39,9 @@ object PaneFactory {
     /** Whether a file at [path] has a rendered view, which a pane opened on it alone shows first. */
     fun rendersFirst(path: String): Boolean = isMarkdown(path) || isSvg(path)
 
-    /** An id no pane in [review] has yet. */
-    fun nextId(review: Review): PaneId {
-        val taken = review.tabIds.mapNotNull { it.removePrefix(PREFIX).toIntOrNull() }
+    /** An id no pane in [workspace] has yet. */
+    fun nextId(workspace: Workspace): PaneId {
+        val taken = workspace.tabIds.mapNotNull { it.removePrefix(PREFIX).toIntOrNull() }
         return PaneId(PREFIX + ((taken.maxOrNull() ?: 0) + 1))
     }
 }

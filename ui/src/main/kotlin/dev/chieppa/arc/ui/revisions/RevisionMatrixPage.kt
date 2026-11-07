@@ -37,7 +37,7 @@ fun RevisionMatrixPage(page: Page.RevisionMatrix, workbench: Workbench, modifier
     val state = workbench.state
     val source = page.source
     val head = state.snapshot(source)?.revisions?.head
-    val recorded = state.review.headsOf(source).size
+    val recorded = state.workspace.headsOf(source).size
     LaunchedEffect(source, head, recorded) { if (head != null) workbench.revisions.load(source) }
     val read = state.revisions[source] ?: return Box(modifier.fillMaxSize())
     val matrix = rememberMatrix(workbench, source, read)

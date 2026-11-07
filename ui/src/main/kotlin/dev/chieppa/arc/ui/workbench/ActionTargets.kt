@@ -26,7 +26,7 @@ object ActionTargets {
         null -> selectedFile(workbench) ?: workbench.marks.current
     }
 
-    /** The files to mark: the tree rows' selection, the tab's file, else the review keys' targets. */
+    /** The files to mark: the tree rows' selection, the tab's file, else the marking keys' targets. */
     fun files(workbench: Workbench): Map<Source, List<String>> = when (val target = workbench.menuTarget) {
         is MenuTarget.OfRows -> ReviewTargets.selected(ReviewTree.roots(workbench.state), target.selection + target.item.key)
         is MenuTarget.OfPane -> workbench.state.pane(target.id)?.let(::changeOf)?.let { (source, path) -> mapOf(source to listOf(path)) }.orEmpty()
@@ -50,7 +50,7 @@ object ActionTargets {
     private fun selectedFile(workbench: Workbench): Pair<Source, String>? {
         if (!workbench.treeFocused) return null
         val (ref, path) = workbench.treeState.selection.singleOrNull()?.let(TreeKeys::fileOf) ?: return null
-        val source = workbench.state.review.sources.firstOrNull { it.ref == ref } ?: return null
+        val source = workbench.state.workspace.sources.firstOrNull { it.ref == ref } ?: return null
         return source to path
     }
 }

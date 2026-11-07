@@ -27,7 +27,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The head of the Files drawer for the active source: one compact row with what the tree shows (all changes or one
- * commit) and the changed-since filter, over how far the review has got.
+ * commit) and the changed-since filter, over how far reviewing has got.
  */
 @Composable
 fun FilesHeader(workbench: Workbench, modifier: Modifier = Modifier) {

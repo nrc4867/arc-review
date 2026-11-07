@@ -9,7 +9,7 @@ import dev.chieppa.stretch.frame.chord
 object SwitcherKeys {
     val SWITCH: KeyChord = KeyChord.parse("Enter")
     val NEW_PANE: KeyChord = KeyChord.parse("Ctrl Enter")
-    val ADD: KeyChord = KeyChord.parse("Alt Enter")
+    val BESIDE: KeyChord = KeyChord.parse("Alt Enter")
     val SCOPE: KeyChord = KeyChord.parse("Tab")
     val SCOPE_BACK: KeyChord = KeyChord.parse("Shift Tab")
     val DOWN: KeyChord = KeyChord.parse("Down")
@@ -23,7 +23,7 @@ object SwitcherKeys {
     fun pickOf(event: KeyEvent): SwitcherPick? = when (event.chord()) {
         SWITCH -> SwitcherPick.Switch
         NEW_PANE -> SwitcherPick.NewPane
-        ADD -> SwitcherPick.Add
+        BESIDE -> SwitcherPick.Beside
         else -> null
     }
 

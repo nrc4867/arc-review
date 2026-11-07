@@ -9,9 +9,9 @@ import dev.chieppa.arc.host.github.repo.GitHubRepo
 import dev.chieppa.stretch.frame.matchScore
 
 /**
- * What followed repos hold that the review does not: the open [pulls] GitHub found, each in the local clone of its
+ * What followed repos hold that the strip does not: the open [pulls] GitHub found, each in the local clone of its
  * repo ([gitHubRepos] says which clone comes from which repo), and the local [branches] whose names match [query].
- * Sources the review holds, [inReview], are left out.
+ * Sources in the strip, [inWorkspace], are left out.
  */
 object FollowedResults {
     fun of(
@@ -19,10 +19,10 @@ object FollowedResults {
         pulls: List<PullRequestSummary>,
         branches: Map<RepoName, List<LocalBranch>>,
         gitHubRepos: Map<RepoName, GitHubRepo>,
-        inReview: Collection<Source>,
+        inWorkspace: Collection<Source>,
     ): List<SwitcherItem> {
         if (query.isBlank()) return emptyList()
-        val held = inReview.toSet()
+        val held = inWorkspace.toSet()
         val heldBranches = held.filterIsInstance<Source.BranchAgainstBase>().map { it.repo to it.branch }.toSet()
         val pullItems = pulls.mapNotNull { pull ->
             val repo = gitHubRepos.entries.firstOrNull { it.value == pull.repo }?.key ?: return@mapNotNull null

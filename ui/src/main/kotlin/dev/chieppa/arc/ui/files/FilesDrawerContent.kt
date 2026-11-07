@@ -13,7 +13,7 @@ import dev.chieppa.stretch.ui.Divider
  */
 @Composable
 fun ColumnScope.FilesDrawerContent(workbench: Workbench) {
-    if (workbench.state.review.sources.isEmpty()) return
+    if (workbench.state.workspace.sources.isEmpty()) return
     FilesHeader(workbench)
     Divider()
     FileTree(workbench, Modifier.fillMaxWidth().weight(1f))

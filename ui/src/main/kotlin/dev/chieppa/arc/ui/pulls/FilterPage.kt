@@ -29,8 +29,8 @@ import org.jetbrains.compose.resources.stringResource
  * A saved filter's tab: its tool row over its pull requests, grouped as the filter says, each group folding under its
  * head. While it shows, the filter counts as looked at, and what changed since it was last looked at stays marked.
  * A page whose filter is gone is plain. Columns that do not fit beside a readable title are left out; a click on a pull
- * request opens it in this review, cloning its repo first when there is no clone of it here, and a right-click offers
- * what else can be done with it.
+ * request opens it in the strip and switches to it, cloning its repo first when there is no clone of it here, and a
+ * right-click offers what else can be done with it.
  */
 @Composable
 fun FilterPage(page: Page.Filter, workbench: Workbench, modifier: Modifier = Modifier) {
@@ -61,15 +61,13 @@ fun FilterPage(page: Page.Filter, workbench: Workbench, modifier: Modifier = Mod
                     if (open) {
                         items(group.pulls, key = { group.name + it.key }) { pull ->
                             val source = workbench.sourceOf(pull)
-                            val holding = source?.let(workbench::reviewHolding)
                             PullRow(
                                 pull = pull,
                                 ref = stringResource(Res.string.pull_ref, source?.repo?.value ?: pull.repo.name, pull.number),
                                 isNew = watch.isNew(filter.id, pull),
                                 waiting = WaitingOnRule.of(pull, watch.viewer),
                                 now = now,
-                                holding = holding,
-                                onAdd = if (holding == null) ({ workbench.withPullSource(pull) { workbench.addSource(it.ref) } }) else null,
+                                open = source != null && source in workbench.state.workspace.sources,
                                 columns = columns,
                                 onOpen = { workbench.withPullSource(pull) { workbench.openSource(it) } },
                                 clone = when (pull.repo) {

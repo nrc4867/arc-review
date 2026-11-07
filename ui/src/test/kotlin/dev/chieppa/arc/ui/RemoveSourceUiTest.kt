@@ -37,10 +37,10 @@ class RemoveSourceUiTest {
         onNodeWithContentDescription("Remove source").performClick()
         waitForIdle()
 
-        assertTrue(workbench.state.review.sources.isEmpty())
-        assertEquals(listOf(pinned), workbench.state.review.panes.map { it.id })
+        assertTrue(workbench.state.workspace.sources.isEmpty())
+        assertEquals(listOf(pinned), workbench.state.workspace.panes.map { it.id })
         assertTrue(pinned.value in workbench.paneLayout.tabs)
-        assertEquals(1, workbench.state.review.marks.size)
+        assertEquals(1, workbench.state.workspace.marks.size)
 
         assertTrue(workbench.addSource(data.source.ref))
         waitUntil { workbench.state.snapshot(data.source) != null }
@@ -56,7 +56,7 @@ class RemoveSourceUiTest {
         assertTrue(shows("Copy source ref"))
         onNodeWithText("Remove source").performClick()
         waitForIdle()
-        assertTrue(workbench.state.review.sources.isEmpty())
+        assertTrue(workbench.state.workspace.sources.isEmpty())
 
         workbench.addSource(data.source.ref)
         waitForIdle()
@@ -74,25 +74,5 @@ class RemoveSourceUiTest {
         waitForIdle()
         onNodeWithText("Copy source ref").performClick()
         assertEquals(data.source.ref, copied.last)
-    }
-
-    @Test
-    fun hoveringAChipShowsItsRemoveButtonEvenAfterTheReviewSelectorWasOpened() = runComposeUiTest {
-        val workbench = openReview(data)
-        val other = "demo@" + "c".repeat(40)
-        assertTrue(workbench.addSource(other))
-        workbench.activateSource(data.source)
-        waitForIdle()
-        val enabledRemoves = { onAllNodesWithContentDescription("Remove source").fetchSemanticsNodes().count { SemanticsProperties.Disabled !in it.config } }
-        assertEquals(1, enabledRemoves())
-        onAllNodesWithContentDescription("Review").onFirst().performClick()
-        waitForIdle()
-        assertEquals(2, onAllNodes(isRoot()).fetchSemanticsNodes().size)
-        onAllNodes(isRoot()).onLast().performKeyInput { pressKey(Key.Escape) }
-        waitForIdle()
-        assertEquals(1, onAllNodes(isRoot()).fetchSemanticsNodes().size)
-        onNodeWithContentDescription(other).performMouseInput { moveTo(center) }
-        waitForIdle()
-        assertEquals(2, enabledRemoves())
     }
 }

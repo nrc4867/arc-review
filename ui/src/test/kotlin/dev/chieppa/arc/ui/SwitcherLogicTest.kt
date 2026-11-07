@@ -33,8 +33,8 @@ class SwitcherLogicTest {
 
     private val inputs = SwitcherInputs(
         sources = listOf(
-            SwitcherItem.InReview(api412, "Rotate refresh tokens on every use"),
-            SwitcherItem.InReview(web88, "Silent token refresh in useSession"),
+            SwitcherItem.InWorkspace(api412, "Rotate refresh tokens on every use"),
+            SwitcherItem.InWorkspace(web88, "Silent token refresh in useSession"),
         ),
         files = listOf(
             SwitcherItem.Changed(api412, ChangedFile("auth/token/TokenService.kt", ChangeStatus.Modified, added = 48, removed = 19)),
@@ -47,7 +47,7 @@ class SwitcherLogicTest {
     @Test
     fun everyScopeShowsSectionsInOrderWithTheirCounts() {
         val sections = SwitcherSearch.sections("tok", SwitcherScope.All, inputs)
-        assertEquals(listOf(SectionKind.InReview, SectionKind.Files), sections.map { it.kind })
+        assertEquals(listOf(SectionKind.InWorkspace, SectionKind.Files), sections.map { it.kind })
         assertEquals(2, sections[0].total)
         val files = sections[1].items.map { (it as? SwitcherItem.Changed)?.file?.path ?: (it as SwitcherItem.AtHead).path }
         assertEquals(listOf("auth/token/TokenService.kt", "src/hooks/useTokenRefresh.test.tsx", "tokens/README.md"), files)
@@ -56,13 +56,13 @@ class SwitcherLogicTest {
     @Test
     fun sourcesMatchOnTheirRefToo() {
         val sections = SwitcherSearch.sections("web#", SwitcherScope.Sources, inputs)
-        assertEquals(listOf(web88), sections.single().items.map { (it as SwitcherItem.InReview).source })
+        assertEquals(listOf(web88), sections.single().items.map { (it as SwitcherItem.InWorkspace).source })
     }
 
     @Test
     fun oneScopeShowsOnlyItsSections() {
         assertEquals(listOf(SectionKind.Files), SwitcherSearch.sections("", SwitcherScope.Files, inputs).map { it.kind })
-        assertEquals(listOf(SectionKind.InReview), SwitcherSearch.sections("", SwitcherScope.Sources, inputs).map { it.kind })
+        assertEquals(listOf(SectionKind.InWorkspace), SwitcherSearch.sections("", SwitcherScope.Sources, inputs).map { it.kind })
     }
 
     @Test
@@ -103,7 +103,7 @@ class SwitcherLogicTest {
         assertEquals(Source.Commit(api, CommitSha("b7e19d2")), target.source)
         assertEquals(Source.PullRequest(api, 398), target.pullRequest)
         assertTrue(target.withinPull)
-        assertEquals(3, OpenAs.of(target).size)
+        assertEquals(2, OpenAs.of(target).size)
     }
 
     @Test
@@ -117,7 +117,7 @@ class SwitcherLogicTest {
     fun aRefOfAKnownRepoReadsAsATargetAndASearchDoesNot() {
         val target = PastedTargets.read("api#398", origins, origins.keys)!!
         assertEquals(Source.PullRequest(api, 398), target.source)
-        assertEquals(2, OpenAs.of(target).size)
+        assertEquals(1, OpenAs.of(target).size)
         assertNull(PastedTargets.read("tok", origins, origins.keys))
         assertNull(PastedTargets.read("nope#3", origins, origins.keys))
         assertNull(PastedTargets.read("remove token", origins, origins.keys))

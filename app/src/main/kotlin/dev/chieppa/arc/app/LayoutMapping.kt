@@ -1,7 +1,7 @@
 package dev.chieppa.arc.app
 
-import dev.chieppa.arc.store.review.StoredPaneLayout
-import dev.chieppa.arc.store.review.StoredPaneNode
+import dev.chieppa.arc.store.workspace.StoredPaneLayout
+import dev.chieppa.arc.store.workspace.StoredPaneNode
 import dev.chieppa.stretch.frame.PaneAxis
 import dev.chieppa.stretch.frame.PaneLayout
 import dev.chieppa.stretch.frame.PaneLeaf

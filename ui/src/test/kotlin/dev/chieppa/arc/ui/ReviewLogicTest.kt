@@ -10,7 +10,7 @@ import dev.chieppa.arc.ui.find.FindQuery
 import dev.chieppa.arc.ui.review.MarkController
 import dev.chieppa.arc.ui.review.PaneController
 import dev.chieppa.arc.ui.review.RepoNames
-import dev.chieppa.arc.ui.review.ReviewState
+import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.review.SourceLoad
 import dev.chieppa.arc.ui.review.SourceSwitching
 import dev.chieppa.arc.ui.tree.FileTreeBuilder
@@ -33,18 +33,18 @@ class ReviewLogicTest {
     private val data = FakeReviewData()
     private val other = SourceRefs.parse("demo@${"c".repeat(40)}")!!
 
-    private suspend fun loaded(): ReviewState {
-        val state = ReviewState(repos = mapOf(data.repo to Path.of(".")))
+    private suspend fun loaded(): WorkspaceState {
+        val state = WorkspaceState(repos = mapOf(data.repo to Path.of(".")))
         for (source in listOf(data.source, other)) {
-            state.review = state.review.add(source)
+            state.workspace = state.workspace.add(source)
             state.loads = state.loads + (source to SourceLoad.Ready(data.read(source)))
         }
         return state
     }
 
-    private fun activate(state: ReviewState, source: dev.chieppa.arc.core.source.Source) {
-        val (review, views) = SourceSwitching.activate(state.review, state.views, source)
-        state.review = review
+    private fun activate(state: WorkspaceState, source: dev.chieppa.arc.core.source.Source) {
+        val (review, views) = SourceSwitching.activate(state.workspace, state.views, source)
+        state.workspace = review
         state.views = views
     }
 
@@ -75,7 +75,7 @@ class ReviewLogicTest {
         panes.openChange(data.source, "docs/Guide.md", newTab = true)
         assertEquals(2, state.paneLayout.tabs.size)
         panes.close(panes.focused!!.id.value)
-        assertEquals(1, state.review.panes.size)
+        assertEquals(1, state.workspace.panes.size)
     }
 
     @Test

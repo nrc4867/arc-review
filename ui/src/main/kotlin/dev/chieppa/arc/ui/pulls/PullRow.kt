@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,10 +32,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.filter_new_since
-import dev.chieppa.arc.design.generated.pull_add
 import dev.chieppa.arc.design.generated.pull_clone_failed
 import dev.chieppa.arc.design.generated.pull_cloning
 import dev.chieppa.arc.design.generated.pull_comments
+import dev.chieppa.arc.design.generated.pull_open
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.pulls.WaitingOn
 import dev.chieppa.arc.ui.util.ArcSizes
@@ -46,8 +45,6 @@ import dev.chieppa.stretch.theme.Icon
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
-import dev.chieppa.stretch.ui.Button
-import dev.chieppa.stretch.ui.ButtonKind
 import dev.chieppa.stretch.ui.Chip
 import dev.chieppa.stretch.ui.ChipKind
 import dev.chieppa.stretch.ui.Spinner
@@ -57,9 +54,9 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * One pull request in a saved filter's list: a dot when it changed since the filter was last looked at, its title, ref
  * and author, labels, who it waits on (nothing while no one is asked to review), checks, comments and age, and at the
- * end the review that holds it ([holding]) or, when it can be added to the open review, [onAdd]'s button. Only the
- * [columns] that fit show; the title takes the rest. While its repo is being cloned, or its [clone] failed, that shows
- * in place of the action. A click runs [onOpen] when there is one; a right-click opens [menu].
+ * end a chip when it is [open] in the strip. Only the [columns] that fit show; the title takes the rest. While its repo
+ * is being cloned, or its [clone] failed, that shows in place of the chip. A click runs [onOpen]; a right-click opens
+ * [menu].
  */
 @Composable
 fun PullRow(
@@ -68,10 +65,9 @@ fun PullRow(
     isNew: Boolean,
     waiting: WaitingOn,
     now: Long,
-    holding: String?,
-    onAdd: (() -> Unit)?,
+    open: Boolean,
     columns: PullColumns,
-    onOpen: (() -> Unit)?,
+    onOpen: () -> Unit,
     clone: CloneState? = null,
     menu: @Composable ColumnScope.(close: () -> Unit) -> Unit,
 ) {
@@ -83,10 +79,10 @@ fun PullRow(
             Modifier
                 .fillMaxWidth()
                 .heightIn(min = ArcSizes.pullRow)
-                .background(if (hovered && onOpen != null) c.surfaceControl else Color.Transparent)
+                .background(if (hovered) c.surfaceControl else Color.Transparent)
                 .bottomRule(c.chartGrid)
                 .hoverable(interaction)
-                .then(if (onOpen != null) Modifier.clickable(interaction, null, role = Role.Button, onClick = onOpen) else Modifier)
+                .clickable(interaction, null, role = Role.Button, onClick = onOpen)
                 .padding(horizontal = StretchSpacing.space12),
             horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space12),
             verticalAlignment = Alignment.CenterVertically,
@@ -131,8 +127,7 @@ fun PullRow(
                 when {
                     clone == CloneState.Cloning -> Spinner(stringResource(Res.string.pull_cloning, pull.repo.fullName))
                     clone == CloneState.Failed -> Tooltip(stringResource(Res.string.pull_clone_failed, pull.repo.fullName)) { Icon(StretchIcons.Error, c.errorInk) }
-                    holding != null -> Chip(holding, kind = ChipKind.On, icon = StretchIcons.Layers)
-                    onAdd != null -> Button(stringResource(Res.string.pull_add), onAdd, Modifier.height(ArcSizes.addButton), kind = ButtonKind.Quiet, icon = StretchIcons.Plus)
+                    open -> Chip(stringResource(Res.string.pull_open), kind = ChipKind.On)
                 }
             }
         }

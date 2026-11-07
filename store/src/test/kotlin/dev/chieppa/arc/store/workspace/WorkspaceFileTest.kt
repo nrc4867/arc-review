@@ -1,4 +1,4 @@
-package dev.chieppa.arc.store.review
+package dev.chieppa.arc.store.workspace
 
 import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.mark.FileMark
@@ -11,21 +11,22 @@ import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
 import dev.chieppa.arc.core.pane.PaneView
 import dev.chieppa.arc.core.pane.Revision
-import dev.chieppa.arc.core.review.Review
-import dev.chieppa.arc.core.review.ReviewId
 import dev.chieppa.arc.core.revision.RecordedHead
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.SourceRefs
+import dev.chieppa.arc.core.workspace.Workspace
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
-class ReviewStoreTest {
-    private val dir = Files.createTempDirectory("arc-reviews")
+class WorkspaceFileTest {
+    private val dir = Files.createTempDirectory("arc-workspace")
     private val range = SourceRefs.parse("stretch@1234abcd..5678abcd")!!
     private val branch = SourceRefs.parse("squash:main...dev")!!
-    private val review = Review(ReviewId("r1"), "Auth rollout")
+    private val workspace = Workspace()
         .add(range).add(branch).activate(branch)
         .withPane(Pane(PaneId("p1"), RepoName("stretch"), "a/B.kt", Revision("5678abcd"), PaneView.FullFile, base = Revision("1234abcd"), source = range))
         .withPane(Pane(PaneId("p2"), RepoName("squash"), "README.md", Revision("main"), PaneView.Rendered, pinned = true))
@@ -40,27 +41,28 @@ class ReviewStoreTest {
         )
 
     @Test
-    fun aReviewWithItsViewsComesBackAsItWasSaved() {
+    fun theWorkspaceWithItsViewsComesBackAsItWasSaved() {
         val layout = StoredPaneLayout(StoredPaneNode.Split("s1", "Row", listOf(StoredPaneNode.Leaf("a", listOf("p1")), StoredPaneNode.Leaf("b", listOf("p2"), "p2")), listOf(0.6f, 0.4f)), "a", 3)
         val views = listOf(StoredSourceView(range.ref, layout, listOf("stretch@1234abcd..5678abcd/a"), commit = "c".repeat(40)))
-        val store = ReviewStore(dir)
-        store.save(ReviewMapping.toStored(review, views, mapOf("p1" to StoredPaneState(split = false, line = 40))))
-        val loaded = store.load("r1")!!
-        assertEquals(review, ReviewMapping.toReview(loaded))
+        val file = WorkspaceFile(dir.resolve("workspace.json"))
+        assertFalse(file.exists())
+        file.save(WorkspaceMapping.toStored(workspace, views, mapOf("p1" to StoredPaneState(split = false, line = 40))))
+        assertTrue(file.exists())
+        val loaded = file.load()!!
+        assertEquals(workspace, WorkspaceMapping.toWorkspace(loaded))
         assertEquals(views, loaded.views)
         assertEquals(StoredPaneState(false, 40), loaded.paneStates["p1"])
-        assertEquals(listOf("Auth rollout"), store.all().map { it.name })
     }
 
     @Test
     fun entriesThatDoNotParseAreLeftOut() {
-        val stored = ReviewMapping.toStored(review).copy(
+        val stored = WorkspaceMapping.toStored(workspace).copy(
             sources = listOf("not a ref", range.ref),
             active = "gone#1",
             panes = listOf(StoredPane("p", "bad repo name!", "x", "main", "Diff")),
             marks = listOf(StoredMark("x", "y", "Nonsense", "m", "e")),
         )
-        val back = ReviewMapping.toReview(stored)
+        val back = WorkspaceMapping.toWorkspace(stored)
         assertEquals(listOf(range), back.sources)
         assertEquals(range, back.active)
         assertEquals(emptyList(), back.panes)
@@ -69,10 +71,8 @@ class ReviewStoreTest {
 
     @Test
     fun aMissingOrBrokenFileReadsAsNothing() {
-        val store = ReviewStore(dir)
-        assertNull(store.load("none"))
+        assertNull(WorkspaceFile(dir.resolve("none.json")).load())
         Files.writeString(dir.resolve("broken.json"), "{ not json")
-        assertNull(store.load("broken"))
-        assertEquals(emptyList(), store.all())
+        assertNull(WorkspaceFile(dir.resolve("broken.json")).load())
     }
 }

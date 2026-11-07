@@ -70,10 +70,10 @@ fun registerContextActions(registry: ActionRegistry, workbench: Workbench) {
         ref?.let(workbench.clipboard::copy)
     }
 
-    action(ArcActionIds.EXPAND_ALL, { state.review.sources.isNotEmpty() }) {
+    action(ArcActionIds.EXPAND_ALL, { state.workspace.sources.isNotEmpty() }) {
         workbench.treeState.expanded += TreeFolds.parents(ReviewTree.roots(state, workbench.sinceReview), ActionTargets.folder(workbench)?.key)
     }
-    action(ArcActionIds.COLLAPSE_ALL, { state.review.sources.isNotEmpty() }) {
+    action(ArcActionIds.COLLAPSE_ALL, { state.workspace.sources.isNotEmpty() }) {
         workbench.treeState.expanded -= TreeFolds.parents(ReviewTree.roots(state, workbench.sinceReview), ActionTargets.folder(workbench)?.key)
     }
 }

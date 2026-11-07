@@ -9,8 +9,7 @@ import dev.chieppa.arc.core.mark.FileStates
 import dev.chieppa.arc.core.mark.ReviewProgress
 import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.pane.Pane
-import dev.chieppa.arc.core.review.Review
-import dev.chieppa.arc.core.review.ReviewId
+import dev.chieppa.arc.core.workspace.Workspace
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
@@ -19,23 +18,23 @@ import dev.chieppa.stretch.frame.PaneLayout
 import java.nio.file.Path
 
 /**
- * The open review as the window shows it: the [review] itself, the repos it reads from, each source's view and how
+ * The workspace as the window shows it: the [workspace] itself, the repos it reads from, each source's view and how
  * far reading it has got, and each pane's own state. Views read it and recompose when it changes.
  */
-class ReviewState(
-    review: Review = Review(ReviewId(DEFAULT_ID), ""),
+class WorkspaceState(
+    workspace: Workspace = Workspace(),
     repos: Map<RepoName, Path> = emptyMap(),
     views: Map<Source, SourceView> = emptyMap(),
     paneStates: Map<String, PaneUiState> = emptyMap(),
 ) {
-    var review by mutableStateOf(review)
+    var workspace by mutableStateOf(workspace)
     var repos by mutableStateOf(repos)
     var views by mutableStateOf(views)
     var paneStates by mutableStateOf(paneStates)
 
     /**
      * The line at the top of each pane, by pane id. It changes with every scroll, so it is kept outside Compose state
-     * and read when the review is saved.
+     * and read when the workspace is saved.
      */
     val paneLines: MutableMap<String, Int> = java.util.concurrent.ConcurrentHashMap(paneStates.mapValues { it.value.line })
 
@@ -51,10 +50,10 @@ class ReviewState(
     /** What the host said of each pull request source when it was last read. */
     var pulls by mutableStateOf<Map<Source, PullRequestSummary>>(emptyMap())
 
-    /** The panes shown while the review has no source. */
+    /** The panes shown while the workspace has no source. */
     var looseLayout by mutableStateOf(PaneLayout())
 
-    val active: Source? get() = review.active
+    val active: Source? get() = workspace.active
 
     /** The active source's pane layout. */
     var paneLayout: PaneLayout
@@ -66,10 +65,10 @@ class ReviewState(
 
     fun viewOf(source: Source): SourceView = views[source] ?: SourceView()
 
-    fun pane(id: String): Pane? = review.panes.firstOrNull { it.id.value == id }
+    fun pane(id: String): Pane? = workspace.panes.firstOrNull { it.id.value == id }
 
     /** The page with tab [id], when the tab shows no file. */
-    fun page(id: String): Page? = review.pages.firstOrNull { it.id.value == id }
+    fun page(id: String): Page? = workspace.pages.firstOrNull { it.id.value == id }
 
     fun paneState(id: String): PaneUiState = paneStates[id] ?: PaneUiState()
 
@@ -83,7 +82,7 @@ class ReviewState(
     /** Where each file of [source]'s whole change stands, by path. */
     fun states(source: Source): Map<String, FileReviewState> {
         val ready = loads[source] as? SourceLoad.Ready ?: return emptyMap()
-        return FileStates.of(ready.snapshot, review.marksIn(source), ready.replays)
+        return FileStates.of(ready.snapshot, workspace.marksIn(source), ready.replays)
     }
 
     /** How much of [source] is reviewed, or null before it is read. */
@@ -91,8 +90,4 @@ class ReviewState(
 
     /** The whole change of [source], once read. */
     fun snapshot(source: Source): SourceSnapshot? = loads[source]?.ready
-
-    companion object {
-        const val DEFAULT_ID = "review-1"
-    }
 }

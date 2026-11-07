@@ -24,7 +24,7 @@ import dev.chieppa.arc.ui.panes.PaneCommands
 import dev.chieppa.arc.ui.panes.PaneTexts
 import dev.chieppa.arc.ui.review.MarkController
 import dev.chieppa.arc.ui.review.PaneController
-import dev.chieppa.arc.ui.review.ReviewState
+import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.review.SourceController
 import dev.chieppa.arc.ui.review.SourceLoad
 import dev.chieppa.arc.ui.switcher.FollowedLookup
@@ -53,25 +53,21 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
- * The main window's state: the look the person chose, where the drawers are, the open review and its panes, which
+ * The main window's state: the look the person chose, where the drawers are, the workspace and its panes, which
  * overlays are open, and the actions that change them. Views read it and recompose when it changes. Sources are read
- * through [data] on [scope]; threads and staged comments come from [conversation]. [reviews] are the saved reviews the
- * top bar offers, and [onOpenReview] opens one by id, or a new one for null; [onNewReviewWith] opens a new one holding
- * the source a ref names. [onQuit] closes the app. Copied paths and refs go to [clipboard], and web links open through
- * [links]. [watch] holds the saved filters and notification rules, which every review shares.
+ * through [data] on [scope]; threads and staged comments come from [conversation]. [onQuit] closes the app. Copied
+ * paths and refs go to [clipboard], and web links open through [links]. [watch] holds the saved filters and
+ * notification rules.
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
     onQuit: () -> Unit = {},
     val data: ReviewData = NoRepos,
-    val state: ReviewState = ReviewState(),
+    val state: WorkspaceState = WorkspaceState(),
     val conversation: ReviewConversation = NoConversation,
     val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
-    val reviews: List<ReviewChoice> = emptyList(),
-    val onOpenReview: (String?) -> Unit = {},
     val clipboard: TextClipboard = SystemClipboard,
     val watch: PullWatch = PullWatch(),
-    val onNewReviewWith: (String) -> Unit = {},
     val links: LinkOpener = SystemBrowser,
 ) {
     var preferences by mutableStateOf(preferences)
@@ -110,7 +106,7 @@ class Workbench(
     /** Whether the tree shows only the files changed since they were reviewed. */
     var sinceReview by mutableStateOf(false)
 
-    /** Whether the file tree has the keyboard, so review keys act on its selection. */
+    /** Whether the file tree has the keyboard, so the marking keys act on its selection. */
     var treeFocused by mutableStateOf(false)
 
     val treeState = TreeState(expanded = state.views.values.flatMap { it.expanded }.toSet() + listOfNotNull(state.active?.let(TreeKeys::source)))
@@ -126,7 +122,7 @@ class Workbench(
     val texts = PaneTexts(data)
     val threadViews = ThreadViews()
 
-    /** The GitHub repo each of the review's repos was cloned from, for those cloned from GitHub. */
+    /** The GitHub repo each of the workspace's repos was cloned from, for those cloned from GitHub. */
     var gitHubRepos by mutableStateOf<Map<RepoName, GitHubRepo>>(emptyMap())
 
     /** What each pane on screen offers the window's commands, by pane id. */
@@ -159,12 +155,6 @@ class Workbench(
     fun sourceOf(pull: PullRequestSummary): Source.PullRequest? =
         gitHubRepos.entries.firstOrNull { it.value == pull.repo }?.let { Source.PullRequest(it.key, pull.number) }
 
-    /** The name of the review that holds [source]: the open one, else the first saved one with it. */
-    fun reviewHolding(source: Source): String? {
-        if (source in state.review.sources) return state.review.name
-        return reviews.firstOrNull { it.id != state.review.id.value && source.ref in it.sources }?.name
-    }
-
     /** The GitHub repos being cloned for a pull request, and those whose clone failed. */
     var cloning by mutableStateOf(emptySet<GitHubRepo>())
     var cloneFailed by mutableStateOf(emptySet<GitHubRepo>())
@@ -193,13 +183,9 @@ class Workbench(
         }
     }
 
-    /** The saved review other than the open one that holds [source], if any. */
-    fun otherReviewHolding(source: Source): ReviewChoice? =
-        reviews.firstOrNull { it.id != null && it.id != state.review.id.value && source.ref in it.sources }
-
-    /** Makes [source] active, adding it to the open review first when it is not in it; false when its repo is unknown. */
+    /** Makes [source] active, opening it in the strip first when it is not there; false when its repo is unknown. */
     fun openSource(source: Source): Boolean {
-        if (source in state.review.sources) {
+        if (source in state.workspace.sources) {
             activateSource(source)
             return true
         }
@@ -212,9 +198,9 @@ class Workbench(
         panes.openRevisions(source)
     }
 
-    /** Removes saved filter [id], with its rules and its tab in this review. */
+    /** Removes saved filter [id], with its rules and its tab. */
     fun removeFilter(id: String) {
-        state.review.pages.filter { it is Page.Filter && it.filter == id }.forEach { panes.close(it.id.value) }
+        state.workspace.pages.filter { it is Page.Filter && it.filter == id }.forEach { panes.close(it.id.value) }
         watch.removeFilter(id)
     }
 
@@ -229,18 +215,18 @@ class Workbench(
     /** Makes [source] drive the tree and the viewport: its row opens and the other sources' rows close. */
     fun activateSource(source: Source) {
         sources.activate(source)
-        val otherSources = state.review.sources.filter { it != source }.map(TreeKeys::source).toSet()
+        val otherSources = state.workspace.sources.filter { it != source }.map(TreeKeys::source).toSet()
         treeState.expanded = treeState.expanded - otherSources + TreeKeys.source(source)
     }
 
-    /** Adds the source [ref] names and makes it active; false when it names none or its repo is unknown. */
+    /** Opens the source [ref] names in the strip and makes it active; false when it names none or its repo is unknown. */
     fun addSource(ref: String): Boolean {
         if (!sources.addSource(ref)) return false
         state.active?.let(::activateSource)
         return true
     }
 
-    /** Adds the source [ref] names without leaving the active one; false when it names none or its repo is unknown. */
+    /** Opens the source [ref] names in the strip without leaving the active one; false when it names none or its repo is unknown. */
     fun addSourceBeside(ref: String): Boolean {
         val before = state.active
         if (!sources.addSource(ref)) return false
@@ -257,7 +243,7 @@ class Workbench(
     }
 
     /**
-     * Takes [source] out of the review, closing its unpinned panes and its open tree rows; its marks stay, so adding it
+     * Takes [source] out of the strip, closing its unpinned panes and its open tree rows; its marks stay, so opening it
      * again restores them.
      */
     fun removeSource(source: Source) {
@@ -276,7 +262,7 @@ class Workbench(
      */
     fun dropFile(key: String, drop: PaneItemDrop) {
         val (ref, path) = TreeKeys.fileOf(key) ?: return
-        val source = state.review.sources.firstOrNull { it.ref == ref } ?: return
+        val source = state.workspace.sources.firstOrNull { it.ref == ref } ?: return
         if (source == state.active || drop is PaneItemDrop.InWindow) panes.openChangeAt(source, path, drop) else panes.openChange(source, path, newTab = true)
     }
 

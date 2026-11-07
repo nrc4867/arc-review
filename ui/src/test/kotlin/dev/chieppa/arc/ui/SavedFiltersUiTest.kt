@@ -11,8 +11,7 @@ import androidx.compose.ui.test.rightClick
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.v2.runComposeUiTest
 import dev.chieppa.arc.core.pane.Page
-import dev.chieppa.arc.core.review.Review
-import dev.chieppa.arc.core.review.ReviewId
+import dev.chieppa.arc.core.workspace.Workspace
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.watch.NotifyRule
 import dev.chieppa.arc.core.watch.SavedFilter
@@ -24,7 +23,7 @@ import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.pulls.FilterResult
 import dev.chieppa.arc.ui.pulls.PullColumns
 import dev.chieppa.arc.ui.pulls.PullWatch
-import dev.chieppa.arc.ui.review.ReviewState
+import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.test.setStretchContent
 import dev.chieppa.stretch.theme.StretchThemes
@@ -54,7 +53,7 @@ class SavedFiltersUiTest {
     private fun androidx.compose.ui.test.ComposeUiTest.open(): Workbench {
         val workbench = Workbench(
             data = data,
-            state = ReviewState(Review(ReviewId("r1"), REVIEW), repos = mapOf(data.repo to Path.of("."))),
+            state = WorkspaceState(Workspace(), repos = mapOf(data.repo to Path.of("."))),
             watch = watch,
             clipboard = { copied += it },
             links = { opened += it },
@@ -71,7 +70,7 @@ class SavedFiltersUiTest {
         val workbench = open()
         workbench.panes.openFilter("f1")
         waitForIdle()
-        assertTrue(workbench.state.review.pages.single() is Page.Filter)
+        assertTrue(workbench.state.workspace.pages.single() is Page.Filter)
         assertTrue(shows("Rotate refresh tokens on every use"))
         assertTrue(shows("Rate-limit /auth/token by family"))
         assertTrue(shows("demo#412"))
@@ -81,31 +80,29 @@ class SavedFiltersUiTest {
         onNodeWithContentDescription("Checks failed").assertExists()
 
         workbench.panes.openFilter("f1")
-        assertEquals(1, workbench.state.review.pages.size)
+        assertEquals(1, workbench.state.workspace.pages.size)
     }
 
     @Test
-    fun addPutsThePullRequestInTheOpenReviewAndThenShowsTheReviewThatHoldsIt() = runComposeUiTest {
+    fun clickingAPullRequestOpensItAndThenItsRowShowsItIsOpen() = runComposeUiTest {
         val workbench = open()
         workbench.panes.openFilter("f1")
         waitForIdle()
-        onAllNodesWithText("Add").onFirst().performClick()
-        waitForIdle()
-        val added = workbench.state.review.sources.single()
-        assertTrue(added is Source.PullRequest)
-        assertTrue(workbench.state.review.pages.single().id.value in workbench.paneLayout.tabs, "the filter's tab follows into the new source's layout")
-        assertEquals(1, onAllNodesWithText("Add").fetchSemanticsNodes().size)
-        assertEquals(2, onAllNodesWithText(REVIEW).fetchSemanticsNodes().size, "the review selector and the added pull request's chip")
-    }
-
-    @Test
-    fun clickingAPullRequestOpensItInTheReview() = runComposeUiTest {
-        val workbench = open()
-        workbench.panes.openFilter("f1")
-        waitForIdle()
+        assertEquals(0, onAllNodesWithText("Add").fetchSemanticsNodes().size)
+        assertEquals(0, onAllNodesWithText("Open").fetchSemanticsNodes().size)
         onNodeWithText("Rate-limit /auth/token by family").performClick()
         waitForIdle()
         assertEquals(Source.PullRequest(data.repo, 415), workbench.state.active)
+        assertTrue(workbench.state.workspace.pages.single().id.value in workbench.paneLayout.tabs, "the filter's tab follows into the new source's layout")
+        assertEquals(1, onAllNodesWithText("Open").fetchSemanticsNodes().size)
+        onNodeWithText("Rotate refresh tokens on every use").performClick()
+        waitForIdle()
+        assertEquals(Source.PullRequest(data.repo, 412), workbench.state.active)
+        assertEquals(2, onAllNodesWithText("Open").fetchSemanticsNodes().size)
+        onNodeWithText("Rate-limit /auth/token by family").performClick()
+        waitForIdle()
+        assertEquals(Source.PullRequest(data.repo, 415), workbench.state.active)
+        assertEquals(2, workbench.state.workspace.sources.size)
     }
 
     @Test
@@ -115,8 +112,8 @@ class SavedFiltersUiTest {
         waitForIdle()
         onNodeWithText("Rotate refresh tokens on every use").performMouseInput { rightClick() }
         waitForIdle()
-        assertTrue(shows("Open in a new review"))
-        assertTrue(shows("Add to this review"))
+        assertFalse(shows("new review"))
+        assertTrue(shows("Open without switching"))
         onNodeWithText("Open on GitHub").performClick()
         waitForIdle()
         onNodeWithText("Rotate refresh tokens on every use").performMouseInput { rightClick() }
@@ -128,7 +125,7 @@ class SavedFiltersUiTest {
         val url = watch.results.getValue("f1").pulls.first().url
         assertEquals(listOf(url), opened)
         assertEquals(listOf(url), copied)
-        assertTrue(workbench.state.review.sources.isEmpty())
+        assertTrue(workbench.state.workspace.sources.isEmpty())
     }
 
     @Test
@@ -172,7 +169,7 @@ class SavedFiltersUiTest {
         waitForIdle()
         onNodeWithText("Rate-limit /auth/token by family").performClick()
         waitForIdle()
-        assertTrue(workbench.state.review.sources.isEmpty())
+        assertTrue(workbench.state.workspace.sources.isEmpty())
         assertEquals(setOf(FakePulls.api), workbench.cloneFailed)
     }
 
@@ -204,4 +201,3 @@ class SavedFiltersUiTest {
     }
 }
 
-private const val REVIEW = "Auth rollout"

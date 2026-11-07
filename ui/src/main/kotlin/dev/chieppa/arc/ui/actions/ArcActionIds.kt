@@ -42,8 +42,6 @@ object ArcActionIds {
     val OPEN_REVISIONS = ActionId("open-revisions")
     val OPEN_PULL = ActionId("open-pull")
     val ADD_PULL = ActionId("add-pull")
-    val OPEN_PULL_IN_NEW_REVIEW = ActionId("open-pull-in-new-review")
-    val OPEN_PULL_REVIEW = ActionId("open-pull-review")
     val OPEN_PULL_ON_GITHUB = ActionId("open-pull-on-github")
     val COPY_PULL_LINK = ActionId("copy-pull-link")
     val COPY_PULL_NUMBER = ActionId("copy-pull-number")

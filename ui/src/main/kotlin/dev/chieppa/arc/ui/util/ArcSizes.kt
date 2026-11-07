@@ -47,7 +47,6 @@ object ArcSizes {
     val switcherRing = 14.dp
     val linkCardIndent = 24.dp
     val popoverWidth = 380.dp
-    val reviewSelector = 200.dp
     val goToAnything = 260.dp
 
     /** The Pull requests drawer, and a saved filter's tab: its tool row, list rows and columns. */
@@ -74,7 +73,6 @@ object ArcSizes {
     val checkMark = 14.dp
     val smallAvatar = 16.dp
     val separatorDot = 3.dp
-    val addButton = 24.dp
     val ruleRow = 40.dp
     val newFilterButton = 28.dp
     val notifyHeader = 28.dp

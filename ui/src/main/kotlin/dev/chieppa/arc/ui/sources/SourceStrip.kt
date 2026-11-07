@@ -43,7 +43,7 @@ fun SourceStrip(workbench: Workbench, modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space4),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                for (source in state.review.sources) {
+                for (source in state.workspace.sources) {
                     val load = state.loads[source]
                     SourceChip(
                         source = source,

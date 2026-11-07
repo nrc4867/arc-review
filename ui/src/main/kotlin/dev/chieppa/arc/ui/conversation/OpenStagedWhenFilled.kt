@@ -6,7 +6,7 @@ import dev.chieppa.arc.ui.drawers.DrawerIds
 import dev.chieppa.arc.ui.workbench.Workbench
 
 /**
- * Opens the Staged comments drawer the first time the review has staged comments, so it starts closed while there are
+ * Opens the Staged comments drawer the first time the workspace has staged comments, so it starts closed while there are
  * none and the person's own closing of it stays.
  */
 @Composable

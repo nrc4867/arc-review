@@ -1,4 +1,4 @@
-package dev.chieppa.arc.store.review
+package dev.chieppa.arc.store.workspace
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
