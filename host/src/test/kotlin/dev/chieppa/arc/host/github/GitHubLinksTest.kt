@@ -35,6 +35,13 @@ class GitHubLinksTest {
     }
 
     @Test
+    fun aLinkSaysWhichPullRequestItSitsIn() {
+        assertEquals(GitHubLink(Source.Commit(repo, CommitSha(sha)), 412), GitHubLinks.read("https://github.com/acme/api/pull/412/commits/$sha"))
+        assertEquals(GitHubLink(Source.PullRequest(repo, 412), 412), GitHubLinks.read("https://github.com/acme/api/pull/412/files"))
+        assertEquals(GitHubLink(Source.Commit(repo, CommitSha(sha))), GitHubLinks.read("https://github.com/acme/api/commit/$sha"))
+    }
+
+    @Test
     fun aComparisonOfBranchesNamesTheHeadAgainstTheBase() {
         assertEquals(
             Source.BranchAgainstBase(repo, BranchName("feature/login"), BranchName("main")),

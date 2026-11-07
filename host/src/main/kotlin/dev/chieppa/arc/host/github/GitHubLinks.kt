@@ -30,7 +30,10 @@ import java.nio.charset.StandardCharsets
  * ignored. Comparisons across forks (`base...fork:head`) name no source here.
  */
 object GitHubLinks {
-    fun parse(link: String): Source? {
+    fun parse(link: String): Source? = read(link)?.source
+
+    /** What [link] points at, with the pull request a pull request's commit sits in; null when it names no source. */
+    fun read(link: String): GitHubLink? {
         val uri = uri(link.trim()) ?: return null
         if (uri.scheme?.lowercase() !in SCHEMES) return null
         if (uri.host?.lowercase()?.removePrefix(WWW_PREFIX) != DOMAIN) return null
@@ -41,8 +44,8 @@ object GitHubLinks {
         val rest = segments.drop(3)
         return when (kind) {
             PULL -> pullRequest(repo, rest)
-            COMMIT -> CommitSha.parse(rest[0])?.let { Source.Commit(repo, it) }
-            COMPARE -> compare(repo, rest.joinToString("/"))
+            COMMIT -> CommitSha.parse(rest[0])?.let { GitHubLink(Source.Commit(repo, it)) }
+            COMPARE -> compare(repo, rest.joinToString("/"))?.let(::GitHubLink)
             else -> null
         }
     }
@@ -58,10 +61,10 @@ object GitHubLinks {
 
     private fun decode(segment: String): String = URLDecoder.decode(segment.replace("+", "%2B"), StandardCharsets.UTF_8)
 
-    private fun pullRequest(repo: RepoName, rest: List<String>): Source? {
+    private fun pullRequest(repo: RepoName, rest: List<String>): GitHubLink? {
         val number = rest[0].takeIf { it.all(Char::isDigit) }?.toIntOrNull()?.takeIf { it > 0 } ?: return null
-        if (rest.size >= 3 && rest[1] == COMMITS) return CommitSha.parse(rest[2])?.let { Source.Commit(repo, it) }
-        return Source.PullRequest(repo, number)
+        if (rest.size >= 3 && rest[1] == COMMITS) return CommitSha.parse(rest[2])?.let { GitHubLink(Source.Commit(repo, it), number) }
+        return GitHubLink(Source.PullRequest(repo, number), number)
     }
 
     private fun compare(repo: RepoName, spec: String): Source? {

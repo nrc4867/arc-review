@@ -7,6 +7,7 @@ import dev.chieppa.arc.host.github.history.PullHistory
 import dev.chieppa.arc.host.github.history.PullHistoryQuery
 import dev.chieppa.arc.host.github.notifications.NotificationsFeed
 import dev.chieppa.arc.host.github.pulls.CheckState
+import dev.chieppa.arc.host.github.pulls.OpenPullSearch
 import dev.chieppa.arc.host.github.pulls.PullRequestQuery
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.pulls.SearchDocument
@@ -37,6 +38,12 @@ class GitHub(private val client: GitHubClient = GitHubClient()) {
     suspend fun search(searches: Map<String, String>): SearchPoll {
         val document = SearchDocument(searches)
         return SearchPoll.parse(document, client.graphql(document.text))
+    }
+
+    /** The open pull requests in [repos] whose titles hold [text], in one search; none for no repo or no text. */
+    suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary> {
+        val query = OpenPullSearch.query(repos, text) ?: return emptyList()
+        return search(mapOf(OpenPullSearch.KEY to query)).results[OpenPullSearch.KEY]?.pulls.orEmpty()
     }
 
     /** Pull request [number] of [repo], or null when there is none. */
