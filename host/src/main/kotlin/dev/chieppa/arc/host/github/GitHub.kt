@@ -2,7 +2,11 @@ package dev.chieppa.arc.host.github
 
 import dev.chieppa.arc.host.github.api.GitHubClient
 import dev.chieppa.arc.host.github.api.GitHubException
+import dev.chieppa.arc.host.github.history.CommitChecksQuery
+import dev.chieppa.arc.host.github.history.PullHistory
+import dev.chieppa.arc.host.github.history.PullHistoryQuery
 import dev.chieppa.arc.host.github.notifications.NotificationsFeed
+import dev.chieppa.arc.host.github.pulls.CheckState
 import dev.chieppa.arc.host.github.pulls.PullRequestQuery
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.pulls.SearchDocument
@@ -13,7 +17,7 @@ import dev.chieppa.arc.host.github.repo.GitHubRepo
 
 /**
  * What Arc reads from GitHub, read-only: who the person is, the pull requests a set of searches finds, one pull
- * request, and the person's notifications. Every call throws [GitHubException] when GitHub gives nothing to use.
+ * request and the heads it has had, the checks on commits, and the person's notifications. Every call throws [GitHubException] when GitHub gives nothing to use.
  */
 class GitHub(private val client: GitHubClient = GitHubClient()) {
     /** The person's notifications, polled conditionally. */
@@ -38,4 +42,12 @@ class GitHub(private val client: GitHubClient = GitHubClient()) {
     /** Pull request [number] of [repo], or null when there is none. */
     suspend fun pullRequest(repo: GitHubRepo, number: Int): PullRequestSummary? =
         PullRequestQuery.parse(client.graphql(PullRequestQuery.text(repo, number)))
+
+    /** What GitHub knows of the heads pull request [number] of [repo] has had, or null when there is no such pull request. */
+    suspend fun pullHistory(repo: GitHubRepo, number: Int): PullHistory? =
+        PullHistoryQuery.parse(client.graphql(PullHistoryQuery.text(repo, number)))
+
+    /** The overall checks on each of [oids] in [repo] that has any, in one request. */
+    suspend fun commitChecks(repo: GitHubRepo, oids: List<String>): Map<String, CheckState> =
+        if (oids.isEmpty()) emptyMap() else CommitChecksQuery.parse(oids, client.graphql(CommitChecksQuery.text(repo, oids)))
 }
