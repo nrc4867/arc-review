@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.stretch.code.ChangeWash
 import dev.chieppa.stretch.test.setStretchContent
 import dev.chieppa.stretch.theme.StretchThemes
 import kotlin.test.Test
@@ -26,5 +27,17 @@ class SettingsPopoverUiTest {
         waitForIdle()
         assertEquals(StretchThemes.WorkshopLight, workbench.preferences.theme)
         assertEquals(1.25f, workbench.preferences.interfaceSize)
+    }
+
+    @Test
+    fun theGutterHighlightToggleMovesChangeWashesToTheGutter() = runComposeUiTest {
+        val workbench = Workbench()
+        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
+        workbench.settingsOpen = true
+        waitForIdle()
+        assertEquals(ChangeWash.Line, workbench.preferences.changeWash)
+        onNodeWithContentDescription("Highlight changes in the gutter only").performClick()
+        waitForIdle()
+        assertEquals(ChangeWash.Gutter, workbench.preferences.changeWash)
     }
 }

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.chieppa.arc.design.generated.Res
+import dev.chieppa.arc.design.generated.settings_gutter_highlight
 import dev.chieppa.arc.design.generated.settings_size
 import dev.chieppa.arc.design.generated.settings_size_percent
 import dev.chieppa.arc.design.generated.settings_theme
@@ -22,8 +23,8 @@ private val WIDTH = 340.dp
 private val THEME_FIELD = 200.dp
 
 /**
- * What the top bar's Settings button opens: the theme, the interface size and whether panes wrap long lines unless set
- * otherwise, applied as they change.
+ * What the top bar's Settings button opens: the theme, the interface size, whether panes wrap long lines unless set
+ * otherwise and whether changed lines are highlighted on their gutter only, applied as they change.
  */
 @Composable
 fun SettingsPopover(open: Boolean, preferences: UiPreferences, onChange: (UiPreferences) -> Unit, onDismiss: () -> Unit) {
@@ -49,6 +50,11 @@ fun SettingsPopover(open: Boolean, preferences: UiPreferences, onChange: (UiPref
         SettingRow(wrap) {
             Spacer(Modifier.weight(1f))
             Toggle(preferences.wrapLines, { onChange(preferences.copy(wrapLines = it)) }, wrap)
+        }
+        val gutter = stringResource(Res.string.settings_gutter_highlight)
+        SettingRow(gutter) {
+            Spacer(Modifier.weight(1f))
+            Toggle(preferences.gutterHighlight, { onChange(preferences.copy(gutterHighlight = it)) }, gutter)
         }
     }
 }

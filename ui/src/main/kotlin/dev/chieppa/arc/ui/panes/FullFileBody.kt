@@ -62,6 +62,7 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
         matches = matches,
         currentMatch = current,
         marks = marks,
+        changeWash = workbench.preferences.changeWash,
     )
     val commands = remember(viewer, find, changeStarts) {
         val shared = find

@@ -62,7 +62,17 @@ fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, 
             }
         },
     )
-    DiffViewer(listOf(diff), modifier, viewer, showBar = false, slots = slots, matches = matches, currentMatch = current, marks = marks)
+    DiffViewer(
+        listOf(diff),
+        modifier,
+        viewer,
+        showBar = false,
+        slots = slots,
+        matches = matches,
+        currentMatch = current,
+        marks = marks,
+        changeWash = workbench.preferences.changeWash,
+    )
 
     val commands = remember(viewer, find, lines) {
         val shared = find
