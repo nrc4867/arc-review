@@ -62,6 +62,5 @@ fun OpenField(workbench: Workbench) {
             kind = ButtonKind.Primary,
             icon = StretchIcons.Search,
         )
-        ActionKeys(workbench, ArcActionIds.GO_TO_ANYTHING.value)
     }
 }
