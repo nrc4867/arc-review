@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,7 +81,7 @@ private fun AddReaction(reactions: List<ReactionGroup>, onToggle: (Reaction) -> 
                                     onToggle(reaction)
                                 },
                             contentAlignment = Alignment.Center,
-                        ) { BasicText(ReactionLooks.emoji(reaction), style = Stretch.type.body) }
+                        ) { DisableSelection { BasicText(ReactionLooks.emoji(reaction), style = Stretch.type.body) } }
                     }
                 }
             }

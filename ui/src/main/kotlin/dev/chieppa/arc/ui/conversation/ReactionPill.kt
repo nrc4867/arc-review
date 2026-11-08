@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,8 +43,10 @@ fun ReactionPill(group: ReactionGroup, onToggle: () -> Unit, modifier: Modifier 
             horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space4),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            BasicText(ReactionLooks.emoji(group.reaction), style = Stretch.type.chip)
-            BasicText(group.count.toString(), style = Stretch.type.chip.merge(TextStyle(color = if (group.mine) c.onInk else c.inkControl)))
+            DisableSelection {
+                BasicText(ReactionLooks.emoji(group.reaction), style = Stretch.type.chip)
+                BasicText(group.count.toString(), style = Stretch.type.chip.merge(TextStyle(color = if (group.mine) c.onInk else c.inkControl)))
+            }
         }
     }
 }
