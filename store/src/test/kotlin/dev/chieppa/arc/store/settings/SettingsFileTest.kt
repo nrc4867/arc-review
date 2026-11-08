@@ -1,5 +1,10 @@
 package dev.chieppa.arc.store.settings
 
+import dev.chieppa.arc.core.start.StartColumn
+import dev.chieppa.arc.core.start.StartLayout
+import dev.chieppa.arc.core.start.StartMove
+import dev.chieppa.arc.core.start.StartScreenKind
+import dev.chieppa.arc.core.start.StartScreenLayout
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
@@ -30,6 +35,22 @@ class SettingsFileTest {
         SettingsFile(path).save(settings)
         assertEquals(settings, SettingsFile(path).load())
         assertFalse(path.resolveSibling("settings.properties.tmp").exists())
+    }
+
+    @Test
+    fun theStartScreensLayoutLoadsBackPerScreen() {
+        val layout = StartLayout()
+            .with(StartScreenKind.NothingOpen, StartScreenLayout(hidden = setOf("arc.keys", "arc.help")))
+            .with(StartScreenKind.OneSource, StartScreenLayout(shown = setOf("arc.notes"), moves = mapOf("arc.notes" to StartMove(StartColumn.Side, 2))))
+        SettingsFile(path).save(AppSettings(startLayout = layout))
+        assertEquals(layout, SettingsFile(path).load().startLayout)
+    }
+
+    @Test
+    fun startMovesThatDoNotParseAreLeftOut() {
+        Files.createDirectories(path.parent)
+        path.writeText("start.one-source.moves=arc.a:side:1,arc.b:middle:0,arc.c:main:-1,arc.d\n")
+        assertEquals(mapOf("arc.a" to StartMove(StartColumn.Side, 1)), SettingsFile(path).load().startLayout.of(StartScreenKind.OneSource).moves)
     }
 
     @Test
