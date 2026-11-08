@@ -45,6 +45,7 @@ fun ArcWindow(
     fun save(workbench: Workbench) {
         session.save(workbench.state, workbench.treeState.expanded)
         session.saveConversation(workbench.comments.controller.local)
+        session.saveRecent(workbench.start.recent)
     }
     val workbench = remember {
         lateinit var opened: Workbench
@@ -58,6 +59,8 @@ fun ArcWindow(
             conversationService = session.conversations,
             localConversation = session.localConversation(),
             codeNavigation = session.codeNavigation,
+            startLayout = session.settings.startLayout,
+            recent = session.recent(),
         ).also { opened = it }
     }
     DisposableEffect(workbench) { onDispose { workbench.scope.cancel() } }
@@ -70,6 +73,7 @@ fun ArcWindow(
         SaveWorkspace(workbench, ::save)
         SaveWatchlist(watch, workbench.dispatchers, session::saveWatchlist)
         SaveConversation(workbench, session::saveConversation)
+        SaveStart(workbench, session::saveStartLayout, session::saveRecent)
         WatchPolling(watch, session.github, notifier, workbench.dispatchers)
         CompositionLocalProvider(LocalActionText provides actionText()) {
             MacMenuBar(appMenus(), workbench.registry, workbench.keymap, null, onSettings = { workbench.settingsOpen = true }, onQuit = { save(workbench); onExit() })

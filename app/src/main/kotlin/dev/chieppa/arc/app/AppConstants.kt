@@ -12,6 +12,9 @@ internal object AppConstants {
     const val REVIEWS_FOLDER = "reviews"
     const val REPOS_FILE = "repos.json"
     const val WATCHLIST_FILE = "filters.json"
+
+    /** The sources opened lately, which the start screen lists. */
+    const val RECENT_FILE = "recent.json"
     const val CLONES_FOLDER = "clones"
 
     /** The person's drafts, staged comments, notes and summaries. */

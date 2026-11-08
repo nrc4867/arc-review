@@ -13,7 +13,10 @@ import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.host.github.GitHub
 import dev.chieppa.arc.core.conversation.LocalConversation
 import dev.chieppa.arc.host.github.avatars.AvatarCache
+import dev.chieppa.arc.core.recent.RecentSources
+import dev.chieppa.arc.core.start.StartLayout
 import dev.chieppa.arc.store.conversation.ConversationFile
+import dev.chieppa.arc.store.recent.RecentFile
 import dev.chieppa.arc.store.repos.RepoRegistryFile
 import dev.chieppa.arc.ui.services.ConversationService
 import dev.chieppa.arc.ui.services.GitHubConversations
@@ -32,8 +35,8 @@ import java.nio.file.Path
 
 /**
  * What the app keeps between runs, in [dataDir]: the settings, the workspace, the repos, the saved filters and
- * notification rules, the person's drafts, staged comments and notes, people's pictures, and the app's own clones of
- * GitHub repos. Repos are read through git for the workspace in
+ * notification rules, the person's drafts, staged comments and notes, the recently opened sources, people's pictures,
+ * and the app's own clones of GitHub repos. Repos are read through git for the workspace in
  * [current], and pull requests through [github].
  */
 class AppSession(dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub()) : Closeable {
@@ -42,6 +45,7 @@ class AppSession(dataDir: Path, val conversation: ReviewConversation, val github
     private val reviewFolder = ReviewFolder(dataDir.resolve(AppConstants.REVIEWS_FOLDER))
     private val registry = RepoRegistryFile(dataDir.resolve(AppConstants.REPOS_FILE))
     private val watchlistFile = WatchlistFile(dataDir.resolve(AppConstants.WATCHLIST_FILE))
+    private val recentFile = RecentFile(dataDir.resolve(AppConstants.RECENT_FILE))
 
     var settings: AppSettings = settingsFile.load()
         private set
@@ -105,6 +109,19 @@ class AppSession(dataDir: Path, val conversation: ReviewConversation, val github
         }
     }
 
+    /** The recently opened sources as saved. */
+    fun recent(): RecentSources = recentFile.load()
+
+    fun saveRecent(recent: RecentSources) {
+        recentFile.save(recent)
+    }
+
+    /** Saves the person's layout of the start screens with the other settings. */
+    fun saveStartLayout(layout: StartLayout) {
+        saveSettings { it.copy(startLayout = layout) }
+    }
+
+    @Synchronized
     fun saveSettings(change: (AppSettings) -> AppSettings) {
         settings = change(settings)
         settingsFile.save(settings)
