@@ -31,6 +31,26 @@ class FileFacts(
         return null
     }
 
+    /** The reference whose name covers [line] (from 1) at [column] (from 0), or null. */
+    fun referenceAt(line: Int, column: Int): Reference? {
+        var low = 0
+        var high = references.size - 1
+        while (low <= high) {
+            val mid = (low + high) ushr 1
+            val ref = references[mid]
+            when {
+                line < ref.line || (line == ref.line && column < ref.column) -> high = mid - 1
+                line > ref.line || column >= ref.column + (ref.end - ref.start) -> low = mid + 1
+                else -> return ref
+            }
+        }
+        return null
+    }
+
+    /** The definition whose name covers [line] (from 1) at [column] (from 0), or null. */
+    fun definitionAt(line: Int, column: Int): Definition? =
+        definitions.firstOrNull { it.line == line && column >= it.column && column < it.column + (it.nameEnd - it.nameStart) }
+
     /** The definition whose name covers string index [offset], or null. */
     fun definitionAt(offset: Int): Definition? = definitions.firstOrNull { offset >= it.nameStart && offset < it.nameEnd }
 

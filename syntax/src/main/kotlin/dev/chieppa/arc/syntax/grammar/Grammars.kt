@@ -7,7 +7,7 @@ object Grammars {
     val javascript = Grammar("javascript", setOf("js", "jsx", "mjs", "cjs"), LanguageFamily.JavaScript)
     val typescript = Grammar("typescript", setOf("ts", "mts", "cts"), LanguageFamily.JavaScript)
     val tsx = Grammar("tsx", setOf("tsx"), LanguageFamily.JavaScript)
-    val mssql = Grammar("mssql", setOf("sql"), LanguageFamily.Sql)
+    val mssql = Grammar("mssql", setOf("sql"), LanguageFamily.Sql, language = "tsql")
 
     val all: List<Grammar> = listOf(java, kotlin, javascript, typescript, tsx, mssql)
 
