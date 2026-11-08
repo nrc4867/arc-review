@@ -11,8 +11,8 @@ import kotlinx.serialization.json.buildJsonObject
 import java.io.IOException
 
 /**
- * Read-only requests to GitHub with the person's token: GraphQL queries and conditional REST GETs. Every failure is a
- * [GitHubException]; a refused token is dropped so the next request asks for it again.
+ * Requests to GitHub with the person's token: GraphQL queries and mutations, conditional REST GETs and REST POSTs.
+ * Every failure is a [GitHubException]; a refused token is dropped so the next request asks for it again.
  */
 class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private val transport: HttpTransport = JdkHttpTransport()) {
     private val json = Json { ignoreUnknownKeys = true }
@@ -21,14 +21,20 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
     fun hasToken(): Boolean = tokens.token() != null
 
     /** The `data` of the GraphQL [query]. */
-    suspend fun graphql(query: String): JsonObject {
-        val body = buildJsonObject { put(QUERY, JsonPrimitive(query)) }.toString()
+    suspend fun graphql(query: String): JsonObject = graphql(query, null)
+
+    /** The `data` of the GraphQL [query] or mutation, sent with [variables] so no value is written into its text. */
+    suspend fun graphql(query: String, variables: JsonObject?): JsonObject {
+        val body = buildJsonObject {
+            put(QUERY, JsonPrimitive(query))
+            variables?.let { put(VARIABLES, it) }
+        }.toString()
         val response = send(GitHubApi.POST, GitHubApi.GRAPHQL, mapOf(GitHubApi.CONTENT_TYPE to GitHubApi.JSON_BODY), body)
         if (response.status != GitHubApi.OK) throw GitHubException(GitHubException.Reason.Failed, "GraphQL answered ${response.status}")
         val root = parse(response.body) as? JsonObject ?: throw GitHubException(GitHubException.Reason.Failed, "GraphQL answer is not an object")
         val errors = root[ERRORS] as? JsonArray
         val data = root[DATA] as? JsonObject
-        if (data == null || !errors.isNullOrEmpty()) throw GitHubException(GitHubException.Reason.Failed, "GraphQL errors: ${errors ?: NO_DATA}")
+        if (data == null || !errors.isNullOrEmpty()) throw GitHubException(GitHubException.Reason.Failed, "GraphQL errors: ${messages(errors) ?: NO_DATA}")
         return data
     }
 
@@ -41,11 +47,22 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
         return send(GitHubApi.GET, url, headers, null)
     }
 
+    /** A REST POST of the JSON [body] to [url]; any status comes back as is. */
+    suspend fun post(url: String, body: String): ApiResponse =
+        send(GitHubApi.POST, url, mapOf(GitHubApi.CONTENT_TYPE to GitHubApi.JSON_BODY), body)
+
     /** [text] as JSON. */
     fun parse(text: String): JsonElement = try {
         json.parseToJsonElement(text)
     } catch (e: SerializationException) {
         throw GitHubException(GitHubException.Reason.Failed, "Not JSON: ${e.message}")
+    }
+
+    /** The `message` of each of [errors], or the errors as they came when none has one. */
+    private fun messages(errors: JsonArray?): String? {
+        if (errors.isNullOrEmpty()) return null
+        val texts = errors.mapNotNull { ((it as? JsonObject)?.get(MESSAGE) as? JsonPrimitive)?.content }
+        return if (texts.isEmpty()) errors.toString() else texts.joinToString(MESSAGE_SEPARATOR)
     }
 
     private suspend fun send(method: String, url: String, extra: Map<String, String>, body: String?): ApiResponse {
@@ -70,8 +87,11 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
 
     private companion object {
         const val QUERY = "query"
+        const val VARIABLES = "variables"
         const val DATA = "data"
         const val ERRORS = "errors"
         const val NO_DATA = "no data"
+        const val MESSAGE = "message"
+        const val MESSAGE_SEPARATOR = "; "
     }
 }

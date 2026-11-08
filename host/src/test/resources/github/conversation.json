@@ -1,0 +1,34 @@
+{"data":{"viewer":{"login":"me"},"repository":{"pullRequest":{
+"id":"PR_kwDO1","headRefOid":"1111111111111111111111111111111111111111","body":"Adds the thing.","createdAt":"2026-11-01T10:00:00Z",
+"author":{"login":"alice","avatarUrl":"https://avatars.githubusercontent.com/u/1?u=abc&v=4"},
+"reactionGroups":[
+ {"content":"THUMBS_UP","viewerHasReacted":true,"reactors":{"totalCount":2}},
+ {"content":"HEART","viewerHasReacted":false,"reactors":{"totalCount":0}},
+ {"content":"ROCKET","viewerHasReacted":false,"reactors":{"totalCount":1}}],
+"comments":{"nodes":[
+ {"id":"IC_1","body":"Looks close.","createdAt":"2026-11-01T12:00:00Z","author":{"login":"bob","avatarUrl":"https://avatars.githubusercontent.com/u/2?v=4"},"reactionGroups":[]},
+ {"id":"IC_2","body":"Old comment.","createdAt":"2026-11-03T12:00:00Z","author":null,"reactionGroups":[]}]},
+"reviews":{"nodes":[
+ {"id":"PRR_1","body":"","state":"APPROVED","createdAt":"2026-11-02T09:00:00Z","submittedAt":"2026-11-02T10:00:00Z","author":{"login":"carol","avatarUrl":"https://avatars.githubusercontent.com/u/3?v=4"},"comments":{"totalCount":0},"reactionGroups":[]},
+ {"id":"PRR_2","body":"","state":"COMMENTED","createdAt":"2026-11-02T11:00:00Z","submittedAt":"2026-11-02T11:00:00Z","author":{"login":"bob","avatarUrl":null},"comments":{"totalCount":3},"reactionGroups":[]},
+ {"id":"PRR_3","body":"Mine, unsent","state":"PENDING","createdAt":"2026-11-04T09:00:00Z","submittedAt":null,"author":{"login":"me","avatarUrl":null},"comments":{"totalCount":2},"reactionGroups":[]},
+ {"id":"PRR_4","body":"Please split this.","state":"CHANGES_REQUESTED","createdAt":"2026-11-04T10:00:00Z","submittedAt":"2026-11-04T10:00:00Z","author":{"login":"dave","avatarUrl":null},"comments":{"totalCount":2},"reactionGroups":[{"content":"EYES","viewerHasReacted":false,"reactors":{"totalCount":1}}]}]},
+"pending":{"nodes":[{"id":"PRR_3","viewerDidAuthor":true}]},
+"reviewThreads":{"nodes":[
+ {"id":"PRRT_open","path":"src/a.kt","line":12,"originalLine":10,"startLine":10,"originalStartLine":8,"diffSide":"RIGHT","isResolved":false,"isOutdated":false,"subjectType":"LINE",
+  "comments":{"nodes":[
+   {"id":"PRRC_1","body":"Why this?","createdAt":"2026-11-02T08:00:00Z","state":"SUBMITTED","viewerDidAuthor":false,"line":12,"originalLine":10,"startLine":10,"originalStartLine":8,"replyTo":null,"commit":{"oid":"2222222222222222222222222222222222222222"},"originalCommit":{"oid":"3333333333333333333333333333333333333333"},"author":{"login":"bob","avatarUrl":"https://avatars.githubusercontent.com/u/2?v=4"},"reactionGroups":[{"content":"LAUGH","viewerHasReacted":false,"reactors":{"totalCount":1}}]},
+   {"id":"PRRC_2","body":"Because.","createdAt":"2026-11-04T09:30:00Z","state":"PENDING","viewerDidAuthor":true,"line":12,"originalLine":12,"startLine":null,"originalStartLine":null,"replyTo":{"id":"PRRC_1"},"commit":{"oid":"1111111111111111111111111111111111111111"},"originalCommit":{"oid":"1111111111111111111111111111111111111111"},"author":{"login":"me","avatarUrl":null},"reactionGroups":[]}]}},
+ {"id":"PRRT_outdated","path":"src/b.kt","line":null,"originalLine":7,"startLine":null,"originalStartLine":5,"diffSide":"LEFT","isResolved":false,"isOutdated":true,"subjectType":"LINE",
+  "comments":{"nodes":[
+   {"id":"PRRC_3","body":"Gone now.","createdAt":"2026-11-01T13:00:00Z","state":"SUBMITTED","viewerDidAuthor":false,"line":null,"originalLine":7,"startLine":null,"originalStartLine":5,"replyTo":null,"commit":null,"originalCommit":{"oid":"4444444444444444444444444444444444444444"},"author":null,"reactionGroups":[]}]}},
+ {"id":"PRRT_resolved","path":"src/c.kt","line":3,"originalLine":3,"startLine":null,"originalStartLine":null,"diffSide":"RIGHT","isResolved":true,"isOutdated":true,"subjectType":"LINE",
+  "comments":{"nodes":[
+   {"id":"PRRC_4","body":"Fixed.","createdAt":"2026-11-01T14:00:00Z","state":"SUBMITTED","viewerDidAuthor":true,"line":3,"originalLine":3,"startLine":null,"originalStartLine":null,"replyTo":null,"commit":null,"originalCommit":{"oid":"4444444444444444444444444444444444444444"},"author":{"login":"me","avatarUrl":"https://avatars.githubusercontent.com/u/9?v=4"},"reactionGroups":[]}]}},
+ {"id":"PRRT_file","path":"docs/readme.md","line":1,"originalLine":1,"startLine":null,"originalStartLine":null,"diffSide":"RIGHT","isResolved":false,"isOutdated":false,"subjectType":"FILE",
+  "comments":{"nodes":[
+   {"id":"PRRC_5","body":"On the whole file.","createdAt":"2026-11-01T15:00:00Z","state":"SUBMITTED","viewerDidAuthor":false,"line":null,"originalLine":null,"startLine":null,"originalStartLine":null,"replyTo":null,"commit":null,"originalCommit":null,"author":{"login":"bob","avatarUrl":null},"reactionGroups":[]}]}},
+ {"id":"PRRT_pending","path":"src/d.kt","line":20,"originalLine":20,"startLine":18,"originalStartLine":18,"diffSide":"RIGHT","isResolved":false,"isOutdated":false,"subjectType":"LINE",
+  "comments":{"nodes":[
+   {"id":"PRRC_6","body":"A new thought.","createdAt":"2026-11-04T09:20:00Z","state":"PENDING","viewerDidAuthor":true,"line":20,"originalLine":20,"startLine":18,"originalStartLine":18,"replyTo":null,"commit":{"oid":"1111111111111111111111111111111111111111"},"originalCommit":{"oid":"1111111111111111111111111111111111111111"},"author":{"login":"me","avatarUrl":null},"reactionGroups":[]}]}}
+]}}}}}

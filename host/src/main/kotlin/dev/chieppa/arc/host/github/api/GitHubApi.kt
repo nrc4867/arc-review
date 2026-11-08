@@ -5,6 +5,7 @@ object GitHubApi {
     const val BASE = "https://api.github.com"
     const val GRAPHQL = "$BASE/graphql"
     const val NOTIFICATIONS = "$BASE/notifications"
+    const val REPOS = "$BASE/repos"
 
     const val GET = "GET"
     const val POST = "POST"
@@ -27,6 +28,7 @@ object GitHubApi {
     const val JSON_BODY = "application/json"
 
     const val OK = 200
+    const val CREATED = 201
     const val NOT_MODIFIED = 304
     const val UNAUTHORIZED = 401
 }
