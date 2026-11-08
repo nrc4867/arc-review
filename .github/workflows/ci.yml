@@ -6,6 +6,8 @@ on:
   pull_request:
 
 # Stretch is built from source: it is checked out beside the app, where settings.gradle.kts looks for it.
+# Each job builds its own platform's tree-sitter libraries (:syntax:compileNatives) with the pinned zig; zig and the
+# grammar sources live in ~/.gradle/arc-natives, cached on the pins, and the libraries themselves in Gradle's build cache.
 jobs:
   windows:
     runs-on: windows-latest
@@ -21,12 +23,17 @@ jobs:
         with:
           distribution: corretto
           java-version: 25
+      - uses: actions/cache@v4
+        with:
+          path: ~/.gradle/arc-natives
+          key: arc-natives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('arc-review/syntax/native/grammars.tsv', 'arc-review/syntax/native/arc_shim.c', 'arc-review/buildSrc/src/main/kotlin/dev/chieppa/arc/build/natives/ZigRelease.kt') }}
       - uses: gradle/actions/setup-gradle@v4
         with:
           build-root-directory: arc-review
       - run: ./gradlew build
         working-directory: arc-review
 
+  # macos-latest is arm64: the syntax tests load the macos-aarch64 libraries built here.
   macos:
     runs-on: macos-latest
     steps:
@@ -41,6 +48,10 @@ jobs:
         with:
           distribution: corretto
           java-version: 25
+      - uses: actions/cache@v4
+        with:
+          path: ~/.gradle/arc-natives
+          key: arc-natives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('arc-review/syntax/native/grammars.tsv', 'arc-review/syntax/native/arc_shim.c', 'arc-review/buildSrc/src/main/kotlin/dev/chieppa/arc/build/natives/ZigRelease.kt') }}
       - uses: gradle/actions/setup-gradle@v4
         with:
           build-root-directory: arc-review
@@ -63,6 +74,10 @@ jobs:
         with:
           distribution: corretto
           java-version: 25
+      - uses: actions/cache@v4
+        with:
+          path: ~/.gradle/arc-natives
+          key: arc-natives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('arc-review/syntax/native/grammars.tsv', 'arc-review/syntax/native/arc_shim.c', 'arc-review/buildSrc/src/main/kotlin/dev/chieppa/arc/build/natives/ZigRelease.kt') }}
       - uses: gradle/actions/setup-gradle@v4
         with:
           build-root-directory: arc-review
