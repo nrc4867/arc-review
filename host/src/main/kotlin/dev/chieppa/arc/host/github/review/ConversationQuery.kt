@@ -24,7 +24,7 @@ object ConversationQuery {
         "pending: reviews(states: [PENDING], first: 1) { nodes { id viewerDidAuthor } } " +
         "reviewThreads(first: $ENTRIES) { nodes { id path line originalLine startLine originalStartLine diffSide " +
         "isResolved isOutdated subjectType comments(first: $THREAD_COMMENTS) { nodes { id body createdAt state viewerDidAuthor " +
-        "line originalLine startLine originalStartLine replyTo { id } commit { oid } originalCommit { oid } $AUTHOR $REACTIONS } } } } } } }"
+        "line originalLine startLine originalStartLine replyTo { id } pullRequestReview { id } commit { oid } originalCommit { oid } $AUTHOR $REACTIONS } } } } } } }"
 
     private const val OWNER = "owner"
     private const val NAME = "name"

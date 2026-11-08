@@ -33,14 +33,15 @@ object ConversationParser {
         return HostConversation(pullId, pull.string("headRefOid"), pendingReview, conversation)
     }
 
-    /** The comments on the pull request and its submitted reviews that say something, oldest first. */
+    /** The comments on the pull request and its submitted reviews that say something or left comments, oldest first. */
     private fun entries(pull: JsonObject): List<ConversationEntry> {
         val comments = pull.nodes("comments").map { ConversationEntry.Comment(MessageParser.parse(it)) }
         val reviews = pull.nodes("reviews").mapNotNull { review ->
             val state = GitHubEnums.reviewState(review.string("state")) ?: return@mapNotNull null
-            if (review.string("body").isNullOrBlank() && state !in VERDICTS) return@mapNotNull null
+            val comments = review.obj("comments").int("totalCount") ?: 0
+            if (review.string("body").isNullOrBlank() && state !in VERDICTS && comments == 0) return@mapNotNull null
             val message = MessageParser.parse(review, review.instant("submittedAt") ?: review.instant("createdAt"))
-            ConversationEntry.Review(message, state, review.obj("comments").int("totalCount") ?: 0)
+            ConversationEntry.Review(message, state, comments)
         }
         return (comments + reviews).sortedBy { it.message.writtenAt }
     }

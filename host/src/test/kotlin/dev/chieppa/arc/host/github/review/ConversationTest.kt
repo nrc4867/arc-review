@@ -60,9 +60,11 @@ class ConversationTest {
     }
 
     @Test
-    fun entriesHoldCommentsAndReviewsThatSaySomethingOldestFirst() = runTest {
-        val entries = read(FakeGitHub.resource("conversation.json")).first!!.conversation.entries
-        assertEquals(listOf("IC_1", "PRR_1", "IC_2", "PRR_4"), entries.map { it.message.id })
+    fun entriesHoldCommentsAndReviewsThatSaySomethingOrLeftCommentsOldestFirst() = runTest {
+        val read = read(FakeGitHub.resource("conversation.json")).first!!.conversation
+        val entries = read.entries.filter { it.message.id != "PRR_2" }
+        assertEquals(listOf("IC_1", "PRR_1", "PRR_2", "IC_2", "PRR_4"), read.entries.map { it.message.id })
+        assertEquals("PRR_2", read.threads.flatMap { it.messages }.single { it.id == "PRRC_1" }.review)
         val approved = entries[1] as ConversationEntry.Review
         assertEquals(ReviewState.Approved, approved.state)
         assertEquals(epoch("2026-11-02T10:00:00Z"), approved.message.writtenAt)

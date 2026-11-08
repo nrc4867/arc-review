@@ -22,6 +22,7 @@ object MessageParser {
             id = node.string("id").orEmpty(),
             avatar = author.string("avatarUrl"),
             reactions = reactions(node),
+            review = node.obj("pullRequestReview").string("id"),
         )
     }
 
