@@ -21,6 +21,7 @@ import dev.chieppa.arc.design.generated.note_done
 import dev.chieppa.arc.design.generated.note_edit
 import dev.chieppa.arc.design.generated.note_make_comment
 import dev.chieppa.arc.design.generated.note_placeholder
+import dev.chieppa.arc.design.generated.staged_edit
 import dev.chieppa.arc.design.generated.thread_keep_as_note
 import dev.chieppa.arc.design.generated.thread_local
 import dev.chieppa.arc.ui.util.ArcSizes
@@ -37,7 +38,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The person's own comment or note under its line. A draft is written in place and staged, or kept as a note; a note
- * is edited in place, made a comment, or deleted. Both stay on this machine.
+ * is edited in place, made a comment, or deleted; a staged comment opened here goes back to writing or is deleted.
+ * All stay on this machine.
  */
 @Composable
 fun LocalCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = Modifier) {
@@ -78,6 +80,9 @@ fun LocalCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = M
         Divider()
         CardFooter(c.surfaceFloat) {
             when {
+                thread.state == ThreadState.Staged -> {
+                    Button(stringResource(Res.string.staged_edit), { views.forget(comment.id); controller.edit(comment.id) }, kind = ButtonKind.Quiet, icon = StretchIcons.Pen)
+                }
                 !note -> {
                     SubmitButton(stringResource(Res.string.comment_stage), { controller.stage(comment.id) }, ArcIcons.Stage)
                     Button(stringResource(Res.string.thread_keep_as_note), { controller.keepAsNote(comment.id) }, kind = ButtonKind.Quiet, icon = ArcIcons.Note)

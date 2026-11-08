@@ -18,6 +18,9 @@ import dev.chieppa.arc.core.conversation.ThreadMessage
 import dev.chieppa.arc.core.conversation.ThreadState
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.ui.services.HostedConversation
+import dev.chieppa.arc.ui.conversation.LineChoice
+import dev.chieppa.arc.ui.conversation.ThreadJumps
+import dev.chieppa.arc.ui.conversation.ThreadReveal
 import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -113,6 +116,46 @@ class ConversationUiTest {
         assertWhenIdle { host.resolved.isNotEmpty() }
         waitForIdle()
         assertEquals(ThreadState.Resolved, controller.hostThreads(pull, "app/Main.kt").single().state)
+    }
+
+    @Test
+    fun aStagedCommentJumpedToOpensUnderItsLine() = runComposeUiTest {
+        val workbench = openReview(data, conversations = host)
+        val controller = workbench.comments.controller
+        val id = controller.startComment(data.source, CommentAnchor("app/Main.kt", 41)).also { controller.write(it, "Look here"); controller.stage(it) }
+        waitForIdle()
+        assertTrue(!shows("Edit comment"))
+        assertTrue(ThreadJumps.toLocal(workbench, id))
+        waitForIdle()
+        assertNull(workbench.threadViews.reveal)
+        assertTrue(shows("Edit comment"))
+        onNodeWithText("Edit comment").performClick()
+        controller.stage(id)
+        waitForIdle()
+        assertTrue(!shows("Edit comment"))
+    }
+
+    @Test
+    fun aClickOnALineWithThreadsAsksWhetherToStartOneOrOpenOne() = runComposeUiTest {
+        val workbench = openReview(data, conversations = host)
+        val controller = workbench.comments.controller
+        val id = controller.startComment(data.source, CommentAnchor("app/Main.kt", 41)).also { controller.write(it, "Look here"); controller.stage(it) }
+        assertTrue(workbench.panes.openChange(data.source, "app/Main.kt"))
+        waitForIdle()
+        val choice = LineChoice(workbench.panes.focused!!.id.value, LineSide.New, 41)
+        workbench.threadViews.reveal = ThreadReveal(data.source, "app/Main.kt", LineSide.New, 41)
+        workbench.threadViews.choosing = choice
+        waitForIdle()
+        onNodeWithText("Staged · You: Look here").performClick()
+        waitForIdle()
+        assertNull(workbench.threadViews.choosing)
+        assertTrue(shows("Edit comment"))
+        workbench.threadViews.choosing = choice
+        waitForIdle()
+        onNodeWithText("New comment").performClick()
+        waitForIdle()
+        assertEquals(2, controller.local.of(data.source).size)
+        assertTrue(controller.local.of(data.source).any { it.id != id && it.anchor?.line == 41 })
     }
 
     @Test

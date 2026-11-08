@@ -3,6 +3,7 @@ package dev.chieppa.arc.ui.conversation
 import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.conversation.CommentAnchor
 import dev.chieppa.arc.core.conversation.LineSide
+import dev.chieppa.arc.core.conversation.ReviewThread
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.ui.workbench.Workbench
 
@@ -21,5 +22,13 @@ object PaneComments {
         val first = minOf(start, end)
         val last = maxOf(start, end)
         workbench.comments.controller.startComment(source, CommentAnchor(pane.path, last, side, first.takeIf { it != last }, madeOn))
+    }
+
+    /**
+     * A click on line numbers [start] to [end] of [side]: one line that has threads [here] asks whether to start a
+     * comment or open one of them; otherwise a comment starts.
+     */
+    fun click(workbench: Workbench, pane: Pane, side: LineSide, start: Int, end: Int, here: List<ReviewThread>) {
+        if (start == end && here.isNotEmpty()) workbench.threadViews.choosing = LineChoice(pane.id.value, side, start) else start(workbench, pane, side, start, end)
     }
 }

@@ -337,6 +337,7 @@
     <string name="thread_lines_changed">lines changed in %1$s</string>
     <string name="thread_guest_author">guest</string>
     <string name="thread_local">local</string>
+    <string name="line_new_comment">New comment</string>
     <string name="thread_line">R %1$d</string>
     <string name="age_now">now</string>
     <string name="age_minutes">%1$d min ago</string>

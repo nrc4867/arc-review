@@ -9,13 +9,17 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import dev.chieppa.arc.core.conversation.LineSide
 import dev.chieppa.arc.core.pane.Pane
+import dev.chieppa.arc.ui.conversation.LineChooser
 import dev.chieppa.arc.ui.conversation.PaneComments
+import dev.chieppa.arc.ui.conversation.ThreadReveal
 import dev.chieppa.arc.ui.conversation.PaneThread
 import dev.chieppa.arc.ui.conversation.paneThreads
 import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.find.ViewerMatches
 import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.stretch.diff.DiffLineRef
 import dev.chieppa.stretch.diff.DiffMark
+import dev.chieppa.stretch.diff.numberOn
 import dev.chieppa.stretch.diff.DiffSide
 import dev.chieppa.stretch.diff.DiffSlots
 import dev.chieppa.stretch.diff.DiffViewer
@@ -28,7 +32,8 @@ import kotlinx.coroutines.flow.filterNotNull
  * A pane's change in Stretch's diff viewer, side by side or in one column and wrapping long lines or not as the pane
  * was left, scrolled back to where it was. Find matches draw in place, the current one set apart; threads sit under
  * their lines with a dot in the gutter and a mark on the ruler. Clicking a line number, or dragging over several,
- * starts a comment there.
+ * starts a comment there; a click on one line that has threads asks whether to start one or open a thread. A thread
+ * jumped to from a list scrolls into view.
  */
 @Composable
 fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, modifier: Modifier = Modifier) {
@@ -49,12 +54,22 @@ fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, 
     val threadInk = Stretch.colors.warnInk
     val marks = remember(threads, threadInk) { threads.map { DiffMark(0, ViewerMatches.sideOf(it.side), it.line, threadInk) } }
 
-    fun key(side: DiffSide, number: Int?) = number?.let { (if (side == DiffSide.Old) LineSide.Old else LineSide.New) to it }
+    fun key(side: DiffSide, number: Int?) = number?.let { lineSide(side) to it }
+    // Split, each side's line is its own; in one column a line stands for both its numbers.
+    fun sidesOf(ref: DiffLineRef) = if (viewer.split) listOf(ref.side) else DiffSide.entries
+    fun here(ref: DiffLineRef) = sidesOf(ref).flatMap { side -> threadsAt[key(side, ref.line.numberOn(side))].orEmpty() }
+    val choice = workbench.threadViews.choosing?.takeIf { it.paneId == id }
     val slots = DiffSlots(
-        gutterMark = { ref -> threadsAt[key(ref.side, ref.number)]?.firstOrNull()?.let { GutterMark(it.state) } },
-        lineAnnotation = { ref -> threadsAt[key(ref.side, ref.number)].orEmpty().forEach { PaneThread(it, workbench) } },
+        gutterMark = { ref -> here(ref).firstOrNull()?.let { GutterMark(it.state) } },
+        lineAnnotation = { ref ->
+            if (choice != null && sidesOf(ref).any { key(it, ref.line.numberOn(it)) == choice.side to choice.line }) {
+                LineChooser(workbench, threadsAt[choice.side to choice.line].orEmpty()) { PaneComments.start(workbench, pane, choice.side, choice.line) }
+            }
+            here(ref).forEach { PaneThread(it, workbench) }
+        },
         onLineRangeSelect = { range ->
-            PaneComments.start(workbench, pane, if (range.side == DiffSide.Old) LineSide.Old else LineSide.New, range.start, range.end)
+            val side = lineSide(range.side)
+            PaneComments.click(workbench, pane, side, range.start, range.end, threadsAt[side to range.start].orEmpty())
             viewer.lineSelection = null
         },
     )
@@ -92,4 +107,13 @@ fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, 
         workbench.state.paneLines[id]?.takeIf { it > 1 }?.let { viewer.scrollToLine(0, DiffSide.New, it) }
         snapshotFlow { viewer.firstVisibleLine(DiffSide.New)?.second }.filterNotNull().collect { workbench.state.paneLines[id] = it }
     }
+    val reveal = workbench.threadViews.reveal?.takeIf { it.source == pane.source && it.path == pane.path }
+    LaunchedEffect(viewer, reveal) {
+        reveal ?: return@LaunchedEffect
+        withFrameNanos {}
+        viewer.scrollToLine(0, if (reveal.side == LineSide.Old) DiffSide.Old else DiffSide.New, (reveal.line - ThreadReveal.LEAD_IN).coerceAtLeast(1))
+        workbench.threadViews.reveal = null
+    }
 }
+
+private fun lineSide(side: DiffSide) = if (side == DiffSide.Old) LineSide.Old else LineSide.New

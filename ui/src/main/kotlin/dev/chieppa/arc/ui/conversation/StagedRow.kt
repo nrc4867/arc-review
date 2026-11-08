@@ -51,7 +51,7 @@ fun StagedRow(comment: StagedComment, workbench: Workbench, modifier: Modifier =
     val controller = workbench.comments.controller
     val gone = comment.lineGoneIn
     val warn = gone != null || comment.failed
-    val open = { comment.path?.let { workbench.panes.openChange(comment.source, it, newTab = false) }; Unit }
+    val open = { ThreadJumps.toLocal(workbench, comment.id, comment.line); Unit }
     Column(
         modifier.fillMaxWidth().background(if (warn) c.warnWash else Color.Transparent).clickable(onClick = open)
             .padding(horizontal = StretchSpacing.space12, vertical = StretchSpacing.space8),
