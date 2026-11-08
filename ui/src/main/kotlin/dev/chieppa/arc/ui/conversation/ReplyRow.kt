@@ -21,11 +21,10 @@ import dev.chieppa.arc.design.generated.staged_edit
 import dev.chieppa.arc.design.generated.staged_state
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.theme.StretchIcons
-import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Button
 import dev.chieppa.stretch.ui.ButtonKind
-import dev.chieppa.stretch.ui.IconButton
+import dev.chieppa.arc.ui.util.TipIconButton
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -49,14 +48,13 @@ fun ReplyRow(reply: LocalComment, workbench: Workbench, writing: Boolean) {
     if (reply.kind != LocalKind.Staged && reply.body.isBlank()) return
     ThreadMessageRow(ThreadMessage(viewer, reply.body, reply.writtenAt), author = you) {
         StateChip(stringResource(Res.string.staged_state), ArcIcons.Stage, stagedLook(reply.failed))
-        if (!reply.fromPending) IconButton(StretchIcons.Pen, stringResource(Res.string.staged_edit), { controller.edit(reply.id) }, size = StretchSizes.seg)
+        if (!reply.fromPending) TipIconButton(StretchIcons.Pen, stringResource(Res.string.staged_edit), { controller.edit(reply.id) })
     }
 }
 
-/** The buttons under a reply being written: stage it, with its keys, or stop writing it. */
+/** The buttons under a reply being written: stage it or stop writing it. */
 @Composable
 fun RowScope.ReplyActions(id: String, controller: ConversationController) {
-    Button(stringResource(Res.string.reply_stage), { controller.stage(id) }, kind = ButtonKind.Primary, icon = ArcIcons.Stage)
-    SubmitKeys()
+    SubmitButton(stringResource(Res.string.reply_stage), { controller.stage(id) }, ArcIcons.Stage)
     Button(stringResource(Res.string.comment_cancel), { controller.discard(id) }, kind = ButtonKind.Quiet)
 }

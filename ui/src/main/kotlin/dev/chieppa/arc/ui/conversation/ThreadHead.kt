@@ -18,9 +18,8 @@ import dev.chieppa.arc.design.generated.thread_fold
 import dev.chieppa.arc.design.generated.thread_line
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
-import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
-import dev.chieppa.stretch.ui.IconButton
+import dev.chieppa.arc.ui.util.TipIconButton
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -49,6 +48,6 @@ fun ThreadHead(
         val summary = if (expanded || peek == null) "$line · $where" else "$line  $peek"
         BasicText(summary, Modifier.weight(1f), style = muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
         trailing()
-        IconButton(if (expanded) StretchIcons.ChevronDown else StretchIcons.ChevronRight, stringResource(Res.string.thread_fold), onToggle, size = StretchSizes.seg)
+        TipIconButton(if (expanded) StretchIcons.ChevronDown else StretchIcons.ChevronRight, stringResource(Res.string.thread_fold), onToggle)
     }
 }

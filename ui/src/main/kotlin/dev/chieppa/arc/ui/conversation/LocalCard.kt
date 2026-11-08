@@ -27,12 +27,11 @@ import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
-import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Button
 import dev.chieppa.stretch.ui.ButtonKind
 import dev.chieppa.stretch.ui.Divider
-import dev.chieppa.stretch.ui.IconButton
+import dev.chieppa.arc.ui.util.TipIconButton
 import dev.chieppa.stretch.ui.framedSurface
 import org.jetbrains.compose.resources.stringResource
 
@@ -80,13 +79,11 @@ fun LocalCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = M
         CardFooter(c.surfaceFloat) {
             when {
                 !note -> {
-                    Button(stringResource(Res.string.comment_stage), { controller.stage(comment.id) }, kind = ButtonKind.Primary, icon = ArcIcons.Stage)
-                    SubmitKeys()
+                    SubmitButton(stringResource(Res.string.comment_stage), { controller.stage(comment.id) }, ArcIcons.Stage)
                     Button(stringResource(Res.string.thread_keep_as_note), { controller.keepAsNote(comment.id) }, kind = ButtonKind.Quiet, icon = ArcIcons.Note)
                 }
                 writing -> {
-                    Button(stringResource(Res.string.note_done), { controller.close(comment.id) }, kind = ButtonKind.Primary, icon = StretchIcons.Check)
-                    SubmitKeys()
+                    SubmitButton(stringResource(Res.string.note_done), { controller.close(comment.id) }, StretchIcons.Check)
                 }
                 else -> {
                     Button(stringResource(Res.string.note_make_comment), { controller.makeComment(comment.id) }, kind = ButtonKind.Quiet, icon = ArcIcons.Comment)
@@ -94,7 +91,7 @@ fun LocalCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = M
                 }
             }
             Spacer(Modifier.weight(1f))
-            IconButton(ArcIcons.Delete, stringResource(Res.string.comment_delete), { controller.discard(comment.id) }, size = StretchSizes.seg)
+            TipIconButton(ArcIcons.Delete, stringResource(Res.string.comment_delete), { controller.discard(comment.id) })
         }
     }
 }

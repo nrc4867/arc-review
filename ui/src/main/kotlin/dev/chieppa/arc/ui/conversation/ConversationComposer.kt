@@ -19,8 +19,10 @@ import dev.chieppa.arc.ui.util.SourceLabels
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Button
-import dev.chieppa.stretch.theme.StretchSizes
-import dev.chieppa.stretch.ui.IconButton
+import dev.chieppa.stretch.ui.Tooltip
+import dev.chieppa.stretch.frame.caps
+import dev.chieppa.arc.ui.actions.ArcKeys
+import dev.chieppa.arc.ui.util.TipIconButton
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -42,10 +44,9 @@ fun ConversationComposer(workbench: Workbench, source: Source) {
             focus = false,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8), verticalAlignment = Alignment.CenterVertically) {
-            Button(stringResource(Res.string.conversation_stage), stage, icon = ArcIcons.Stage)
-            SubmitKeys()
+            Tooltip(stringResource(Res.string.conversation_stage), ArcKeys.SUBMIT_COMMENT.caps()) { Button(stringResource(Res.string.conversation_stage), stage, icon = ArcIcons.Stage) }
             Spacer(Modifier.weight(1f))
-            IconButton(ArcIcons.Note, stringResource(Res.string.thread_keep_as_note), { draft?.let { controller.keepAsNote(it.id) } }, size = StretchSizes.seg)
+            TipIconButton(ArcIcons.Note, stringResource(Res.string.thread_keep_as_note), { draft?.let { controller.keepAsNote(it.id) } })
         }
     }
 }

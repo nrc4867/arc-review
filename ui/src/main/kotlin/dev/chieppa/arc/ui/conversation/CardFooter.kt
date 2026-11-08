@@ -10,10 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import dev.chieppa.arc.ui.actions.ArcKeys
-import dev.chieppa.stretch.frame.caps
 import dev.chieppa.stretch.theme.StretchSpacing
-import dev.chieppa.stretch.ui.Kbd
 
 /** The row of actions at the foot of a thread card, on [fill]. */
 @Composable
@@ -24,10 +21,4 @@ fun CardFooter(fill: Color, content: @Composable RowScope.() -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         content = content,
     )
-}
-
-/** The keys that stage what is being written, shown after its button. */
-@Composable
-fun SubmitKeys() {
-    Kbd(ArcKeys.SUBMIT_COMMENT.caps())
 }

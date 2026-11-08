@@ -30,7 +30,7 @@ import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Button
 import dev.chieppa.stretch.ui.ButtonKind
-import dev.chieppa.stretch.ui.Kbd
+import dev.chieppa.stretch.ui.Tooltip
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -51,13 +51,15 @@ fun StagedFooter(workbench: Workbench, source: Source, staged: List<StagedCommen
         )
         BasicText(parts.joinToString(stringResource(Res.string.staged_separator)), style = Stretch.type.bodySm.merge(TextStyle(color = c.inkMuted)))
         Row(horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8), verticalAlignment = Alignment.CenterVertically) {
-            Button(
-                stringResource(if (source is Source.PullRequest) Res.string.push_review else Res.string.push_comments),
-                { if (pusher.canPush(source)) pusher.confirming = source },
-                kind = if (pusher.canPush(source)) ButtonKind.Primary else ButtonKind.Default,
-                icon = StretchIcons.Push,
-            )
-            Kbd(ArcKeys.PUSH_REVIEW.caps())
+            val label = stringResource(if (source is Source.PullRequest) Res.string.push_review else Res.string.push_comments)
+            Tooltip(label, ArcKeys.PUSH_REVIEW.caps()) {
+                Button(
+                    label,
+                    { if (pusher.canPush(source)) pusher.confirming = source },
+                    kind = if (pusher.canPush(source)) ButtonKind.Primary else ButtonKind.Default,
+                    icon = StretchIcons.Push,
+                )
+            }
         }
     }
 }

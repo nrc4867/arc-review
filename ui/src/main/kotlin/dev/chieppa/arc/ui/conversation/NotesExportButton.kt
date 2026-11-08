@@ -12,8 +12,7 @@ import dev.chieppa.arc.ui.util.SourceLabels
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.document.rememberFileChooser
 import dev.chieppa.stretch.theme.StretchIcons
-import dev.chieppa.stretch.theme.StretchSizes
-import dev.chieppa.stretch.ui.IconButton
+import dev.chieppa.arc.ui.util.TipIconButton
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
@@ -28,11 +27,11 @@ fun NotesExportButton(workbench: Workbench) {
     val format = NotesFormat(stringResource(Res.string.notes_file_kind))
     val title = stringResource(Res.string.notes_title, SourceLabels.of(source))
     val onLines = stringResource(Res.string.notes_on_lines)
-    IconButton(StretchIcons.Export, stringResource(Res.string.notes_export), {
+    TipIconButton(StretchIcons.Export, stringResource(Res.string.notes_export), {
         val text = NotesExport.markdown(workbench.comments.controller.local, source, title, onLines)
         scope.launch {
             val target = chooser.chooseSave(format, NotesExport.fileName(source)) ?: return@launch
             withContext(workbench.dispatchers.io) { File(target).writeBytes(format.encode(text)) }
         }
-    }, size = StretchSizes.seg)
+    })
 }
