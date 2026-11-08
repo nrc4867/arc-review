@@ -40,6 +40,7 @@ includeBuild(stretchDir)
 
 include(":core")
 include(":syntax")
+include(":codeintel")
 include(":git")
 include(":host")
 include(":store")
