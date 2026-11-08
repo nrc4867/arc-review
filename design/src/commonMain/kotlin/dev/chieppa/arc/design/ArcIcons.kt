@@ -86,6 +86,11 @@ object ArcIcons {
             stroke("M12.5 3v10")
         }
     }
+    val Delete: ImageVector by lazy {
+        icon("delete") {
+            stroke("M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.5 9h6l.5-9")
+        }
+    }
     val Filter: ImageVector by lazy {
         icon("filter") {
             stroke("M2.5 3h11l-4.5 5.5V13l-2-1V8.5z")
@@ -202,6 +207,15 @@ object ArcIcons {
             stroke("M1.75 8a1.75 1.75 0 1 0 3.5 0a1.75 1.75 0 1 0 -3.5 0z")
             stroke("M10.75 8a1.75 1.75 0 1 0 3.5 0a1.75 1.75 0 1 0 -3.5 0z")
             stroke("M6 8h.01M8 8h.01M10 8h.01")
+        }
+    }
+    val Reaction: ImageVector by lazy {
+        icon("reaction") {
+            stroke("M12.5 8.5a5 5 0 1 1-5-5")
+            stroke("M5.25 10.25c1.25 1.25 3.25 1.25 4.5 0")
+            fill("M4.75 7.5a0.75 0.75 0 1 0 1.5 0a0.75 0.75 0 1 0 -1.5 0z")
+            fill("M8.75 7.5a0.75 0.75 0 1 0 1.5 0a0.75 0.75 0 1 0 -1.5 0z")
+            stroke("M12.5 1.5v4M10.5 3.5h4")
         }
     }
     val Refresh: ImageVector by lazy {

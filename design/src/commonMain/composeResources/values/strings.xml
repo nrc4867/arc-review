@@ -36,6 +36,8 @@
     <string name="action_next_change">Next change</string>
     <string name="action_previous_change">Previous change</string>
     <string name="action_mark_and_advance">Mark reviewed and go to next</string>
+    <string name="action_comment_here">Comment here</string>
+    <string name="action_push_review">Push review</string>
     <string name="action_toggle_reviewed">Mark or unmark reviewed</string>
     <string name="action_set_aside">Set aside</string>
     <string name="action_find_in_file">Find in file</string>
@@ -218,6 +220,109 @@
     <string name="verdict_approve">Approve</string>
     <string name="verdict_request_changes">Request changes</string>
     <string name="push_review">Push review</string>
+    <string name="staged_summary">Summary</string>
+    <string name="staged_summary_placeholder">What goes up with the verdict</string>
+    <string name="staged_on_file">On file</string>
+    <string name="staged_reply">Reply</string>
+    <string name="staged_on_conversation">Conversation</string>
+    <string name="staged_on_commit">On commit</string>
+    <string name="staged_moved_from">re-anchored from :%1$d</string>
+    <string name="staged_from_pending">from your pending review</string>
+    <string name="staged_open">Open line</string>
+    <string name="staged_goes_up">goes up with the review</string>
+    <string name="staged_separator"> · </string>
+    <plurals name="staged_count_lines">
+        <item quantity="one">%1$d line comment</item>
+        <item quantity="other">%1$d line comments</item>
+    </plurals>
+    <plurals name="staged_count_replies">
+        <item quantity="one">%1$d reply</item>
+        <item quantity="other">%1$d replies</item>
+    </plurals>
+    <string name="staged_count_summary">%1$d in summary</string>
+    <plurals name="staged_count_conversation">
+        <item quantity="one">%1$d on the conversation</item>
+        <item quantity="other">%1$d on the conversation</item>
+    </plurals>
+    <string name="staged_count_verdict">verdict</string>
+    <plurals name="staged_replies">
+        <item quantity="one">%1$d staged reply</item>
+        <item quantity="other">%1$d staged replies</item>
+    </plurals>
+    <string name="push_comments">Push comments</string>
+    <string name="push_title">Push review to %1$s</string>
+    <string name="push_line_comments">Line comments</string>
+    <string name="push_replies">Replies</string>
+    <string name="push_conversation">On the conversation</string>
+    <string name="push_in_summary">In summary</string>
+    <string name="push_viewed">Viewed on GitHub</string>
+    <plurals name="push_viewed_files">
+        <item quantity="one">%1$d file</item>
+        <item quantity="other">%1$d files</item>
+    </plurals>
+    <plurals name="push_set_aside">
+        <item quantity="one">%1$d set aside stays unmarked</item>
+        <item quantity="other">%1$d set aside stay unmarked</item>
+    </plurals>
+    <string name="push_goes_up_as">Goes up as</string>
+
+    <string name="comment_you">You</string>
+    <string name="comment_placeholder">Comment on this line</string>
+    <string name="comment_stage">Stage</string>
+    <string name="comment_cancel">Cancel</string>
+    <string name="comment_delete">Delete</string>
+    <string name="reply_placeholder">Reply</string>
+    <string name="reply_stage">Stage reply</string>
+    <string name="thread_unresolve">Unresolve</string>
+    <string name="thread_note">Note</string>
+    <string name="thread_keep_as_note">Keep as note</string>
+    <string name="note_placeholder">Note to self</string>
+    <string name="note_done">Done</string>
+    <string name="note_edit">Edit</string>
+    <string name="note_make_comment">Make comment</string>
+
+    <string name="reaction_add">Add reaction</string>
+    <string name="reaction_thumbs_up">Thumbs up</string>
+    <string name="reaction_thumbs_down">Thumbs down</string>
+    <string name="reaction_laugh">Laugh</string>
+    <string name="reaction_hooray">Hooray</string>
+    <string name="reaction_confused">Confused</string>
+    <string name="reaction_heart">Heart</string>
+    <string name="reaction_rocket">Rocket</string>
+    <string name="reaction_eyes">Eyes</string>
+
+    <string name="conversation_author">Author</string>
+    <string name="conversation_opened">%1$s opened %2$s</string>
+    <plurals name="conversation_comments">
+        <item quantity="one">%1$d comment</item>
+        <item quantity="other">%1$d comments</item>
+    </plurals>
+    <plurals name="conversation_threads_open">
+        <item quantity="one">%1$d thread open</item>
+        <item quantity="other">%1$d threads open</item>
+    </plurals>
+    <string name="conversation_placeholder">Comment on %1$s</string>
+    <string name="conversation_stage">Stage comment</string>
+    <string name="review_approved">Approved</string>
+    <string name="review_changes_requested">Changes requested</string>
+    <string name="review_commented">Commented</string>
+    <string name="review_dismissed">Dismissed</string>
+    <plurals name="review_line_comments">
+        <item quantity="one">%1$d comment</item>
+        <item quantity="other">%1$d comments</item>
+    </plurals>
+
+    <string name="notes_export">Export notes to Markdown</string>
+    <string name="notes_file_kind">Markdown notes</string>
+    <string name="notes_kept_here">Kept on this machine</string>
+    <plurals name="notes_count">
+        <item quantity="one">%1$d note</item>
+        <item quantity="other">%1$d notes</item>
+    </plurals>
+    <string name="notes_on_source">On %1$s</string>
+    <string name="notes_on_lines">On lines</string>
+    <string name="notes_title">Notes on %1$s</string>
+
 
     <string name="thread_open">Open</string>
     <string name="thread_addressed">Addressed</string>

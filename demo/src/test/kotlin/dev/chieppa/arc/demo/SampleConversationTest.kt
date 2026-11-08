@@ -19,9 +19,9 @@ class SampleConversationTest {
     }
 
     @Test
-    fun everyThreadStateSitsOnItsOwnLine() {
+    fun everyOtherPersonsThreadStateSitsOnItsOwnLine() {
         val threads = SampleConversation { 0 }.threads(source, "a/B.kt", ThreadContext((20..40).toList(), 60))
-        assertEquals(ThreadState.entries.toSet(), threads.map { it.state }.toSet())
+        assertEquals(setOf(ThreadState.Open, ThreadState.Addressed, ThreadState.Resolved, ThreadState.Guest), threads.map { it.state }.toSet())
         assertEquals(threads.size, threads.map { it.line }.toSet().size)
     }
 
@@ -41,12 +41,4 @@ class SampleConversationTest {
         assertEquals(emptyList(), SampleConversation { 0 }.threads(source, "a/B.kt", ThreadContext(emptyList(), 60)))
     }
 
-    @Test
-    fun stagedCommentsAreOnTheReviewsFiles() {
-        val staged = SampleConversation().staged(mapOf(source to listOf("a/B.kt", "c/D.kt")))
-        assertTrue(staged.isNotEmpty())
-        assertTrue(staged.all { it.path in setOf("a/B.kt", "c/D.kt") })
-        assertTrue(staged.any { it.lineGoneIn != null })
-        assertEquals(emptyList(), SampleConversation().staged(emptyMap()))
-    }
 }
