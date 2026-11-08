@@ -19,7 +19,7 @@ class SavePreferencesTest {
         assertEquals(emptyList(), saved)
         val light = UiPreferences(StretchThemes.WorkshopLight, 1.25f)
         workbench.preferences = light
-        waitUntil { saved.isNotEmpty() }
+        waitForIdle()
         assertEquals(listOf(light), saved)
     }
 }

@@ -32,7 +32,7 @@ class EndedPullsUiTest {
 
     private fun androidx.compose.ui.test.ComposeUiTest.openPulls() = openReview(data).also { workbench ->
         listOf(merged, closed, open).forEach { assertTrue(workbench.addSource(it.ref)) }
-        waitUntil { listOf(merged, closed, open).all { it in workbench.state.pulls } }
+        assertWhenIdle { listOf(merged, closed, open).all { it in workbench.state.pulls } }
         waitForIdle()
     }
 

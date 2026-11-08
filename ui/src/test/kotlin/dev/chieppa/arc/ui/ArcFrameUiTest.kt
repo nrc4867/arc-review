@@ -36,7 +36,8 @@ class ArcFrameUiTest {
 
     @Test
     fun theFrameShowsTheAppAndEveryDrawerOnTheRails() = runComposeUiTest {
-        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(Workbench()) }
+        val workbench = Workbench(dispatchers = testDispatchers())
+        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         assertTrue(onAllNodesWithText("Arc").fetchSemanticsNodes().isNotEmpty())
         for (name in drawerNames) {
             assertTrue(onAllNodesWithContentDescription(name).fetchSemanticsNodes().isNotEmpty(), name)
@@ -45,7 +46,7 @@ class ArcFrameUiTest {
 
     @Test
     fun commandsOpenThePaletteOfCommands() = runComposeUiTest {
-        val workbench = Workbench()
+        val workbench = Workbench(dispatchers = testDispatchers())
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         workbench.registry[ArcActionIds.COMMANDS]!!.run()
         waitForIdle()
@@ -54,7 +55,7 @@ class ArcFrameUiTest {
 
     @Test
     fun ctrlKOrCmdKFromTheKeyboardOpensTheSwitcher() = runComposeUiTest {
-        val workbench = Workbench()
+        val workbench = Workbench(dispatchers = testDispatchers())
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         waitForIdle()
         onRoot().performKeyInput { withKeyDown(shortcutKey) { pressKey(Key.K) } }
@@ -64,7 +65,7 @@ class ArcFrameUiTest {
 
     @Test
     fun theTopBarFieldOpensTheSwitcher() = runComposeUiTest {
-        val workbench = Workbench()
+        val workbench = Workbench(dispatchers = testDispatchers())
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         onNodeWithContentDescription("Open switcher").performClick()
         waitForIdle()
@@ -73,7 +74,8 @@ class ArcFrameUiTest {
 
     @Test
     fun goToAnythingSitsInTheMiddleOfTheWholeBar() = runDesktopComposeUiTest(WIDE, TALL) {
-        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(Workbench()) }
+        val workbench = Workbench(dispatchers = testDispatchers())
+        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         waitForIdle()
         val root = onRoot().getBoundsInRoot()
         val field = onNodeWithText("Go to anything").getBoundsInRoot()

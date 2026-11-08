@@ -24,7 +24,7 @@ class RevisionMatrixUiTest {
     private fun androidx.compose.ui.test.ComposeUiTest.openMatrix(): Workbench {
         val workbench = openReview(data)
         workbench.openRevisions(data.source)
-        waitUntil { workbench.state.revisions[data.source] != null }
+        assertWhenIdle { workbench.state.revisions[data.source] != null }
         waitForIdle()
         return workbench
     }
@@ -44,7 +44,7 @@ class RevisionMatrixUiTest {
         assertEquals(3, cells("Unchanged"))
         assertTrue(shows("Text.kt @ r2"))
         assertTrue(shows("changed in r2"))
-        waitUntil { workbench.state.workspace.headsOf(data.source).size == 1 }
+        assertWhenIdle { workbench.state.workspace.headsOf(data.source).size == 1 }
     }
 
     @Test
@@ -92,7 +92,7 @@ class RevisionMatrixUiTest {
         onAllNodesWithContentDescription("Pick for compare").fetchSemanticsNodes().let { assertEquals(2, it.size) }
         onAllNodesWithContentDescription("Pick for compare").onFirst().performClick()
         onAllNodesWithContentDescription("Pick for compare")[1].performClick()
-        waitUntil { shows("files differ") }
+        assertWhenIdle { shows("files differ") }
         assertTrue(shows("2 files differ"))
         assertTrue(shows("2 commits picked"))
         assertEquals(data.firstHead, data.compared?.first?.head)

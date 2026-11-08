@@ -39,7 +39,7 @@ class PaneKindsUiTest {
     @Test
     fun aDeletedFileShowsItsWholeFormerTextUnderADeletedChip() = runComposeUiTest {
         openFile("old/Gone.kt")
-        waitUntil { shows("goneToo") }
+        assertWhenIdle { shows("goneToo") }
         assertTrue(shows("Deleted"))
         assertTrue(shows("fun gone() = 1"))
         assertFalse(hasDiffChoice())
@@ -48,7 +48,7 @@ class PaneKindsUiTest {
     @Test
     fun anAddedFileShowsWholeUnderAnAddedChip() = runComposeUiTest {
         val workbench = openFile("docs/Guide.md")
-        waitUntil { shows("Added") }
+        assertWhenIdle { shows("Added") }
         assertFalse(hasDiffChoice())
         assertTrue(shows("Full file") && shows("Rendered"))
         assertEquals("docs/Guide.md", workbench.panes.focused?.path)
@@ -57,7 +57,7 @@ class PaneKindsUiTest {
     @Test
     fun aFileWithNoChangedLineShowsWholeUnderAnUnchangedChip() = runComposeUiTest {
         openFile("scripts/run.sh")
-        waitUntil { shows("echo run") }
+        assertWhenIdle { shows("echo run") }
         assertTrue(shows("Unchanged"))
         assertFalse(hasDiffChoice())
     }
@@ -65,7 +65,7 @@ class PaneKindsUiTest {
     @Test
     fun aBinaryFileShowsItsKindInTheHeaderAndTheBody() = runComposeUiTest {
         openFile("img/logo.png")
-        waitUntil { shows("Binary file") }
+        assertWhenIdle { shows("Binary file") }
         assertTrue(shows("Added"))
         assertTrue(onAllNodesWithText("Binary").fetchSemanticsNodes().isNotEmpty())
     }
@@ -73,7 +73,7 @@ class PaneKindsUiTest {
     @Test
     fun aChangedFileStillOffersItsDiff() = runComposeUiTest {
         openFile("app/Main.kt")
-        waitUntil { shows("line twenty") }
+        assertWhenIdle { shows("line twenty") }
         assertTrue(hasDiffChoice())
         assertFalse(shows("Unchanged"))
     }
@@ -112,11 +112,11 @@ class PaneKindsUiTest {
     fun findInAFullFileCountsMatchesWithoutWashingLines() = runComposeUiTest {
         val workbench = openFile("app/Main.kt")
         workbench.panes.setView(workbench.panes.focused!!.id.value, PaneView.FullFile)
-        waitUntil { shows("find me too") }
+        assertWhenIdle { shows("find me too") }
         workbench.registry[ArcActionIds.FIND_IN_FILE]!!.run()
-        waitUntil { onAllNodesWithContentDescription("Find").fetchSemanticsNodes().isNotEmpty() }
+        assertWhenIdle { onAllNodesWithContentDescription("Find").fetchSemanticsNodes().isNotEmpty() }
         onAllNodesWithContentDescription("Find").onFirst().performTextInput("find me")
-        waitUntil { shows("1 of 2") }
+        assertWhenIdle { shows("1 of 2") }
     }
 
     @Test

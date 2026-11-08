@@ -33,6 +33,7 @@ fun ComposeUiTest.openReview(
     conversations: ConversationService = NoConversations,
 ): Workbench {
     val workbench = Workbench(
+        dispatchers = testDispatchers(),
         preferences = preferences,
         data = data,
         state = WorkspaceState(repos = mapOf(data.repo to Path.of("."))),
@@ -42,7 +43,7 @@ fun ComposeUiTest.openReview(
     setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
     waitForIdle()
     assertTrue(workbench.addSource(data.source.ref))
-    waitUntil { workbench.state.snapshot(data.source) != null }
+    assertWhenIdle { workbench.state.snapshot(data.source) != null }
     waitForIdle()
     return workbench
 }

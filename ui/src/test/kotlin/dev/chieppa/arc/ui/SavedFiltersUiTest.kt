@@ -52,6 +52,7 @@ class SavedFiltersUiTest {
 
     private fun androidx.compose.ui.test.ComposeUiTest.open(): Workbench {
         val workbench = Workbench(
+            dispatchers = testDispatchers(),
             data = data,
             state = WorkspaceState(Workspace(), repos = mapOf(data.repo to Path.of("."))),
             watch = watch,

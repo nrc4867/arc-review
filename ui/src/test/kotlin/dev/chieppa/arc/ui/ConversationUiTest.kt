@@ -3,7 +3,7 @@ package dev.chieppa.arc.ui
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.runComposeUiTest
+import androidx.compose.ui.test.v2.runComposeUiTest
 import dev.chieppa.arc.core.conversation.CommentAnchor
 import dev.chieppa.arc.core.conversation.ConversationEntry
 import dev.chieppa.arc.core.conversation.LineSide
@@ -18,6 +18,7 @@ import dev.chieppa.arc.core.conversation.ThreadMessage
 import dev.chieppa.arc.core.conversation.ThreadState
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.ui.services.HostedConversation
+import kotlinx.coroutines.CompletableDeferred
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -57,7 +58,7 @@ class ConversationUiTest {
         assertEquals(StagedRoute.Commit, staged.route)
         assertEquals(41, staged.line)
         workbench.comments.pusher.push(data.source)
-        waitUntil { host.pushes.isNotEmpty() && workbench.comments.pusher.pushing == null }
+        assertWhenIdle { host.pushes.isNotEmpty() && workbench.comments.pusher.pushing == null }
         assertEquals(data.head, host.pushes.single().head)
         assertTrue(controller.local.staged(data.source).isEmpty())
     }
@@ -68,7 +69,7 @@ class ConversationUiTest {
         val controller = workbench.comments.controller
         val kept = controller.startComment(data.source, CommentAnchor("app/Main.kt", 25, madeOn = data.base)).also { controller.write(it, "kept"); controller.stage(it) }
         val gone = controller.startComment(data.source, CommentAnchor("app/Main.kt", 20, madeOn = data.base)).also { controller.write(it, "gone"); controller.stage(it) }
-        waitUntil { workbench.comments.placer.placed.keys.containsAll(listOf(kept, gone)) }
+        assertWhenIdle { workbench.comments.placer.placed.keys.containsAll(listOf(kept, gone)) }
         val rows = workbench.comments.pusher.staged(data.source).associateBy { it.id }
         assertEquals(25, rows.getValue(kept).line)
         assertNull(rows.getValue(kept).lineGoneIn)
@@ -83,7 +84,7 @@ class ConversationUiTest {
         val controller = workbench.comments.controller
         val id = controller.startComment(data.source, CommentAnchor("app/Main.kt", 41)).also { controller.write(it, "one"); controller.stage(it) }
         workbench.comments.pusher.push(data.source)
-        waitUntil { host.pushes.isNotEmpty() && workbench.comments.pusher.pushing == null }
+        assertWhenIdle { host.pushes.isNotEmpty() && workbench.comments.pusher.pushing == null }
         assertEquals(true, controller.local.byId(id)?.failed)
         assertTrue(workbench.comments.pusher.staged(data.source).single().failed)
     }
@@ -98,16 +99,18 @@ class ConversationUiTest {
         host.accepts = false
         val workbench = openReview(data, conversations = host)
         assertTrue(workbench.addSource(pull.ref))
-        waitUntil { workbench.comments.controller.hosted[pull] != null }
+        assertWhenIdle { workbench.comments.controller.hosted[pull] != null }
         val controller = workbench.comments.controller
+        val answer = CompletableDeferred<Unit>().also { host.answer = it }
         controller.react(pull, "C_1", Reaction.ThumbsUp)
         assertEquals(2, controller.hostThreads(pull, "app/Main.kt").single().messages.single().reactions.single().count)
-        waitUntil { host.reactions.isNotEmpty() }
-        waitUntil { controller.hostThreads(pull, "app/Main.kt").single().messages.single().reactions.single().count == 1 }
+        answer.complete(Unit)
+        host.answer = null
+        assertWhenIdle { controller.hostThreads(pull, "app/Main.kt").single().messages.single().reactions.single().count == 1 }
         assertEquals(Triple("C_1", Reaction.ThumbsUp, true), host.reactions.single())
         host.accepts = true
         controller.resolve(controller.hostThreads(pull, "app/Main.kt").single(), true)
-        waitUntil { host.resolved.isNotEmpty() }
+        assertWhenIdle { host.resolved.isNotEmpty() }
         waitForIdle()
         assertEquals(ThreadState.Resolved, controller.hostThreads(pull, "app/Main.kt").single().state)
     }

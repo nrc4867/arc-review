@@ -37,7 +37,7 @@ class RemoveSourceUiTest {
         assertEquals(1, workbench.state.workspace.marks.size)
 
         assertTrue(workbench.addSource(data.source.ref))
-        waitUntil { workbench.state.snapshot(data.source) != null }
+        assertWhenIdle { workbench.state.snapshot(data.source) != null }
         assertEquals(FileReviewState.Reviewed, workbench.state.states(data.source)["app/Main.kt"])
         assertTrue(pinned.value in workbench.paneLayout.tabs)
     }

@@ -19,6 +19,7 @@ import dev.chieppa.arc.git.repo.LocalBranch
 import dev.chieppa.arc.host.github.repo.GitHubRepo
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.review.WorkspaceState
+import dev.chieppa.arc.ui.switcher.SwitcherLimits
 import dev.chieppa.arc.ui.switcher.SwitcherScope
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.test.setStretchContent
@@ -36,12 +37,12 @@ class SwitcherUiTest {
     private val field = "Switch to a source, file or pull request, or paste a link"
 
     private fun ComposeUiTest.open(): Workbench {
-        val workbench = Workbench(data = data, state = WorkspaceState(repos = mapOf(data.repo to Path.of("."))))
+        val workbench = Workbench(dispatchers = testDispatchers(), data = data, state = WorkspaceState(repos = mapOf(data.repo to Path.of("."))))
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         waitForIdle()
         assertTrue(workbench.addSource(other.ref))
         assertTrue(workbench.addSource(data.source.ref))
-        waitUntil(timeoutMillis = LOAD_TIMEOUT) { workbench.state.snapshot(data.source) != null && workbench.state.snapshot(other) != null }
+        assertWhenIdle { workbench.state.snapshot(data.source) != null && workbench.state.snapshot(other) != null }
         waitForIdle()
         return workbench
     }
@@ -86,11 +87,11 @@ class SwitcherUiTest {
         val workbench = open()
         search("Text.kt")
         press(Key.Enter, shortcutKey)
-        waitUntil { workbench.panes.focused?.path == "app/util/Text.kt" }
+        assertWhenIdle { workbench.panes.focused?.path == "app/util/Text.kt" }
         val first = workbench.panes.focused!!.id
         search("Main.kt")
         press(Key.Enter, shortcutKey)
-        waitUntil { workbench.panes.focused?.path == "app/Main.kt" }
+        assertWhenIdle { workbench.panes.focused?.path == "app/Main.kt" }
         assertTrue(workbench.state.pane(first.value) != null)
     }
 
@@ -114,7 +115,8 @@ class SwitcherUiTest {
         data.openPullList = listOf(FakePulls.pull(398, "Remove legacy token table", repo = GitHubRepo("lumen", "demo")))
         open()
         search("legacy")
-        waitUntil { shows("Remove legacy token table") }
+        mainClock.advanceTimeBy(SwitcherLimits.DEBOUNCE_MILLIS)
+        assertWhenIdle { shows("Remove legacy token table") }
         assertTrue(shows("demo#398"))
     }
 
@@ -122,7 +124,7 @@ class SwitcherUiTest {
     fun aPastedLinkShowsWhatItPointsAtAndOpensIt() = runComposeUiTest {
         data.origin = GitHubRepo("lumen", "demo")
         val workbench = open()
-        waitUntil { workbench.gitHubRepos.isNotEmpty() }
+        assertWhenIdle { workbench.gitHubRepos.isNotEmpty() }
         search("https://github.com/lumen/demo/commit/dddd1234")
         assertTrue(shows("GitHub commit"))
         assertTrue(shows("OPEN AS"))
@@ -134,6 +136,3 @@ class SwitcherUiTest {
         assertEquals(commit, workbench.state.active)
     }
 }
-
-/** How long the switcher tests wait for both sources to be read, which a busy machine can take more than a second for. */
-private const val LOAD_TIMEOUT = 5_000L

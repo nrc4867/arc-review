@@ -25,7 +25,7 @@ class ImagePanesUiTest {
     @Test
     fun aChangedPictureShowsBeforeAndAfterWithTheirSizes() = runComposeUiTest {
         openFile("img/photo.png")
-        waitUntil { shows("30 × 20") }
+        assertWhenIdle { shows("30 × 20") }
         assertTrue(shows("40 × 20"))
         assertTrue(described("Before") && described("After"))
         assertFalse(shows("Binary file"))
@@ -34,16 +34,16 @@ class ImagePanesUiTest {
     @Test
     fun anSvgShowsDrawnAndAsItsText() = runComposeUiTest {
         openFile("img/icon.svg")
-        waitUntil { shows("Rendered") }
+        assertWhenIdle { shows("Rendered") }
         onNodeWithText("Rendered").performClick()
-        waitUntil { shows("16 × 16") }
+        assertWhenIdle { shows("16 × 16") }
         onNodeWithText("Full file").performClick()
-        waitUntil { shows("circle") }
+        assertWhenIdle { shows("circle") }
     }
 
     @Test
     fun aBinaryFileThatIsNoPictureStillShowsItsKind() = runComposeUiTest {
         openFile("img/logo.png")
-        waitUntil { shows("Binary file") }
+        assertWhenIdle { shows("Binary file") }
     }
 }

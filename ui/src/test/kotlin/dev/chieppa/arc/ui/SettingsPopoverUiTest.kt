@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 class SettingsPopoverUiTest {
     @Test
     fun pickingAThemeAndASizeChangesTheLook() = runComposeUiTest {
-        val workbench = Workbench()
+        val workbench = Workbench(dispatchers = testDispatchers())
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         workbench.settingsOpen = true
         waitForIdle()
@@ -31,7 +31,7 @@ class SettingsPopoverUiTest {
 
     @Test
     fun turningOffWholeLineHighlightMovesChangeWashesToTheGutter() = runComposeUiTest {
-        val workbench = Workbench()
+        val workbench = Workbench(dispatchers = testDispatchers())
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         workbench.settingsOpen = true
         waitForIdle()
