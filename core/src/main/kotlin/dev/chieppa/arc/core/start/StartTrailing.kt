@@ -13,4 +13,7 @@ sealed interface StartTrailing {
 
     /** The keys bound to the action [action], as the keymap has them now. */
     data class Keys(val action: String) : StartTrailing
+
+    /** Key caps for a gesture no action is bound to, such as a click with a key held. */
+    data class Caps(val caps: List<String>) : StartTrailing
 }
