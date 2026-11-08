@@ -1,17 +1,15 @@
 package dev.chieppa.arc.ui.conversation
 
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
 import dev.chieppa.arc.ui.workbench.Workbench
-import dev.chieppa.stretch.theme.Stretch
+import dev.chieppa.stretch.markdown.MarkdownView
 
-/** What a comment says, as its author wrote it. */
+/**
+ * What a comment says, formatted as GitHub formats it: markdown and the HTML GitHub allows, its pictures fetched from
+ * the host. A link, or a video, which shows as one, opens in the browser.
+ */
 @Composable
 fun CommentBody(text: String, workbench: Workbench, modifier: Modifier = Modifier) {
-    SelectionContainer(modifier) {
-        BasicText(text, style = Stretch.type.body.merge(TextStyle(color = Stretch.colors.ink)))
-    }
+    MarkdownView(text, modifier, images = workbench.comments.images, onLinkClick = { workbench.links.open(it) })
 }
