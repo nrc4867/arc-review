@@ -196,7 +196,7 @@ class SavedFiltersUiTest {
         assertTrue(workbench.frameLayout.drawers.single { it.id == DrawerIds.PULL_REQUESTS }.open)
         assertTrue(shows("Notify me".uppercase()))
         assertTrue(shows("Comments on my PRs"))
-        onNodeWithText("Team: auth").performClick()
+        onAllNodesWithText("Team: auth").onFirst().performClick()
         waitForIdle()
         assertTrue(shows("Rotate refresh tokens on every use"))
     }

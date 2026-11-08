@@ -51,6 +51,21 @@ import dev.chieppa.arc.design.generated.action_copy_pull_reference
 import dev.chieppa.arc.design.generated.action_copy_pull_branch
 import dev.chieppa.arc.design.generated.action_copy_pull_head
 import dev.chieppa.arc.design.generated.action_copy_pull_title
+import dev.chieppa.arc.design.generated.action_open_source
+import dev.chieppa.arc.design.generated.action_open_link
+import dev.chieppa.arc.design.generated.action_open_filter
+import dev.chieppa.arc.design.generated.action_continue_review
+import dev.chieppa.arc.design.generated.action_toggle_since_review
+import dev.chieppa.arc.design.generated.action_open_conversation
+import dev.chieppa.arc.design.generated.action_open_side_by_side
+import dev.chieppa.arc.design.generated.action_review_staged
+import dev.chieppa.arc.design.generated.action_clear_recent
+import dev.chieppa.arc.design.generated.action_forget_recent
+import dev.chieppa.arc.design.generated.action_hide_start_card
+import dev.chieppa.arc.design.generated.action_move_start_card_up
+import dev.chieppa.arc.design.generated.action_move_start_card_down
+import dev.chieppa.arc.design.generated.action_move_start_card_across
+import dev.chieppa.arc.design.generated.action_restore_start_cards
 import dev.chieppa.arc.ui.drawers.ArcDrawerSlots
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -105,6 +120,21 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.COPY_PULL_BRANCH.value to Res.string.action_copy_pull_branch,
     ArcActionIds.COPY_PULL_HEAD.value to Res.string.action_copy_pull_head,
     ArcActionIds.COPY_PULL_TITLE.value to Res.string.action_copy_pull_title,
+    ArcActionIds.OPEN_SOURCE.value to Res.string.action_open_source,
+    ArcActionIds.OPEN_LINK.value to Res.string.action_open_link,
+    ArcActionIds.OPEN_FILTER.value to Res.string.action_open_filter,
+    ArcActionIds.CONTINUE_REVIEW.value to Res.string.action_continue_review,
+    ArcActionIds.TOGGLE_SINCE_REVIEW.value to Res.string.action_toggle_since_review,
+    ArcActionIds.OPEN_CONVERSATION.value to Res.string.action_open_conversation,
+    ArcActionIds.OPEN_SIDE_BY_SIDE.value to Res.string.action_open_side_by_side,
+    ArcActionIds.REVIEW_STAGED.value to Res.string.action_review_staged,
+    ArcActionIds.CLEAR_RECENT.value to Res.string.action_clear_recent,
+    ArcActionIds.FORGET_RECENT.value to Res.string.action_forget_recent,
+    ArcActionIds.HIDE_START_CARD.value to Res.string.action_hide_start_card,
+    ArcActionIds.MOVE_START_CARD_UP.value to Res.string.action_move_start_card_up,
+    ArcActionIds.MOVE_START_CARD_DOWN.value to Res.string.action_move_start_card_down,
+    ArcActionIds.MOVE_START_CARD_ACROSS.value to Res.string.action_move_start_card_across,
+    ArcActionIds.RESTORE_START_CARDS.value to Res.string.action_restore_start_cards,
 ) + ArcDrawerSlots.all.associate { ArcActionIds.toggleDrawer(it.id).value to it.title }
 
 /** Turns an action's text key into its label, for Stretch's `LocalActionText`. */

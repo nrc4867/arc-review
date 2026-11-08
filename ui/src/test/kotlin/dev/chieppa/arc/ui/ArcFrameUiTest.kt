@@ -78,7 +78,7 @@ class ArcFrameUiTest {
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         waitForIdle()
         val root = onRoot().getBoundsInRoot()
-        val field = onNodeWithText("Go to anything").getBoundsInRoot()
+        val field = onNodeWithContentDescription("Open switcher").getBoundsInRoot()
         val middle = (field.left + field.right) / 2
         val rootMiddle = (root.left + root.right) / 2
         assertTrue(abs((middle - rootMiddle).value) <= 1f, "field centre $middle, bar centre $rootMiddle")

@@ -18,6 +18,13 @@ import dev.chieppa.arc.ui.actions.registerArcActions
 import dev.chieppa.arc.ui.actions.registerContextActions
 import dev.chieppa.arc.ui.actions.registerPullActions
 import dev.chieppa.arc.ui.actions.registerReviewActions
+import dev.chieppa.arc.ui.actions.registerStartActions
+import dev.chieppa.arc.ui.start.StartState
+import dev.chieppa.arc.ui.start.arcStartProvider
+import dev.chieppa.arc.core.recent.RecentSources
+import dev.chieppa.arc.core.source.SourceRefs
+import dev.chieppa.arc.core.start.StartContributor
+import dev.chieppa.arc.core.start.StartLayout
 import dev.chieppa.arc.ui.drawers.defaultFrameLayout
 import dev.chieppa.arc.ui.conversation.CommentTools
 import dev.chieppa.arc.ui.conversation.ConversationViews
@@ -66,8 +73,8 @@ import kotlinx.coroutines.launch
  * through [data] on [scope]; the host's threads and the person's own comments go through [comments], from
  * [conversationService] and [localConversation], with sample threads from [conversation]. [onQuit] closes the app. Copied
  * paths and refs go to [clipboard], and web links open through [links]. [watch] holds the saved filters and
- * notification rules. All of the window's work runs on [dispatchers], [scope] on their main. Questions about code go
- * to [codeNavigation].
+ * notification rules. [start] holds the start screen, starting from the person's [startLayout] and [recent] sources.
+ * All of the window's work runs on [dispatchers], [scope] on their main. Questions about code go to [codeNavigation].
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -83,6 +90,8 @@ class Workbench(
     conversationService: ConversationService = NoConversations,
     localConversation: LocalConversation = LocalConversation(),
     codeNavigation: CodeNavigation = CodeNavigation(),
+    startLayout: StartLayout = StartLayout(),
+    recent: RecentSources = RecentSources(),
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -158,6 +167,7 @@ class Workbench(
 
     val registry = ActionRegistry()
     val keymap = Keymap(registry)
+    val start = StartState(startLayout, recent)
 
     init {
         registerArcActions(registry, this, onQuit)
@@ -165,6 +175,8 @@ class Workbench(
         registerContextActions(registry, this)
         registerPullActions(registry, this)
         navigation.start()
+        registerStartActions(registry, this)
+        start.registry.register(StartContributor.ARC, arcStartProvider(this))
     }
 
     /** Opens the Pull requests drawer and counts every notification as seen. */
@@ -245,6 +257,7 @@ class Workbench(
     fun addSource(ref: String): Boolean {
         if (!sources.addSource(ref)) return false
         state.active?.let(::activateSource)
+        state.active?.let { start.record(it.ref, null) }
         return true
     }
 
@@ -253,6 +266,7 @@ class Workbench(
         val before = state.active
         if (!sources.addSource(ref)) return false
         (before ?: state.active)?.let(::activateSource)
+        SourceRefs.parse(ref)?.let { start.record(it.ref, null) }
         return true
     }
 
@@ -269,6 +283,7 @@ class Workbench(
      * again restores them.
      */
     fun removeSource(source: Source) {
+        start.record(source.ref, state.loads[source]?.ready?.title)
         sources.removeSource(source)
         state.selected -= source
         treeState.expanded = treeState.expanded.filterNot { it is String && TreeKeys.belongsTo(it, source) }.toSet()

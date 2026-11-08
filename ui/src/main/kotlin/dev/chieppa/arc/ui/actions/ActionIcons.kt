@@ -43,6 +43,19 @@ private val icons: Map<String, ImageVector> = mapOf(
     ArcActionIds.COPY_PULL_BRANCH.value to ArcIcons.Branch,
     ArcActionIds.COPY_PULL_HEAD.value to ArcIcons.Commit,
     ArcActionIds.COPY_PULL_REFERENCE.value to ArcIcons.PullRequest,
+    ArcActionIds.OPEN_LINK.value to StretchIcons.ExternalLink,
+    ArcActionIds.OPEN_FILTER.value to ArcIcons.Filter,
+    ArcActionIds.CONTINUE_REVIEW.value to ArcIcons.Continue,
+    ArcActionIds.TOGGLE_SINCE_REVIEW.value to ArcIcons.ChangedSince,
+    ArcActionIds.OPEN_CONVERSATION.value to ArcIcons.Comment,
+    ArcActionIds.OPEN_SIDE_BY_SIDE.value to StretchIcons.SplitView,
+    ArcActionIds.REVIEW_STAGED.value to ArcIcons.Stage,
+    ArcActionIds.CLEAR_RECENT.value to StretchIcons.Close,
+    ArcActionIds.FORGET_RECENT.value to StretchIcons.Close,
+    ArcActionIds.HIDE_START_CARD.value to StretchIcons.EyeOff,
+    ArcActionIds.MOVE_START_CARD_UP.value to StretchIcons.ArrowUp,
+    ArcActionIds.MOVE_START_CARD_DOWN.value to StretchIcons.ArrowDown,
+    ArcActionIds.RESTORE_START_CARDS.value to StretchIcons.Restore,
 )
 
 /** The icon for an action's icon key: a drawer action shows its drawer's icon. */

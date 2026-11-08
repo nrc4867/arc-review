@@ -1,7 +1,10 @@
 package dev.chieppa.arc.ui
 
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isPopup
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.v2.runComposeUiTest
@@ -21,9 +24,9 @@ class SettingsPopoverUiTest {
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
         workbench.settingsOpen = true
         waitForIdle()
-        onNodeWithContentDescription("Theme").performClick()
+        onNode(hasContentDescription("Theme") and hasAnyAncestor(isPopup())).performClick()
         onNodeWithText(StretchThemes.WorkshopLight.name).performClick()
-        onNodeWithText("125%").performClick()
+        onNode(hasText("125%") and hasAnyAncestor(isPopup())).performClick()
         waitForIdle()
         assertEquals(StretchThemes.WorkshopLight, workbench.preferences.theme)
         assertEquals(1.25f, workbench.preferences.interfaceSize)
@@ -36,7 +39,7 @@ class SettingsPopoverUiTest {
         workbench.settingsOpen = true
         waitForIdle()
         assertEquals(ChangeWash.Line, workbench.preferences.changeWash)
-        onNodeWithContentDescription("Highlight whole changed lines").performClick()
+        onNode(hasContentDescription("Highlight whole changed lines") and hasAnyAncestor(isPopup())).performClick()
         waitForIdle()
         assertEquals(ChangeWash.Gutter, workbench.preferences.changeWash)
     }

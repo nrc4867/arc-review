@@ -55,6 +55,22 @@ object ArcActionIds {
     val COPY_PULL_HEAD = ActionId("copy-pull-head")
     val COPY_PULL_TITLE = ActionId("copy-pull-title")
 
+    val OPEN_SOURCE = ActionId("open-source")
+    val OPEN_LINK = ActionId("open-link")
+    val OPEN_FILTER = ActionId("open-filter")
+    val CONTINUE_REVIEW = ActionId("continue-review")
+    val TOGGLE_SINCE_REVIEW = ActionId("toggle-since-review")
+    val OPEN_CONVERSATION = ActionId("open-conversation")
+    val OPEN_SIDE_BY_SIDE = ActionId("open-side-by-side")
+    val REVIEW_STAGED = ActionId("review-staged")
+    val CLEAR_RECENT = ActionId("clear-recent")
+    val FORGET_RECENT = ActionId("forget-recent")
+    val HIDE_START_CARD = ActionId("hide-start-card")
+    val MOVE_START_CARD_UP = ActionId("move-start-card-up")
+    val MOVE_START_CARD_DOWN = ActionId("move-start-card-down")
+    val MOVE_START_CARD_ACROSS = ActionId("move-start-card-across")
+    val RESTORE_START_CARDS = ActionId("restore-start-cards")
+
     private const val DRAWER_PREFIX = "drawer-"
 
     /** The action that opens and closes the drawer [drawerId]. */

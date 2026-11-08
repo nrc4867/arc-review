@@ -1,5 +1,7 @@
 package dev.chieppa.arc.ui.frame
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -12,6 +14,7 @@ import dev.chieppa.arc.design.generated.revisions_tab
 import dev.chieppa.arc.ui.menus.TabMenu
 import dev.chieppa.arc.ui.panes.PageContent
 import dev.chieppa.arc.ui.panes.PaneContent
+import dev.chieppa.arc.ui.start.StartScreen
 import dev.chieppa.arc.ui.util.SourceLabels
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.arc.ui.workbench.pageTab
@@ -22,9 +25,10 @@ import dev.chieppa.stretch.frame.WindowBounds
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The viewport: the active source's panes, and every pinned pane and page, such as a saved filter's, in a grid of tabs. Empty while there are none.
- * The tree's files drag in as tabs, onto a pane, an edge or away into a window; a tab's menu holds Arc's items. Where
- * panes can open windows, it keeps where a new one goes: over the viewport, a little in from its corner.
+ * The viewport: the active source's panes, and every pinned pane and page, such as a saved filter's, in a grid of tabs.
+ * While there are none, the start screen shows over the grid. The tree's files drag in as tabs, onto a pane, an edge or
+ * away into a window, the start screen showing or not; a tab's menu holds Arc's items. Where panes can open windows, it
+ * keeps where a new one goes: over the viewport, a little in from its corner.
  */
 @Composable
 fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
@@ -33,27 +37,30 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
     val titleOf = { source: Source -> revisionsTitle.replace(TITLE_ARG, SourceLabels.of(source)) }
     val conversationTitle = stringResource(Res.string.conversation_tab)
     val conversationOf = { source: Source -> conversationTitle.replace(TITLE_ARG, SourceLabels.of(source)) }
-    PaneGrid(
-        layout = workbench.paneLayout,
-        onChange = { workbench.paneLayout = it },
-        item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf, conversationOf) } ?: paneTab(id, workbench.state.pane(id)) },
-        modifier = modifier.onGloballyPositioned { coordinates ->
-            val topLeft = coordinates.positionInWindow()
-            val size = Offset(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
-            workbench.windowBounds = host?.let {
-                {
-                    val corner = it.screenPosition(topLeft)
-                    val far = it.screenPosition(topLeft + size)
-                    WindowBounds(corner.x + WINDOW_INSET, corner.y + WINDOW_INSET, far.x - corner.x, far.y - corner.y)
+    Box(modifier) {
+        PaneGrid(
+            layout = workbench.paneLayout,
+            onChange = { workbench.paneLayout = it },
+            item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf, conversationOf) } ?: paneTab(id, workbench.state.pane(id)) },
+            modifier = Modifier.fillMaxSize().onGloballyPositioned { coordinates ->
+                val topLeft = coordinates.positionInWindow()
+                val size = Offset(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
+                workbench.windowBounds = host?.let {
+                    {
+                        val corner = it.screenPosition(topLeft)
+                        val far = it.screenPosition(topLeft + size)
+                        WindowBounds(corner.x + WINDOW_INSET, corner.y + WINDOW_INSET, far.x - corner.x, far.y - corner.y)
+                    }
                 }
-            }
-        },
-        onClose = workbench.panes::close,
-        tabMenu = { id, close -> TabMenu(workbench, id, close) },
-        dropTarget = workbench.dropTarget,
-        onDropItem = workbench::dropFile,
-    ) { id ->
-        workbench.state.pane(id)?.let { PaneContent(it, workbench) } ?: workbench.state.page(id)?.let { PageContent(it, workbench) }
+            },
+            onClose = workbench.panes::close,
+            tabMenu = { id, close -> TabMenu(workbench, id, close) },
+            dropTarget = workbench.dropTarget,
+            onDropItem = workbench::dropFile,
+        ) { id ->
+            workbench.state.pane(id)?.let { PaneContent(it, workbench) } ?: workbench.state.page(id)?.let { PageContent(it, workbench) }
+        }
+        if (workbench.paneLayout.leaves.all { it.tabs.isEmpty() }) StartScreen(workbench)
     }
 }
 
