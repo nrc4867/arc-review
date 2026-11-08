@@ -46,6 +46,8 @@ class GitHubConversations(
 
     override suspend fun avatar(url: String): ByteArray? = avatars.bytes(url)
 
+    override suspend fun picture(url: String): ByteArray? = github.picture(url)
+
     private fun failAll(push: ReviewPush, why: String) = PushOutcome(failed = push.items.associate { it.comment.id to why })
 
     private suspend fun <T> attempt(block: suspend () -> T): T? = try {

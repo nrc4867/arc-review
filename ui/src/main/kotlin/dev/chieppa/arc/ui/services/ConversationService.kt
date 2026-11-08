@@ -24,4 +24,7 @@ interface ConversationService {
 
     /** The picture at [url], from the cache while it is fresh; null when there is none to be had. */
     suspend fun avatar(url: String): ByteArray?
+
+    /** The picture at [url] in a comment; null when it is not a picture or cannot be had. */
+    suspend fun picture(url: String): ByteArray?
 }

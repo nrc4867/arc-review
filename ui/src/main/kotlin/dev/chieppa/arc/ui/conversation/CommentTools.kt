@@ -10,7 +10,7 @@ import kotlinx.coroutines.CoroutineScope
 
 /**
  * Everything the window uses to read and write a review's conversation: the conversation itself, where the person's
- * comments sit as sources move, pushing, and the people's pictures.
+ * comments sit as sources move, pushing, the people's pictures and the pictures in comments.
  */
 @Stable
 class CommentTools(
@@ -25,4 +25,5 @@ class CommentTools(
     val placer = StagedPlacer(data, dispatchers.default)
     val pusher = ReviewPusher(state, controller, placer, service, scope)
     val avatars = AvatarImages(service, scope, dispatchers.default)
+    val images = CommentImages(service, dispatchers.default)
 }

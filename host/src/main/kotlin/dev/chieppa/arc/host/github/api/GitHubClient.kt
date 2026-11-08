@@ -20,6 +20,9 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
     /** Whether a token is to hand, without asking GitHub. */
     fun hasToken(): Boolean = tokens.token() != null
 
+    /** The person's token, for a request to GitHub this client does not send itself, such as a picture. */
+    fun token(): String? = tokens.token()
+
     /** The `data` of the GraphQL [query]. */
     suspend fun graphql(query: String): JsonObject = graphql(query, null)
 

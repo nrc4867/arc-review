@@ -19,4 +19,6 @@ object NoConversations : ConversationService {
         PushOutcome(failed = push.items.associate { it.comment.id to NO_HOST })
 
     override suspend fun avatar(url: String): ByteArray? = null
+
+    override suspend fun picture(url: String): ByteArray? = null
 }

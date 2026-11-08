@@ -5,6 +5,8 @@ import dev.chieppa.arc.core.conversation.Reaction
 import dev.chieppa.arc.core.conversation.ReviewPush
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.host.github.api.GitHubClient
+import dev.chieppa.arc.host.github.media.JdkMediaFetcher
+import dev.chieppa.arc.host.github.media.MediaFetcher
 import dev.chieppa.arc.host.github.api.GitHubException
 import dev.chieppa.arc.host.github.history.CommitChecksQuery
 import dev.chieppa.arc.host.github.history.PullHistory
@@ -35,13 +37,20 @@ import dev.chieppa.arc.host.github.review.ReviewWriter
  * writes only when the person acts: reactions, resolving threads, and pushing a staged batch as a review or as commit
  * comments, every write spaced by [pacer]. Every call throws [GitHubException] when GitHub gives nothing to use.
  */
-class GitHub(private val client: GitHubClient = GitHubClient(), pacer: MutationPacer = MutationPacer()) {
+class GitHub(
+    private val client: GitHubClient = GitHubClient(),
+    pacer: MutationPacer = MutationPacer(),
+    private val media: MediaFetcher = JdkMediaFetcher(client::token),
+) {
     private val writer = ReviewWriter(client, pacer)
     private val publisher = ReviewPublisher(writer)
     private val commenter = CommitCommenter(client, pacer)
 
     /** The person's notifications, polled conditionally. */
     val notifications = NotificationsFeed(client)
+
+    /** The picture at [url] in a comment, or null when it is not a picture or cannot be had. */
+    suspend fun picture(url: String): ByteArray? = media.fetch(url)
 
     /** Whether a token is to hand. */
     fun hasToken(): Boolean = client.hasToken()

@@ -41,4 +41,6 @@ class FakeConversations : ConversationService {
     }
 
     override suspend fun avatar(url: String): ByteArray? = null
+
+    override suspend fun picture(url: String): ByteArray? = null
 }
