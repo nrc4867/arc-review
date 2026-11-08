@@ -6,12 +6,12 @@ import dev.chieppa.arc.core.conversation.ThreadState
 data class ThreadCounts(val open: Int = 0, val addressed: Int = 0, val resolved: Int = 0) {
     val isEmpty: Boolean get() = open == 0 && addressed == 0 && resolved == 0
 
-    /** These counts with one more thread in [state]; drafts and guest notes are not counted. */
+    /** These counts with one more thread in [state]; the person's own drafts and notes and guest notes are not counted. */
     fun plus(state: ThreadState): ThreadCounts = when (state) {
         ThreadState.Open -> copy(open = open + 1)
         ThreadState.Addressed -> copy(addressed = addressed + 1)
         ThreadState.Resolved -> copy(resolved = resolved + 1)
-        ThreadState.Draft, ThreadState.Guest -> this
+        ThreadState.Draft, ThreadState.Staged, ThreadState.Note, ThreadState.Guest -> this
     }
 
     companion object {

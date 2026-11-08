@@ -11,6 +11,12 @@ enum class ThreadState {
     /** The person's own comment, not yet staged. */
     Draft,
 
+    /** The person's own comment, staged to go up with the review. */
+    Staged,
+
+    /** The person's own note on the line, kept on this machine. */
+    Note,
+
     /** Left by an outside agent; a person adopts or dismisses it. */
     Guest,
 }
