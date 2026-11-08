@@ -103,6 +103,18 @@ class PaneController(private val state: WorkspaceState) {
         state.paneLayout = state.paneLayout.open(page.id.value)
     }
 
+    /** Opens the conversation of [source] as a tab in the grid, or shows its tab when one is open already. */
+    fun openConversation(source: Source) {
+        val existing = state.workspace.pages.firstOrNull { it is Page.Conversation && it.source == source }
+        if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) {
+            state.paneLayout = state.paneLayout.activate(existing.id.value)
+            return
+        }
+        val page = existing ?: Page.Conversation(PaneFactory.nextId(state.workspace), source)
+        state.workspace = state.workspace.withPage(page)
+        state.paneLayout = state.paneLayout.open(page.id.value)
+    }
+
     /** Opens the page for saved filter [filter], or shows its tab when one is open already. */
     fun openFilter(filter: String) {
         val existing = state.workspace.pages.firstOrNull { it is Page.Filter && it.filter == filter }

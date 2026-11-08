@@ -60,12 +60,14 @@ object WorkspaceMapping {
     private fun toStored(page: Page): StoredPage = when (page) {
         is Page.Filter -> StoredPage.Filter(page.id.value, page.filter)
         is Page.RevisionMatrix -> StoredPage.RevisionMatrix(page.id.value, page.source.ref, page.pinned)
+        is Page.Conversation -> StoredPage.Conversation(page.id.value, page.source.ref, page.pinned)
     }
 
     private fun toPage(stored: StoredPage): Page? = readOrNull {
         when (stored) {
             is StoredPage.Filter -> Page.Filter(PaneId(stored.id), stored.filter)
             is StoredPage.RevisionMatrix -> SourceRefs.parse(stored.source)?.let { Page.RevisionMatrix(PaneId(stored.id), it, stored.pinned) }
+            is StoredPage.Conversation -> SourceRefs.parse(stored.source)?.let { Page.Conversation(PaneId(stored.id), it, stored.pinned) }
         }
     }
 

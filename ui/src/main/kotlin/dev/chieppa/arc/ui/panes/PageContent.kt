@@ -3,6 +3,7 @@ package dev.chieppa.arc.ui.panes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.chieppa.arc.core.pane.Page
+import dev.chieppa.arc.ui.conversation.ConversationPage
 import dev.chieppa.arc.ui.pulls.FilterPage
 import dev.chieppa.arc.ui.revisions.RevisionMatrixPage
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -13,5 +14,6 @@ fun PageContent(page: Page, workbench: Workbench, modifier: Modifier = Modifier)
     when (page) {
         is Page.Filter -> FilterPage(page, workbench, modifier)
         is Page.RevisionMatrix -> RevisionMatrixPage(page, workbench, modifier)
+        is Page.Conversation -> ConversationPage(page, workbench, modifier)
     }
 }

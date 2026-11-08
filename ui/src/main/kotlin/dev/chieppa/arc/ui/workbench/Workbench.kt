@@ -20,6 +20,7 @@ import dev.chieppa.arc.ui.actions.registerPullActions
 import dev.chieppa.arc.ui.actions.registerReviewActions
 import dev.chieppa.arc.ui.drawers.defaultFrameLayout
 import dev.chieppa.arc.ui.conversation.CommentTools
+import dev.chieppa.arc.ui.conversation.ConversationViews
 import dev.chieppa.arc.ui.conversation.ThreadViews
 import dev.chieppa.arc.core.conversation.LocalConversation
 import dev.chieppa.arc.ui.services.ConversationService
@@ -129,6 +130,7 @@ class Workbench(
 
     val texts = PaneTexts(data, dispatchers.default)
     val threadViews = ThreadViews()
+    val conversationViews = ConversationViews()
 
     /** The review's conversation: threads, the person's drafts, notes and staged comments, and pushing them. */
     val comments = CommentTools(state, data, conversationService, scope, dispatchers, localConversation)

@@ -52,12 +52,18 @@ class SourceController(
      * Takes [source] out of the strip with its view and its unpinned panes. Its marks stay in the workspace, so adding
      * it again brings them back; pinned panes stay, in the next source's layout or the loose one.
      */
+    private fun Page.belongsTo(source: Source) = when (this) {
+        is Page.RevisionMatrix -> this.source == source
+        is Page.Conversation -> this.source == source
+        is Page.Filter -> false
+    }
+
     fun removeSource(source: Source) {
         if (source !in state.workspace.sources) return
         jobs.keys.filter { it.first == source }.forEach { jobs.remove(it)?.cancel() }
         val shown = state.viewOf(source).layout.tabs.toSet()
         val closing = state.workspace.panes.filter { !it.pinned && (it.source == source || it.id.value in shown) }.map { it.id }
-        val pages = state.workspace.pages.filter { it is Page.RevisionMatrix && it.source == source && !it.pinned }.map { it.id }
+        val pages = state.workspace.pages.filter { it.belongsTo(source) && !it.pinned }.map { it.id }
         state.workspace = (closing.fold(state.workspace.remove(source)) { workspace, id -> workspace.withoutPane(id) }).let { workspace ->
             pages.fold(workspace) { w, id -> w.withoutPage(id) }
         }

@@ -303,6 +303,17 @@
     </plurals>
     <string name="conversation_placeholder">Comment on %1$s</string>
     <string name="conversation_stage">Stage comment</string>
+    <string name="conversation_tab">Conversation · %1$s</string>
+    <string name="conversation_timeline">Timeline</string>
+    <string name="conversation_by_file">By file</string>
+    <string name="conversation_previous">Previous item</string>
+    <string name="conversation_next">Next item</string>
+    <string name="conversation_fold_all">Fold all</string>
+    <string name="conversation_unfold_all">Unfold all</string>
+    <string name="conversation_open_as_tab">Open as a tab</string>
+    <string name="comment_show_more">Show more</string>
+    <string name="comment_show_less">Show less</string>
+    <string name="thread_go_to">Go to the line</string>
     <string name="review_approved">Approved</string>
     <string name="review_changes_requested">Changes requested</string>
     <string name="review_commented">Commented</string>

@@ -22,8 +22,6 @@ import dev.chieppa.arc.design.generated.thread_dismiss
 import dev.chieppa.arc.design.generated.thread_lines_changed
 import dev.chieppa.arc.design.generated.thread_reply
 import dev.chieppa.arc.design.generated.thread_replies
-import dev.chieppa.arc.design.generated.thread_resolve
-import dev.chieppa.arc.design.generated.thread_unresolve
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.arc.ui.util.SourceLabels
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -73,7 +71,7 @@ fun ThreadCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = 
         if (!expanded) return@Column
         for (message in thread.messages) {
             Divider()
-            ThreadMessageRow(message, images = workbench.comments.avatars, onReact = { r: Reaction -> controller.react(thread.source, message.id, r) }.takeIf { thread.hosted })
+            ThreadMessageRow(message, workbench, onReact = { r: Reaction -> controller.react(thread.source, message.id, r) }.takeIf { thread.hosted })
         }
         for (reply in thread.replies) {
             Divider()
@@ -104,17 +102,4 @@ fun ThreadCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = 
             }
         }
     }
-}
-
-/** Resolves a host's thread, or opens a resolved one again. */
-@Composable
-private fun ResolveButton(thread: ReviewThread, controller: ConversationController) {
-    if (!thread.hosted) return
-    val resolved = thread.state == ThreadState.Resolved
-    Button(
-        stringResource(if (resolved) Res.string.thread_unresolve else Res.string.thread_resolve),
-        { controller.resolve(thread, !resolved) },
-        kind = ButtonKind.Quiet,
-        icon = if (resolved) ArcIcons.Comment else StretchIcons.Check,
-    )
 }

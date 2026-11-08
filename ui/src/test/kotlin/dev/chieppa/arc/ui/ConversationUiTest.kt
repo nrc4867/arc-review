@@ -12,6 +12,7 @@ import dev.chieppa.arc.core.conversation.PullConversation
 import dev.chieppa.arc.core.conversation.PushOutcome
 import dev.chieppa.arc.core.conversation.Reaction
 import dev.chieppa.arc.core.conversation.ReactionGroup
+import dev.chieppa.arc.core.conversation.ReviewState
 import dev.chieppa.arc.core.conversation.ReviewThread
 import dev.chieppa.arc.core.conversation.StagedRoute
 import dev.chieppa.arc.core.conversation.ThreadMessage
@@ -156,6 +157,40 @@ class ConversationUiTest {
         waitForIdle()
         assertEquals(2, controller.local.of(data.source).size)
         assertTrue(controller.local.of(data.source).any { it.id != id && it.anchor?.line == 41 })
+    }
+
+    @Test
+    fun theConversationShowsEachReviewsThreadsWhereTheyAreAndOpensAsATab() = runComposeUiTest {
+        val pull = Source.PullRequest(data.repo, 7)
+        data.pulls[pull] = FakePulls.pull(7, "Seven")
+        val open = ThreadMessage("mfischer", "Same transaction?", 5, id = "C_1", review = "R_1")
+        val done = ThreadMessage("mfischer", "Old point", 4, id = "C_9", review = "R_1")
+        val review = ConversationEntry.Review(ThreadMessage("mfischer", "", 6, id = "R_1"), ReviewState.ChangesRequested, comments = 2)
+        val threads = listOf(
+            ReviewThread("T_1", pull, "app/Main.kt", 20, LineSide.New, ThreadState.Open, listOf(open)),
+            ReviewThread("T_2", pull, "app/Main.kt", 3, LineSide.New, ThreadState.Resolved, listOf(done)),
+        )
+        host.hosted = HostedConversation("PR_7", PullConversation(ThreadMessage("bo", "Seven things", 1, id = "PR_7"), listOf(review), threads, viewer = "me"))
+        val workbench = openReview(data, conversations = host)
+        assertTrue(workbench.addSource(pull.ref))
+        assertWhenIdle { workbench.comments.controller.hosted[pull] != null }
+        if (workbench.frameLayout.drawers.firstOrNull { it.id == dev.chieppa.arc.ui.drawers.DrawerIds.CONVERSATION }?.open != true) {
+            workbench.toggleDrawer(dev.chieppa.arc.ui.drawers.DrawerIds.CONVERSATION)
+        }
+        waitForIdle()
+        // The drawer is short in a test window: fold the description to bring the review into view.
+        workbench.conversationViews.toggleFold("description")
+        waitForIdle()
+        assertTrue(shows("Same transaction?"))
+        assertTrue(shows("app/Main.kt:20"))
+        assertTrue(!shows("Old point"))
+        assertTrue(shows("Seven things"))
+        workbench.conversationViews.grouping = dev.chieppa.arc.ui.conversation.ConversationGrouping.ByFile
+        waitForIdle()
+        assertTrue(shows("R 20"))
+        workbench.panes.openConversation(pull)
+        waitForIdle()
+        assertTrue(workbench.state.workspace.pages.any { it is dev.chieppa.arc.core.pane.Page.Conversation && it.source == pull })
     }
 
     @Test

@@ -75,7 +75,7 @@ fun LocalCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = M
                 }
             }
         } else {
-            ThreadMessageRow(thread.messages.first(), author = you)
+            ThreadMessageRow(thread.messages.first(), workbench, author = you)
         }
         Divider()
         CardFooter(c.surfaceFloat) {

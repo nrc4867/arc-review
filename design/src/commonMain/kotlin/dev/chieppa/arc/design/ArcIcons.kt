@@ -96,6 +96,13 @@ object ArcIcons {
             stroke("M2.5 3h11l-4.5 5.5V13l-2-1V8.5z")
         }
     }
+    val FoldAll: ImageVector by lazy {
+        icon("fold-all") {
+            stroke("M5 2.5l3 3 3-3")
+            stroke("M5 13.5l3-3 3 3")
+            stroke("M3 8h10")
+        }
+    }
     val FolderOpen: ImageVector by lazy {
         icon("folder-open") {
             stroke("M1.5 12.5V4a1 1 0 0 1 1-1H6l1.5 1.5h5a1 1 0 0 1 1 1V7")
@@ -170,6 +177,12 @@ object ArcIcons {
         icon("note") {
             stroke("M3 2.5h10v7l-4 4H3z")
             stroke("M13 9.5H9v4")
+        }
+    }
+    val OpenAsTab: ImageVector by lazy {
+        icon("open-as-tab") {
+            stroke("M2 6.5h12")
+            stroke("M2 4a1.5 1.5 0 0 1 1.5-1.5h3L8 4.5h4.5A1.5 1.5 0 0 1 14 6v6a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12z")
         }
     }
     val Outline: ImageVector by lazy {
@@ -286,6 +299,13 @@ object ArcIcons {
             stroke("M3.5 5h5.5a1.5 1.5 0 0 1 1.5 1.5v5.5a1.5 1.5 0 0 1 -1.5 1.5h-5.5a1.5 1.5 0 0 1 -1.5 -1.5v-5.5a1.5 1.5 0 0 1 1.5 -1.5z")
             stroke("M7 2.5h6.5V9")
             stroke("M13.5 2.5L8.5 7.5")
+        }
+    }
+    val UnfoldAll: ImageVector by lazy {
+        icon("unfold-all") {
+            stroke("M5 5.5l3-3 3 3")
+            stroke("M5 10.5l3 3 3-3")
+            stroke("M3 8h10")
         }
     }
     val Usages: ImageVector by lazy {

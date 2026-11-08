@@ -46,7 +46,7 @@ fun ReplyRow(reply: LocalComment, workbench: Workbench, writing: Boolean) {
         return
     }
     if (reply.kind != LocalKind.Staged && reply.body.isBlank()) return
-    ThreadMessageRow(ThreadMessage(viewer, reply.body, reply.writtenAt), author = you) {
+    ThreadMessageRow(ThreadMessage(viewer, reply.body, reply.writtenAt, id = reply.id), workbench, author = you) {
         StateChip(stringResource(Res.string.staged_state), ArcIcons.Stage, stagedLook(reply.failed))
         if (!reply.fromPending) TipIconButton(StretchIcons.Pen, stringResource(Res.string.staged_edit), { controller.edit(reply.id) })
     }

@@ -17,4 +17,9 @@ sealed interface StoredPage {
     @Serializable
     @SerialName("revisions")
     data class RevisionMatrix(override val id: String, val source: String, val pinned: Boolean = false) : StoredPage
+
+    /** A pull request's conversation, by the source's ref. */
+    @Serializable
+    @SerialName("conversation")
+    data class Conversation(override val id: String, val source: String, val pinned: Boolean = false) : StoredPage
 }

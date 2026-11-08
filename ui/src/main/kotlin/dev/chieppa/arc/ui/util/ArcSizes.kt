@@ -29,6 +29,10 @@ object ArcSizes {
     val findField = 200.dp
 
     val threadMaxWidth = 720.dp
+
+    /** How tall a comment shows before it is cut short behind Show more, and how wide a conversation tab reads. */
+    val commentClamp = 260.dp
+    val conversationPage = 860.dp
     val avatar = 18.dp
     val gutterDot = 7.dp
     val binaryIcon = 32.dp

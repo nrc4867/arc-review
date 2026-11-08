@@ -7,6 +7,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.design.generated.Res
+import dev.chieppa.arc.design.generated.conversation_tab
 import dev.chieppa.arc.design.generated.revisions_tab
 import dev.chieppa.arc.ui.menus.TabMenu
 import dev.chieppa.arc.ui.panes.PageContent
@@ -30,10 +31,12 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
     val host = LocalPaneWindows.current
     val revisionsTitle = stringResource(Res.string.revisions_tab)
     val titleOf = { source: Source -> revisionsTitle.replace(TITLE_ARG, SourceLabels.of(source)) }
+    val conversationTitle = stringResource(Res.string.conversation_tab)
+    val conversationOf = { source: Source -> conversationTitle.replace(TITLE_ARG, SourceLabels.of(source)) }
     PaneGrid(
         layout = workbench.paneLayout,
         onChange = { workbench.paneLayout = it },
-        item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf) } ?: paneTab(id, workbench.state.pane(id)) },
+        item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf, conversationOf) } ?: paneTab(id, workbench.state.pane(id)) },
         modifier = modifier.onGloballyPositioned { coordinates ->
             val topLeft = coordinates.positionInWindow()
             val size = Offset(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
