@@ -1,5 +1,5 @@
 // Bulk query results in one call, so the JVM makes one downcall per query run instead of several per capture.
-// Built into the tree-sitter core library by build-natives.sh. Text predicates (#eq?, #match?) are applied by the
+// Built into the tree-sitter core library by :syntax:compileNatives. Text predicates (#eq?, #match?) are applied by the
 // caller, which gets each capture's pattern for that.
 #include <stdint.h>
 #include <tree_sitter/api.h>

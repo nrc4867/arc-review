@@ -23,3 +23,6 @@ out/
 # Agent worktrees live inside the project
 .worktrees/*
 !.worktrees/.gitkeep
+
+# The tree-sitter libraries are built by :syntax:compileNatives into syntax/build/generated/natives.
+syntax/src/main/resources/dev/chieppa/arc/syntax/natives/
