@@ -62,6 +62,8 @@ Marks follow `docs/research/review-marks.md`: a mark holds the file's fingerprin
 
 **Nothing leaves without a deliberate push.** Notes, marks and drafts stay local until a person publishes them in a confirmed step. An agent never marks, stages, pushes or approves.
 
+**Tests are deterministic, light and windowless.** No timed waits: no `waitUntil`, `Thread.sleep`, `delay` or poll loop. Work a test waits on runs on the test's dispatcher (the window's through `ArcDispatchers`, `testDispatchers()` in UI tests) and is settled with `waitForIdle` and `mainClock`; work outside our control gets a suspend hook to await. No reflection to widen visibility. No real windows, no CPU-heavy tests. `check` fails on the timed waits and the reflection.
+
 **Comments and docs describe the code as it stands.** Current behaviour only, with no account of how it came to be. Public APIs get a one-line KDoc where the name is not enough.
 
 **Licences.** Arc is AGPL-3.0-only, like Stretch. Any dependency must be permissive (Apache-2.0, MIT, BSD). Add a dependency only when code needs it.
