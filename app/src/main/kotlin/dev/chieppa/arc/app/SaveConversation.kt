@@ -7,7 +7,6 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import dev.chieppa.arc.core.conversation.LocalConversation
 import dev.chieppa.arc.ui.workbench.Workbench
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
@@ -22,6 +21,6 @@ fun SaveConversation(workbench: Workbench, save: (LocalConversation) -> Unit) {
         snapshotFlow { workbench.comments.controller.local }
             .drop(1)
             .debounce(AppConstants.SAVE_DELAY_MILLIS)
-            .collect { withContext(Dispatchers.IO) { current(it) } }
+            .collect { withContext(workbench.dispatchers.io) { current(it) } }
     }
 }

@@ -67,9 +67,9 @@ fun ArcWindow(
     ) {
         SavePreferences(workbench) { preferences = it; onPreferencesChange(it) }
         SaveWorkspace(workbench, ::save)
-        SaveWatchlist(watch, session::saveWatchlist)
+        SaveWatchlist(watch, workbench.dispatchers, session::saveWatchlist)
         SaveConversation(workbench, session::saveConversation)
-        WatchPolling(watch, session.github, notifier)
+        WatchPolling(watch, session.github, notifier, workbench.dispatchers)
         CompositionLocalProvider(LocalActionText provides actionText()) {
             MacMenuBar(appMenus(), workbench.registry, workbench.keymap, null, onSettings = { workbench.settingsOpen = true }, onQuit = { save(workbench); onExit() })
         }

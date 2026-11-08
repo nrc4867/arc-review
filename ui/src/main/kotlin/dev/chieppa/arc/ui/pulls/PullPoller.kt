@@ -2,7 +2,7 @@ package dev.chieppa.arc.ui.pulls
 
 import dev.chieppa.arc.host.github.GitHub
 import dev.chieppa.arc.host.github.api.GitHubException
-import kotlinx.coroutines.Dispatchers
+import dev.chieppa.arc.ui.util.ArcDispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -12,9 +12,14 @@ import kotlinx.coroutines.withTimeoutOrNull
 /**
  * Polls GitHub for [watch] while it runs: every saved search in one request every [PullTimes.POLL_MINUTES] minutes,
  * or at once when asked, and the person's notifications as often as GitHub allows. What a poll sets off goes to
- * [notifier].
+ * [notifier]. Blocking reads run on [dispatchers]' io.
  */
-class PullPoller(private val watch: PullWatch, private val github: GitHub, private val notifier: WatchNotifier) {
+class PullPoller(
+    private val watch: PullWatch,
+    private val github: GitHub,
+    private val notifier: WatchNotifier,
+    private val dispatchers: ArcDispatchers = ArcDispatchers.Real,
+) {
     /** Polls until cancelled. */
     suspend fun run() = coroutineScope {
         launch { searches() }
@@ -23,7 +28,7 @@ class PullPoller(private val watch: PullWatch, private val github: GitHub, priva
 
     /** One poll of every search, with what it sets off. */
     suspend fun pollOnce() {
-        if (!withContext(Dispatchers.IO) { github.hasToken() }) {
+        if (!withContext(dispatchers.io) { github.hasToken() }) {
             watch.status = WatchStatus.Unavailable
             return
         }
@@ -57,7 +62,7 @@ class PullPoller(private val watch: PullWatch, private val github: GitHub, priva
     private suspend fun notifications() {
         while (true) {
             try {
-                if (withContext(Dispatchers.IO) { github.hasToken() }) {
+                if (withContext(dispatchers.io) { github.hasToken() }) {
                     WatchEvents.threads(watch.watchlist.rules, github.notifications.poll()).forEach { notifier.tell(it) }
                 }
             } catch (_: GitHubException) {

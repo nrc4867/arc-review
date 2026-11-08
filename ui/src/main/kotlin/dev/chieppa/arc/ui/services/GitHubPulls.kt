@@ -12,16 +12,16 @@ import dev.chieppa.arc.host.github.pulls.CheckState
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.repo.GitHubRemotes
 import dev.chieppa.arc.host.github.repo.GitHubRepo
-import kotlinx.coroutines.Dispatchers
+import dev.chieppa.arc.ui.util.ArcDispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Pull requests of local repos, asked of [github] by the GitHub repo each clone's `origin` points at. What GitHub said
  * last of each is kept, so the source chip and the reader ask once per read. A repo without a GitHub origin, or no
- * token, knows no pull request.
+ * token, knows no pull request. Blocking reads run on [dispatchers]' io.
  */
-class GitHubPulls(private val github: GitHub) : PullRequestLookup, PushHistoryLookup {
+class GitHubPulls(private val github: GitHub, private val dispatchers: ArcDispatchers = ArcDispatchers.Real) : PullRequestLookup, PushHistoryLookup {
     private val last = ConcurrentHashMap<Source.PullRequest, PullRequestSummary>()
 
     override suspend fun refs(repo: GitRepository, source: Source.PullRequest): PullRequestRefs? {
@@ -66,7 +66,7 @@ class GitHubPulls(private val github: GitHub) : PullRequestLookup, PushHistoryLo
 
     /** The open pull requests in [repos] whose titles hold [text]; null without a token or when GitHub gives no answer. */
     suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? {
-        if (!withContext(Dispatchers.IO) { github.hasToken() }) return null
+        if (!withContext(dispatchers.io) { github.hasToken() }) return null
         return try {
             github.openPulls(repos, text)
         } catch (_: GitHubException) {

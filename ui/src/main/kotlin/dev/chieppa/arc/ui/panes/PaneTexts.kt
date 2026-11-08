@@ -9,15 +9,15 @@ import dev.chieppa.arc.ui.util.TextDecoding
 import dev.chieppa.stretch.diff.FileDiff
 import dev.chieppa.stretch.diff.diffTexts
 import dev.chieppa.stretch.ui.decodeImage
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 /**
- * Reads the text a pane shows through [data], and its diff when it has a base, worked out off the UI thread, and draws
+ * Reads the text a pane shows through [data], and its diff when it has a base, worked out on [work], off the UI thread, and draws
  * a binary file or an SVG as a picture where it is one. The most recent files are kept, so switching back to a pane is
  * instant.
  */
-class PaneTexts(private val data: ReviewData) {
+class PaneTexts(private val data: ReviewData, private val work: CoroutineDispatcher) {
     private val recent = object : LinkedHashMap<Triple<RepoName, Revision, String>, ByteArray?>(CAPACITY, LOAD_FACTOR, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Triple<RepoName, Revision, String>, ByteArray?>?) = size > CAPACITY
     }
@@ -37,7 +37,7 @@ class PaneTexts(private val data: ReviewData) {
         val diff = if (pane.base == null) {
             null
         } else {
-            withContext(Dispatchers.Default) {
+            withContext(work) {
                 diffTexts(oldText.orEmpty(), newText.orEmpty(), oldPath.takeIf { oldText != null }, pane.path.takeIf { newText != null })
             }
         }
@@ -46,7 +46,7 @@ class PaneTexts(private val data: ReviewData) {
     }
 
     /** [old] and [new] drawn, off the UI thread; [old] alone is left out when it is the same as [new]. */
-    private suspend fun pictures(old: ByteArray?, new: ByteArray?) = withContext(Dispatchers.Default) {
+    private suspend fun pictures(old: ByteArray?, new: ByteArray?) = withContext(work) {
         val same = old != null && new != null && old.contentEquals(new)
         (if (same) null else old?.let(::decodeImage)) to new?.let(::decodeImage)
     }

@@ -5,6 +5,7 @@ import dev.chieppa.arc.core.conversation.LocalConversation
 import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.services.ConversationService
 import dev.chieppa.arc.ui.services.ReviewData
+import dev.chieppa.arc.ui.util.ArcDispatchers
 import kotlinx.coroutines.CoroutineScope
 
 /**
@@ -17,10 +18,11 @@ class CommentTools(
     data: ReviewData,
     service: ConversationService,
     scope: CoroutineScope,
+    dispatchers: ArcDispatchers,
     initial: LocalConversation = LocalConversation(),
 ) {
     val controller = ConversationController(service, scope, initial)
-    val placer = StagedPlacer(data)
+    val placer = StagedPlacer(data, dispatchers.default)
     val pusher = ReviewPusher(state, controller, placer, service, scope)
-    val avatars = AvatarImages(service, scope)
+    val avatars = AvatarImages(service, scope, dispatchers.default)
 }

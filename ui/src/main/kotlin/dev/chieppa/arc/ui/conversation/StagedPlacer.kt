@@ -15,16 +15,16 @@ import dev.chieppa.arc.ui.services.ReviewData
 import dev.chieppa.arc.ui.util.TextDecoding
 import dev.chieppa.stretch.diff.LineKind
 import dev.chieppa.stretch.diff.diffTexts
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 /**
  * Where the person's comments sit as their sources move, and which lines of each changed file the host takes comments
  * on. A comment written at an older head is moved along with its lines to the head now; one whose line is gone is
- * marked with the head that removed it. Files are read through [data] off the UI thread.
+ * marked with the head that removed it. Files are read through [data] and compared on [work], off the UI thread.
  */
 @Stable
-class StagedPlacer(private val data: ReviewData) {
+class StagedPlacer(private val data: ReviewData, private val work: CoroutineDispatcher) {
     /** Where a comment's line is at [head]: [line], or null when the line is gone. */
     data class Placed(val head: ObjectId, val line: Int?)
 
@@ -56,7 +56,7 @@ class StagedPlacer(private val data: ReviewData) {
             val anchor = comment.anchor ?: continue
             val madeOn = anchor.madeOn
             if (madeOn != null && madeOn != head && anchor.side == LineSide.New && placed[comment.id]?.head != head) {
-                val line = withContext(Dispatchers.Default) {
+                val line = withContext(work) {
                     val old = text(repo, madeOn, anchor.path)
                     val new = text(repo, head, anchor.path)
                     if (old == null || new == null) null else LineMap.of(old.lines(), new.lines()).map(anchor.line)
@@ -65,7 +65,7 @@ class StagedPlacer(private val data: ReviewData) {
             }
             val file = snapshot.file(anchor.path) ?: continue
             if (FileKey(head, file.path, anchor.side) in commentable) continue
-            val lines = withContext(Dispatchers.Default) { hunkLines(repo, snapshot, file.path, file.oldPath ?: file.path) }
+            val lines = withContext(work) { hunkLines(repo, snapshot, file.path, file.oldPath ?: file.path) }
             commentable = commentable + (FileKey(head, file.path, LineSide.New) to lines.first) + (FileKey(head, file.path, LineSide.Old) to lines.second)
         }
     }

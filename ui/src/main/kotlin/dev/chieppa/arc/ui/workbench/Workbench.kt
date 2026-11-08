@@ -42,6 +42,7 @@ import dev.chieppa.arc.ui.services.SystemBrowser
 import dev.chieppa.arc.ui.services.TextClipboard
 import dev.chieppa.arc.ui.settings.UiPreferences
 import dev.chieppa.arc.ui.tree.TreeKeys
+import dev.chieppa.arc.ui.util.ArcDispatchers
 import dev.chieppa.stretch.core.ActionRegistry
 import dev.chieppa.stretch.core.Keymap
 import dev.chieppa.stretch.frame.FrameLayout
@@ -51,7 +52,6 @@ import dev.chieppa.stretch.frame.PaneLayout
 import dev.chieppa.stretch.frame.WindowBounds
 import dev.chieppa.stretch.ui.TreeState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -62,7 +62,7 @@ import kotlinx.coroutines.launch
  * through [data] on [scope]; the host's threads and the person's own comments go through [comments], from
  * [conversationService] and [localConversation], with sample threads from [conversation]. [onQuit] closes the app. Copied
  * paths and refs go to [clipboard], and web links open through [links]. [watch] holds the saved filters and
- * notification rules.
+ * notification rules. All of the window's work runs on [dispatchers], [scope] on their main.
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -70,7 +70,8 @@ class Workbench(
     val data: ReviewData = NoRepos,
     val state: WorkspaceState = WorkspaceState(),
     val conversation: ReviewConversation = NoConversation,
-    val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+    val dispatchers: ArcDispatchers = ArcDispatchers.Real,
+    val scope: CoroutineScope = CoroutineScope(SupervisorJob() + dispatchers.main),
     val clipboard: TextClipboard = SystemClipboard,
     val watch: PullWatch = PullWatch(),
     val links: LinkOpener = SystemBrowser,
@@ -126,11 +127,11 @@ class Workbench(
     val switcher = SwitcherState()
     val followed = FollowedLookup(data)
 
-    val texts = PaneTexts(data)
+    val texts = PaneTexts(data, dispatchers.default)
     val threadViews = ThreadViews()
 
     /** The review's conversation: threads, the person's drafts, notes and staged comments, and pushing them. */
-    val comments = CommentTools(state, data, conversationService, scope, localConversation)
+    val comments = CommentTools(state, data, conversationService, scope, dispatchers, localConversation)
 
     /** The GitHub repo each of the workspace's repos was cloned from, for those cloned from GitHub. */
     var gitHubRepos by mutableStateOf<Map<RepoName, GitHubRepo>>(emptyMap())

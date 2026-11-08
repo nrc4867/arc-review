@@ -14,7 +14,6 @@ import dev.chieppa.stretch.document.rememberFileChooser
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.ui.IconButton
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
@@ -33,7 +32,7 @@ fun NotesExportButton(workbench: Workbench) {
         val text = NotesExport.markdown(workbench.comments.controller.local, source, title, onLines)
         scope.launch {
             val target = chooser.chooseSave(format, NotesExport.fileName(source)) ?: return@launch
-            withContext(Dispatchers.IO) { File(target).writeBytes(format.encode(text)) }
+            withContext(workbench.dispatchers.io) { File(target).writeBytes(format.encode(text)) }
         }
     }, size = StretchSizes.seg)
 }
