@@ -3,3 +3,5 @@
 *.jar binary
 *.png binary
 *.ttf binary
+*.dll binary
+*.dylib binary

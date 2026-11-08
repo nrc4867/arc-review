@@ -1,0 +1,8 @@
+# name	repository	commit	source folder (holding parser.c and an optional scanner.c)
+core	https://github.com/tree-sitter/tree-sitter.git	d97971e24500218865c05ed1febdee2acf41bae1	lib
+java	https://github.com/tree-sitter/tree-sitter-java.git	e10607b45ff745f5f876bfa3e94fbcc6b44bdc11	src
+kotlin	https://github.com/fwcd/tree-sitter-kotlin.git	d6af96d2e23ef0a8ff5ab512864378cf08fba311	src
+javascript	https://github.com/tree-sitter/tree-sitter-javascript.git	58404d8cf191d69f2674a8fd507bd5776f46cb11	src
+typescript	https://github.com/tree-sitter/tree-sitter-typescript.git	75b3874edb2dc714fb1fd77a32013d0f8699989f	typescript/src
+tsx	https://github.com/tree-sitter/tree-sitter-typescript.git	75b3874edb2dc714fb1fd77a32013d0f8699989f	tsx/src
+mssql	https://github.com/alfpricot/tree-sitter-mssql.git	852cbd20d7dc8078bdea0ebbcbb621e78c86f0cf	src

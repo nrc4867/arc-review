@@ -2,3 +2,9 @@ Arc
 Copyright Nicholas Chieppa
 
 Licensed under the GNU Affero General Public License, version 3 only (AGPL-3.0-only). See LICENSE.
+
+The syntax module bundles native libraries built from these projects, each under the MIT License, at the commits
+listed in syntax/native/grammars.tsv: tree-sitter (Copyright (c) 2018 Max Brunsfeld), tree-sitter-java (Copyright
+(c) 2017 Ayman Nadeem), tree-sitter-kotlin (Copyright (c) 2019 fwcd), tree-sitter-javascript (Copyright (c) 2014 Max
+Brunsfeld), tree-sitter-typescript (Copyright (c) 2017 Max Brunsfeld) and tree-sitter-mssql (Copyright (c) 2026 M.
+Reifschneider and Copyright (c) 2021 Derek Stride). Its highlights queries are those projects' own query files.
