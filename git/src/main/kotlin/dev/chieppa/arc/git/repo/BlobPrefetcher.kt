@@ -11,7 +11,16 @@ class BlobPrefetcher(private val repo: GitRepository) {
     /** Fetches every blob in the trees of [revisions] that the clone does not have yet. Returns how many it asked for. */
     suspend fun prefetch(revisions: Collection<ObjectId>): Int {
         if (revisions.isEmpty() || !repo.isPartial()) return 0
-        val blobs = revisions.flatMap { blobsOf(it) }.toSet()
+        return fetchMissing(revisions.flatMap { blobsOf(it) }.toSet())
+    }
+
+    /** Fetches those of [blobs] the clone does not have yet. Returns how many it asked for. */
+    suspend fun prefetchBlobs(blobs: Collection<ObjectId>): Int {
+        if (blobs.isEmpty() || !repo.isPartial()) return 0
+        return fetchMissing(blobs.map { it.value }.toSet())
+    }
+
+    private suspend fun fetchMissing(blobs: Set<String>): Int {
         val missing = missing(blobs)
         if (missing.isEmpty()) return 0
         val input = missing.joinToString("\n", postfix = "\n").toByteArray()

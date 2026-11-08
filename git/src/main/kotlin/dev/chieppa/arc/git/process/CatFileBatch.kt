@@ -40,12 +40,60 @@ class CatFileBatch(private val dir: Path, private val runner: GitRunner = GitRun
         }
     }
 
+    /**
+     * Reads every object of [names] in one stream, writing the requests from another thread while the answers are
+     * read, and hands each to [consume] in order; null for a name that names no object.
+     */
+    suspend fun readAll(names: List<String>, consume: (name: String, GitObject?) -> Unit) {
+        require(names.none { '\n' in it }) { "An object name is one line" }
+        if (names.isEmpty()) return
+        lock.withLock {
+            runInterruptible(Dispatchers.IO) {
+                try {
+                    stream(names, consume)
+                } catch (e: IOException) {
+                    stop()
+                    throw e
+                } catch (e: InterruptedException) {
+                    stop()
+                    throw e
+                }
+            }
+        }
+    }
+
+    private fun stream(names: List<String>, consume: (String, GitObject?) -> Unit) {
+        if (process?.isAlive != true) begin()
+        val out = output!!
+        val reader = input!!
+        val writer = Thread {
+            try {
+                for (name in names) out.write((name + "\n").toByteArray(Charsets.UTF_8))
+                out.flush()
+            } catch (_: IOException) {
+                // The reading side sees the process end and fails the read.
+            }
+        }.apply {
+            isDaemon = true
+            start()
+        }
+        try {
+            for (name in names) consume(name, answer(reader))
+        } finally {
+            writer.join()
+        }
+    }
+
     private fun request(name: String): GitObject? {
         if (process?.isAlive != true) begin()
         val out = output!!
         val reader = input!!
         out.write((name + "\n").toByteArray(Charsets.UTF_8))
         out.flush()
+        return answer(reader)
+    }
+
+    private fun answer(reader: BufferedInputStream): GitObject? {
         val header = readLine(reader)
         val parts = header.split(' ')
         if (parts.size != HEADER_PARTS) return null

@@ -7,6 +7,7 @@ import dev.chieppa.arc.git.parse.CommitLogParser
 import dev.chieppa.arc.git.parse.DiffFileOutput
 import dev.chieppa.arc.git.parse.DiffOutputParser
 import dev.chieppa.arc.git.parse.NulReader
+import dev.chieppa.arc.git.parse.TreeBlobParser
 import dev.chieppa.arc.git.process.CatFileBatch
 import dev.chieppa.arc.git.process.GitResult
 import dev.chieppa.arc.git.process.GitRunner
@@ -80,6 +81,10 @@ class GitRepository(val dir: Path, private val runner: GitRunner = GitRunner()) 
         return buildList { while (!reader.atEnd) reader.field().takeIf { it.isNotEmpty() }?.let(::add) }
     }
 
+    /** Every file in [rev]'s tree with its blob and size, in git's order. */
+    suspend fun listBlobs(rev: String): List<TreeBlob> =
+        TreeBlobParser.parse(git(listOf("ls-tree", "-r", "-l", "-z", "--full-tree", rev)).stdout)
+
     /** The paths whose entry differs between trees [a] and [b], renames not followed. */
     suspend fun differingPaths(a: ObjectId, b: ObjectId): Set<String> {
         val reader = NulReader(git(listOf("diff-tree", "-r", "-z", "--name-only", "--no-renames", a.value, b.value)).stdout)
@@ -88,6 +93,11 @@ class GitRepository(val dir: Path, private val runner: GitRunner = GitRunner()) 
 
     /** The bytes of blob [id], or null when the repo does not have it. */
     suspend fun readBlob(id: ObjectId): ByteArray? = objects.read(id.value)?.takeIf { it.type == BLOB }?.bytes
+
+    /** The bytes of each blob of [ids], handed to [consume] in order, read in one stream; null for one the repo lacks. */
+    suspend fun readBlobs(ids: List<ObjectId>, consume: (ObjectId, ByteArray?) -> Unit) {
+        objects.readAll(ids.map { it.value }) { name, found -> consume(ObjectId(name), found?.takeIf { it.type == BLOB }?.bytes) }
+    }
 
     /** The bytes of [path] at [rev], or null when there is no such file. */
     suspend fun readFile(rev: String, path: String): ByteArray? = objects.read("$rev:$path")?.takeIf { it.type == BLOB }?.bytes
