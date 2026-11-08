@@ -80,6 +80,11 @@ object ArcIcons {
             stroke("M7 8h2")
         }
     }
+    val Continue: ImageVector by lazy {
+        icon("continue") {
+            stroke("M3 8h10M9 4l4 4-4 4")
+        }
+    }
     val Definition: ImageVector by lazy {
         icon("definition") {
             stroke("M2 8h7.5M7 5.5L9.5 8 7 10.5")
@@ -127,6 +132,18 @@ object ArcIcons {
             stroke("M8 5V2.75")
             fill("M7.2 2.5a0.8 0.8 0 1 0 1.6 0a0.8 0.8 0 1 0 -1.6 0z")
             stroke("M6 9h.01M10 9h.01")
+        }
+    }
+    val Guide: ImageVector by lazy {
+        icon("guide") {
+            stroke("M2.5 3.5c2-1 4-1 5.5.5 1.5-1.5 3.5-1.5 5.5-.5v9c-2-1-4-1-5.5.5-1.5-1.5-3.5-1.5-5.5-.5z")
+            stroke("M8 4v9.5")
+        }
+    }
+    val Keyboard: ImageVector by lazy {
+        icon("keyboard") {
+            stroke("M3 4h10a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1 -1.5 1.5h-10a1.5 1.5 0 0 1 -1.5 -1.5v-5a1.5 1.5 0 0 1 1.5 -1.5z")
+            stroke("M4 6.5h.01M6.5 6.5h.01M9 6.5h.01M11.5 6.5h.01M5 9.5h6")
         }
     }
     val Label: ImageVector by lazy {
@@ -191,6 +208,14 @@ object ArcIcons {
             stroke("M8.5 3.5h5M8.5 8h5M8.5 12.5h4")
         }
     }
+    val Palette: ImageVector by lazy {
+        icon("palette") {
+            stroke("M8 2a6 6 0 1 0 0 12c1 0 1.5-.6 1.5-1.3 0-1-.8-1.2-.8-2 0-.7.6-1.2 1.3-1.2H12a2 2 0 0 0 2-2C14 4.5 11.3 2 8 2z")
+            fill("M4.2 7a0.8 0.8 0 1 0 1.6 0a0.8 0.8 0 1 0 -1.6 0z")
+            fill("M6.7 4.8a0.8 0.8 0 1 0 1.6 0a0.8 0.8 0 1 0 -1.6 0z")
+            fill("M9.7 5.3a0.8 0.8 0 1 0 1.6 0a0.8 0.8 0 1 0 -1.6 0z")
+        }
+    }
     val People: ImageVector by lazy {
         icon("people") {
             stroke("M3.75 5.5a2.25 2.25 0 1 0 4.5 0a2.25 2.25 0 1 0 -4.5 0z")
@@ -203,6 +228,12 @@ object ArcIcons {
             stroke("M5.5 2v3M10.5 2v3")
             stroke("M3.5 5h9v2.5a4.5 4.5 0 0 1-9 0z")
             stroke("M8 12v2.5")
+        }
+    }
+    val Problem: ImageVector by lazy {
+        icon("problem") {
+            stroke("M2 8a6 6 0 1 0 12 0a6 6 0 1 0 -12 0z")
+            stroke("M8 5v3.5M8 11h.01")
         }
     }
     val PullRequest: ImageVector by lazy {
@@ -235,6 +266,12 @@ object ArcIcons {
         icon("refresh") {
             stroke("M13 8a5 5 0 1 1-1.5-3.5")
             stroke("M13 2.5v3h-3")
+        }
+    }
+    val Reply: ImageVector by lazy {
+        icon("reply") {
+            stroke("M6.5 4L2.5 8l4 4")
+            stroke("M2.5 8h7a4 4 0 0 1 4 4v1")
         }
     }
     val Repo: ImageVector by lazy {
