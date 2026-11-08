@@ -19,7 +19,11 @@ import dev.chieppa.arc.ui.actions.registerContextActions
 import dev.chieppa.arc.ui.actions.registerPullActions
 import dev.chieppa.arc.ui.actions.registerReviewActions
 import dev.chieppa.arc.ui.drawers.defaultFrameLayout
+import dev.chieppa.arc.ui.conversation.CommentTools
 import dev.chieppa.arc.ui.conversation.ThreadViews
+import dev.chieppa.arc.core.conversation.LocalConversation
+import dev.chieppa.arc.ui.services.ConversationService
+import dev.chieppa.arc.ui.services.NoConversations
 import dev.chieppa.arc.ui.panes.PaneCommands
 import dev.chieppa.arc.ui.panes.PaneTexts
 import dev.chieppa.arc.ui.review.MarkController
@@ -55,7 +59,8 @@ import kotlinx.coroutines.launch
 /**
  * The main window's state: the look the person chose, where the drawers are, the workspace and its panes, which
  * overlays are open, and the actions that change them. Views read it and recompose when it changes. Sources are read
- * through [data] on [scope]; threads and staged comments come from [conversation]. [onQuit] closes the app. Copied
+ * through [data] on [scope]; the host's threads and the person's own comments go through [comments], from
+ * [conversationService] and [localConversation], with sample threads from [conversation]. [onQuit] closes the app. Copied
  * paths and refs go to [clipboard], and web links open through [links]. [watch] holds the saved filters and
  * notification rules.
  */
@@ -69,6 +74,8 @@ class Workbench(
     val clipboard: TextClipboard = SystemClipboard,
     val watch: PullWatch = PullWatch(),
     val links: LinkOpener = SystemBrowser,
+    conversationService: ConversationService = NoConversations,
+    localConversation: LocalConversation = LocalConversation(),
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -121,6 +128,9 @@ class Workbench(
 
     val texts = PaneTexts(data)
     val threadViews = ThreadViews()
+
+    /** The review's conversation: threads, the person's drafts, notes and staged comments, and pushing them. */
+    val comments = CommentTools(state, data, conversationService, scope, localConversation)
 
     /** The GitHub repo each of the workspace's repos was cloned from, for those cloned from GitHub. */
     var gitHubRepos by mutableStateOf<Map<RepoName, GitHubRepo>>(emptyMap())

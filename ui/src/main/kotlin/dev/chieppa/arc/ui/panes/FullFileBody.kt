@@ -9,7 +9,8 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import dev.chieppa.arc.core.conversation.LineSide
 import dev.chieppa.arc.core.pane.Pane
-import dev.chieppa.arc.ui.conversation.ThreadCard
+import dev.chieppa.arc.ui.conversation.PaneComments
+import dev.chieppa.arc.ui.conversation.PaneThread
 import dev.chieppa.arc.ui.conversation.paneThreads
 import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.find.ViewerMatches
@@ -28,6 +29,7 @@ import dev.chieppa.stretch.theme.Stretch
  * A whole file in Stretch's code viewer, filling the pane, its changed lines washed and barred, wrapping long lines or
  * not as the pane was left and scrolled back to where it was. Find matches draw in place, the current one set apart.
  * [diff] gives the changed lines to step between; [removed] shows a deleted file as it was, every line removed.
+ * Clicking a line number starts a comment there.
  */
 @Composable
 fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench, find: FindState, modifier: Modifier = Modifier, removed: Boolean = false) {
@@ -53,11 +55,8 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
         tones = { line -> if (line in changed) (if (removed) LineTone.Removed else LineTone.Added) else null },
         slots = CodeViewerSlots(
             gutterMark = { line -> threadsAt[line]?.firstOrNull()?.let { GutterMark(it.state) } },
-            lineAnnotation = { line ->
-                threadsAt[line].orEmpty().forEach { thread ->
-                    ThreadCard(thread, workbench.threadViews.expanded(thread), { workbench.threadViews.toggle(thread) })
-                }
-            },
+            lineAnnotation = { line -> threadsAt[line].orEmpty().forEach { PaneThread(it, workbench) } },
+            onLineNumberClick = { line -> if (!removed) PaneComments.start(workbench, pane, LineSide.New, line) },
         ),
         matches = matches,
         currentMatch = current,

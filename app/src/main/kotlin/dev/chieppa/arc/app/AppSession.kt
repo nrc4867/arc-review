@@ -5,7 +5,12 @@ import dev.chieppa.arc.core.watch.Watchlist
 import dev.chieppa.arc.git.repo.GitRepositories
 import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.host.github.GitHub
+import dev.chieppa.arc.core.conversation.LocalConversation
+import dev.chieppa.arc.host.github.avatars.AvatarCache
+import dev.chieppa.arc.store.conversation.ConversationFile
 import dev.chieppa.arc.store.repos.RepoRegistryFile
+import dev.chieppa.arc.ui.services.ConversationService
+import dev.chieppa.arc.ui.services.GitHubConversations
 import dev.chieppa.arc.store.settings.AppSettings
 import dev.chieppa.arc.store.settings.SettingsFile
 import dev.chieppa.arc.store.watch.WatchlistFile
@@ -21,7 +26,8 @@ import java.nio.file.Path
 
 /**
  * What the app keeps between runs, in [dataDir]: the settings, the workspace, the repos, the saved filters and
- * notification rules, and the app's own clones of GitHub repos. Repos are read through git for the workspace in
+ * notification rules, the person's drafts, staged comments and notes, people's pictures, and the app's own clones of
+ * GitHub repos. Repos are read through git for the workspace in
  * [current], and pull requests through [github].
  */
 class AppSession(dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub()) : Closeable {
@@ -43,6 +49,18 @@ class AppSession(dataDir: Path, val conversation: ReviewConversation, val github
 
     private val git = GitRepositories({ name -> (current?.repos ?: repos)[name] })
     val data: ReviewData = GitReviewData(git, GitHubPulls(github), dataDir.resolve(AppConstants.CLONES_FOLDER))
+
+    private val conversationFile = ConversationFile(dataDir.resolve(AppConstants.CONVERSATION_FILE))
+
+    /** The conversation on GitHub, with people's pictures cached in the data folder. */
+    val conversations: ConversationService = GitHubConversations(github, AvatarCache(dataDir.resolve(AppConstants.AVATARS_FOLDER)), data::gitHubRepo)
+
+    /** The person's drafts, staged comments, notes and summaries as saved. */
+    fun localConversation(): LocalConversation = conversationFile.load()
+
+    fun saveConversation(conversation: LocalConversation) {
+        conversationFile.save(conversation)
+    }
 
     /** The saved filters and rules; on a first run, those [seeds] makes, saved at once. */
     fun watchlist(seeds: () -> Watchlist): Watchlist {

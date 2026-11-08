@@ -1,8 +1,11 @@
 package dev.chieppa.arc.ui.drawers
 
 import androidx.compose.runtime.Composable
-import dev.chieppa.arc.ui.conversation.StagedActions
+import dev.chieppa.arc.ui.conversation.ConversationDrawer
+import dev.chieppa.arc.ui.conversation.NotesDrawer
+import dev.chieppa.arc.ui.conversation.NotesExportButton
 import dev.chieppa.arc.ui.conversation.StagedCommentsContent
+import dev.chieppa.arc.ui.conversation.stagedComments
 import dev.chieppa.arc.ui.files.FilesDrawerContent
 import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
@@ -14,8 +17,9 @@ import dev.chieppa.stretch.frame.DrawerSpec
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The frame's drawers, one per [DrawerSlot]: Files and Staged comments hold the workspace, Pull requests the saved filters
- * and notification rules, Revisions the active source's commits under the title Commits; the others open plain.
+ * The frame's drawers, one per [DrawerSlot]: Files holds the workspace; Notes, Conversation and Staged comments the
+ * active source's notes, pull request conversation and staged batch; Pull requests the saved filters and notification
+ * rules; Revisions the active source's commits under the title Commits; the others open plain.
  */
 @Composable
 fun arcDrawerSpecs(workbench: Workbench): List<DrawerSpec> = ArcDrawerSlots.all.map { slot ->
@@ -29,8 +33,16 @@ fun arcDrawerSpecs(workbench: Workbench): List<DrawerSpec> = ArcDrawerSlots.all.
             headerIcon = ArcIcons.Commit,
             railLabel = stringResource(slot.title),
         ) { CommitsDrawer(workbench) }
-        DrawerIds.STAGED_COMMENTS -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, actions = { StagedActions(workbench) }) {
-            StagedCommentsContent(workbench)
+        DrawerIds.STAGED_COMMENTS -> DrawerSpec(
+            slot.id,
+            stringResource(slot.title),
+            slot.icon,
+            badge = stagedComments(workbench).size.takeIf { it > 0 }?.toString(),
+            scrolls = false,
+        ) { StagedCommentsContent(workbench) }
+        DrawerIds.CONVERSATION -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false) { ConversationDrawer(workbench) }
+        DrawerIds.NOTES -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false, actions = { NotesExportButton(workbench) }) {
+            NotesDrawer(workbench)
         }
         else -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon) {}
     }

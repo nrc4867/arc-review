@@ -1,61 +1,60 @@
 package dev.chieppa.arc.ui.conversation
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
+import dev.chieppa.arc.core.conversation.LocalKind
+import dev.chieppa.arc.core.conversation.Reaction
 import dev.chieppa.arc.core.conversation.ReviewThread
 import dev.chieppa.arc.core.conversation.ThreadState
+import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
+import dev.chieppa.arc.design.generated.staged_replies
 import dev.chieppa.arc.design.generated.thread_adopt
 import dev.chieppa.arc.design.generated.thread_dismiss
-import dev.chieppa.arc.design.generated.thread_fold
 import dev.chieppa.arc.design.generated.thread_lines_changed
-import dev.chieppa.arc.design.generated.thread_line
-import dev.chieppa.arc.design.generated.thread_replies
 import dev.chieppa.arc.design.generated.thread_reply
+import dev.chieppa.arc.design.generated.thread_replies
 import dev.chieppa.arc.design.generated.thread_resolve
+import dev.chieppa.arc.design.generated.thread_unresolve
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.arc.ui.util.SourceLabels
+import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
-import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Button
 import dev.chieppa.stretch.ui.ButtonKind
 import dev.chieppa.stretch.ui.Divider
-import dev.chieppa.stretch.ui.IconButton
 import dev.chieppa.stretch.ui.framedSurface
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * A thread under its line: a head with its state, line and where it stands, and when [expanded] its messages and the
- * actions for its state. A guest note is drawn in the guest colors and offers [onAdopt] and [onDismiss].
+ * A thread from the host or a guest under its line: a head with its state, line and where it stands, and when open
+ * its messages with their reactions, the person's replies, and the actions for its state. A host's thread takes a
+ * reply, which stages with the review, and resolving, which goes up at once. A guest note is drawn in the guest colors
+ * and is adopted or dismissed.
  */
 @Composable
-fun ThreadCard(
-    thread: ReviewThread,
-    expanded: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-    onAdopt: () -> Unit = {},
-    onDismiss: () -> Unit = {},
-) {
+fun ThreadCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = Modifier) {
     val c = Stretch.colors
+    val controller = workbench.comments.controller
+    val views = workbench.threadViews
+    val expanded = views.expanded(thread)
     val look = stateLook(thread.state)
-    val edge = if (thread.state == ThreadState.Open || thread.state == ThreadState.Draft) c.lineStrong else look.edge
-    val fill = if (thread.state == ThreadState.Guest) look.fill else c.surfaceFloat
+    val guest = thread.state == ThreadState.Guest
+    val edge = if (thread.state == ThreadState.Open) c.lineStrong else look.edge
+    val fill = if (guest) look.fill else c.surfaceFloat
+    val writing = thread.replies.firstOrNull { it.kind == LocalKind.Draft && it.id in controller.writing }
+    val staged = thread.replies.count { it.kind == LocalKind.Staged }
     Column(
         modifier
             .padding(horizontal = StretchSpacing.space24, vertical = StretchSpacing.space6)
@@ -63,46 +62,59 @@ fun ThreadCard(
             .fillMaxWidth()
             .framedSurface(Stretch.shapes.cardShape, fill, edge, Stretch.stroke),
     ) {
-        Row(
-            Modifier.fillMaxWidth().clickable(onClick = onToggle).padding(horizontal = StretchSpacing.space10, vertical = StretchSpacing.space6),
-            horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            val (text, icon) = threadChip(thread.state)
-            StateChip(text, icon, look)
+        val first = thread.messages.firstOrNull()
+        ThreadHead(thread, expanded, { views.toggle(thread) }, SourceLabels.of(thread.source), first?.let { "${it.author}: ${it.body}" }) {
             val muted = Stretch.type.valueSm.merge(TextStyle(color = c.inkMuted))
-            val first = thread.messages.firstOrNull()
-            val line = stringResource(Res.string.thread_line, thread.line)
-            val summary = if (expanded || first == null) "$line · ${SourceLabels.of(thread.source)}" else "$line  ${first.author}: ${first.body}"
-            BasicText(summary, Modifier.weight(1f), style = muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
             thread.changedIn?.let { BasicText(stringResource(Res.string.thread_lines_changed, it), style = muted.merge(TextStyle(color = look.ink))) }
+            if (staged > 0) StateChip(pluralStringResource(Res.plurals.staged_replies, staged, staged), ArcIcons.Stage, stagedLook(false))
             val replies = thread.messages.size - 1
             if (!expanded && replies > 0) BasicText(pluralStringResource(Res.plurals.thread_replies, replies, replies), style = muted)
-            IconButton(if (expanded) StretchIcons.ChevronDown else StretchIcons.ChevronRight, stringResource(Res.string.thread_fold), onToggle, size = StretchSizes.seg)
         }
         if (!expanded) return@Column
         for (message in thread.messages) {
             Divider()
-            ThreadMessageRow(message)
+            ThreadMessageRow(message, images = workbench.comments.avatars, onReact = { r: Reaction -> controller.react(thread.source, message.id, r) }.takeIf { thread.hosted })
+        }
+        for (reply in thread.replies) {
+            Divider()
+            ReplyRow(reply, workbench, writing = reply.id == writing?.id)
         }
         Divider()
-        Row(
-            Modifier.fillMaxWidth().background(if (thread.state == ThreadState.Guest) look.fill else c.surfaceFloat).padding(StretchSpacing.space6),
-            horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space6),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            when (thread.state) {
-                ThreadState.Guest -> {
-                    Button(stringResource(Res.string.thread_adopt), onAdopt, kind = ButtonKind.Quiet, icon = StretchIcons.Pen)
-                    Button(stringResource(Res.string.thread_dismiss), onDismiss, kind = ButtonKind.Quiet, icon = StretchIcons.Close)
+        CardFooter(fill) {
+            when {
+                guest -> {
+                    Button(stringResource(Res.string.thread_adopt), { controller.adopt(thread); views.dismissed += thread.id }, kind = ButtonKind.Quiet, icon = StretchIcons.Pen)
+                    Button(stringResource(Res.string.thread_dismiss), { views.dismissed += thread.id }, kind = ButtonKind.Quiet, icon = StretchIcons.Close)
                 }
-                ThreadState.Draft -> Unit
+                writing != null -> {
+                    ReplyActions(writing.id, controller)
+                    Spacer(Modifier.weight(1f))
+                    ResolveButton(thread, controller)
+                }
                 else -> {
-                    Button(stringResource(Res.string.thread_reply), {}, kind = ButtonKind.Quiet, icon = dev.chieppa.arc.design.ArcIcons.Comment)
-                    if (thread.state != ThreadState.Resolved) Button(stringResource(Res.string.thread_resolve), {}, kind = ButtonKind.Quiet, icon = StretchIcons.Check)
+                    if (thread.hosted) Button(stringResource(Res.string.thread_reply), { controller.startReply(thread) }, kind = ButtonKind.Quiet, icon = ArcIcons.Comment)
+                    ResolveButton(thread, controller)
+                    BasicText(
+                        thread.link.orEmpty(),
+                        Modifier.weight(1f).padding(end = StretchSpacing.space6),
+                        style = Stretch.type.bodySm.merge(TextStyle(color = c.inkMuted, textAlign = TextAlign.End)),
+                        maxLines = 1,
+                    )
                 }
             }
-            BasicText(thread.link.orEmpty(), Modifier.weight(1f).padding(end = StretchSpacing.space6), style = Stretch.type.bodySm.merge(TextStyle(color = c.inkMuted, textAlign = androidx.compose.ui.text.style.TextAlign.End)), maxLines = 1)
         }
     }
+}
+
+/** Resolves a host's thread, or opens a resolved one again. */
+@Composable
+private fun ResolveButton(thread: ReviewThread, controller: ConversationController) {
+    if (!thread.hosted) return
+    val resolved = thread.state == ThreadState.Resolved
+    Button(
+        stringResource(if (resolved) Res.string.thread_unresolve else Res.string.thread_resolve),
+        { controller.resolve(thread, !resolved) },
+        kind = ButtonKind.Quiet,
+        icon = if (resolved) ArcIcons.Comment else StretchIcons.Check,
+    )
 }

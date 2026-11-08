@@ -35,9 +35,19 @@ object ArcSizes {
 
     /** The bar over each side of a changed picture, in the removed or added color. */
     val imageSideBar = 2.dp
-    val stagedChip = 92.dp
-    val stagedSource = 150.dp
-    val stagedLocation = 300.dp
+
+    /** Reactions under a message: a pill's height, the picker's width and each choice in it. */
+    val reactionPill = 22.dp
+    val reactionPicker = 280.dp
+    val reactionChoice = 30.dp
+
+    /** The push confirmation: its width, a fact row's least height and its label column. */
+    val pushDialog = 540.dp
+    val pushFactRow = 34.dp
+    val pushFactLabel = 150.dp
+
+    /** The most the Notes drawer's list of notes on lines grows before it scrolls. */
+    val notesOnLines = 220.dp
 
     /** The switcher: how wide it is, how far down the window, the widest a row's ref grows, its rows' progress ring. */
     val switcherWidth = 640.dp

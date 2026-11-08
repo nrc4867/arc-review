@@ -21,7 +21,7 @@ import dev.chieppa.stretch.theme.StretchSpacing
 
 /** A small pill naming a thread's or a staged comment's state, drawn in [look]'s colors. */
 @Composable
-fun StateChip(text: String, icon: ImageVector, look: StateLook, modifier: Modifier = Modifier) {
+fun StateChip(text: String, icon: ImageVector?, look: StateLook, modifier: Modifier = Modifier) {
     val shape = Stretch.shapes.pillShape
     Row(
         modifier
@@ -33,7 +33,7 @@ fun StateChip(text: String, icon: ImageVector, look: StateLook, modifier: Modifi
         horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space4),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(icon, look.ink, size = ArcSizes.ring)
+        icon?.let { Icon(it, look.ink, size = ArcSizes.ring) }
         BasicText(text, style = Stretch.type.chip.merge(TextStyle(color = look.ink)), maxLines = 1)
     }
 }

@@ -20,6 +20,8 @@ import dev.chieppa.arc.design.generated.action_settings
 import dev.chieppa.arc.design.generated.action_toggle_full_file
 import dev.chieppa.arc.design.generated.action_toggle_pin
 import dev.chieppa.arc.design.generated.action_toggle_reviewed
+import dev.chieppa.arc.design.generated.action_comment_here
+import dev.chieppa.arc.design.generated.action_push_review
 import dev.chieppa.arc.design.generated.action_toggle_split
 import dev.chieppa.arc.design.generated.action_remove_source
 import dev.chieppa.arc.design.generated.action_close_ended_pulls
@@ -64,6 +66,8 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.PREVIOUS_CHANGE.value to Res.string.action_previous_change,
     ArcActionIds.MARK_AND_ADVANCE.value to Res.string.action_mark_and_advance,
     ArcActionIds.TOGGLE_REVIEWED.value to Res.string.action_toggle_reviewed,
+    ArcActionIds.COMMENT_HERE.value to Res.string.action_comment_here,
+    ArcActionIds.PUSH_REVIEW.value to Res.string.action_push_review,
     ArcActionIds.SET_ASIDE.value to Res.string.action_set_aside,
     ArcActionIds.FIND_IN_FILE.value to Res.string.action_find_in_file,
     ArcActionIds.OPEN_FILE.value to Res.string.action_open_file,

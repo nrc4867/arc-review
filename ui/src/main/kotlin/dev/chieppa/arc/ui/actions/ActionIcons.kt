@@ -16,6 +16,8 @@ private val icons: Map<String, ImageVector> = mapOf(
     ArcActionIds.PREVIOUS_FILE.value to StretchIcons.ArrowUp,
     ArcActionIds.MARK_AND_ADVANCE.value to StretchIcons.Check,
     ArcActionIds.TOGGLE_REVIEWED.value to StretchIcons.Check,
+    ArcActionIds.COMMENT_HERE.value to ArcIcons.Comment,
+    ArcActionIds.PUSH_REVIEW.value to StretchIcons.Push,
     ArcActionIds.SET_ASIDE.value to ArcIcons.SetAside,
     ArcActionIds.FIND_IN_FILE.value to StretchIcons.Search,
     ArcActionIds.OPEN_FILE.value to StretchIcons.File,

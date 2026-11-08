@@ -10,6 +10,8 @@ import dev.chieppa.arc.design.generated.thread_draft
 import dev.chieppa.arc.design.generated.thread_guest
 import dev.chieppa.arc.design.generated.thread_open
 import dev.chieppa.arc.design.generated.thread_resolved
+import dev.chieppa.arc.design.generated.thread_note
+import dev.chieppa.arc.design.generated.staged_state
 import dev.chieppa.stretch.theme.StretchIcons
 import org.jetbrains.compose.resources.stringResource
 
@@ -20,5 +22,7 @@ fun threadChip(state: ThreadState): Pair<String, ImageVector> = when (state) {
     ThreadState.Addressed -> stringResource(Res.string.thread_addressed) to ArcIcons.CommentMoved
     ThreadState.Resolved -> stringResource(Res.string.thread_resolved) to ArcIcons.CommentCheck
     ThreadState.Draft -> stringResource(Res.string.thread_draft) to StretchIcons.Pen
+    ThreadState.Staged -> stringResource(Res.string.staged_state) to ArcIcons.Stage
+    ThreadState.Note -> stringResource(Res.string.thread_note) to ArcIcons.Note
     ThreadState.Guest -> stringResource(Res.string.thread_guest) to ArcIcons.Guest
 }

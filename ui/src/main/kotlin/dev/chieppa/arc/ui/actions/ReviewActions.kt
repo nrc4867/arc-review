@@ -1,6 +1,8 @@
 package dev.chieppa.arc.ui.actions
 
+import dev.chieppa.arc.core.conversation.LineSide
 import dev.chieppa.arc.core.pane.PaneView
+import dev.chieppa.arc.ui.conversation.PaneComments
 import dev.chieppa.arc.core.mark.FileReviewState
 import dev.chieppa.arc.ui.switcher.SwitcherScope
 import dev.chieppa.arc.ui.workbench.ActionTargets
@@ -40,6 +42,13 @@ fun registerReviewActions(registry: ActionRegistry, workbench: Workbench) {
     }
     action(ArcActionIds.SET_ASIDE, available = { hasSource() && ActionTargets.files(workbench).any { (source, paths) -> paths.any { state.states(source)[it] != FileReviewState.SetAside } } }) {
         ActionTargets.files(workbench).forEach { (source, paths) -> workbench.marks.setAside(source, paths) }
+    }
+    action(ArcActionIds.COMMENT_HERE, ArcKeys.COMMENT_HERE, { workbench.panes.focused?.source != null }) {
+        val pane = workbench.panes.focused ?: return@action
+        PaneComments.start(workbench, pane, LineSide.New, state.paneLines[pane.id.value]?.coerceAtLeast(1) ?: 1)
+    }
+    action(ArcActionIds.PUSH_REVIEW, ArcKeys.PUSH_REVIEW, { state.active?.let(workbench.comments.pusher::canPush) == true }) {
+        state.active?.let { workbench.comments.pusher.confirming = it }
     }
     action(ArcActionIds.TOGGLE_PIN, available = { ActionTargets.pane(workbench) != null }) { ActionTargets.pane(workbench)?.let { workbench.panes.togglePin(it.id.value) } }
     action(ArcActionIds.CLOSE_PANE, ArcKeys.CLOSE_PANE, hasPane) { workbench.panes.focused?.let { workbench.panes.close(it.id.value) } }

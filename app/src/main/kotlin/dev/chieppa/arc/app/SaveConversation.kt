@@ -1,0 +1,27 @@
+package dev.chieppa.arc.app
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.snapshotFlow
+import dev.chieppa.arc.core.conversation.LocalConversation
+import dev.chieppa.arc.ui.workbench.Workbench
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.withContext
+
+/** Hands the person's drafts, staged comments, notes and summaries to [save] a moment after each change to them. */
+@OptIn(FlowPreview::class)
+@Composable
+fun SaveConversation(workbench: Workbench, save: (LocalConversation) -> Unit) {
+    val current by rememberUpdatedState(save)
+    LaunchedEffect(workbench) {
+        snapshotFlow { workbench.comments.controller.local }
+            .drop(1)
+            .debounce(AppConstants.SAVE_DELAY_MILLIS)
+            .collect { withContext(Dispatchers.IO) { current(it) } }
+    }
+}

@@ -8,6 +8,7 @@ import dev.chieppa.arc.design.ArcTheme
 import dev.chieppa.arc.ui.actions.ArcActionIds
 import dev.chieppa.arc.ui.actions.actionIcon
 import dev.chieppa.arc.ui.actions.actionText
+import dev.chieppa.arc.ui.conversation.ConversationEffects
 import dev.chieppa.arc.ui.conversation.OpenStagedWhenFilled
 import dev.chieppa.arc.ui.drawers.arcDrawerSpecs
 import dev.chieppa.arc.ui.switcher.Switcher
@@ -31,6 +32,7 @@ fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
         workbench.gitHubRepos = workbench.state.repos.keys.mapNotNull { repo -> workbench.data.gitHubRepo(repo)?.let { repo to it } }.toMap()
     }
     OpenStagedWhenFilled(workbench)
+    ConversationEffects(workbench)
     ArcTheme {
         CompositionLocalProvider(LocalActionText provides actionText()) {
             StretchApp(

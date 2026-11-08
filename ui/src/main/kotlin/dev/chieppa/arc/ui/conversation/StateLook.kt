@@ -19,6 +19,8 @@ fun stateLook(state: ThreadState): StateLook {
         ThreadState.Addressed -> StateLook(arc.addressedWash, arc.addressedEdge, arc.addressed)
         ThreadState.Resolved -> StateLook(c.diffAddWash, c.diffAddStrong, c.diffAddStrong)
         ThreadState.Draft -> StateLook(Color.Transparent, c.lineStrong, c.ink)
+        ThreadState.Staged -> StateLook(c.onFill, c.chipOnEdge, c.onInk)
+        ThreadState.Note -> StateLook(Color.Transparent, c.chipEdge, c.inkControl)
         ThreadState.Guest -> StateLook(arc.guestWash, arc.guestEdge, arc.guest)
     }
 }

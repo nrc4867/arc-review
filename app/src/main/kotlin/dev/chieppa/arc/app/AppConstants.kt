@@ -14,6 +14,12 @@ internal object AppConstants {
     const val WATCHLIST_FILE = "filters.json"
     const val CLONES_FOLDER = "clones"
 
+    /** The person's drafts, staged comments, notes and summaries. */
+    const val CONVERSATION_FILE = "conversation.json"
+
+    /** People's pictures from GitHub, kept for a day. */
+    const val AVATARS_FOLDER = "avatars"
+
     /** How long the workspace waits after a change before it is saved. */
     const val SAVE_DELAY_MILLIS = 400L
     val WINDOW_WIDTH = 1440.dp

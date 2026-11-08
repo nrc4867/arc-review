@@ -48,8 +48,16 @@ them. Every head a source is read at is recorded and kept under a private ref, a
 GitHub knows of (force pushes and reviewed commits); the revision matrix sets the source's files against those
 revisions, showing which file changed in which, compared through rebases, where each was reviewed and where it changed
 after, with arrow keys to move and Enter to open a file at a revision, and the Commits drawer picks any two commits to
-open the files whose change differs between them. Threads and staged comments are drawn only from the dev-only sample
-(`-Pdemo`).
+open the files whose change differs between them.
+
+A pull request's conversation comes from GitHub: line threads sit under their lines with the authors' pictures and
+reactions, and the Conversation drawer holds the description, comments and review summaries. Clicking a line number, or
+dragging over several, starts a comment; a draft stages to go up with the review or stays as a note, and a thread
+takes a staged reply. Reactions and resolving go to GitHub at once. The Staged comments drawer holds the active
+source's batch with its verdict and summary; a push, confirmed first, sends it as one review through the pending
+review, routing a comment off the diff to its file or the summary, and marks reviewed files viewed. Comments move with
+their lines when the source is pushed again, and one whose line is gone is marked in place. Notes, on a line or on the
+whole source in the Notes drawer, never leave the machine unless made a comment, and export to one Markdown file.
 
 ## Build and run
 
@@ -59,7 +67,7 @@ by `stretch.dir` in `~/.gradle/gradle.properties`).
 ```
 ./gradlew build        # compile and test
 ./gradlew :app:run     # run the app
-./gradlew :app:run -Pdemo   # run it with sample threads and staged comments
+./gradlew :app:run -Pdemo   # run it with sample threads
 ```
 
 ## Links

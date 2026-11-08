@@ -18,6 +18,8 @@ object ArcActionIds {
     val MARK_AND_ADVANCE = ActionId("mark-and-advance")
     val TOGGLE_REVIEWED = ActionId("toggle-reviewed")
     val SET_ASIDE = ActionId("set-aside")
+    val COMMENT_HERE = ActionId("comment-here")
+    val PUSH_REVIEW = ActionId("push-review")
     val FIND_IN_FILE = ActionId("find-in-file")
     val OPEN_FILE = ActionId("open-file")
     val TOGGLE_PIN = ActionId("toggle-pin")

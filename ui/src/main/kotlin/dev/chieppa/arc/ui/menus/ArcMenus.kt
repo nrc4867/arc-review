@@ -19,7 +19,7 @@ object ArcMenus {
         ),
         ArcMenu(
             Res.string.menu_review,
-            listOf(ArcActionIds.MARK_AND_ADVANCE, ArcActionIds.TOGGLE_REVIEWED, ArcActionIds.SET_ASIDE),
+            listOf(ArcActionIds.MARK_AND_ADVANCE, ArcActionIds.TOGGLE_REVIEWED, ArcActionIds.SET_ASIDE, null, ArcActionIds.COMMENT_HERE, ArcActionIds.PUSH_REVIEW),
         ),
         ArcMenu(
             Res.string.menu_go,

@@ -19,6 +19,7 @@ dependencies {
     api("dev.chieppa.stretch:stretch-diff")
     api("dev.chieppa.stretch:stretch-code")
     api("dev.chieppa.stretch:stretch-markdown")
+    implementation("dev.chieppa.stretch:stretch-document")
 
     testImplementation(kotlin("test"))
     testImplementation("dev.chieppa.stretch:stretch-test")

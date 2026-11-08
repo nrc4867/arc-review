@@ -9,7 +9,8 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import dev.chieppa.arc.core.conversation.LineSide
 import dev.chieppa.arc.core.pane.Pane
-import dev.chieppa.arc.ui.conversation.ThreadCard
+import dev.chieppa.arc.ui.conversation.PaneComments
+import dev.chieppa.arc.ui.conversation.PaneThread
 import dev.chieppa.arc.ui.conversation.paneThreads
 import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.find.ViewerMatches
@@ -26,7 +27,8 @@ import kotlinx.coroutines.flow.filterNotNull
 /**
  * A pane's change in Stretch's diff viewer, side by side or in one column and wrapping long lines or not as the pane
  * was left, scrolled back to where it was. Find matches draw in place, the current one set apart; threads sit under
- * their lines with a dot in the gutter and a mark on the ruler.
+ * their lines with a dot in the gutter and a mark on the ruler. Clicking a line number, or dragging over several,
+ * starts a comment there.
  */
 @Composable
 fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, modifier: Modifier = Modifier) {
@@ -50,16 +52,10 @@ fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, 
     fun key(side: DiffSide, number: Int?) = number?.let { (if (side == DiffSide.Old) LineSide.Old else LineSide.New) to it }
     val slots = DiffSlots(
         gutterMark = { ref -> threadsAt[key(ref.side, ref.number)]?.firstOrNull()?.let { GutterMark(it.state) } },
-        lineAnnotation = { ref ->
-            threadsAt[key(ref.side, ref.number)].orEmpty().forEach { thread ->
-                ThreadCard(
-                    thread,
-                    workbench.threadViews.expanded(thread),
-                    { workbench.threadViews.toggle(thread) },
-                    onAdopt = { workbench.threadViews.adopted += thread.id },
-                    onDismiss = { workbench.threadViews.dismissed += thread.id },
-                )
-            }
+        lineAnnotation = { ref -> threadsAt[key(ref.side, ref.number)].orEmpty().forEach { PaneThread(it, workbench) } },
+        onLineRangeSelect = { range ->
+            PaneComments.start(workbench, pane, if (range.side == DiffSide.Old) LineSide.Old else LineSide.New, range.start, range.end)
+            viewer.lineSelection = null
         },
     )
     DiffViewer(
