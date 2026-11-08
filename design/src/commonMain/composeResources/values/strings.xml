@@ -530,4 +530,48 @@
         <item quantity="one">%1$d commit picked</item>
         <item quantity="other">%1$d commits picked</item>
     </plurals>
+
+    <string name="action_go_to_definition">Go to definition</string>
+    <string name="action_show_usages">Show usages</string>
+    <string name="outline_place">%1$s @ %2$s</string>
+    <string name="outline_filter">Filter symbols</string>
+    <string name="status_index">index: %1$s, %2$s</string>
+    <plurals name="status_index_sources">
+        <item quantity="one">%1$d source</item>
+        <item quantity="other">%1$d sources</item>
+    </plurals>
+    <plurals name="status_index_files">
+        <item quantity="one">%1$s file</item>
+        <item quantity="other">%1$s files</item>
+    </plurals>
+    <string name="status_caret">Ln %1$d, Col %2$d</string>
+    <string name="status_tree_sitter">tree-sitter</string>
+    <string name="navigation_title">%1$s · %2$s</string>
+    <string name="navigation_title_in">%1$s · %2$s in %3$s</string>
+    <plurals name="navigation_usages">
+        <item quantity="one">%1$d usage</item>
+        <item quantity="other">%1$d usages</item>
+    </plurals>
+    <plurals name="navigation_definitions">
+        <item quantity="one">%1$d definition</item>
+        <item quantity="other">%1$d definitions</item>
+    </plurals>
+    <plurals name="navigation_repos">
+        <item quantity="one">%1$d repo</item>
+        <item quantity="other">%1$d repos</item>
+    </plurals>
+    <string name="navigation_group">%1$s · %2$s</string>
+    <string name="navigation_by_name">by name</string>
+    <string name="navigation_exact">exact</string>
+    <string name="navigation_line">:%1$d</string>
+    <plurals name="navigation_footer">
+        <item quantity="one">tree-sitter index · names matched in %1$d source</item>
+        <item quantity="other">tree-sitter index · names matched across %1$d sources</item>
+    </plurals>
+    <string name="language_kotlin">Kotlin</string>
+    <string name="language_java">Java</string>
+    <string name="language_javascript">JavaScript</string>
+    <string name="language_typescript">TypeScript</string>
+    <string name="language_tsx">TSX</string>
+    <string name="language_tsql">T-SQL</string>
 </resources>

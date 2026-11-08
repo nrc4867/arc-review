@@ -1,5 +1,11 @@
 package dev.chieppa.arc.app
 
+import dev.chieppa.arc.codeintel.CodeIntel
+import dev.chieppa.arc.index.WorkspaceIndex
+import dev.chieppa.arc.index.nav.TreeSitterNavigation
+import dev.chieppa.arc.index.store.GitBlobStore
+import dev.chieppa.arc.ui.navigation.CodeNavigation
+import kotlinx.coroutines.Dispatchers
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.watch.Watchlist
 import dev.chieppa.arc.git.repo.GitRepositories
@@ -49,6 +55,13 @@ class AppSession(dataDir: Path, val conversation: ReviewConversation, val github
 
     private val git = GitRepositories({ name -> (current?.repos ?: repos)[name] })
     val data: ReviewData = GitReviewData(git, GitHubPulls(github), dataDir.resolve(AppConstants.CLONES_FOLDER))
+
+    /** Code navigation: the tree-sitter index of the open sources, read from the same repos, answering by name. */
+    val codeNavigation: CodeNavigation = run {
+        val blobs = GitBlobStore(git)
+        val index = WorkspaceIndex(blobs, Dispatchers.Default)
+        CodeNavigation(CodeIntel(), index).also { TreeSitterNavigation(index, blobs).register(it.intel) }
+    }
 
     private val conversationFile = ConversationFile(dataDir.resolve(AppConstants.CONVERSATION_FILE))
 

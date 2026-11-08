@@ -24,7 +24,7 @@ fun PaneBody(pane: Pane, text: PaneText, kind: FileKind, view: PaneView, workben
     when {
         view == PaneView.Rendered && text.image -> ImageBody(text, modifier)
         view == PaneView.Rendered -> MarkdownBody(whole, modifier)
-        view == PaneView.Diff && kind.hasDiff && text.diff != null -> DiffBody(pane, text.diff, workbench, find, modifier)
+        view == PaneView.Diff && kind.hasDiff && text.diff != null -> DiffBody(pane, text, text.diff, workbench, find, modifier)
         else -> FullFileBody(pane, whole, text.diff, workbench, find, modifier, removed = kind == FileKind.Deleted)
     }
 }

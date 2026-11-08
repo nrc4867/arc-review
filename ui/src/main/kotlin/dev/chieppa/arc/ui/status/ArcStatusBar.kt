@@ -7,6 +7,10 @@ import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.status_commit
 import dev.chieppa.arc.design.generated.status_commits
 import dev.chieppa.arc.design.generated.status_matches
+import dev.chieppa.arc.design.generated.status_caret
+import dev.chieppa.arc.design.generated.status_tree_sitter
+import dev.chieppa.arc.ui.navigation.IndexStatusItem
+import dev.chieppa.arc.ui.navigation.SyntaxTokens
 import dev.chieppa.arc.ui.sources.sourceIcon
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.code.CodeLanguages
@@ -15,8 +19,8 @@ import dev.chieppa.stretch.frame.StatusItem
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The status bar: the active source, its commits and head; at the end, the focused pane's find matches while it is
- * finding, and its file's language. A saved filter's tab and a revision matrix's show their own instead.
+ * The status bar: the active source, its commits and head, and what the code index holds; at the end, the focused
+ * pane's find matches while it is finding, its caret, its file's language, and tree-sitter when tree-sitter reads it. A saved filter's tab and a revision matrix's show their own instead.
  */
 @Composable
 fun ArcStatusBar(workbench: Workbench) {
@@ -42,13 +46,16 @@ fun ArcStatusBar(workbench: Workbench) {
                 val count = snapshot.commits.size
                 StatusItem(if (count == 1) stringResource(Res.string.status_commit, head) else stringResource(Res.string.status_commits, count, head))
             }
+            IndexStatusItem(workbench.navigation)
         },
         end = {
             val find = pane?.let { workbench.paneCommands[it.id.value]?.find }
             if (find != null && find.open && find.matches.isNotEmpty()) {
                 StatusItem(stringResource(Res.string.status_matches, find.current + 1, find.matches.size))
             }
+            workbench.navigation.caret?.takeIf { it.paneId == pane?.id?.value }?.let { StatusItem(stringResource(Res.string.status_caret, it.line, it.column + 1)) }
             pane?.let { CodeLanguages.forPath(it.path) }?.let { StatusItem(LanguageNames.of(it)) }
+            if (pane != null && SyntaxTokens.reads(pane.path)) StatusItem(stringResource(Res.string.status_tree_sitter))
         },
     )
 }

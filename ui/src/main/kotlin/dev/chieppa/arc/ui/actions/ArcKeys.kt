@@ -13,6 +13,8 @@ object ArcKeys {
     val MARK_AND_ADVANCE: KeyChord = KeyChord.parse("R")
     val TOGGLE_REVIEWED: KeyChord = KeyChord.parse("Shift R")
     val FIND_IN_FILE: KeyChord = KeyChord.parse("Ctrl F")
+    val GO_TO_DEFINITION: KeyChord = KeyChord.parse("F12")
+    val SHOW_USAGES: KeyChord = KeyChord.parse("Ctrl Alt F7")
     val OPEN_FILE: KeyChord = KeyChord.parse("Ctrl P")
     val CLOSE_PANE: KeyChord = KeyChord.parse("Ctrl W")
     val TOGGLE_WRAP: KeyChord = KeyChord.parse("Alt Z")

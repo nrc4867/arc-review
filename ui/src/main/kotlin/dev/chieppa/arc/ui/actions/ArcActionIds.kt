@@ -15,6 +15,8 @@ object ArcActionIds {
     val PREVIOUS_FILE = ActionId("previous-file")
     val NEXT_CHANGE = ActionId("next-change")
     val PREVIOUS_CHANGE = ActionId("previous-change")
+    val GO_TO_DEFINITION = ActionId("go-to-definition")
+    val SHOW_USAGES = ActionId("show-usages")
     val MARK_AND_ADVANCE = ActionId("mark-and-advance")
     val TOGGLE_REVIEWED = ActionId("toggle-reviewed")
     val SET_ASIDE = ActionId("set-aside")

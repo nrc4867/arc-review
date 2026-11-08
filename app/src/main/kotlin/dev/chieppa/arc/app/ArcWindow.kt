@@ -57,6 +57,7 @@ fun ArcWindow(
             watch = watch,
             conversationService = session.conversations,
             localConversation = session.localConversation(),
+            codeNavigation = session.codeNavigation,
         ).also { opened = it }
     }
     DisposableEffect(workbench) { onDispose { workbench.scope.cancel() } }

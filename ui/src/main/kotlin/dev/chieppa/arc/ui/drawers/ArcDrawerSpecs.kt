@@ -10,6 +10,7 @@ import dev.chieppa.arc.ui.files.FilesDrawerContent
 import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.drawer_commits
+import dev.chieppa.arc.ui.navigation.OutlineDrawer
 import dev.chieppa.arc.ui.pulls.PullRequestsDrawer
 import dev.chieppa.arc.ui.revisions.CommitsDrawer
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -17,7 +18,7 @@ import dev.chieppa.stretch.frame.DrawerSpec
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The frame's drawers, one per [DrawerSlot]: Files holds the workspace; Notes, Conversation and Staged comments the
+ * The frame's drawers, one per [DrawerSlot]: Files holds the workspace; Outline the focused pane's symbols; Notes, Conversation and Staged comments the
  * active source's notes, pull request conversation and staged batch; Pull requests the saved filters and notification
  * rules; Revisions the active source's commits under the title Commits; the others open plain.
  */
@@ -25,6 +26,7 @@ import org.jetbrains.compose.resources.stringResource
 fun arcDrawerSpecs(workbench: Workbench): List<DrawerSpec> = ArcDrawerSlots.all.map { slot ->
     when (slot.id) {
         DrawerIds.FILES -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false) { FilesDrawerContent(workbench) }
+        DrawerIds.OUTLINE -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false) { OutlineDrawer(workbench) }
         DrawerIds.PULL_REQUESTS -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon) { PullRequestsDrawer(workbench) }
         DrawerIds.REVISIONS -> DrawerSpec(
             slot.id,

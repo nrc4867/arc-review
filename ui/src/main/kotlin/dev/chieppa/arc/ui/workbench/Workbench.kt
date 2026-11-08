@@ -25,6 +25,9 @@ import dev.chieppa.arc.ui.conversation.ThreadViews
 import dev.chieppa.arc.core.conversation.LocalConversation
 import dev.chieppa.arc.ui.services.ConversationService
 import dev.chieppa.arc.ui.services.NoConversations
+import dev.chieppa.arc.ui.navigation.CodeNavigation
+import dev.chieppa.arc.ui.navigation.NavigationController
+import dev.chieppa.arc.ui.navigation.SymbolOpener
 import dev.chieppa.arc.ui.panes.PaneCommands
 import dev.chieppa.arc.ui.panes.PaneTexts
 import dev.chieppa.arc.ui.review.MarkController
@@ -63,7 +66,8 @@ import kotlinx.coroutines.launch
  * through [data] on [scope]; the host's threads and the person's own comments go through [comments], from
  * [conversationService] and [localConversation], with sample threads from [conversation]. [onQuit] closes the app. Copied
  * paths and refs go to [clipboard], and web links open through [links]. [watch] holds the saved filters and
- * notification rules. All of the window's work runs on [dispatchers], [scope] on their main.
+ * notification rules. All of the window's work runs on [dispatchers], [scope] on their main. Questions about code go
+ * to [codeNavigation].
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -78,6 +82,7 @@ class Workbench(
     val links: LinkOpener = SystemBrowser,
     conversationService: ConversationService = NoConversations,
     localConversation: LocalConversation = LocalConversation(),
+    codeNavigation: CodeNavigation = CodeNavigation(),
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -124,6 +129,9 @@ class Workbench(
     val marks = MarkController(state, panes)
     val revisions = RevisionController(state, data, scope, panes)
 
+    /** Code navigation over [codeNavigation]: the index of the open sources, Ctrl+click and its lists. */
+    val navigation = NavigationController(state, codeNavigation, SymbolOpener(state, panes), scope, dispatchers)
+
     /** The switcher over the window, and what followed repos hold, asked as it searches. */
     val switcher = SwitcherState()
     val followed = FollowedLookup(data)
@@ -156,6 +164,7 @@ class Workbench(
         registerReviewActions(registry, this)
         registerContextActions(registry, this)
         registerPullActions(registry, this)
+        navigation.start()
     }
 
     /** Opens the Pull requests drawer and counts every notification as seen. */

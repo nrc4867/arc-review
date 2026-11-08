@@ -13,6 +13,7 @@ dependencies {
     api(project(":design"))
     api(project(":git"))
     api(project(":host"))
+    api(project(":index"))
     api("dev.chieppa.stretch:stretch-core")
     api("dev.chieppa.stretch:stretch-ui")
     api("dev.chieppa.stretch:stretch-frame")

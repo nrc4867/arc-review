@@ -29,6 +29,11 @@ fun registerReviewActions(registry: ActionRegistry, workbench: Workbench) {
     action(ArcActionIds.NEXT_CHANGE, ArcKeys.NEXT_CHANGE, hasPane) { workbench.onFocusedPane { nextChange() } }
     action(ArcActionIds.PREVIOUS_CHANGE, ArcKeys.PREVIOUS_CHANGE, hasPane) { workbench.onFocusedPane { previousChange() } }
     action(ArcActionIds.FIND_IN_FILE, ArcKeys.FIND_IN_FILE, hasPane) { workbench.onFocusedPane { openFind() } }
+    action(ArcActionIds.GO_TO_DEFINITION, ArcKeys.GO_TO_DEFINITION, hasPane) { workbench.onFocusedPane { clickSymbolAtCaret() } }
+    action(ArcActionIds.SHOW_USAGES, ArcKeys.SHOW_USAGES, hasPane) {
+        workbench.navigation.askUsagesNext()
+        workbench.onFocusedPane { if (!clickSymbolAtCaret()) workbench.navigation.cancelUsagesNext() }
+    }
     action(ArcActionIds.MARK_AND_ADVANCE, ArcKeys.MARK_AND_ADVANCE, hasSource) {
         val targets = ReviewTargets.of(workbench)
         if (workbench.treeFocused && targets.isNotEmpty()) {

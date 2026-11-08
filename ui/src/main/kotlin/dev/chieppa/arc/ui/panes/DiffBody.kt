@@ -17,7 +17,22 @@ import dev.chieppa.arc.ui.conversation.paneThreads
 import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.find.ViewerMatches
 import dev.chieppa.arc.ui.workbench.Workbench
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.produceState
+import dev.chieppa.arc.ui.navigation.NameSpan
+import dev.chieppa.arc.ui.navigation.NavigationPopover
+import dev.chieppa.arc.ui.navigation.NavigationSizes
+import dev.chieppa.arc.ui.navigation.NavigationTargets
+import dev.chieppa.arc.ui.navigation.PaneCaret
+import dev.chieppa.arc.ui.navigation.SyntaxTokens
+import dev.chieppa.arc.ui.navigation.rememberDecorations
+import dev.chieppa.stretch.code.CodeRange
+import dev.chieppa.stretch.diff.DiffDecoration
 import dev.chieppa.stretch.diff.DiffLineRef
+import dev.chieppa.stretch.diff.DiffPosition
+import dev.chieppa.stretch.diff.FileTokens
+import kotlinx.coroutines.withContext
 import dev.chieppa.stretch.diff.DiffMark
 import dev.chieppa.stretch.diff.numberOn
 import dev.chieppa.stretch.diff.DiffSide
@@ -33,10 +48,11 @@ import kotlinx.coroutines.flow.filterNotNull
  * was left, scrolled back to where it was. Find matches draw in place, the current one set apart; threads sit under
  * their lines with a dot in the gutter and a mark on the ruler. Clicking a line number, or dragging over several,
  * starts a comment there; a click on one line that has threads asks whether to start one or open a thread. A thread
- * jumped to from a list scrolls into view.
+ * jumped to from a list scrolls into view. Each side is coloured by tree-sitter where it can read the file, its names
+ * click through with Ctrl, and navigation's marks and providers' decorations draw on the side they belong to.
  */
 @Composable
-fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, modifier: Modifier = Modifier) {
+fun DiffBody(pane: Pane, text: PaneText, diff: FileDiff, workbench: Workbench, find: FindState, modifier: Modifier = Modifier) {
     val id = pane.id.value
     val ui = workbench.state.paneState(id)
     val wrap = workbench.wrap(id)
@@ -59,6 +75,23 @@ fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, 
     fun sidesOf(ref: DiffLineRef) = if (viewer.split) listOf(ref.side) else DiffSide.entries
     fun here(ref: DiffLineRef) = sidesOf(ref).flatMap { side -> threadsAt[key(side, ref.line.numberOn(side))].orEmpty() }
     val choice = workbench.threadViews.choosing?.takeIf { it.paneId == id }
+    val navigation = workbench.navigation
+    val documents = remember(pane) { DiffSide.entries.associateWith { NavigationTargets.document(pane, lineSide(it)) } }
+    val tokens = produceState(emptyMap<FileDiff, FileTokens>(), diff, text) {
+        value = withContext(workbench.dispatchers.default) {
+            val old = text.old?.let { SyntaxTokens.lines(documents.getValue(DiffSide.Old).path, it) }
+            val new = text.new?.let { SyntaxTokens.lines(documents.getValue(DiffSide.New).path, it) }
+            if (old == null && new == null) emptyMap() else mapOf(diff to FileTokens(old, new))
+        }
+    }.value
+    val oldLines = remember(text.old) { text.old?.lines().orEmpty() }
+    val newLines = remember(text.new) { text.new?.lines().orEmpty() }
+    val oldDecorations = rememberDecorations(workbench, documents.getValue(DiffSide.Old).takeIf { pane.base != null }) { oldLines.getOrNull(it - 1)?.length }
+    val newDecorations = rememberDecorations(workbench, documents.getValue(DiffSide.New)) { newLines.getOrNull(it - 1)?.length }
+    val decorations = remember(oldDecorations, newDecorations) {
+        oldDecorations.map { DiffDecoration(0, DiffSide.Old, it.range, it.style, it.tooltip) } +
+            newDecorations.map { DiffDecoration(0, DiffSide.New, it.range, it.style, it.tooltip) }
+    }
     val slots = DiffSlots(
         gutterMark = { ref -> here(ref).firstOrNull()?.let { GutterMark(it.state) } },
         lineAnnotation = { ref ->
@@ -72,18 +105,28 @@ fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, 
             PaneComments.click(workbench, pane, side, range.start, range.end, threadsAt[side to range.start].orEmpty())
             viewer.lineSelection = null
         },
+        symbolAt = { at -> navigation.nameAt(documents.getValue(at.side), at.line, at.column)?.let { CodeRange(it.line, it.start, it.end) } },
+        onSymbolClick = { click ->
+            val name = NameSpan(click.range.line, click.range.start, click.range.end)
+            navigation.click(id, documents.getValue(click.position.side), name, click.bounds)
+        },
     )
-    DiffViewer(
-        listOf(diff),
-        modifier,
-        viewer,
-        showBar = false,
-        slots = slots,
-        matches = matches,
-        currentMatch = current,
-        marks = marks,
-        changeWash = workbench.preferences.changeWash,
-    )
+    Box(modifier) {
+        DiffViewer(
+            listOf(diff),
+            Modifier.fillMaxSize(),
+            viewer,
+            showBar = false,
+            slots = slots,
+            tokens = tokens,
+            matches = matches,
+            currentMatch = current,
+            marks = marks,
+            changeWash = workbench.preferences.changeWash,
+            decorations = decorations,
+        )
+        NavigationPopover(workbench, id)
+    }
 
     val commands = remember(viewer, find, lines) {
         val shared = find
@@ -96,6 +139,8 @@ fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, 
                 val match = find.move(step) ?: return
                 ViewerMatches.inDiff(listOf(match), lines).firstOrNull()?.let { viewer.scrollToMatch(it) }
             }
+
+            override suspend fun clickSymbolAtCaret() = viewer.clickSymbolAtCaret()
         }
     }
     DisposableEffect(id, commands) {
@@ -106,6 +151,18 @@ fun DiffBody(pane: Pane, diff: FileDiff, workbench: Workbench, find: FindState, 
         withFrameNanos {}
         workbench.state.paneLines[id]?.takeIf { it > 1 }?.let { viewer.scrollToLine(0, DiffSide.New, it) }
         snapshotFlow { viewer.firstVisibleLine(DiffSide.New)?.second }.filterNotNull().collect { workbench.state.paneLines[id] = it }
+    }
+    LaunchedEffect(viewer) {
+        snapshotFlow { viewer.caret }.collect { at -> at?.let { navigation.caret = PaneCaret(id, it.line, it.column) } }
+    }
+    val jump = navigation.reveal?.takeIf { jump -> DiffSide.entries.any { documents.getValue(it).let { d -> d.repo == jump.repo.value && d.revision == jump.revision && d.path == jump.path } } }
+    LaunchedEffect(viewer, jump) {
+        jump ?: return@LaunchedEffect
+        withFrameNanos {}
+        val side = if (documents.getValue(DiffSide.New).revision == jump.revision) DiffSide.New else DiffSide.Old
+        viewer.scrollToLine(0, side, (jump.line - NavigationSizes.LEAD_IN).coerceAtLeast(1))
+        viewer.caret = DiffPosition(0, side, jump.line, jump.column)
+        navigation.reveal = null
     }
     val reveal = workbench.threadViews.reveal?.takeIf { it.source == pane.source && it.path == pane.path }
     LaunchedEffect(viewer, reveal) {

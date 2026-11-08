@@ -17,7 +17,22 @@ import dev.chieppa.arc.ui.conversation.paneThreads
 import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.find.ViewerMatches
 import dev.chieppa.arc.ui.workbench.Workbench
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.produceState
+import dev.chieppa.arc.ui.navigation.NameSpan
+import dev.chieppa.arc.ui.navigation.NavigationPopover
+import dev.chieppa.arc.ui.navigation.NavigationSizes
+import dev.chieppa.arc.ui.navigation.NavigationTargets
+import dev.chieppa.arc.ui.navigation.PaneCaret
+import dev.chieppa.arc.ui.navigation.SyntaxTokens
+import dev.chieppa.arc.ui.navigation.rememberDecorations
+import dev.chieppa.stretch.code.CodeDecoration
 import dev.chieppa.stretch.code.CodeLanguages
+import dev.chieppa.stretch.code.CodePosition
+import dev.chieppa.stretch.code.CodeRange
+import dev.chieppa.stretch.code.CodeToken
+import kotlinx.coroutines.withContext
 import dev.chieppa.stretch.code.CodeMark
 import dev.chieppa.stretch.code.CodeText
 import dev.chieppa.stretch.code.CodeViewer
@@ -51,27 +66,41 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
     val threadInk = Stretch.colors.warnInk
     val marks = remember(threadsAt, threadInk) { threadsAt.keys.map { CodeMark(it, threadInk) } }
     val choice = workbench.threadViews.choosing?.takeIf { it.paneId == id }
-    CodeViewer(
-        code,
-        modifier,
-        viewer,
-        language = CodeLanguages.forPath(pane.path),
-        tones = { line -> if (line in changed) (if (removed) LineTone.Removed else LineTone.Added) else null },
-        slots = CodeViewerSlots(
-            gutterMark = { line -> threadsAt[line]?.firstOrNull()?.let { GutterMark(it.state) } },
-            lineAnnotation = { line ->
-                if (choice?.side == LineSide.New && choice.line == line) {
-                    LineChooser(workbench, threadsAt[line].orEmpty()) { PaneComments.start(workbench, pane, LineSide.New, line) }
-                }
-                threadsAt[line].orEmpty().forEach { PaneThread(it, workbench) }
-            },
-            onLineNumberClick = { line -> if (!removed) PaneComments.click(workbench, pane, LineSide.New, line, line, threadsAt[line].orEmpty()) },
-        ),
-        matches = matches,
-        currentMatch = current,
-        marks = marks,
-        changeWash = workbench.preferences.changeWash,
-    )
+    val navigation = workbench.navigation
+    val document = remember(pane, removed) { NavigationTargets.document(pane, if (removed) LineSide.Old else LineSide.New) }
+    val tokens = produceState<List<List<CodeToken>>?>(null, text, document.path) {
+        value = withContext(workbench.dispatchers.default) { SyntaxTokens.lines(document.path, text) }
+    }.value
+    val lineDecorations = rememberDecorations(workbench, document) { line -> code.lines.getOrNull(line - 1)?.length }
+    val decorations = remember(lineDecorations) { lineDecorations.map { CodeDecoration(it.range, it.style, it.tooltip) } }
+    Box(modifier) {
+        CodeViewer(
+            code,
+            Modifier.fillMaxSize(),
+            viewer,
+            language = CodeLanguages.forPath(pane.path),
+            tones = { line -> if (line in changed) (if (removed) LineTone.Removed else LineTone.Added) else null },
+            slots = CodeViewerSlots(
+                gutterMark = { line -> threadsAt[line]?.firstOrNull()?.let { GutterMark(it.state) } },
+                lineAnnotation = { line ->
+                    if (choice?.side == LineSide.New && choice.line == line) {
+                        LineChooser(workbench, threadsAt[line].orEmpty()) { PaneComments.start(workbench, pane, LineSide.New, line) }
+                    }
+                    threadsAt[line].orEmpty().forEach { PaneThread(it, workbench) }
+                },
+                onLineNumberClick = { line -> if (!removed) PaneComments.click(workbench, pane, LineSide.New, line, line, threadsAt[line].orEmpty()) },
+                symbolAt = { at -> navigation.nameAt(document, at.line, at.column)?.let { CodeRange(it.line, it.start, it.end) } },
+                onSymbolClick = { click -> navigation.click(id, document, NameSpan(click.range.line, click.range.start, click.range.end), click.bounds) },
+            ),
+            tokens = tokens,
+            matches = matches,
+            currentMatch = current,
+            marks = marks,
+            changeWash = workbench.preferences.changeWash,
+            decorations = decorations,
+        )
+        NavigationPopover(workbench, id)
+    }
     val commands = remember(viewer, find, changeStarts) {
         val shared = find
         object : PaneCommands {
@@ -90,6 +119,8 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
                 val match = find.move(step) ?: return
                 ViewerMatches.inCode(listOf(match)).firstOrNull()?.let { viewer.scrollToMatch(it) }
             }
+
+            override suspend fun clickSymbolAtCaret() = viewer.clickSymbolAtCaret()
         }
     }
     DisposableEffect(id, commands) {
@@ -100,6 +131,17 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
         withFrameNanos {}
         workbench.state.paneLines[id]?.takeIf { it > 1 }?.let { viewer.alignLine(it) }
         snapshotFlow { viewer.firstVisibleLine }.collect { workbench.state.paneLines[id] = it }
+    }
+    LaunchedEffect(viewer) {
+        snapshotFlow { viewer.caret }.collect { at -> at?.let { navigation.caret = PaneCaret(id, it.line, it.column) } }
+    }
+    val jump = navigation.reveal?.takeIf { it.repo == pane.repo && it.revision == document.revision && it.path == document.path }
+    LaunchedEffect(viewer, jump) {
+        jump ?: return@LaunchedEffect
+        withFrameNanos {}
+        viewer.scrollToLine((jump.line - NavigationSizes.LEAD_IN).coerceAtLeast(1))
+        viewer.caret = CodePosition(jump.line, jump.column)
+        navigation.reveal = null
     }
     val reveal = workbench.threadViews.reveal?.takeIf { it.source == pane.source && it.path == pane.path && it.side == LineSide.New }
     LaunchedEffect(viewer, reveal) {

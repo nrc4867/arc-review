@@ -25,7 +25,7 @@ object NativeLibraries {
     private val lookups = ConcurrentHashMap<String, SymbolLookup>()
 
     /** Whether the libraries for this machine are bundled. */
-    val available: Boolean get() = NativeLibraries::class.java.getResource(resource(CORE)) != null
+    val available: Boolean by lazy { NativeLibraries::class.java.getResource(resource(CORE)) != null }
 
     /** The symbols of library [name], such as `tree-sitter` or `tree-sitter-kotlin`. */
     fun lookup(name: String): SymbolLookup = lookups.computeIfAbsent(name) {
