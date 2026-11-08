@@ -270,6 +270,7 @@ class Workbench(
      */
     fun removeSource(source: Source) {
         sources.removeSource(source)
+        state.selected -= source
         treeState.expanded = treeState.expanded.filterNot { it is String && TreeKeys.belongsTo(it, source) }.toSet()
         treeState.selection = treeState.selection.filterNot { it is String && TreeKeys.belongsTo(it, source) }.toSet()
         state.active?.let(::activateSource)

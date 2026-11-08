@@ -28,7 +28,11 @@ import dev.chieppa.stretch.ui.Divider
 import dev.chieppa.stretch.ui.IconButton
 import org.jetbrains.compose.resources.stringResource
 
-/** The strip under the top bar: every source open in the workspace, the active one outlined, and the button to open one. */
+/**
+ * The strip under the top bar: every source open in the workspace, the selected ones outlined, and the button to open
+ * one. A click makes a source active and the only one selected; a Ctrl+click (Cmd on macOS) adds it to the selection
+ * or takes it out.
+ */
 @Composable
 fun SourceStrip(workbench: Workbench, modifier: Modifier = Modifier) {
     val state = workbench.state
@@ -50,11 +54,15 @@ fun SourceStrip(workbench: Workbench, modifier: Modifier = Modifier) {
                         title = load?.ready?.title.orEmpty(),
                         progress = state.progress(source),
                         changedSince = state.states(source).values.count { it == FileReviewState.ChangedSinceReviewed },
-                        active = source == state.active,
+                        selected = source in state.selection,
                         failed = load is SourceLoad.Failed,
                         checks = state.pulls[source]?.checks?.state,
                         pullState = state.pulls[source]?.state,
-                        onClick = { workbench.activateSource(source) },
+                        onClick = {
+                            workbench.activateSource(source)
+                            state.selectOnlyActive()
+                        },
+                        onToggleSelected = { state.toggleSelected(source) },
                         onClose = { workbench.removeSource(source) },
                         menu = { close -> SourceMenu(workbench, source, close) },
                     )

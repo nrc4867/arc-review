@@ -12,6 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
+import dev.chieppa.arc.ui.util.extendsSelection
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,21 +55,24 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * One source in the strip: its kind, ref and title, how much of it is reviewed and how many files changed since they
- * were reviewed, and for a pull request its [checks]. The [active] source is outlined; a source that could not be read
- * is edged in the error color, and a pull request whose [pullState] is merged or closed is dimmed, its ref's tooltip
- * saying which. Its close button runs [onClose], and a right-click opens [menu].
+ * were reviewed, and for a pull request its [checks]. A [selected] source, the active one or one added beside it, is
+ * outlined; a source that could not be read is edged in the error color, and a pull request whose [pullState] is merged
+ * or closed is dimmed, its ref's tooltip saying which. A click runs [onClick], and with Ctrl (Cmd on macOS) held
+ * [onToggleSelected]. Its close button runs [onClose], and a right-click opens [menu].
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SourceChip(
     source: Source,
     title: String,
     progress: ReviewProgress?,
     changedSince: Int,
-    active: Boolean,
+    selected: Boolean,
     failed: Boolean,
     checks: CheckState?,
     pullState: PullState?,
     onClick: () -> Unit,
+    onToggleSelected: () -> Unit,
     onClose: () -> Unit,
     menu: @Composable ColumnScope.(close: () -> Unit) -> Unit,
 ) {
@@ -68,24 +80,29 @@ fun SourceChip(
     val shape = Stretch.shapes.ctlShape
     val edge = when {
         failed -> c.errorEdge
-        active -> c.accent
+        selected -> c.accent
         else -> c.linePanel.copy(alpha = 0f)
     }
+    var extending by remember { mutableStateOf(false) }
     ContextMenuArea(menu) {
         Row(
             Modifier
                 .alpha(if (pullState?.ended == true) ArcAlphas.ENDED else 1f)
                 .height(ArcSizes.sourceChipHeight)
                 .clip(shape)
-                .background(if (active) c.onFill else c.surfaceRail)
+                .background(if (selected) c.onFill else c.surfaceRail)
                 .border(Stretch.stroke, edge, shape)
-                .clickable(role = Role.Tab, onClick = onClick)
-                .semantics { contentDescription = source.ref; selected = active }
+                .onPointerEvent(PointerEventType.Press, PointerEventPass.Initial) { extending = it.keyboardModifiers.extendsSelection }
+                .clickable(role = Role.Tab) {
+                    if (extending) onToggleSelected() else onClick()
+                    extending = false
+                }
+                .semantics { contentDescription = source.ref; this.selected = selected }
                 .padding(start = StretchSpacing.space8, end = StretchSpacing.space2),
             horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space6),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val ink = if (failed) c.errorInk else if (active) c.inkStrong else c.ink
+            val ink = if (failed) c.errorInk else if (selected) c.inkStrong else c.ink
             Icon(sourceIcon(source), ink)
             val label = @Composable { BasicText(SourceLabels.of(source), style = Stretch.type.valueSm.merge(TextStyle(color = ink, fontWeight = FontWeight.SemiBold)), maxLines = 1) }
             pullStateText(pullState)?.let { Tooltip(it, content = label) } ?: label()

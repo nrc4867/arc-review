@@ -55,6 +55,23 @@ class WorkspaceState(
 
     val active: Source? get() = workspace.active
 
+    /** The sources added to the selection beside the active one with Ctrl+click in the strip. Window state, not saved. */
+    var selected by mutableStateOf<Set<Source>>(emptySet())
+
+    /** The selection in strip order: the active source, always, and the sources added beside it. */
+    val selection: List<Source> get() = workspace.sources.filter { it == active || it in selected }
+
+    /** Adds [source] to the selection, or takes it out when it is in; the active source always stays in. */
+    fun toggleSelected(source: Source) {
+        if (source == active || source !in workspace.sources) return
+        selected = if (source in selected) selected - source else selected + source
+    }
+
+    /** Leaves the active source alone in the selection. */
+    fun selectOnlyActive() {
+        selected = emptySet()
+    }
+
     /** The active source's pane layout. */
     var paneLayout: PaneLayout
         get() = active?.let { views[it]?.layout } ?: looseLayout
