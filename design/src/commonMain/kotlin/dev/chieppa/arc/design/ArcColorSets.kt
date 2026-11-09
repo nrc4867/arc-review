@@ -11,6 +11,8 @@ object ArcColorSets {
         addressed = Color(0xFF7FB6F2),
         addressedWash = Color(0xFF172434),
         addressedEdge = Color(0xFF31608F),
+        passFill = Color(0xFF2F5A36),
+        passEdge = Color(0xFF4F8F5B),
     )
 
     val Light = ArcColors(
@@ -20,6 +22,8 @@ object ArcColorSets {
         addressed = Color(0xFF2B66A6),
         addressedWash = Color(0xFFE7F0FA),
         addressedEdge = Color(0xFF9CC0E8),
+        passFill = Color(0xFFDCEFDF),
+        passEdge = Color(0xFF4F8F5B),
     )
 
     fun forDark(dark: Boolean): ArcColors = if (dark) Dark else Light
