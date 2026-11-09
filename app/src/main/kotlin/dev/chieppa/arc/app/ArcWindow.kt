@@ -51,7 +51,7 @@ fun ArcWindow(
         lateinit var opened: Workbench
         Workbench(
             preferences = preferences,
-            onQuit = { save(opened); exit() },
+            onQuit = { exitStep { save(opened) }; exit() },
             data = session.data,
             state = session.open(),
             conversation = session.conversation,
@@ -65,7 +65,7 @@ fun ArcWindow(
     }
     DisposableEffect(workbench) { onDispose { workbench.scope.cancel() } }
     StretchWindow(
-        onCloseRequest = { save(workbench); onExit() },
+        onCloseRequest = { exitStep { save(workbench) }; onExit() },
         title = stringResource(Res.string.app_name),
         state = rememberWindowState(width = AppConstants.WINDOW_WIDTH, height = AppConstants.WINDOW_HEIGHT),
     ) {
@@ -76,7 +76,7 @@ fun ArcWindow(
         SaveStart(workbench, session::saveStartLayout, session::saveRecent)
         WatchPolling(watch, session.github, notifier, workbench.dispatchers)
         CompositionLocalProvider(LocalActionText provides actionText()) {
-            MacMenuBar(appMenus(), workbench.registry, workbench.keymap, null, onSettings = { workbench.settingsOpen = true }, onQuit = { save(workbench); onExit() })
+            MacMenuBar(appMenus(), workbench.registry, workbench.keymap, null, onSettings = { workbench.settingsOpen = true }, onQuit = { exitStep { save(workbench) }; onExit() })
         }
         StretchTheme(workbench.preferences.theme, scale = workbench.preferences.interfaceSize) {
             ArcFrame(workbench)

@@ -27,9 +27,9 @@ fun main() {
             notifier = { title, text -> DesktopNotifications.show(title, text) },
             onPreferencesChange = { look -> withContext(Dispatchers.IO) { session.saveSettings { look.toSettings(it) } } },
             onExit = {
-                session.saveWatchlist(watch.watchlist)
-                DesktopNotifications.close()
-                session.close()
+                exitStep { session.saveWatchlist(watch.watchlist) }
+                exitStep { DesktopNotifications.close() }
+                exitStep { session.close() }
                 exitApplication()
             },
         )
