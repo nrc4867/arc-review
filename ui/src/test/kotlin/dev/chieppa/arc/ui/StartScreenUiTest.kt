@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui
 
+import androidx.compose.ui.test.onAllNodesWithText
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.source.BranchName
 import dev.chieppa.arc.git.repo.LocalBranch
@@ -102,6 +103,21 @@ class StartScreenUiTest {
         onNodeWithText("Rotate tokens").performClick()
         waitForIdle()
         assertEquals(listOf(data.source), workbench.state.workspace.sources)
+    }
+
+    @Test
+    fun aRightClickOnARecentRowOpensOneMenuWithTheRowsAndTheCardsItems() = runComposeUiTest {
+        val workbench = openReview(data)
+        workbench.removeSource(data.source)
+        waitForIdle()
+        onNodeWithText("Rotate tokens").performMouseInput { rightClick(center) }
+        waitForIdle()
+        assertEquals(1, onAllNodesWithText("Remove from recent").fetchSemanticsNodes().size)
+        assertEquals(1, onAllNodesWithText("Hide").fetchSemanticsNodes().size)
+        onNodeWithText("Remove from recent").performClick()
+        waitForIdle()
+        assertTrue(workbench.start.recent.sources.isEmpty())
+        onNodeWithText("Hide").assertDoesNotExist()
     }
 
     @Test
