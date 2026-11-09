@@ -13,7 +13,7 @@ import kotlin.io.path.isRegularFile
  * Downloaded artifacts under [folder], at `<owner>/<name>/<artifact id>`, holding at most [capBytes] in all: once a
  * new one goes over, the ones used longest ago go first. Using one marks it used now through [clock].
  */
-class ArtifactCache(private val folder: Path, private val capBytes: Long = CAP_BYTES, private val clock: () -> Long = System::currentTimeMillis) {
+class ArtifactCache(private val folder: Path, val capBytes: Long = CAP_BYTES, private val clock: () -> Long = System::currentTimeMillis) {
     /** The file of artifact [id] of [run]'s repo, if it is here; it counts as used now. */
     fun get(run: RunRef, id: Long): Path? = file(run, id).takeIf { it.isRegularFile() }?.also(::touch)
 
