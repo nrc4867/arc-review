@@ -71,9 +71,19 @@ class GitRepository(val dir: Path, private val runner: GitRunner = GitRunner()) 
     suspend fun commit(commit: ObjectId): CommitInfo? =
         CommitLogParser.parse(git(listOf("log", "-1", "--no-color", CommitLogParser.FORMAT, commit.value, "--")).text).firstOrNull()
 
-    /** The clone's own branches, newest commit first. */
-    suspend fun branches(): List<LocalBranch> =
-        BranchListParser.parse(git(listOf("for-each-ref", "--sort=-committerdate", BranchListParser.FORMAT, HEADS)).text)
+    /** The clone's own branches, newest commit first, with how far each is ahead of the default branch where git can tell. */
+    suspend fun branches(): List<LocalBranch> {
+        defaultBranch()?.let { base ->
+            val counted = git(listOf("for-each-ref", "--sort=-committerdate", BranchListParser.formatAhead(base), HEADS), accept = setOf(0, FATAL))
+            if (counted.exitCode == 0) return BranchListParser.parse(counted.text)
+        }
+        return BranchListParser.parse(git(listOf("for-each-ref", "--sort=-committerdate", BranchListParser.FORMAT, HEADS)).text)
+    }
+
+    /** The newest [limit] commits on any branch or remote branch, merges left out, newest first. */
+    suspend fun recentCommits(limit: Int): List<CommitInfo> = CommitLogParser.parse(
+        git(listOf("log", "--branches", "--remotes", "--no-merges", "--no-color", "-n", limit.toString(), CommitLogParser.FORMAT, "--")).text,
+    )
 
     /** Every file path in [rev]'s tree, changed or not, in git's order. */
     suspend fun listFiles(rev: String): List<String> {

@@ -77,6 +77,32 @@ class GitRepositoryTest {
     }
 
     @Test
+    fun branchesCountWhatTheyHaveThatTheDefaultBranchDoesNot() = runTest {
+        repo.git("branch", "merged", first.value)
+        repo.git("checkout", "-q", "-b", "feature")
+        repo.commit("One", mapOf("a.txt" to "a"))
+        repo.commit("Two", mapOf("b.txt" to "b"))
+        repo.git("checkout", "-q", "main")
+        GitRepository(repo.dir).use { git ->
+            val ahead = git.branches().associate { it.name to it.ahead }
+            assertEquals(mapOf("feature" to 2, "main" to 0, "merged" to 0), ahead)
+        }
+    }
+
+    @Test
+    fun recentCommitsComeNewestFirstFromEveryBranch() = runTest {
+        repo.git("checkout", "-q", "-b", "feature")
+        val third = repo.commitAt(4_000_000_000, "Third", mapOf("c.txt" to "c"))
+        repo.git("checkout", "-q", "main")
+        GitRepository(repo.dir).use { git ->
+            val commits = git.recentCommits(10)
+            assertEquals(listOf(third, second, first), commits.map { it.id })
+            assertEquals("Third", commits.first().subject)
+            assertEquals(listOf(third), git.recentCommits(1).map { it.id })
+        }
+    }
+
+    @Test
     fun revisionsResolveToCommitsOrNothing() = runTest {
         GitRepository(repo.dir).use { git ->
             assertEquals(second, git.resolveCommit("main"))
