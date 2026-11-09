@@ -1,79 +1,65 @@
 # Arc
 
-Arc is a desktop app for reviewing code, for Windows and macOS, built on [Stretch](https://github.com/nrc4867/stretch).
-One person reviews commits and pull requests across several repos and branches at once, in one saved workspace that
-spans repos, where any file at any revision can sit next to any other.
+Arc is a desktop code review app for Windows and macOS, built on [Stretch](https://github.com/nrc4867/stretch).
+It is made for one person reviewing a lot of code: pull requests, commits, ranges and branches from several repos,
+open side by side in one workspace that is saved between runs. Each source keeps its own panes, scroll and progress,
+so switching between them is instant and loses nothing. Notes, marks and drafts stay on your machine until you push a
+review on purpose.
 
-The repo and the binary are named `arc-review`.
+![Reviewing a change in Stretch, with the changed files, review progress and a split diff](docs/images/review.png)
 
-## Principles
+## What sets it apart
 
-- **Reading comes first.** The tool is judged by how fast and how comfortably someone can read and compare code.
-- **Nothing leaves without a deliberate push.** Notes, marks and comment drafts are local until published.
-- **Switching is instant and loses nothing.** Each commit, PR, branch and repo keeps its own view state.
-- **AI is a guest.** The app has no model. An outside agent can read a review and leave marked suggestions, or be handed
-  a checked-out source to fix; a person reviews what it did.
+| | |
+| --- | --- |
+| **Many sources, one workspace** | Pull requests, commits, commit ranges and branches from any number of repos sit in one strip, each with its own panes, open folders and reviewed count. |
+| **Marks that survive a rebase** | A file marked reviewed stays reviewed when the change is rebased or amended without touching it, and is flagged when it really changed after your review. |
+| **Every revision, side by side** | Arc records every head a source is read at, plus the force pushes GitHub knows of, and the revision matrix shows which file changed in which revision and where you reviewed it. |
+| **Code navigation without a checkout** | A tree-sitter index of every open source answers Ctrl+click and usages at the exact revision under review, across repos, for Java, Kotlin, JavaScript, TypeScript and T-SQL. |
+| **Search, not an inbox** | Saved GitHub searches poll in the background, rules raise desktop notifications, and Go to anything finds open pull requests, branches and recent sources fuzzily, or opens a pasted link. |
+| **Nothing leaves by accident** | Comments are drafted, staged and sent as one confirmed review; notes never leave the machine and export to Markdown. |
+| **Any file at any revision** | Open any file of any repo at any commit, pin it beside the diff, and keep it there while you move through the review. |
+
+The start screen picks up where you left off: the next file to review, the source's revisions and the keys that matter.
+
+![The start screen for one source, with Continue, review progress, revisions and keys](docs/images/start.png)
+
+The revision matrix sets a source's files against each revision it has had, to see what changed after you looked.
+
+![The revision matrix of four revisions, marking which files changed in each](docs/images/revisions.png)
 
 ## Status
 
-Reading local repos. There is one workspace, saved between runs: the strip under the top bar lists every source open
-in it. Add a repo by its folder and open sources in it by ref (`@sha`, `@sha..sha`, `:branch...base`); opening a
-pull request, commit, range or branch from a filter tab, Go to anything, a pasted link or "+" puts it in the strip
-and switches to it, and each chip's close button takes it out (its marks stay, so opening it again restores them).
-Each source keeps its own panes, scroll and open folders. The Files drawer
-groups every source's changed files with their status, line counts and reviewed marks, a folder or selection marks at
-once, and a source's tree can be scoped to one commit. Right-clicking a file, folder, source or tab offers what can be
-done to it, and files drag from the tree onto a pane, an edge or out into a window of their own. Panes show a file's
-diff (split or unified), the whole file with its changes marked, or rendered Markdown, with find in file and wrapping
-of long lines; an added, deleted or unchanged file shows whole under a chip saying so. Pictures (PNG, JPEG, GIF, WebP,
-BMP, ICO) show drawn, a changed one before and after side by side, and an SVG can show drawn or as its text. A setting
-highlights changed lines whole or in the gutter only, leaving the code plain. Any file at any revision of any
-repo can be opened and pinned beside the rest. Marks survive a rebase that keeps the change. The keyboard covers next
-and previous file and change, mark and advance, find and wrapping, all in the command palette (Ctrl Shift P). Go to
-anything (Ctrl K, or Ctrl P for files) searches the strip's sources, the files they change and the active source's
-other files, and the open pull requests (by title, on GitHub) and local branches of every registered repo that the
-strip does not hold: Enter switches, Ctrl Enter opens in a new pane, Alt Enter opens without switching. A pasted
-github.com link or a ref shows what it points at, with the pull request a commit sits in, and opens it or its whole
-pull request.
-The workspace, repos and layouts are saved locally. Pull requests are read from GitHub with the `gh` login (read-only): a
-pull request (`#412`) is opened as a source whose head is fetched from the clone's origin, and saved GitHub searches,
-polled every five minutes in the Pull requests drawer, open as tabs listing each pull request's labels, who it waits on,
-checks and comments, the title keeping its room as columns give way in a narrow pane, and an "Open" chip on those in
-the strip. Clicking a pull request opens it, cloning its repo (blobless, into the app's data folder) when there is no
-clone of it here; a right-click also opens it without switching, opens it on GitHub, and copies its link, number,
-reference, branch, head commit or title. A merged or closed pull request shows dimmed on its chip and its tree row,
-and one action closes them all. Rules raise desktop notifications for
-comments on the person's pull requests, mentions, and new pull requests in a filter or with a label; the bell counts
-them. Every head a source is read at is recorded and kept under a private ref, and a pull request also takes the heads
-GitHub knows of (force pushes and reviewed commits); the revision matrix sets the source's files against those
-revisions, showing which file changed in which, compared through rebases, where each was reviewed and where it changed
-after, with arrow keys to move and Enter to open a file at a revision, and the Commits drawer picks any two commits to
-open the files whose change differs between them.
+Early and in daily use. GitHub is the only host so far, read through your `gh` login; Linux builds but is not
+supported.
 
-A pull request's conversation comes from GitHub: line threads sit under their lines with the authors' pictures and
-reactions, and the Conversation drawer holds the description, comments and review summaries. Clicking a line number, or
-dragging over several, starts a comment; a draft stages to go up with the review or stays as a note, and a thread
-takes a staged reply. Reactions and resolving go to GitHub at once. The Staged comments drawer holds the active
-source's batch with its verdict and summary; a push, confirmed first, sends it as one review through the pending
-review, routing a comment off the diff to its file or the summary, and marks reviewed files viewed. Comments move with
-their lines when the source is pushed again, and one whose line is gone is marked in place. Notes, on a line or on the
-whole source in the Notes drawer, never leave the machine unless made a comment, and export to one Markdown file.
+## Developing locally
 
-## Build and run
+You need:
 
-Needs JDK 25 as `JAVA_HOME` and a checkout of [Stretch](https://github.com/nrc4867/stretch) beside this one (or named
-by `stretch.dir` in `~/.gradle/gradle.properties`).
+- JDK 25 as `JAVA_HOME`. Gradle provisions the JetBrains Runtime the app runs on.
+- A checkout of [Stretch](https://github.com/nrc4867/stretch) beside this one (`../stretch`), or its path as
+  `stretch.dir` in `~/.gradle/gradle.properties`. Stretch is built from source as part of the build.
+- git on the `PATH`, and for GitHub features the GitHub CLI signed in (`gh auth login`) or `GH_TOKEN` set.
 
 ```
-./gradlew build        # compile and test
-./gradlew :app:run     # run the app
-./gradlew :app:run -Pdemo   # run it with sample threads
+./gradlew build                      # compile, test and check every module
+./gradlew :ui:test                   # one module's tests
+./gradlew :app:run                   # run the app
+./gradlew :app:run -Pdemo            # run it with sample comment threads
+./gradlew :app:run -Pdevtools=47811  # run it with window screenshots at 127.0.0.1:47811/capture
 ```
 
-## Links
+The first build also builds the tree-sitter libraries from source: it downloads a pinned zig and the grammars (about
+100 MB, kept in `~/.gradle/arc-natives`) and takes a few minutes; later builds reuse them.
 
-- Design: https://claude.ai/artifact/Bq6CtuCH27F79TC1CLLhtQ
-- Design boards: https://claude.ai/artifact/3xbBdkCrd2zhjZw7bYSGVs
+Stop a running app before rebuilding, or it will fail as classes change under it.
+
+The app keeps its data in `%LOCALAPPDATA%\dev.chieppa.arc` on Windows and
+`~/Library/Application Support/dev.chieppa.arc` on macOS: the workspace, the repos it knows, saved filters, drafts and
+notes, and its own clones of GitHub repos. Delete that folder to start fresh.
+
+How the code is laid out, and the rules it follows, are in [CLAUDE.md](CLAUDE.md).
 
 ## Licence
 
