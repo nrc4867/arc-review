@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.runs
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -54,18 +55,25 @@ fun RunPage(page: Page.Run, workbench: Workbench, modifier: Modifier = Modifier)
         JobGraph(JobColumns.of(jobs, detail?.spec?.jobs.orEmpty()), job?.id, stalls, now) { state.job = it.id; state.step = null; state.view = RunView.Jobs }
         Divider()
         if (run.state.finished && state.view == RunView.Summary) {
-            Row(Modifier.weight(1f).fillMaxWidth()) {
-                RunSummary(run, detail, workbench, Modifier.weight(1f).fillMaxHeight())
-                ArtifactsColumn(run, detail, state, workbench, Modifier.width(RunSizes.artifactsColumn).fillMaxHeight())
+            BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+                val width = maxWidth
+                Row(Modifier.fillMaxSize()) {
+                    RunSummary(run, detail, workbench, Modifier.weight(1f).fillMaxHeight())
+                    ArtifactsColumn(run, detail, state, workbench, Modifier.width(RunColumns.side(RunSizes.artifactsColumn, width)).fillMaxHeight())
+                }
             }
         } else {
-            Row(Modifier.weight(1f).fillMaxWidth()) {
-                val running = job?.state == RunState.Running
-                if (job != null) {
-                    StepsColumn(run, job, detail, state, watch, stalls, now, Modifier.width(if (running) RunSizes.timedStepsColumn else RunSizes.stepsColumn).fillMaxHeight())
+            BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+                val width = maxWidth
+                Row(Modifier.fillMaxSize()) {
+                    val running = job?.state == RunState.Running
+                    if (job != null) {
+                        val steps = RunColumns.side(if (running) RunSizes.timedStepsColumn else RunSizes.stepsColumn, width)
+                        StepsColumn(run, job, detail, state, watch, stalls, now, Modifier.width(steps).fillMaxHeight())
+                    }
+                    LogColumn(run, job, detail?.logs?.get(job?.id), state, workbench, Modifier.weight(1f).fillMaxHeight())
+                    if (pending.isNotEmpty()) DeploymentCard(run, pending, workbench, Modifier.width(RunColumns.side(RunSizes.sideColumn, width)).fillMaxHeight())
                 }
-                LogColumn(run, job, detail?.logs?.get(job?.id), state, workbench, Modifier.weight(1f).fillMaxHeight())
-                if (pending.isNotEmpty()) DeploymentCard(run, pending, workbench, Modifier.width(RunSizes.sideColumn).fillMaxHeight())
             }
         }
     }

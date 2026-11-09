@@ -23,9 +23,9 @@ import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchSpacing
 import org.jetbrains.compose.resources.stringResource
 
-/** The column heads over a run list, lined up with [RunRow]. */
+/** The column heads over a run list, lined up with [RunRow], for the [columns] shown. */
 @Composable
-fun RunHeaderRow() {
+fun RunHeaderRow(columns: RunColumns) {
     val c = Stretch.colors
     Row(
         Modifier.fillMaxWidth().heightIn(min = RunSizes.header).background(c.surfacePanel).bottomRule(c.chartGrid).padding(horizontal = StretchSpacing.space12),
@@ -35,9 +35,9 @@ fun RunHeaderRow() {
         Box(Modifier.width(RunSizes.stateColumn))
         RunText(stringResource(Res.string.runs_col_run), RunTextKind.Eyebrow, c.inkMuted, Modifier.weight(1f))
         RunText(stringResource(Res.string.runs_col_source), RunTextKind.Eyebrow, c.inkMuted, Modifier.width(RunSizes.sourceColumn))
-        RunText(stringResource(Res.string.runs_col_why), RunTextKind.Eyebrow, c.inkMuted, Modifier.width(RunSizes.whyColumn))
-        RunText(stringResource(Res.string.runs_col_jobs), RunTextKind.Eyebrow, c.inkMuted, Modifier.width(RunSizes.jobsColumn))
-        RunText(stringResource(Res.string.runs_col_time), RunTextKind.Eyebrow, c.inkMuted, Modifier.width(RunSizes.timeColumn), TextAlign.End)
-        Box(Modifier.width(RunSizes.actionsColumn))
+        if (columns.why) RunText(stringResource(Res.string.runs_col_why), RunTextKind.Eyebrow, c.inkMuted, Modifier.width(RunSizes.whyColumn))
+        if (columns.jobs) RunText(stringResource(Res.string.runs_col_jobs), RunTextKind.Eyebrow, c.inkMuted, Modifier.width(RunSizes.jobsColumn))
+        if (columns.time) RunText(stringResource(Res.string.runs_col_time), RunTextKind.Eyebrow, c.inkMuted, Modifier.width(RunSizes.timeColumn), TextAlign.End)
+        if (columns.actions) Box(Modifier.width(RunSizes.actionsColumn))
     }
 }

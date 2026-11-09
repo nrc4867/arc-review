@@ -47,4 +47,9 @@ object RunSizes {
     val consoleMin = 240.dp
     val previewHeight = 320.dp
     val selectedEdge = 2.dp
+    val titleMin = 180.dp
+    val headerLabels = 960.dp
+
+    /** The most of a run page's width a side column takes. */
+    const val SIDE_SHARE = 0.4f
 }

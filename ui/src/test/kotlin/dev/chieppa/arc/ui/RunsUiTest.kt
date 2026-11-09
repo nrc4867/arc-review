@@ -5,6 +5,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.runDesktopComposeUiTest
 import androidx.compose.ui.test.v2.runComposeUiTest
 import dev.chieppa.arc.core.actions.MineRule
 import dev.chieppa.arc.core.actions.RunConclusion
@@ -26,6 +27,12 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class RunsUiTest {
+    private companion object {
+        /** Wide enough for a run list's every column. */
+        const val WIDE = 1440
+        const val TALL = 900
+    }
+
     private val actions = FakeActions()
     private val mine = FakeActions.run(1, "Release", actor = "nc")
     private val failed = FakeActions.run(2, "Nightly", conclusion = RunConclusion.Failure, actor = "nc")
@@ -68,7 +75,7 @@ class RunsUiTest {
     }
 
     @Test
-    fun reRunningAFailedRunAsksFirstAndThenWatchesIt() = runComposeUiTest {
+    fun reRunningAFailedRunAsksFirstAndThenWatchesIt() = runDesktopComposeUiTest(WIDE, TALL) {
         val workbench = open()
         workbench.panes.openRuns(RunWatchlist.MINE)
         waitForIdle()

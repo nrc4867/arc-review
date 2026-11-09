@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.runs
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,7 +24,7 @@ import dev.chieppa.stretch.ui.Divider
 
 /**
  * A run filter's tab: its tool row over its runs, grouped into those waiting on the person, running, failed and done
- * today, each group folding under its head. A click on a run opens its page; a right-click offers what else can be
+ * today, each group folding under its head, with the columns its width fits. A click on a run opens its page; a right-click offers what else can be
  * done with it. A page whose filter is gone is plain.
  */
 @Composable
@@ -40,31 +41,35 @@ fun RunsPage(page: Page.Runs, workbench: Workbench, modifier: Modifier = Modifie
     Column(modifier.fillMaxSize()) {
         RunsToolRow(filter, watch, repos, repo, { repo = it }) { controller.startDispatch(repo?.let(dev.chieppa.arc.host.github.repo.GitHubRepo::parse)) }
         Divider()
-        LazyColumn(Modifier.weight(1f).fillMaxWidth(), rememberLazyListState()) {
-            item(HEADER) { RunHeaderRow() }
-            for (group in groups) {
-                val open = group.group !in folded
-                item(GROUP + group.group.name) {
-                    RunGroupRow(group.group, group.runs.size, !open) { folded = if (open) folded + group.group else folded - group.group }
-                }
-                if (open) {
-                    items(group.runs, key = { group.group.name + it.ref }) { run ->
-                        val detail = watch.details[run.ref]
-                        val usual = detail?.jobs?.mapNotNull { watch.timings.jobP90(TimingKey(run.repo, run.workflowPath, it.name)) }?.maxOrNull()
-                        RunRow(
-                            run = run,
-                            why = watch.why(run),
-                            jobs = detail?.jobs,
-                            login = watch.login,
-                            now = now,
-                            usual = usual,
-                            open = run.ref in watch.open,
-                            watched = run.ref in watch.watchlist.runs,
-                            waitingOnMe = run.ref in watch.waitingOnMe,
-                            hasArtifacts = !detail?.artifacts.isNullOrEmpty(),
-                            controller = controller,
-                            onOpen = { workbench.panes.openRun(run.ref) },
-                        ) { close -> RunMenu(workbench, run, close) }
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+            val columns = RunColumns.fitting(maxWidth)
+            LazyColumn(Modifier.fillMaxSize(), rememberLazyListState()) {
+                item(HEADER) { RunHeaderRow(columns) }
+                for (group in groups) {
+                    val open = group.group !in folded
+                    item(GROUP + group.group.name) {
+                        RunGroupRow(group.group, group.runs.size, !open) { folded = if (open) folded + group.group else folded - group.group }
+                    }
+                    if (open) {
+                        items(group.runs, key = { group.group.name + it.ref }) { run ->
+                            val detail = watch.details[run.ref]
+                            val usual = detail?.jobs?.mapNotNull { watch.timings.jobP90(TimingKey(run.repo, run.workflowPath, it.name)) }?.maxOrNull()
+                            RunRow(
+                                run = run,
+                                why = watch.why(run),
+                                jobs = detail?.jobs,
+                                login = watch.login,
+                                now = now,
+                                usual = usual,
+                                open = run.ref in watch.open,
+                                watched = run.ref in watch.watchlist.runs,
+                                waitingOnMe = run.ref in watch.waitingOnMe,
+                                hasArtifacts = !detail?.artifacts.isNullOrEmpty(),
+                                controller = controller,
+                                onOpen = { workbench.panes.openRun(run.ref) },
+                                columns = columns,
+                            ) { close -> RunMenu(workbench, run, close) }
+                        }
                     }
                 }
             }

@@ -673,7 +673,7 @@
     </plurals>
     <string name="runs_col_run">Run</string>
     <string name="runs_col_source">Repo and ref</string>
-    <string name="runs_col_why">Why it\'s mine</string>
+    <string name="runs_col_why">Why it's mine</string>
     <string name="runs_col_jobs">Jobs</string>
     <string name="runs_col_time">Time</string>
     <string name="runs_group_waiting">Waiting on you</string>
@@ -801,7 +801,7 @@
     <string name="dispatch_inputs">Inputs</string>
     <string name="dispatch_goes_as">Goes to GitHub as</string>
     <string name="dispatch_line">dispatch %1$s on %2$s @ %3$s</string>
-    <string name="dispatch_runs_as">Runs on GitHub\'s runners as you · opens and watches the run</string>
+    <string name="dispatch_runs_as">Runs on GitHub's runners as you · opens and watches the run</string>
     <string name="input_text">string</string>
     <string name="input_number">number</string>
     <string name="input_boolean">boolean</string>
@@ -812,7 +812,7 @@
     <string name="input_type">%1$s · %2$s</string>
     <string name="confirm_rerun_title">Re-run on GitHub</string>
     <string name="confirm_cancel_title">Cancel on GitHub</string>
-    <string name="confirm_approve_fork_title">Approve a fork\'s run</string>
+    <string name="confirm_approve_fork_title">Approve a fork's run</string>
     <string name="confirm_rerun">Re-run all jobs</string>
     <string name="confirm_rerun_failed">Re-run failed jobs</string>
     <string name="confirm_rerun_job">Re-run job</string>
@@ -843,13 +843,13 @@
     <string name="action_open_runs">Open my runs</string>
     <string name="action_run_workflow">Run workflow…</string>
     <string name="action_open_run">Open run</string>
-    <string name="action_open_run_commit">Open run\'s commit as a source</string>
+    <string name="action_open_run_commit">Open run's commit as a source</string>
     <string name="action_watch_run">Watch or stop watching run</string>
     <string name="action_watch_workflow">Watch or stop watching workflow</string>
     <string name="action_rerun_run">Re-run all jobs</string>
     <string name="action_rerun_failed">Re-run failed jobs</string>
     <string name="action_cancel_run">Cancel run</string>
-    <string name="action_approve_fork_run">Approve fork\'s run</string>
+    <string name="action_approve_fork_run">Approve fork's run</string>
     <string name="action_run_workflow_again">Run this workflow again…</string>
     <string name="action_open_run_on_github">Open run on GitHub</string>
     <string name="action_copy_run_link">Copy run link</string>

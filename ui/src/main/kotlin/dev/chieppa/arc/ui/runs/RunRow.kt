@@ -33,7 +33,7 @@ import dev.chieppa.stretch.theme.StretchSpacing
 /**
  * One run in a run list: its state, workflow and trigger, repo and ref, why it is the person's, its jobs, its time
  * and the buttons its state offers. A run waiting on the person is washed in the warning color; one whose page is
- * [open] has an accent edge. A click opens it; a right-click opens [menu].
+ * [open] has an accent edge. Only the optional [columns] given are drawn. A click opens it; a right-click opens [menu].
  */
 @Composable
 fun RunRow(
@@ -49,6 +49,7 @@ fun RunRow(
     hasArtifacts: Boolean,
     controller: RunController,
     onOpen: () -> Unit,
+    columns: RunColumns = RunColumns.All,
     menu: @Composable ColumnScope.(close: () -> Unit) -> Unit,
 ) {
     val c = Stretch.colors
@@ -72,10 +73,10 @@ fun RunRow(
             Box(Modifier.width(RunSizes.stateColumn)) { RunStateIcon(run.state) }
             RunTitleCell(run, login, Modifier.weight(1f))
             RunSourceCell(run, Modifier.width(RunSizes.sourceColumn))
-            Box(Modifier.width(RunSizes.whyColumn)) { why?.let { WhyChip(it) } }
-            RunJobsCell(run, jobs, Modifier.width(RunSizes.jobsColumn))
-            RunTimeCell(run, now, usual, Modifier.width(RunSizes.timeColumn))
-            RunRowActions(run, waitingOnMe, watched, hasArtifacts, controller, onOpen, Modifier.width(RunSizes.actionsColumn))
+            if (columns.why) Box(Modifier.width(RunSizes.whyColumn)) { why?.let { WhyChip(it) } }
+            if (columns.jobs) RunJobsCell(run, jobs, Modifier.width(RunSizes.jobsColumn))
+            if (columns.time) RunTimeCell(run, now, usual, Modifier.width(RunSizes.timeColumn))
+            if (columns.actions) RunRowActions(run, waitingOnMe, watched, hasArtifacts, controller, onOpen, Modifier.width(RunSizes.actionsColumn))
         }
     }
 }
