@@ -88,14 +88,6 @@
     <string name="sources_progress">%1$d/%2$d</string>
     <string name="sources_close">Close source</string>
 
-    <string name="add_source_title">Add source</string>
-    <string name="add_source_repo">Repository</string>
-    <string name="add_source_ref">Source</string>
-    <string name="add_source_ref_hint">#412, @sha, @sha..sha or :branch...base</string>
-    <string name="add_source_folder">Folder of a git repository</string>
-    <string name="add_source_add_repo">Add repository</string>
-    <string name="add_source_add">Add</string>
-    <string name="add_source_choose_folder">Choose folder</string>
 
     <string name="files_scope">Scope</string>
     <string name="files_scope_whole">All changes</string>
@@ -146,6 +138,7 @@
 
     <string name="switcher_open">Open switcher</string>
     <string name="switcher_placeholder">Switch to a source, file or pull request, or paste a link</string>
+    <string name="switcher_sources_placeholder">Find a pull request, branch or recent source, or paste a link or a repo folder</string>
     <string name="switcher_files_placeholder">Open a file at %1$s</string>
     <plurals name="switcher_results">
         <item quantity="one">%1$d result</item>
@@ -161,6 +154,8 @@
     <string name="switcher_refs_more">%1$s, %2$s and %3$d more</string>
     <string name="switcher_file_place">%1$s · %2$s</string>
     <string name="switcher_followed">Followed repos</string>
+    <string name="switcher_suggested">Suggested</string>
+    <string name="switcher_add_repo">Add repository</string>
     <string name="switcher_followed_note">not open</string>
     <plurals name="switcher_commits">
         <item quantity="one">%1$d commit</item>

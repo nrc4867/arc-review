@@ -3,7 +3,6 @@ package dev.chieppa.arc.ui.sources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +17,7 @@ import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.sources_add
 import dev.chieppa.arc.ui.menus.SourceMenu
 import dev.chieppa.arc.ui.review.SourceLoad
+import dev.chieppa.arc.ui.switcher.SwitcherScope
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.theme.Stretch
@@ -68,10 +68,7 @@ fun SourceStrip(workbench: Workbench, modifier: Modifier = Modifier) {
                     )
                 }
             }
-            Box {
-                IconButton(StretchIcons.Plus, stringResource(Res.string.sources_add), { workbench.addSourceOpen = true }, size = StretchSizes.seg)
-                AddSourcePopover(workbench)
-            }
+            IconButton(StretchIcons.Plus, stringResource(Res.string.sources_add), { workbench.switcher.show(SwitcherScope.Sources) }, size = StretchSizes.seg)
         }
         Divider()
     }

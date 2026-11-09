@@ -3,9 +3,10 @@ package dev.chieppa.arc.ui.switcher
 import dev.chieppa.stretch.frame.matchScore
 
 /**
- * Ranks what the switcher searches against a query, the way the palette ranks: a title or ref starting with the query
- * first, then a word in it, then the query anywhere, then its letters in order. A file ranks by its name before its
- * folder, and its whole path matches only where it holds the query. Each section keeps its best few; the count of all that match stays with it.
+ * Ranks what the switcher searches against a query. Sources rank fuzzily by [SourceScores]; a file the way the palette
+ * ranks, by its name before its folder, its whole path matching only where it holds the query. Ties keep the order the
+ * inputs come in, which for followed repos is the order they are suggested in. Each section keeps its best few; the
+ * count of all that match stays with it.
  */
 object SwitcherSearch {
     fun sections(query: String, scope: SwitcherScope, inputs: SwitcherInputs): List<SwitcherSection> {
@@ -22,11 +23,9 @@ object SwitcherSearch {
 
     /** How well [item] matches [query], lower is better, or null when it does not. */
     fun score(query: String, item: SwitcherItem): Int? = when (item) {
-        is SwitcherItem.InWorkspace -> best(matchScore(query, item.title), matchScore(query, item.source.ref))
         is SwitcherItem.Changed -> fileScore(query, item.file.path)
         is SwitcherItem.AtHead -> fileScore(query, item.path)
-        is SwitcherItem.FollowedPull -> best(matchScore(query, item.pull.title), matchScore(query, item.source.ref))
-        is SwitcherItem.FollowedBranch -> matchScore(query, item.branch.name)
+        else -> SourceScores.of(query, item)
     }
 
     private fun <T : SwitcherItem> rank(query: String, items: List<T>): List<T> = items

@@ -22,7 +22,7 @@ fun registerReviewActions(registry: ActionRegistry, workbench: Workbench) {
     val hasSource = { state.active != null }
     val hasPane = { workbench.panes.focused != null }
 
-    action(ArcActionIds.ADD_SOURCE) { workbench.addSourceOpen = true }
+    action(ArcActionIds.ADD_SOURCE) { workbench.switcher.show(SwitcherScope.Sources) }
     action(ArcActionIds.OPEN_FILE, ArcKeys.OPEN_FILE, hasSource) { workbench.switcher.show(SwitcherScope.Files) }
     action(ArcActionIds.NEXT_FILE, ArcKeys.NEXT_FILE, hasSource) { workbench.marks.step(1) }
     action(ArcActionIds.PREVIOUS_FILE, ArcKeys.PREVIOUS_FILE, hasSource) { workbench.marks.step(-1) }

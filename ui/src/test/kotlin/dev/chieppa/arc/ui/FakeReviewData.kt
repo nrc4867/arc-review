@@ -101,7 +101,10 @@ class FakeReviewData(more: Boolean = false, pictures: Boolean = false) : ReviewD
 
     override suspend fun listFiles(repo: RepoName, revision: Revision): List<String> = newTexts.keys.sorted()
 
-    override suspend fun isRepo(dir: Path): Boolean = true
+    /** Whether a folder holds a repo. */
+    var repoAt = true
+
+    override suspend fun isRepo(dir: Path): Boolean = repoAt
 
     /** The clone's branches, the open pull requests GitHub finds (null as without a token), and where the clone comes from. */
     var branchList: List<LocalBranch> = emptyList()

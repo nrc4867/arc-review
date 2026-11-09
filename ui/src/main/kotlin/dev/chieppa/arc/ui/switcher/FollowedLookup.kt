@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Asks [data] what followed repos hold, keeping each answer for [SwitcherLimits.CACHE_MILLIS] so typing back and forth
- * asks GitHub once per query: open pull requests by title, in one search across the repos, and each clone's branches.
+ * asks GitHub once per query: open pull requests by title or the latest updated, in one search across the repos, and
+ * each clone's branches.
  */
 class FollowedLookup(private val data: ReviewData, private val clock: () -> Long = System::currentTimeMillis) {
     private class Kept<T>(val at: Long, val value: T)
@@ -17,10 +18,10 @@ class FollowedLookup(private val data: ReviewData, private val clock: () -> Long
     private val pulls = ConcurrentHashMap<String, Kept<List<PullRequestSummary>?>>()
     private val branches = ConcurrentHashMap<RepoName, Kept<List<LocalBranch>>>()
 
-    /** The open pull requests in [repos] whose titles hold [text]; null when GitHub cannot be asked. */
+    /** The open pull requests in [repos] whose titles hold [text], or the latest updated for blank [text]; null when GitHub cannot be asked. */
     suspend fun pulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? {
         val words = text.trim()
-        if (repos.isEmpty() || words.isEmpty()) return emptyList()
+        if (repos.isEmpty()) return emptyList()
         val key = repos.map { it.fullName.lowercase() }.sorted().joinToString(REPO_SEPARATOR) + KEY_SEPARATOR + words.lowercase()
         fresh(pulls[key])?.let { return it.value }
         return data.openPulls(repos, words).also { pulls[key] = Kept(clock(), it) }

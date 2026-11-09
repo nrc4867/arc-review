@@ -97,7 +97,6 @@ class Workbench(
     var frameLayout by mutableStateOf(defaultFrameLayout())
     var paletteOpen by mutableStateOf(false)
     var settingsOpen by mutableStateOf(false)
-    var addSourceOpen by mutableStateOf(false)
 
     /** What the tree's files drag into the pane grid through. */
     val dropTarget = PaneDropTarget()

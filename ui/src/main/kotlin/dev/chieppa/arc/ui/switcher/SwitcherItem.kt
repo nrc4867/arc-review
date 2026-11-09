@@ -21,4 +21,7 @@ sealed interface SwitcherItem {
 
     /** A local branch of a followed repo, not in the strip. */
     data class FollowedBranch(val source: Source.BranchAgainstBase, val branch: LocalBranch) : SwitcherItem
+
+    /** A source opened lately and not in the strip now, with its [title] where it was read and [at] when, in epoch seconds. */
+    data class Recent(val source: Source, val title: String, val at: Long) : SwitcherItem
 }

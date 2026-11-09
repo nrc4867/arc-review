@@ -8,6 +8,10 @@ import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.git.repo.LocalBranch
 import dev.chieppa.arc.host.github.repo.GitHubRepo
+import dev.chieppa.arc.core.recent.RecentSource
+import dev.chieppa.arc.host.github.pulls.ReviewRequest
+import dev.chieppa.arc.host.github.pulls.Viewer
+import dev.chieppa.arc.ui.switcher.FolderTarget
 import dev.chieppa.arc.ui.switcher.FollowedLookup
 import dev.chieppa.arc.ui.switcher.FollowedResults
 import dev.chieppa.arc.ui.switcher.OpenAs
@@ -23,6 +27,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import java.nio.file.Path
+import java.time.Instant
 
 class SwitcherLogicTest {
     private val api = RepoName("api")
@@ -85,15 +91,64 @@ class SwitcherLogicTest {
         val pulls = listOf(FakePulls.pull(398, "Remove legacy token table"), FakePulls.pull(412, "Rotate refresh tokens"), FakePulls.pull(5, "Elsewhere", repo = GitHubRepo("other", "repo")))
         val branches = mapOf(api to listOf(LocalBranch("spike/token-binding", "mfischer", 0), LocalBranch("main", "x", 0), LocalBranch("held", "x", 0)))
         val held = listOf(api412, Source.BranchAgainstBase(api, BranchName("held")))
-        val found = FollowedResults.of("tok", pulls, branches, origins, held)
-        assertEquals(listOf(Source.PullRequest(api, 398), Source.BranchAgainstBase(api, BranchName("spike/token-binding"))), found.map {
-            when (it) {
-                is SwitcherItem.FollowedPull -> it.source
-                is SwitcherItem.FollowedBranch -> it.source
-                else -> error("not followed")
-            }
-        })
-        assertEquals(emptyList(), FollowedResults.of(" ", pulls, branches, origins, held))
+        val found = FollowedResults.of(pulls, branches, origins, held)
+        assertEquals(
+            listOf(Source.PullRequest(api, 398), Source.BranchAgainstBase(api, BranchName("spike/token-binding")), Source.BranchAgainstBase(api, BranchName("main"))),
+            found.map(::sourceOf),
+        )
+    }
+
+    @Test
+    fun suggestionsPutWhatWaitsOnThePersonFirstThenWhatWasOpenedLately() {
+        val older = FakePulls.pull(398, "Remove legacy token table", updated = Instant.parse("2026-11-01T00:00:00Z"))
+        val newer = FakePulls.pull(401, "Paginate audit log", updated = Instant.parse("2026-11-07T00:00:00Z"))
+        val waiting = FakePulls.pull(377, "Bump the driver", updated = Instant.parse("2026-10-01T00:00:00Z")).copy(requests = listOf(ReviewRequest.User("me")))
+        val branches = mapOf(api to listOf(LocalBranch("spike/token-binding", "mfischer", 0)))
+        val recent = listOf(RecentSource(Source.BranchAgainstBase(api, BranchName("spike/token-binding")).ref, "Spike", 10), RecentSource(Source.Commit(api, CommitSha("b7e19d2")).ref, "Old commit", 5), RecentSource("gone#1", null, 1))
+        val found = FollowedResults.of(listOf(older, newer, waiting), branches, origins, emptyList(), recent, Viewer("me"))
+        assertEquals(
+            listOf(
+                Source.PullRequest(api, 377),
+                Source.BranchAgainstBase(api, BranchName("spike/token-binding")),
+                Source.Commit(api, CommitSha("b7e19d2")),
+                Source.PullRequest(api, 401),
+                Source.PullRequest(api, 398),
+            ),
+            found.map(::sourceOf),
+        )
+        val shown = SwitcherSearch.sections("", SwitcherScope.Sources, SwitcherInputs(followed = found)).single()
+        assertEquals(found, shown.items)
+    }
+
+    @Test
+    fun followedSourcesMatchFuzzily() {
+        val pulls = listOf(
+            FakePulls.pull(398, "Remove legacy token table").copy(author = "mfischer"),
+            FakePulls.pull(401, "Paginate audit log").copy(headBranch = "feature/audit-pages"),
+        )
+        val found = FollowedResults.of(pulls, emptyMap(), origins, emptyList())
+        fun first(query: String) = sourceOf(SwitcherSearch.sections(query, SwitcherScope.Sources, SwitcherInputs(followed = found)).single().items.first())
+        assertEquals(Source.PullRequest(api, 398), first("legcy tokn"))
+        assertEquals(Source.PullRequest(api, 398), first("table remove"))
+        assertEquals(Source.PullRequest(api, 401), first("#401"))
+        assertEquals(Source.PullRequest(api, 401), first("audit-pages"))
+        assertEquals(Source.PullRequest(api, 398), first("fischer"))
+        assertTrue(SwitcherSearch.sections("qqqq", SwitcherScope.Sources, SwitcherInputs(followed = found)).isEmpty())
+    }
+
+    @Test
+    fun aPastedFolderIsReadAsARepoToFollow() {
+        val folder = Path.of("").toAbsolutePath().toString()
+        assertEquals(Path.of(folder), FolderTarget.read("\"$folder\""))
+        assertNull(FolderTarget.read("api#398"))
+        assertNull(FolderTarget.read("token"))
+    }
+
+    private fun sourceOf(item: SwitcherItem): Source = when (item) {
+        is SwitcherItem.FollowedPull -> item.source
+        is SwitcherItem.FollowedBranch -> item.source
+        is SwitcherItem.Recent -> item.source
+        else -> error("not followed")
     }
 
     @Test

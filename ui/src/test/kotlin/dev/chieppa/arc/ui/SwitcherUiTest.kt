@@ -35,6 +35,7 @@ class SwitcherUiTest {
     private val data = FakeReviewData()
     private val other = Source.Commit(data.repo, CommitSha("c".repeat(40)))
     private val field = "Switch to a source, file or pull request, or paste a link"
+    private val sourcesField = "Find a pull request, branch or recent source, or paste a link or a repo folder"
 
     private fun ComposeUiTest.open(): Workbench {
         val workbench = Workbench(dispatchers = testDispatchers(), data = data, state = WorkspaceState(repos = mapOf(data.repo to Path.of("."))))
@@ -54,8 +55,8 @@ class SwitcherUiTest {
         waitForIdle()
     }
 
-    private fun ComposeUiTest.press(key: Key, modifier: Key? = null) {
-        onNodeWithContentDescription(field).performKeyInput { if (modifier == null) pressKey(key) else withKeyDown(modifier) { pressKey(key) } }
+    private fun ComposeUiTest.press(key: Key, modifier: Key? = null, on: String = field) {
+        onNodeWithContentDescription(on).performKeyInput { if (modifier == null) pressKey(key) else withKeyDown(modifier) { pressKey(key) } }
         waitForIdle()
     }
 
@@ -78,7 +79,7 @@ class SwitcherUiTest {
         assertTrue(shows("FILES IN"))
         press(Key.Tab)
         assertEquals(SwitcherScope.Sources, workbench.switcher.scope)
-        press(Key.Tab)
+        press(Key.Tab, on = sourcesField)
         assertEquals(SwitcherScope.Files, workbench.switcher.scope)
     }
 
@@ -118,6 +119,37 @@ class SwitcherUiTest {
         mainClock.advanceTimeBy(SwitcherLimits.DEBOUNCE_MILLIS)
         assertWhenIdle { shows("Remove legacy token table") }
         assertTrue(shows("demo#398"))
+    }
+
+    @Test
+    fun theAddButtonSuggestsSourcesBeforeAnythingIsTyped() = runComposeUiTest {
+        data.branchList = listOf(LocalBranch("spike/token-binding", "mfischer", 0))
+        val workbench = open()
+        onNodeWithContentDescription("Add source").performClick()
+        waitForIdle()
+        assertEquals(SwitcherScope.Sources, workbench.switcher.scope)
+        assertWhenIdle { shows("SUGGESTED") }
+        assertTrue(shows("spike/token-binding"))
+        onNodeWithContentDescription(sourcesField).performTextInput("tokn bindng")
+        waitForIdle()
+        assertTrue(shows("FOLLOWED REPOS"))
+        press(Key.Enter, on = sourcesField)
+        assertEquals(Source.BranchAgainstBase(data.repo, BranchName("spike/token-binding")), workbench.state.active)
+    }
+
+    @Test
+    fun aPastedFolderWithNoRepoIsMarkedInPlace() = runComposeUiTest {
+        data.repoAt = false
+        val workbench = open()
+        workbench.switcher.show(SwitcherScope.Sources)
+        waitForIdle()
+        val folder = Path.of("").toAbsolutePath().toString()
+        onNodeWithContentDescription(sourcesField).performTextInput(folder)
+        waitForIdle()
+        assertTrue(shows("Add repository"))
+        press(Key.Enter, on = sourcesField)
+        assertTrue(workbench.switcher.open)
+        assertEquals(1, workbench.state.repos.size)
     }
 
     @Test
