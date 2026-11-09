@@ -6,6 +6,7 @@ import dev.chieppa.arc.core.mark.MarkKind
 import dev.chieppa.arc.core.mark.PatchFingerprint
 import dev.chieppa.arc.core.mark.PatchHash
 import dev.chieppa.arc.core.mark.ReviewedRevisions
+import dev.chieppa.arc.core.actions.RunRef
 import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
@@ -61,6 +62,8 @@ object WorkspaceMapping {
         is Page.Filter -> StoredPage.Filter(page.id.value, page.filter)
         is Page.RevisionMatrix -> StoredPage.RevisionMatrix(page.id.value, page.source.ref, page.pinned)
         is Page.Conversation -> StoredPage.Conversation(page.id.value, page.source.ref, page.pinned)
+        is Page.Runs -> StoredPage.Runs(page.id.value, page.filter)
+        is Page.Run -> StoredPage.Run(page.id.value, page.run.repo, page.run.id)
     }
 
     private fun toPage(stored: StoredPage): Page? = readOrNull {
@@ -68,6 +71,8 @@ object WorkspaceMapping {
             is StoredPage.Filter -> Page.Filter(PaneId(stored.id), stored.filter)
             is StoredPage.RevisionMatrix -> SourceRefs.parse(stored.source)?.let { Page.RevisionMatrix(PaneId(stored.id), it, stored.pinned) }
             is StoredPage.Conversation -> SourceRefs.parse(stored.source)?.let { Page.Conversation(PaneId(stored.id), it, stored.pinned) }
+            is StoredPage.Runs -> Page.Runs(PaneId(stored.id), stored.filter)
+            is StoredPage.Run -> Page.Run(PaneId(stored.id), RunRef(stored.repo, stored.run))
         }
     }
 

@@ -22,4 +22,14 @@ sealed interface StoredPage {
     @Serializable
     @SerialName("conversation")
     data class Conversation(override val id: String, val source: String, val pinned: Boolean = false) : StoredPage
+
+    /** A run filter's runs, by the filter's id. */
+    @Serializable
+    @SerialName("runs")
+    data class Runs(override val id: String, val filter: String) : StoredPage
+
+    /** One workflow run, by its repo and id. */
+    @Serializable
+    @SerialName("run")
+    data class Run(override val id: String, val repo: String, val run: Long) : StoredPage
 }

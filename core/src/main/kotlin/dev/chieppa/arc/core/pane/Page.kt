@@ -1,5 +1,6 @@
 package dev.chieppa.arc.core.pane
 
+import dev.chieppa.arc.core.actions.RunRef
 import dev.chieppa.arc.core.source.Source
 
 /**
@@ -21,4 +22,14 @@ sealed interface Page {
 
     /** The conversation of pull request [source], open in the grid. It stays with its source unless [pinned]. */
     data class Conversation(override val id: PaneId, val source: Source, override val pinned: Boolean = false) : Page
+
+    /** The runs the run filter [filter] shows, by the filter's id. It belongs to no source, so it is always pinned. */
+    data class Runs(override val id: PaneId, val filter: String) : Page {
+        override val pinned: Boolean get() = true
+    }
+
+    /** One workflow run, [run]. It belongs to no source, so it is always pinned. */
+    data class Run(override val id: PaneId, val run: RunRef) : Page {
+        override val pinned: Boolean get() = true
+    }
 }
