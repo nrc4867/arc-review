@@ -68,7 +68,7 @@ class GitHub(
         return SearchPoll.parse(document, client.graphql(document.text))
     }
 
-    /** The open pull requests in [repos] whose titles hold [text], in one search; none for no repo or no text. */
+    /** The open pull requests in [repos] whose titles hold [text], or the latest updated for blank [text], in one search; none for no repo. */
     suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary> {
         val query = OpenPullSearch.query(repos, text) ?: return emptyList()
         return search(mapOf(OpenPullSearch.KEY to query)).results[OpenPullSearch.KEY]?.pulls.orEmpty()

@@ -26,12 +26,16 @@ class OpenPullSearchTest {
     }
 
     @Test
-    fun noRepoOrNoTextSearchesNothing() = runTest {
+    fun noRepoSearchesNothing() = runTest {
         assertNull(OpenPullSearch.query(emptyList(), "token"))
-        assertNull(OpenPullSearch.query(listOf(api), "  "))
         val transport = RecordedTransport(mutableListOf())
-        assertEquals(emptyList(), GitHub(FakeGitHub.client(transport)).openPulls(listOf(api), " "))
+        assertEquals(emptyList(), GitHub(FakeGitHub.client(transport)).openPulls(emptyList(), "token"))
         assertTrue(transport.requests.isEmpty())
+    }
+
+    @Test
+    fun noTextFindsTheLatestUpdated() {
+        assertEquals("is:open sort:updated-desc repo:lumen/api repo:lumen/web", OpenPullSearch.query(listOf(api, web), "  "))
     }
 
     @Test
