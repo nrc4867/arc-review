@@ -10,6 +10,10 @@ import dev.chieppa.arc.design.generated.status_matches
 import dev.chieppa.arc.design.generated.status_caret
 import dev.chieppa.arc.design.generated.status_tree_sitter
 import dev.chieppa.arc.ui.navigation.IndexStatusItem
+import dev.chieppa.arc.ui.runs.RunStatusEnd
+import dev.chieppa.arc.ui.runs.RunStatusStart
+import dev.chieppa.arc.ui.runs.RunsStatusEnd
+import dev.chieppa.arc.ui.runs.RunsStatusStart
 import dev.chieppa.arc.ui.navigation.SyntaxTokens
 import dev.chieppa.arc.ui.sources.sourceIcon
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -20,7 +24,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The status bar: the active source, its commits and head, and what the code index holds; at the end, the focused
- * pane's find matches while it is finding, its caret, its file's language, and tree-sitter when tree-sitter reads it. A saved filter's tab and a revision matrix's show their own instead.
+ * pane's find matches while it is finding, its caret, its file's language, and tree-sitter when tree-sitter reads it. A saved filter's tab, a run filter's, a run's and a revision matrix's show their own instead.
  */
 @Composable
 fun ArcStatusBar(workbench: Workbench) {
@@ -33,7 +37,19 @@ fun ArcStatusBar(workbench: Workbench) {
         StatusBar(start = { FilterStatusStart(filter, workbench.watch) }, end = { FilterStatusEnd(workbench.watch) })
         return
     }
-    val matrix = state.paneLayout.activeTab?.let(state::page) as? Page.RevisionMatrix
+    val page = state.paneLayout.activeTab?.let(state::page)
+    val runWatch = workbench.runs.watch
+    if (page is Page.Runs) {
+        val runs = runWatch.watchlist.filter(page.filter)
+        StatusBar(start = { runs?.let { RunsStatusStart(it, runWatch) } }, end = { RunsStatusEnd(runWatch, runs) })
+        return
+    }
+    val run = (page as? Page.Run)?.let { runWatch.run(it.run) }
+    if (run != null) {
+        StatusBar(start = { RunStatusStart(run, runWatch) }, end = { RunStatusEnd(run, runWatch) })
+        return
+    }
+    val matrix = page as? Page.RevisionMatrix
     if (matrix != null) {
         StatusBar(start = { RevisionStatusStart(matrix.source, workbench) }, end = { RevisionStatusEnd(matrix.source, workbench) })
         return

@@ -12,6 +12,7 @@ import dev.chieppa.arc.ui.conversation.ConversationEffects
 import dev.chieppa.arc.ui.conversation.OpenStagedWhenFilled
 import dev.chieppa.arc.ui.drawers.arcDrawerSpecs
 import dev.chieppa.arc.ui.switcher.Switcher
+import dev.chieppa.arc.ui.runs.RunOverlays
 import dev.chieppa.arc.ui.sources.SourceStrip
 import dev.chieppa.arc.ui.status.ArcStatusBar
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -23,7 +24,8 @@ import dev.chieppa.stretch.frame.actionKeys
 /**
  * The main window's content: the top bar, the source strip under it across the window, Arc's drawers on both rails, the pane grid in
  * the viewport, the status bar, and the command palette and the switcher over them, all on [workbench]'s state. Every source
- * not read yet is read when it opens, and each repo's GitHub origin is looked up.
+ * not read yet is read when it opens, and each repo's GitHub origin is looked up and its runs followed. The run dialogs
+ * go over all of it.
  */
 @Composable
 fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
@@ -31,6 +33,7 @@ fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
     LaunchedEffect(workbench, workbench.state.repos) {
         workbench.gitHubRepos = workbench.state.repos.keys.mapNotNull { repo -> workbench.data.gitHubRepo(repo)?.let { repo to it } }.toMap()
     }
+    LaunchedEffect(workbench, workbench.gitHubRepos) { workbench.runs.watch.followed = workbench.gitHubRepos.values.toSet() }
     OpenStagedWhenFilled(workbench)
     ConversationEffects(workbench)
     ArcTheme {
@@ -55,6 +58,7 @@ fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
                 icons = ::actionIcon,
             )
             Switcher(workbench)
+            RunOverlays(workbench.runs)
         }
     }
 }

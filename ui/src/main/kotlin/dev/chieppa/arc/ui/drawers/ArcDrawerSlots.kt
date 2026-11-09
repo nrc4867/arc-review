@@ -10,6 +10,7 @@ import dev.chieppa.arc.design.generated.drawer_notes
 import dev.chieppa.arc.design.generated.drawer_outline
 import dev.chieppa.arc.design.generated.drawer_pull_requests
 import dev.chieppa.arc.design.generated.drawer_revisions
+import dev.chieppa.arc.design.generated.drawer_runs
 import dev.chieppa.arc.design.generated.drawer_search
 import dev.chieppa.arc.design.generated.drawer_staged_comments
 import dev.chieppa.arc.ui.util.ArcSizes
@@ -28,6 +29,7 @@ object ArcDrawerSlots {
         DrawerSlot(DrawerIds.CONSOLE, Res.string.drawer_console, StretchIcons.Command, Side.Left, bottom = true),
         DrawerSlot(DrawerIds.PULL_REQUESTS, Res.string.drawer_pull_requests, ArcIcons.Filter, Side.Right, width = ArcSizes.pullRequestsDrawer),
         DrawerSlot(DrawerIds.CHECKS, Res.string.drawer_checks, ArcIcons.CheckRun, Side.Right),
+        DrawerSlot(DrawerIds.RUNS, Res.string.drawer_runs, ArcIcons.Runs, Side.Right, width = ArcSizes.pullRequestsDrawer),
         DrawerSlot(DrawerIds.STAGED_COMMENTS, Res.string.drawer_staged_comments, ArcIcons.Stage, Side.Right, bottom = true),
     )
 

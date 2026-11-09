@@ -20,6 +20,18 @@ internal object AppConstants {
     /** The person's drafts, staged comments, notes and summaries. */
     const val CONVERSATION_FILE = "conversation.json"
 
+    /** The run filters, the Mine rules and what is watched. */
+    const val RUNS_FILE = "runs.json"
+
+    /** Each job's step timings over its last successful runs. */
+    const val TIMINGS_FILE = "timings.json"
+
+    /** The kept runs: each run's jobs and the kept part of their logs. */
+    const val RUNS_FOLDER = "runs"
+
+    /** Downloaded artifacts, at most 2 GB. */
+    const val ARTIFACTS_FOLDER = "artifacts"
+
     /** People's pictures from GitHub, kept for a day. */
     const val AVATARS_FOLDER = "avatars"
 

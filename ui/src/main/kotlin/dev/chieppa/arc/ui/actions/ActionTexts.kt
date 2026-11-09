@@ -135,7 +135,7 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.MOVE_START_CARD_DOWN.value to Res.string.action_move_start_card_down,
     ArcActionIds.MOVE_START_CARD_ACROSS.value to Res.string.action_move_start_card_across,
     ArcActionIds.RESTORE_START_CARDS.value to Res.string.action_restore_start_cards,
-) + ArcDrawerSlots.all.associate { ArcActionIds.toggleDrawer(it.id).value to it.title }
+) + RunActionTexts.texts + ArcDrawerSlots.all.associate { ArcActionIds.toggleDrawer(it.id).value to it.title }
 
 /** Turns an action's text key into its label, for Stretch's `LocalActionText`. */
 @Composable

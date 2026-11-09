@@ -11,5 +11,6 @@ object DrawerIds {
     const val CONSOLE = "console"
     const val PULL_REQUESTS = "pull-requests"
     const val CHECKS = "checks"
+    const val RUNS = "runs"
     const val STAGED_COMMENTS = "staged-comments"
 }

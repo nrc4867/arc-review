@@ -7,8 +7,8 @@ import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.ui.IconButton
 import dev.chieppa.stretch.ui.Tooltip
 
-/** An icon-only button whose [label] shows in a tooltip on hover, with its [keys] when it has them. */
+/** An icon-only button whose [label] shows in a tooltip on hover, with its [keys] when it has them; [on] while what it switches is on. */
 @Composable
-fun TipIconButton(icon: ImageVector, label: String, onClick: () -> Unit, size: Dp = StretchSizes.seg, keys: List<String>? = null) {
-    Tooltip(label, keys) { IconButton(icon, label, onClick, size = size) }
+fun TipIconButton(icon: ImageVector, label: String, onClick: () -> Unit, size: Dp = StretchSizes.seg, keys: List<String>? = null, on: Boolean = false) {
+    Tooltip(label, keys) { IconButton(icon, label, onClick, size = size, on = on) }
 }

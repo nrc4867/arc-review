@@ -18,6 +18,15 @@ import dev.chieppa.arc.ui.actions.registerArcActions
 import dev.chieppa.arc.ui.actions.registerContextActions
 import dev.chieppa.arc.ui.actions.registerPullActions
 import dev.chieppa.arc.ui.actions.registerReviewActions
+import dev.chieppa.arc.ui.actions.registerRunActions
+import dev.chieppa.arc.ui.runs.RunController
+import dev.chieppa.arc.ui.runs.RunNotifier
+import dev.chieppa.arc.ui.runs.RunPoller
+import dev.chieppa.arc.ui.runs.RunWatch
+import dev.chieppa.arc.ui.services.ActionsService
+import dev.chieppa.arc.ui.services.DesktopNotifier
+import dev.chieppa.arc.ui.services.NoActions
+import dev.chieppa.arc.ui.services.RunKeeper
 import dev.chieppa.arc.ui.actions.registerStartActions
 import dev.chieppa.arc.ui.start.StartState
 import dev.chieppa.arc.ui.start.arcStartProvider
@@ -75,6 +84,7 @@ import kotlinx.coroutines.launch
  * paths and refs go to [clipboard], and web links open through [links]. [watch] holds the saved filters and
  * notification rules. [start] holds the start screen, starting from the person's [startLayout] and [recent] sources.
  * All of the window's work runs on [dispatchers], [scope] on their main. Questions about code go to [codeNavigation].
+ * Runs are watched in [runWatch] through [actions], their notifications going to [desktop].
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -92,6 +102,10 @@ class Workbench(
     codeNavigation: CodeNavigation = CodeNavigation(),
     startLayout: StartLayout = StartLayout(),
     recent: RecentSources = RecentSources(),
+    runWatch: RunWatch = RunWatch(),
+    val actions: ActionsService = NoActions,
+    runKeeper: RunKeeper = RunKeeper.NONE,
+    desktop: DesktopNotifier = DesktopNotifier.NONE,
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -164,6 +178,12 @@ class Workbench(
             state.paneLayout = value
         }
 
+    /** The runs the window shows and what a person does to them, through [actions]. */
+    val runs = RunController(runWatch, actions, scope) { panes.openRun(it) }
+
+    /** Polls GitHub Actions for [runs] while the window is open, keeping finished runs through [runKeeper]. */
+    val runPoller = RunPoller(runWatch, watch, actions, RunNotifier(watch, desktop), runKeeper)
+
     val registry = ActionRegistry()
     val keymap = Keymap(registry)
     val start = StartState(startLayout, recent)
@@ -173,6 +193,7 @@ class Workbench(
         registerReviewActions(registry, this)
         registerContextActions(registry, this)
         registerPullActions(registry, this)
+        registerRunActions(registry, this)
         navigation.start()
         registerStartActions(registry, this)
         start.registry.register(StartContributor.ARC, arcStartProvider(this))

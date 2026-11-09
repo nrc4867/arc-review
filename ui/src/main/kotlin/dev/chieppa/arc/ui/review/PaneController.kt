@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui.review
 
+import dev.chieppa.arc.core.actions.RunRef
 import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.core.pane.PaneId
@@ -117,12 +118,27 @@ class PaneController(private val state: WorkspaceState) {
 
     /** Opens the page for saved filter [filter], or shows its tab when one is open already. */
     fun openFilter(filter: String) {
-        val existing = state.workspace.pages.firstOrNull { it is Page.Filter && it.filter == filter }
+        openPinnedPage({ it is Page.Filter && it.filter == filter }) { Page.Filter(it, filter) }
+    }
+
+    /** Opens the page for run filter [filter], or shows its tab when one is open already. */
+    fun openRuns(filter: String) {
+        openPinnedPage({ it is Page.Runs && it.filter == filter }) { Page.Runs(it, filter) }
+    }
+
+    /** Opens the page of run [run], or shows its tab when one is open already. */
+    fun openRun(run: RunRef) {
+        openPinnedPage({ it is Page.Run && it.run == run }) { Page.Run(it, run) }
+    }
+
+    /** Shows the pinned page [matches] finds, opening the one [make] makes when none shows. */
+    private fun openPinnedPage(matches: (Page) -> Boolean, make: (PaneId) -> Page) {
+        val existing = state.workspace.pages.firstOrNull(matches)
         if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) {
             state.paneLayout = state.paneLayout.activate(existing.id.value)
             return
         }
-        val page = existing ?: Page.Filter(PaneFactory.nextId(state.workspace), filter)
+        val page = existing ?: make(PaneFactory.nextId(state.workspace))
         state.workspace = state.workspace.withPage(page)
         state.paneLayout = state.paneLayout.open(page.id.value)
         placePinned()

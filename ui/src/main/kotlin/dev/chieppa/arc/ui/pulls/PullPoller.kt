@@ -12,13 +12,15 @@ import kotlinx.coroutines.withTimeoutOrNull
 /**
  * Polls GitHub for [watch] while it runs: every saved search in one request every [PullTimes.POLL_MINUTES] minutes,
  * or at once when asked, and the person's notifications as often as GitHub allows. What a poll sets off goes to
- * [notifier]. Blocking reads run on [dispatchers]' io.
+ * [notifier]. [extraSearches] are polled in the same request, by key, for others to read from the results. Blocking
+ * reads run on [dispatchers]' io.
  */
 class PullPoller(
     private val watch: PullWatch,
     private val github: GitHub,
     private val notifier: WatchNotifier,
     private val dispatchers: ArcDispatchers = ArcDispatchers.Real,
+    private val extraSearches: Map<String, String> = emptyMap(),
 ) {
     /** Polls until cancelled. */
     suspend fun run() = coroutineScope {
@@ -34,7 +36,7 @@ class PullPoller(
         }
         try {
             if (watch.viewer == null) watch.viewer = github.viewer()
-            val searches = WatchSearches.of(watch.watchlist)
+            val searches = WatchSearches.of(watch.watchlist) + extraSearches
             if (searches.isEmpty()) {
                 watch.results = emptyMap()
                 watch.status = WatchStatus.Live

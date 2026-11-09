@@ -8,6 +8,17 @@ import dev.chieppa.arc.ui.navigation.CodeNavigation
 import kotlinx.coroutines.Dispatchers
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.watch.Watchlist
+import dev.chieppa.arc.core.actions.RunWatchlist
+import dev.chieppa.arc.core.actions.timing.TimingHistory
+import dev.chieppa.arc.core.pane.Revision
+import dev.chieppa.arc.host.github.repo.GitHubRepo
+import dev.chieppa.arc.store.actions.ArtifactCache
+import dev.chieppa.arc.store.actions.RunArchive
+import dev.chieppa.arc.store.actions.RunWatchlistFile
+import dev.chieppa.arc.store.actions.TimingsFile
+import dev.chieppa.arc.ui.services.ActionsService
+import dev.chieppa.arc.ui.services.GitHubActions
+import dev.chieppa.arc.ui.services.RunKeeper
 import dev.chieppa.arc.git.repo.GitRepositories
 import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.host.github.GitHub
@@ -35,8 +46,8 @@ import java.nio.file.Path
 
 /**
  * What the app keeps between runs, in [dataDir]: the settings, the workspace, the repos, the saved filters and
- * notification rules, the person's drafts, staged comments and notes, the recently opened sources, people's pictures,
- * and the app's own clones of GitHub repos. Repos are read through git for the workspace in
+ * notification rules, the run filters, step timings, kept runs and downloaded artifacts, the person's drafts, staged
+ * comments and notes, the recently opened sources, people's pictures, and the app's own clones of GitHub repos. Repos are read through git for the workspace in
  * [current], and pull requests through [github].
  */
 class AppSession(dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub()) : Closeable {
@@ -71,6 +82,37 @@ class AppSession(dataDir: Path, val conversation: ReviewConversation, val github
 
     /** The conversation on GitHub, with people's pictures cached in the data folder. */
     val conversations: ConversationService = GitHubConversations(github, AvatarCache(dataDir.resolve(AppConstants.AVATARS_FOLDER)), data::gitHubRepo)
+
+    private val runWatchlistFile = RunWatchlistFile(dataDir.resolve(AppConstants.RUNS_FILE))
+    private val timingsFile = TimingsFile(dataDir.resolve(AppConstants.TIMINGS_FILE))
+
+    /** The kept runs, read and written as runs finish. */
+    val runKeeper: RunKeeper = ArchiveKeeper(RunArchive(dataDir.resolve(AppConstants.RUNS_FOLDER)))
+
+    /** GitHub Actions, with artifacts cached in the data folder and workflow files read from the clones where they are. */
+    val actions: ActionsService = GitHubActions(github, ArtifactCache(dataDir.resolve(AppConstants.ARTIFACTS_FOLDER)), ::clonedFile)
+
+    /** The run filters and what is watched; on a first run, those [seeds] makes, saved at once. */
+    fun runWatchlist(seeds: () -> RunWatchlist): RunWatchlist {
+        if (runWatchlistFile.exists()) return runWatchlistFile.load()
+        return seeds().also(runWatchlistFile::save)
+    }
+
+    fun saveRunWatchlist(watchlist: RunWatchlist) {
+        runWatchlistFile.save(watchlist)
+    }
+
+    fun timings(): TimingHistory = timingsFile.load()
+
+    fun saveTimings(history: TimingHistory) {
+        timingsFile.save(history)
+    }
+
+    /** The text of [path] at [ref] in the clone here of GitHub repo [repo], when there is one that holds it. */
+    private suspend fun clonedFile(repo: GitHubRepo, path: String, ref: String): String? {
+        val name = (current?.repos ?: repos).keys.firstOrNull { data.gitHubRepo(it) == repo } ?: return null
+        return data.readFile(name, Revision(ref), path)?.toString(Charsets.UTF_8)
+    }
 
     /** The person's drafts, staged comments, notes and summaries as saved. */
     fun localConversation(): LocalConversation = conversationFile.load()

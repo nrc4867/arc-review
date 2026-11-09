@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui.workbench
 
+import dev.chieppa.arc.core.actions.WorkflowRun
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.start.StartAction
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
@@ -18,6 +19,9 @@ sealed interface MenuTarget {
 
     /** A pull request's row in a saved filter's list; [source] is it in a local clone, when there is one. */
     data class OfPull(val pull: PullRequestSummary, val source: Source.PullRequest?) : MenuTarget
+
+    /** A workflow run's row or page. */
+    data class OfRun(val run: WorkflowRun) : MenuTarget
 
     /** A click or menu item on the start screen, whose [action] carries what it acts on as arguments. */
     data class OfStart(val action: StartAction) : MenuTarget

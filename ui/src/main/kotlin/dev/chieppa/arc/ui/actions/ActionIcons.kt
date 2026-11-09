@@ -59,4 +59,4 @@ private val icons: Map<String, ImageVector> = mapOf(
 )
 
 /** The icon for an action's icon key: a drawer action shows its drawer's icon. */
-fun actionIcon(key: String): ImageVector? = icons[key] ?: ArcActionIds.drawerOf(key)?.let(ArcDrawerSlots::byId)?.icon
+fun actionIcon(key: String): ImageVector? = icons[key] ?: RunActionTexts.icons[key] ?: ArcActionIds.drawerOf(key)?.let(ArcDrawerSlots::byId)?.icon

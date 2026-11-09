@@ -44,7 +44,7 @@ class WorkbenchTest {
             listOf(DrawerIds.FILES, DrawerIds.OUTLINE, DrawerIds.SEARCH, DrawerIds.NOTES, DrawerIds.CONVERSATION, DrawerIds.REVISIONS, DrawerIds.CONSOLE),
             layout.on(Side.Left).map { it.id },
         )
-        assertEquals(listOf(DrawerIds.PULL_REQUESTS, DrawerIds.CHECKS, DrawerIds.STAGED_COMMENTS), layout.on(Side.Right).map { it.id })
+        assertEquals(listOf(DrawerIds.PULL_REQUESTS, DrawerIds.CHECKS, DrawerIds.RUNS, DrawerIds.STAGED_COMMENTS), layout.on(Side.Right).map { it.id })
         assertTrue(layout[DrawerIds.CONSOLE]!!.bottom)
         assertTrue(layout[DrawerIds.STAGED_COMMENTS]!!.bottom)
     }
