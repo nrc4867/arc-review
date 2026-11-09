@@ -1,6 +1,9 @@
 package dev.chieppa.arc.host.github
 
 import dev.chieppa.arc.host.github.api.GitHubApi
+import dev.chieppa.arc.host.github.actions.ActionsClient
+import dev.chieppa.arc.host.github.actions.ActionsWriter
+import dev.chieppa.arc.host.github.pulls.RateBudget
 import dev.chieppa.arc.core.conversation.PushOutcome
 import dev.chieppa.arc.core.conversation.Reaction
 import dev.chieppa.arc.core.conversation.ReviewPush
@@ -34,9 +37,9 @@ import dev.chieppa.arc.host.github.review.ReviewWriter
 
 /**
  * What Arc reads from and writes to GitHub. It reads who the person is, the pull requests a set of searches finds, one
- * pull request, the heads it has had and its conversation, the checks on commits, and the person's notifications. It
- * writes only when the person acts: reactions, resolving threads, and pushing a staged batch as a review or as commit
- * comments, every write spaced by [pacer]. Every call throws [GitHubException] when GitHub gives nothing to use.
+ * pull request, the heads it has had and its conversation, the checks on commits, the person's notifications, and
+ * repos' Actions runs. It writes only when the person acts: reactions, resolving threads, pushing a staged batch as a
+ * review or as commit comments, and starting, re-running, cancelling and approving runs, every write spaced by [pacer]. Every call throws [GitHubException] when GitHub gives nothing to use.
  */
 class GitHub(
     private val client: GitHubClient = GitHubClient(),
@@ -46,6 +49,15 @@ class GitHub(
     private val writer = ReviewWriter(client, pacer)
     private val publisher = ReviewPublisher(writer)
     private val commenter = CommitCommenter(client, pacer)
+
+    /** The repos' GitHub Actions: runs, jobs, logs, artifacts and the workflows that can be started. */
+    val actions = ActionsClient(client)
+
+    /** The writes a person makes to GitHub Actions once they confirm them. */
+    val actionsWriter = ActionsWriter(client, pacer)
+
+    /** The REST budget GitHub reported last. */
+    val restBudget: RateBudget? get() = client.restBudget
 
     /** The person's notifications, polled conditionally. */
     val notifications = NotificationsFeed(client)

@@ -8,10 +8,14 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import dev.chieppa.arc.host.github.actions.RestBudget
+import dev.chieppa.arc.host.github.pulls.RateBudget
 import java.io.IOException
+import java.io.InputStream
 
 /**
- * Requests to GitHub with the person's token: GraphQL queries and mutations, conditional REST GETs and REST POSTs.
+ * Requests to GitHub with the person's token: GraphQL queries and mutations, conditional REST GETs, streamed REST GETs
+ * and REST POSTs. The REST budget each REST answer reports is kept.
  * Every failure is a [GitHubException]; a refused token is dropped so the next request asks for it again.
  */
 class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private val transport: HttpTransport = JdkHttpTransport()) {
@@ -41,13 +45,32 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
         return data
     }
 
-    /** A REST GET of [url], conditional on [etag] or [lastModified] from an earlier answer; a 304 comes back as is. */
-    suspend fun get(url: String, etag: String? = null, lastModified: String? = null): ApiResponse {
+    /** The REST budget the latest REST answer reported, or null before any. */
+    @Volatile
+    var restBudget: RateBudget? = null
+        private set
+
+    /**
+     * A REST GET of [url], conditional on [etag] or [lastModified] from an earlier answer, asking for [accept] when it
+     * is not GitHub's JSON; a 304 comes back as is.
+     */
+    suspend fun get(url: String, etag: String? = null, lastModified: String? = null, accept: String? = null): ApiResponse {
         val headers = buildMap {
             etag?.let { put(GitHubApi.IF_NONE_MATCH, it) }
             lastModified?.let { put(GitHubApi.IF_MODIFIED_SINCE, it) }
+            accept?.let { put(GitHubApi.ACCEPT, it) }
         }
-        return send(GitHubApi.GET, url, headers, null)
+        return send(GitHubApi.GET, url, headers, null).also { response -> RestBudget.of(response)?.let { restBudget = it } }
+    }
+
+    /** A REST GET of [url] whose status and body go to [read] as the body arrives. */
+    suspend fun <T> stream(url: String, read: (Int, InputStream) -> T): T {
+        val token = tokens.token() ?: throw GitHubException(GitHubException.Reason.NoToken, "No GitHub token")
+        return try {
+            transport.stream(ApiRequest(GitHubApi.GET, url, standardHeaders(token)), read)
+        } catch (e: IOException) {
+            throw GitHubException(GitHubException.Reason.Failed, "No answer: ${e.message}")
+        }
     }
 
     /** A REST POST of the JSON [body] to [url]; any status comes back as is. */
@@ -70,12 +93,7 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
 
     private suspend fun send(method: String, url: String, extra: Map<String, String>, body: String?): ApiResponse {
         val token = tokens.token() ?: throw GitHubException(GitHubException.Reason.NoToken, "No GitHub token")
-        val headers = mapOf(
-            GitHubApi.AUTHORIZATION to GitHubApi.BEARER + token,
-            GitHubApi.ACCEPT to GitHubApi.JSON,
-            GitHubApi.VERSION to GitHubApi.API_VERSION,
-            GitHubApi.USER_AGENT to GitHubApi.AGENT,
-        ) + extra
+        val headers = standardHeaders(token) + extra
         val response = try {
             transport.send(ApiRequest(method, url, headers, body))
         } catch (e: IOException) {
@@ -87,6 +105,13 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
         }
         return response
     }
+
+    private fun standardHeaders(token: String): Map<String, String> = mapOf(
+        GitHubApi.AUTHORIZATION to GitHubApi.BEARER + token,
+        GitHubApi.ACCEPT to GitHubApi.JSON,
+        GitHubApi.VERSION to GitHubApi.API_VERSION,
+        GitHubApi.USER_AGENT to GitHubApi.AGENT,
+    )
 
     private companion object {
         const val QUERY = "query"
