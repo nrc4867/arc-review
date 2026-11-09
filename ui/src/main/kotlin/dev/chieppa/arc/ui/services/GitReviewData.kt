@@ -60,6 +60,8 @@ class GitReviewData(
 
     override suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? = pulls?.openPulls(repos, text)
 
+    override suspend fun repoExists(repo: GitHubRepo): Boolean? = pulls?.repoExists(repo)
+
     private fun reader(source: Source) = SourceReader(repos.repository(source.repo), pulls ?: PullRequestLookup.NONE)
 
     private fun revisionReader(repo: RepoName): RevisionReader {

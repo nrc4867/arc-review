@@ -17,6 +17,13 @@ class FollowedLookup(private val data: ReviewData, private val clock: () -> Long
 
     private val pulls = ConcurrentHashMap<String, Kept<List<PullRequestSummary>?>>()
     private val branches = ConcurrentHashMap<RepoName, Kept<List<LocalBranch>>>()
+    private val repos = ConcurrentHashMap<GitHubRepo, Kept<Boolean?>>()
+
+    /** Whether [repo] exists on GitHub; null when GitHub cannot be asked. */
+    suspend fun exists(repo: GitHubRepo): Boolean? {
+        fresh(repos[repo])?.let { return it.value }
+        return data.repoExists(repo).also { repos[repo] = Kept(clock(), it) }
+    }
 
     /** The open pull requests in [repos] whose titles hold [text], or the latest updated for blank [text]; null when GitHub cannot be asked. */
     suspend fun pulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? {

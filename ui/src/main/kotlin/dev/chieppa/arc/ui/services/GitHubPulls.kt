@@ -74,6 +74,16 @@ class GitHubPulls(private val github: GitHub, private val dispatchers: ArcDispat
         }
     }
 
+    /** Whether [repo] exists on GitHub; null without a token or when GitHub gives no answer. */
+    suspend fun repoExists(repo: GitHubRepo): Boolean? {
+        if (!withContext(dispatchers.io) { github.hasToken() }) return null
+        return try {
+            github.repoExists(repo)
+        } catch (_: GitHubException) {
+            null
+        }
+    }
+
     /** The GitHub repo [repo]'s `origin` points at, if it is one. */
     suspend fun gitHubRepo(repo: GitRepository): GitHubRepo? = repo.remoteUrl()?.let(GitHubRemotes::parse)
 

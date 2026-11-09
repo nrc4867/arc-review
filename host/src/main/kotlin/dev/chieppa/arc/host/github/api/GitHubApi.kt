@@ -28,6 +28,7 @@ object GitHubApi {
     const val JSON_BODY = "application/json"
 
     const val OK = 200
+    const val NOT_FOUND = 404
     const val CREATED = 201
     const val NOT_MODIFIED = 304
     const val UNAUTHORIZED = 401

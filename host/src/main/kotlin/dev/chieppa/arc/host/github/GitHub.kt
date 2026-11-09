@@ -1,5 +1,6 @@
 package dev.chieppa.arc.host.github
 
+import dev.chieppa.arc.host.github.api.GitHubApi
 import dev.chieppa.arc.core.conversation.PushOutcome
 import dev.chieppa.arc.core.conversation.Reaction
 import dev.chieppa.arc.core.conversation.ReviewPush
@@ -72,6 +73,16 @@ class GitHub(
     suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary> {
         val query = OpenPullSearch.query(repos, text) ?: return emptyList()
         return search(mapOf(OpenPullSearch.KEY to query)).results[OpenPullSearch.KEY]?.pulls.orEmpty()
+    }
+
+    /** Whether [repo] exists and the token can see it. */
+    suspend fun repoExists(repo: GitHubRepo): Boolean {
+        val status = client.get("${GitHubApi.REPOS}/${repo.fullName}").status
+        return when (status) {
+            GitHubApi.OK -> true
+            GitHubApi.NOT_FOUND -> false
+            else -> throw GitHubException(GitHubException.Reason.Failed, "Repo lookup answered $status")
+        }
     }
 
     /** Pull request [number] of [repo], or null when there is none. */

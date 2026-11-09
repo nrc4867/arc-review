@@ -19,7 +19,7 @@ object SourceScores {
         )
         is SwitcherItem.FollowedBranch -> best(listOf(item.branch.name), listOf(item.branch.author, item.source.repo.value), query)
         is SwitcherItem.Recent -> best(listOf(item.title, item.source.ref), emptyList(), query)
-        is SwitcherItem.Changed, is SwitcherItem.AtHead -> null
+        is SwitcherItem.Changed, is SwitcherItem.AtHead, is SwitcherItem.GitHubRepository -> null
     }
 
     private fun best(main: List<String>, aside: List<String>, query: String): Int? = (

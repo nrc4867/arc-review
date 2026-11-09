@@ -188,7 +188,7 @@ class Workbench(
     fun sourceOf(pull: PullRequestSummary): Source.PullRequest? =
         gitHubRepos.entries.firstOrNull { it.value == pull.repo }?.let { Source.PullRequest(it.key, pull.number) }
 
-    /** The GitHub repos being cloned for a pull request, and those whose clone failed. */
+    /** The GitHub repos being cloned, for a pull request or to follow, and those whose clone failed. */
     var cloning by mutableStateOf(emptySet<GitHubRepo>())
     var cloneFailed by mutableStateOf(emptySet<GitHubRepo>())
 
@@ -197,21 +197,29 @@ class Workbench(
      * made first and added to the repos. Nothing runs while its repo is being cloned or when it cannot be cloned.
      */
     fun withPullSource(pull: PullRequestSummary, then: (Source.PullRequest) -> Unit) {
-        sourceOf(pull)?.let { return then(it) }
-        if (pull.repo in cloning) return
+        followGitHub(pull.repo) { then(Source.PullRequest(it, pull.number)) }
+    }
+
+    /**
+     * Runs [then] with the repo here that [repo] is cloned in: the one known, or else the app's own clone, made first and
+     * added to the repos. Nothing runs while it is being cloned or when it cannot be cloned.
+     */
+    fun followGitHub(repo: GitHubRepo, then: (RepoName) -> Unit) {
+        gitHubRepos.entries.firstOrNull { it.value == repo }?.let { return then(it.key) }
+        if (repo in cloning) return
         scope.launch {
-            cloning = cloning + pull.repo
-            cloneFailed = cloneFailed - pull.repo
+            cloning = cloning + repo
+            cloneFailed = cloneFailed - repo
             try {
-                val name = data.clone(pull.repo)?.let { sources.addRepo(it) }
+                val name = data.clone(repo)?.let { sources.addRepo(it) }
                 if (name == null) {
-                    cloneFailed = cloneFailed + pull.repo
+                    cloneFailed = cloneFailed + repo
                 } else {
-                    gitHubRepos = gitHubRepos + (name to pull.repo)
-                    then(Source.PullRequest(name, pull.number))
+                    gitHubRepos = gitHubRepos + (name to repo)
+                    then(name)
                 }
             } finally {
-                cloning = cloning - pull.repo
+                cloning = cloning - repo
             }
         }
     }

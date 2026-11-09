@@ -7,13 +7,16 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.KeyEvent
+import dev.chieppa.arc.host.github.repo.GitHubRepoLinks
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.chord
 import java.nio.file.Path
 
 /**
  * What a switcher field's text comes to: a pasted [target] with the ways it can [options] open and its [facts], a pasted
- * [folder] to follow as a repo, or else a search in [sections]. The palette and the start screen's field both show it.
+ * [folder] to follow as a repo, or else a search in [sections]. A GitHub repo's page or clone URL comes as the one
+ * section; a bare `owner/name` GitHub has comes as a section over the search. The palette and the start screen's field
+ * both show it.
  */
 class SwitcherView(
     val target: PastedTarget?,
@@ -69,14 +72,22 @@ fun rememberSwitcherView(workbench: Workbench, state: SwitcherState): SwitcherVi
     }
     val folder = remember(query, target) { if (target == null) FolderTarget.read(query) else null }
     var folderFailed by remember(query) { mutableStateOf(false) }
-    val searching = target == null && folder == null
+    val link = remember(query, target, folder) { if (target == null && folder == null) GitHubRepoLinks.read(query) else null }
+    val local = link?.let { found -> workbench.gitHubRepos.entries.firstOrNull { it.value == found.repo }?.key }
+    val exists = produceState<Boolean?>(null, link, local) {
+        value = null
+        if (link?.bare == true && local == null) value = workbench.followed.exists(link.repo)
+    }.value
+    val repoItem = link?.takeIf { !it.bare || local != null || exists == true }?.let { SwitcherItem.GitHubRepository(it.repo, local) }
+    val searching = target == null && folder == null && link?.bare != false
     val inputs = rememberSwitcherInputs(workbench, if (searching) query else "", state.scope)
+    val repoSection = listOfNotNull(repoItem?.let { SwitcherSection(SectionKind.Repository, listOf(it), 1) })
     val facts = produceState(LinkFacts(), target) { value = LinkFacts(); target?.let { value = LinkFactsReader.read(workbench.data, it) } }.value
     return SwitcherView(
         target = target,
         folder = folder,
         folderFailed = folderFailed,
-        sections = if (searching) SwitcherSearch.sections(query, state.scope, inputs) else emptyList(),
+        sections = repoSection + if (searching) SwitcherSearch.sections(query, state.scope, inputs) else emptyList(),
         options = target?.let(OpenAs::of).orEmpty(),
         facts = facts,
         onFolderFailed = { folderFailed = true },

@@ -1,9 +1,11 @@
 package dev.chieppa.arc.ui.switcher
 
 import dev.chieppa.arc.core.change.ChangedFile
+import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.git.repo.LocalBranch
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
+import dev.chieppa.arc.host.github.repo.GitHubRepo
 
 /** One thing the switcher finds. */
 sealed interface SwitcherItem {
@@ -21,6 +23,9 @@ sealed interface SwitcherItem {
 
     /** A local branch of a followed repo, not in the strip. */
     data class FollowedBranch(val source: Source.BranchAgainstBase, val branch: LocalBranch) : SwitcherItem
+
+    /** A GitHub repo named in the field, to follow by cloning it, or to search when it is followed already as [local]. */
+    data class GitHubRepository(val repo: GitHubRepo, val local: RepoName?) : SwitcherItem
 
     /** A source opened lately and not in the strip now, with its [title] where it was read and [at] when, in epoch seconds. */
     data class Recent(val source: Source, val title: String, val at: Long) : SwitcherItem

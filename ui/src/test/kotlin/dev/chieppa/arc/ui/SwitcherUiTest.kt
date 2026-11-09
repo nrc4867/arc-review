@@ -1,5 +1,8 @@
 package dev.chieppa.arc.ui
 
+import java.nio.file.Files
+import dev.chieppa.arc.core.source.RepoName
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -35,7 +38,7 @@ class SwitcherUiTest {
     private val data = FakeReviewData()
     private val other = Source.Commit(data.repo, CommitSha("c".repeat(40)))
     private val field = "Switch to a source, file or pull request, or paste a link"
-    private val sourcesField = "Find a pull request, branch or recent source, or paste a link or a repo folder"
+    private val sourcesField = "Find a pull request, branch or recent source, or paste a link, a GitHub repo or a folder"
 
     private fun ComposeUiTest.open(): Workbench {
         val workbench = Workbench(dispatchers = testDispatchers(), data = data, state = WorkspaceState(repos = mapOf(data.repo to Path.of("."))))
@@ -160,6 +163,37 @@ class SwitcherUiTest {
         press(Key.Enter, on = sourcesField)
         assertTrue(workbench.switcher.open)
         assertEquals(1, workbench.state.repos.size)
+    }
+
+    @Test
+    fun aGitHubRepoLinkClonesTheRepoAndSearchesIt() = runComposeUiTest {
+        val clone = Files.createTempDirectory("arc-clone").resolve("arc-review")
+        data.cloneTo = clone
+        val workbench = open()
+        workbench.switcher.show(SwitcherScope.Sources)
+        waitForIdle()
+        onNodeWithContentDescription(sourcesField).performTextInput("github.com/nrc4867/arc-review")
+        waitForIdle()
+        assertTrue(shows("GITHUB"))
+        assertTrue(shows("Add repository"))
+        press(Key.Enter, on = sourcesField)
+        assertWhenIdle { RepoName("arc-review") in workbench.state.repos }
+        assertEquals(listOf(GitHubRepo("nrc4867", "arc-review")), data.cloned)
+        assertEquals("arc-review", workbench.switcher.query)
+    }
+
+    @Test
+    fun aBareOwnerAndNameOffersTheRepoOnlyWhenGitHubHasIt() = runComposeUiTest {
+        data.existingRepos = setOf(GitHubRepo("nrc4867", "arc-review"))
+        val workbench = open()
+        workbench.switcher.show(SwitcherScope.Sources)
+        waitForIdle()
+        onNodeWithContentDescription(sourcesField).performTextInput("nrc4867/arc-review")
+        assertWhenIdle { shows("Add repository") }
+        onNodeWithContentDescription(sourcesField).performTextClearance()
+        onNodeWithContentDescription(sourcesField).performTextInput("spike/token-binding")
+        waitForIdle()
+        assertFalse(shows("Add repository"))
     }
 
     @Test

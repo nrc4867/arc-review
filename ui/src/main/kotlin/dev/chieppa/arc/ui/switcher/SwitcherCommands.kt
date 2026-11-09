@@ -19,6 +19,7 @@ class SwitcherCommands(
     private val onRepoAdded: (RepoName) -> Unit = { workbench.switcher.show(SwitcherScope.Sources, it.value) },
 ) {
     fun pick(item: SwitcherItem, how: SwitcherPick) {
+        if (item is SwitcherItem.GitHubRepository) return follow(item)
         close()
         when (item) {
             is SwitcherItem.InWorkspace -> goTo(item.source, how)
@@ -34,6 +35,7 @@ class SwitcherCommands(
             is SwitcherItem.FollowedPull -> goTo(item.source, how)
             is SwitcherItem.FollowedBranch -> goTo(item.source, how)
             is SwitcherItem.Recent -> goTo(item.source, how)
+            is SwitcherItem.GitHubRepository -> Unit
         }
     }
 
@@ -48,6 +50,12 @@ class SwitcherCommands(
             val name = workbench.sources.addRepo(folder)
             if (name == null) onFailed() else onRepoAdded(name)
         }
+    }
+
+    /** Searches the followed repo [item] names, or clones it first, keeping the field open while it clones. */
+    private fun follow(item: SwitcherItem.GitHubRepository) {
+        item.local?.let { return onRepoAdded(it) }
+        workbench.followGitHub(item.repo, onRepoAdded)
     }
 
     private fun goTo(source: Source, how: SwitcherPick) {

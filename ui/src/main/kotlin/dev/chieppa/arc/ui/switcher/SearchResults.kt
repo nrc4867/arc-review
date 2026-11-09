@@ -8,6 +8,7 @@ import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.switcher_files_in
 import dev.chieppa.arc.design.generated.switcher_followed
 import dev.chieppa.arc.design.generated.switcher_followed_note
+import dev.chieppa.arc.design.generated.switcher_github_repo
 import dev.chieppa.arc.design.generated.switcher_in_review
 import dev.chieppa.arc.design.generated.switcher_suggested
 import dev.chieppa.arc.ui.util.SourceLabels
@@ -27,6 +28,7 @@ fun SearchResults(workbench: Workbench, sections: List<SwitcherSection>, query: 
     Column(Modifier.padding(start = StretchSpacing.space6, end = StretchSpacing.space6, top = StretchSpacing.space4, bottom = StretchSpacing.space6)) {
         for (section in sections) {
             when (section.kind) {
+                SectionKind.Repository -> PaletteSection(stringResource(Res.string.switcher_github_repo))
                 SectionKind.InWorkspace -> PaletteSection(stringResource(Res.string.switcher_in_review))
                 SectionKind.Files -> {
                     val refs = section.items.mapNotNull { (it as? SwitcherItem.Changed)?.source ?: (it as? SwitcherItem.AtHead)?.source }.distinct()
@@ -47,6 +49,7 @@ fun SearchResults(workbench: Workbench, sections: List<SwitcherSection>, query: 
                     is SwitcherItem.FollowedPull -> FollowedPullRow(item, workbench.watch.viewer, query, highlighted, pick)
                     is SwitcherItem.FollowedBranch -> FollowedBranchRow(item, query, nowSeconds, highlighted, pick)
                     is SwitcherItem.Recent -> RecentRow(item, query, nowSeconds, highlighted, pick)
+                    is SwitcherItem.GitHubRepository -> GitHubRepoRow(item, workbench, highlighted, pick)
                 }
             }
         }

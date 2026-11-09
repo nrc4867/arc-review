@@ -128,6 +128,11 @@ class FakeReviewData(more: Boolean = false, pictures: Boolean = false) : ReviewD
 
     override suspend fun gitHubRepo(repo: RepoName): GitHubRepo? = origin
 
+    /** The GitHub repos that exist, as GitHub would answer. */
+    var existingRepos: Set<GitHubRepo> = emptySet()
+
+    override suspend fun repoExists(repo: GitHubRepo): Boolean? = repo in existingRepos
+
     /** The first head the source had, before [head]: it changed only `app/Main.kt`, as it does now. */
     val firstHead = ObjectId("c".repeat(40))
 

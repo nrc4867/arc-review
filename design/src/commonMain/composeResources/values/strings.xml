@@ -138,7 +138,7 @@
 
     <string name="switcher_open">Open switcher</string>
     <string name="switcher_placeholder">Switch to a source, file or pull request, or paste a link</string>
-    <string name="switcher_sources_placeholder">Find a pull request, branch or recent source, or paste a link or a repo folder</string>
+    <string name="switcher_sources_placeholder">Find a pull request, branch or recent source, or paste a link, a GitHub repo or a folder</string>
     <string name="switcher_files_placeholder">Open a file at %1$s</string>
     <plurals name="switcher_results">
         <item quantity="one">%1$d result</item>
@@ -156,6 +156,8 @@
     <string name="switcher_followed">Followed repos</string>
     <string name="switcher_suggested">Suggested</string>
     <string name="switcher_add_repo">Add repository</string>
+    <string name="switcher_search_repo">Search repository</string>
+    <string name="switcher_github_repo">GitHub</string>
     <string name="switcher_followed_note">not open</string>
     <plurals name="switcher_commits">
         <item quantity="one">%1$d commit</item>
@@ -585,7 +587,7 @@
     <string name="action_move_start_card_across">Move to the other column</string>
     <string name="action_restore_start_cards">Restore start screen cards</string>
 
-    <string name="start_paste_placeholder">Find or paste a pull request, branch or commit</string>
+    <string name="start_paste_placeholder">Find or paste a pull request, branch, commit or GitHub repo</string>
     <string name="start_paste_description">Find a source to open</string>
     <string name="start_find_source">Find a source</string>
     <string name="start_recent">Recent</string>

@@ -45,6 +45,9 @@ interface ReviewData {
     /** The open pull requests in [repos] whose titles hold [text]; null when the host cannot be asked, as without a token. */
     suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? = null
 
+    /** Whether [repo] exists on GitHub and can be seen; null when GitHub cannot be asked, as without a token. */
+    suspend fun repoExists(repo: GitHubRepo): Boolean? = null
+
     /** The GitHub repo [repo]'s clone comes from, or null when it comes from elsewhere. */
     suspend fun gitHubRepo(repo: RepoName): GitHubRepo? = null
 
