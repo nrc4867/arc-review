@@ -138,6 +138,16 @@ class SwitcherUiTest {
     }
 
     @Test
+    fun textTheSwitcherOpensWithKeepsTheCursorAtItsEnd() = runComposeUiTest {
+        val workbench = open()
+        workbench.switcher.show(query = "demo@")
+        waitForIdle()
+        onNodeWithContentDescription(field).performTextInput("c")
+        waitForIdle()
+        assertEquals("demo@c", workbench.switcher.query)
+    }
+
+    @Test
     fun aPastedFolderWithNoRepoIsMarkedInPlace() = runComposeUiTest {
         data.repoAt = false
         val workbench = open()

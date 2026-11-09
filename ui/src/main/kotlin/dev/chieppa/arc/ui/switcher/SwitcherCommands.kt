@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.switcher
 
 import dev.chieppa.arc.core.pane.Revision
+import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.ui.workbench.Workbench
 import kotlinx.coroutines.launch
@@ -10,10 +11,15 @@ import java.nio.file.Path
  * What picking a switcher row does on [workbench]. A source in the strip is switched to; one outside it is opened in the
  * strip and switched to, or with [SwitcherPick.Beside] opened without switching. A file opens in the focused pane, or in a new one with
  * [SwitcherPick.NewPane], which for a source opens its first changed file once it is read. A pasted folder is followed as a repo.
+ * Picking runs [close] first; the switcher's own by default, the start screen's field passes its own.
  */
-class SwitcherCommands(private val workbench: Workbench) {
+class SwitcherCommands(
+    private val workbench: Workbench,
+    private val close: () -> Unit = { workbench.switcher.close() },
+    private val onRepoAdded: (RepoName) -> Unit = { workbench.switcher.show(SwitcherScope.Sources, it.value) },
+) {
     fun pick(item: SwitcherItem, how: SwitcherPick) {
-        workbench.switcher.close()
+        close()
         when (item) {
             is SwitcherItem.InWorkspace -> goTo(item.source, how)
             is SwitcherItem.Changed -> {
@@ -32,15 +38,15 @@ class SwitcherCommands(private val workbench: Workbench) {
     }
 
     fun pick(option: OpenAs, how: SwitcherPick) {
-        workbench.switcher.close()
+        close()
         goTo(option.source, how)
     }
 
-    /** Follows the repo in [folder] and searches its sources, or calls [onFailed] when the folder holds no repo. */
+    /** Follows the repo in [folder] and hands it to [onRepoAdded], or calls [onFailed] when the folder holds no repo. */
     fun addRepo(folder: Path, onFailed: () -> Unit) {
         workbench.scope.launch {
             val name = workbench.sources.addRepo(folder)
-            if (name == null) onFailed() else workbench.switcher.show(SwitcherScope.Sources, name.value)
+            if (name == null) onFailed() else onRepoAdded(name)
         }
     }
 

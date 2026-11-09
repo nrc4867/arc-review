@@ -1,31 +1,16 @@
 package dev.chieppa.arc.ui.switcher
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
-import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.pane.Revision
+import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.design.generated.Res
-import dev.chieppa.arc.design.generated.switcher_add_repo
 import dev.chieppa.arc.design.generated.switcher_files_placeholder
-import dev.chieppa.arc.design.generated.switcher_hint_beside
-import dev.chieppa.arc.design.generated.switcher_hint_open
-import dev.chieppa.arc.design.generated.switcher_hint_close
-import dev.chieppa.arc.design.generated.switcher_hint_new_pane
-import dev.chieppa.arc.design.generated.switcher_hint_scope
-import dev.chieppa.arc.design.generated.switcher_hint_switch
 import dev.chieppa.arc.design.generated.switcher_link_branch
 import dev.chieppa.arc.design.generated.switcher_link_commit
 import dev.chieppa.arc.design.generated.switcher_link_pull
 import dev.chieppa.arc.design.generated.switcher_link_range
-import dev.chieppa.arc.design.generated.switcher_open_as
 import dev.chieppa.arc.design.generated.switcher_placeholder
 import dev.chieppa.arc.design.generated.switcher_ref_branch
 import dev.chieppa.arc.design.generated.switcher_ref_commit
@@ -33,18 +18,13 @@ import dev.chieppa.arc.design.generated.switcher_ref_pull
 import dev.chieppa.arc.design.generated.switcher_ref_range
 import dev.chieppa.arc.design.generated.switcher_results
 import dev.chieppa.arc.design.generated.switcher_sources_placeholder
-import dev.chieppa.arc.ui.pulls.currentTime
 import dev.chieppa.arc.ui.sources.sourceIcon
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.arc.ui.util.Revisions
 import dev.chieppa.arc.ui.workbench.Workbench
-import dev.chieppa.stretch.frame.PaletteHint
-import dev.chieppa.stretch.frame.PaletteSection
 import dev.chieppa.stretch.frame.SearchPalette
-import dev.chieppa.stretch.frame.chord
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
-import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Chip
 import dev.chieppa.stretch.ui.ChipKind
 import org.jetbrains.compose.resources.pluralStringResource
@@ -62,27 +42,11 @@ import org.jetbrains.compose.resources.stringResource
 fun Switcher(workbench: Workbench) {
     val switcher = workbench.switcher
     if (!switcher.open) return
-    val state = workbench.state
-    val query = switcher.query
     val commands = remember(workbench) { SwitcherCommands(workbench) }
-    val now = currentTime() / MILLIS_PER_SECOND
-    val target = remember(query, workbench.gitHubRepos, state.repos) { PastedTargets.read(query, workbench.gitHubRepos, state.repos.keys) }
-    val folder = remember(query, target) { if (target == null) FolderTarget.read(query) else null }
-    var folderFailed by remember(query) { mutableStateOf(false) }
-    val searching = target == null && folder == null
-    val inputs = rememberSwitcherInputs(workbench, if (searching) query else "", switcher.scope)
-    val sections = if (searching) SwitcherSearch.sections(query, switcher.scope, inputs) else emptyList()
-    val rows = sections.flatMap { it.items }
-    val addFolder = { folder?.let { commands.addRepo(it) { folderFailed = true } } }
-    val options = target?.let(OpenAs::of).orEmpty()
-    val facts = produceState(LinkFacts(), target) { value = LinkFacts(); target?.let { value = LinkFactsReader.read(workbench.data, it) } }.value
-    val count = when {
-        folder != null -> 1
-        target == null -> rows.size
-        else -> options.size
-    }
+    val view = rememberSwitcherView(workbench, switcher)
+    val target = view.target
     SearchPalette(
-        query = query,
+        query = switcher.query,
         onQueryChange = switcher::type,
         onDismiss = switcher::close,
         placeholder = placeholder(workbench, switcher.scope),
@@ -91,28 +55,11 @@ fun Switcher(workbench: Workbench) {
         scrim = true,
         icon = if (target?.link == true) StretchIcons.Link else StretchIcons.Search,
         queryStyle = if (target?.link == true) Stretch.type.value.merge(TextStyle(fontSize = Stretch.type.body.fontSize)) else null,
-        hints = when {
-            folder != null -> folderHints()
-            target == null -> searchHints()
-            else -> linkHints()
-        },
-        onKey = { event ->
-            val chord = event.chord()
-            val pick = SwitcherKeys.pickOf(event)
-            when {
-                pick != null && folder != null -> addFolder() != null
-                pick != null && target == null -> rows.getOrNull(switcher.index)?.let { commands.pick(it, pick) } != null
-                pick != null -> options.getOrNull(switcher.index)?.let { commands.pick(it, pick) } != null
-                chord == SwitcherKeys.DOWN -> { switcher.move(1, count); true }
-                chord == SwitcherKeys.UP -> { switcher.move(-1, count); true }
-                chord == SwitcherKeys.SCOPE && searching -> { switcher.pick(switcher.scope.next()); true }
-                chord == SwitcherKeys.SCOPE_BACK && searching -> { switcher.pick(switcher.scope.next(back = true)); true }
-                else -> false
-            }
-        },
+        hints = switcherHints(view),
+        onKey = { view.onKey(it, switcher, commands) },
         trailing = {
-            if (searching) {
-                val total = sections.sumOf { it.total }
+            if (view.searching) {
+                val total = view.sections.sumOf { it.total }
                 RowMeta(pluralStringResource(Res.plurals.switcher_results, total, total))
                 ScopePicker(switcher.scope, switcher::pick)
             } else if (target != null) {
@@ -120,22 +67,7 @@ fun Switcher(workbench: Workbench) {
             }
         },
     ) {
-        if (folder != null) {
-            Column(Modifier.padding(start = StretchSpacing.space6, end = StretchSpacing.space6, top = StretchSpacing.space4, bottom = StretchSpacing.space6)) {
-                AddRepoRow(folder, folderFailed, highlighted = true) { addFolder() }
-            }
-        } else if (target == null) {
-            SearchResults(workbench, sections, query, switcher.index, now) { commands.pick(it, SwitcherPick.Switch) }
-        } else {
-            Column(Modifier.padding(start = StretchSpacing.space6, end = StretchSpacing.space6, bottom = StretchSpacing.space6)) {
-                LinkCard(target, facts, now)
-                if (options.isNotEmpty()) PaletteSection(stringResource(Res.string.switcher_open_as))
-                options.forEachIndexed { i, option ->
-                    val held = option.source in state.workspace.sources
-                    OpenAsRow(option, facts, held, i == switcher.index) { commands.pick(option, SwitcherPick.Switch) }
-                }
-            }
-        }
+        SwitcherBody(workbench, view, switcher.query, switcher.index, commands)
     }
 }
 
@@ -150,27 +82,6 @@ private fun placeholder(workbench: Workbench, scope: SwitcherScope): String {
 }
 
 @Composable
-private fun searchHints() = listOf(
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.SWITCH), stringResource(Res.string.switcher_hint_switch)),
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.NEW_PANE), stringResource(Res.string.switcher_hint_new_pane)),
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.BESIDE), stringResource(Res.string.switcher_hint_beside)),
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.SCOPE), stringResource(Res.string.switcher_hint_scope)),
-)
-
-@Composable
-private fun folderHints() = listOf(
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.SWITCH), stringResource(Res.string.switcher_add_repo)),
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.CLOSE), stringResource(Res.string.switcher_hint_close)),
-)
-
-@Composable
-private fun linkHints() = listOf(
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.SWITCH), stringResource(Res.string.switcher_hint_open)),
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.NEW_PANE), stringResource(Res.string.switcher_hint_new_pane)),
-    PaletteHint(SwitcherKeys.caps(SwitcherKeys.CLOSE), stringResource(Res.string.switcher_hint_close)),
-)
-
-@Composable
 private fun chipText(target: PastedTarget): String = stringResource(
     when (target.named) {
         is Source.Commit -> if (target.link) Res.string.switcher_link_commit else Res.string.switcher_ref_commit
@@ -179,5 +90,3 @@ private fun chipText(target: PastedTarget): String = stringResource(
         is Source.CommitRange -> if (target.link) Res.string.switcher_link_range else Res.string.switcher_ref_range
     },
 )
-
-private const val MILLIS_PER_SECOND = 1000L

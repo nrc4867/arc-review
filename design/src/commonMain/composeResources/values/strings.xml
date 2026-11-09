@@ -585,8 +585,8 @@
     <string name="action_move_start_card_across">Move to the other column</string>
     <string name="action_restore_start_cards">Restore start screen cards</string>
 
-    <string name="start_paste_placeholder">Paste a pull request, branch or commit link</string>
-    <string name="start_paste_description">Open a source from a link</string>
+    <string name="start_paste_placeholder">Find or paste a pull request, branch or commit</string>
+    <string name="start_paste_description">Find a source to open</string>
     <string name="start_find_source">Find a source</string>
     <string name="start_recent">Recent</string>
     <string name="start_repositories">Repositories</string>

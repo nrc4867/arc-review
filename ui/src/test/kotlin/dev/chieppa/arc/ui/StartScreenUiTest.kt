@@ -1,5 +1,12 @@
 package dev.chieppa.arc.ui
 
+import dev.chieppa.arc.core.source.Source
+import dev.chieppa.arc.core.source.BranchName
+import dev.chieppa.arc.git.repo.LocalBranch
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -59,7 +66,7 @@ class StartScreenUiTest {
         val workbench = openEmpty(watch)
         assertEquals(StartScreenKind.NothingOpen, workbench.start.kind)
         assertTrue(shows("Find a source"))
-        onNodeWithContentDescription("Open a source from a link").assertExists()
+        onNodeWithContentDescription("Find a source to open").assertExists()
         assertTrue(shows("1 new"))
         assertTrue(shown(StartCards.REPOSITORIES) && shown(StartCards.KEYS) && shown(StartCards.SETTINGS) && shown(StartCards.HELP))
         assertFalse(shown(StartCards.RECENT))
@@ -68,6 +75,21 @@ class StartScreenUiTest {
         waitForIdle()
         assertTrue(workbench.state.workspace.pages.isNotEmpty())
         assertFalse(shown(StartCards.REPOSITORIES))
+    }
+
+    @Test
+    fun typingInTheFieldSuggestsUnderItAndEnterOpensTheHighlightedOne() = runComposeUiTest {
+        data.branchList = listOf(LocalBranch("spike/token-binding", "mfischer", 0), LocalBranch("docs/readme", "jpark", 0))
+        val workbench = openEmpty()
+        val field = onNodeWithContentDescription("Find a source to open")
+        field.performTextInput("bindng")
+        waitForIdle()
+        assertTrue(shows("spike/token-binding"))
+        assertFalse(shows("docs/readme"))
+        assertFalse(workbench.switcher.open)
+        field.performKeyInput { pressKey(Key.Enter) }
+        waitForIdle()
+        assertEquals(Source.BranchAgainstBase(data.repo, BranchName("spike/token-binding")), workbench.state.active)
     }
 
     @Test
