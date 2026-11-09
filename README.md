@@ -28,11 +28,6 @@ The revision matrix sets a source's files against each revision it has had, to s
 
 ![The revision matrix of four revisions, marking which files changed in each](docs/images/revisions.png)
 
-## Status
-
-Early and in daily use. GitHub is the only host so far, read through your `gh` login; Linux builds but is not
-supported.
-
 ## Developing locally
 
 You need:
