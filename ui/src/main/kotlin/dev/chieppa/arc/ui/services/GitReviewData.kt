@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui.services
 
+import dev.chieppa.arc.core.change.CommitInfo
 import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.change.SourceRevisions
 import dev.chieppa.arc.core.change.SourceSnapshot
@@ -56,6 +57,19 @@ class GitReviewData(
         repos.repository(repo).branches()
     } catch (_: UnknownRepoException) {
         emptyList()
+    }
+
+    override suspend fun recentCommits(repo: RepoName, limit: Int): List<CommitInfo> = try {
+        repos.repository(repo).recentCommits(limit)
+    } catch (_: UnknownRepoException) {
+        emptyList()
+    }
+
+    override suspend fun findCommit(repo: RepoName, rev: String): CommitInfo? = try {
+        val git = repos.repository(repo)
+        git.resolveCommit(rev)?.let { git.commit(it) }
+    } catch (_: UnknownRepoException) {
+        null
     }
 
     override suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? = pulls?.openPulls(repos, text)

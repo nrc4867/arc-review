@@ -15,15 +15,18 @@ import dev.chieppa.arc.host.github.repo.GitHubRepo
 /**
  * What followed repos hold that the strip does not, in the order they are suggested: the open [pulls] waiting on the
  * person ([viewer]), then what was opened lately ([recent]), then the other pulls by when they were updated, then the
- * local [branches] by when they were committed. Each pull lands in the local clone of its repo ([gitHubRepos] says
- * which clone comes from which repo); a recent source shows on its own only when it is in one of [repos] and nothing
- * else here names it. Sources in the strip, [inWorkspace], are left out.
+ * local [branches] by when they were committed, then [commits], and last the branches with nothing ahead of the default
+ * branch. Each pull lands in the local clone of its repo ([gitHubRepos] says which clone comes from which repo); a
+ * recent source shows on its own only when it is in one of [repos] and nothing else here names it. Sources in the
+ * strip, [inWorkspace], are left out.
  */
 object FollowedResults {
     private const val WAITING = 0
     private const val RECENT = 1
     private const val PULL = 2
     private const val BRANCH = 3
+    private const val COMMIT = 4
+    private const val SPENT_BRANCH = 5
 
     fun of(
         pulls: List<PullRequestSummary>,
@@ -33,6 +36,7 @@ object FollowedResults {
         recent: List<RecentSource> = emptyList(),
         viewer: Viewer? = null,
         repos: Collection<RepoName> = gitHubRepos.keys + branches.keys,
+        commits: List<SwitcherItem.FollowedCommit> = emptyList(),
     ): List<SwitcherItem> {
         val held = inWorkspace.toSet()
         val pullItems = pulls.mapNotNull { pull ->
@@ -59,17 +63,22 @@ object FollowedResults {
                 item is SwitcherItem.FollowedPull && WaitingOnRule.of(item.pull, viewer) is WaitingOn.You -> Triple(WAITING, 0, -item.pull.updatedAt.epochSecond)
                 lately != null -> Triple(RECENT, lately, 0)
                 item is SwitcherItem.FollowedPull -> Triple(PULL, 0, -item.pull.updatedAt.epochSecond)
+                item is SwitcherItem.FollowedBranch && item.branch.ahead == 0 -> Triple(SPENT_BRANCH, 0, -item.branch.committed)
                 item is SwitcherItem.FollowedBranch -> Triple(BRANCH, 0, -item.branch.committed)
-                else -> Triple(BRANCH + 1, 0, 0)
+                item is SwitcherItem.FollowedCommit -> Triple(COMMIT, 0, -item.commit.committed)
+                else -> Triple(COMMIT + 1, 0, 0)
             }
         }
-        return (pullItems + recentItems + branchItems).sortedWith(compareBy({ order(it).first }, { order(it).second }, { order(it).third }))
+        val listed = named + recentItems.map { it.source }
+        val commitItems = commits.filter { it.source !in held && it.source !in listed }.distinctBy { it.source }
+        return (pullItems + recentItems + branchItems + commitItems).sortedWith(compareBy({ order(it).first }, { order(it).second }, { order(it).third }))
     }
 
     private fun sourceOf(item: SwitcherItem): Source? = when (item) {
         is SwitcherItem.FollowedPull -> item.source
         is SwitcherItem.FollowedBranch -> item.source
         is SwitcherItem.Recent -> item.source
+        is SwitcherItem.FollowedCommit -> item.source
         else -> null
     }
 }

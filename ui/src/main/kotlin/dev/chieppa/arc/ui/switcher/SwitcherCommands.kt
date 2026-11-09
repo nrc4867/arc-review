@@ -35,6 +35,7 @@ class SwitcherCommands(
             is SwitcherItem.FollowedPull -> goTo(item.source, how)
             is SwitcherItem.FollowedBranch -> goTo(item.source, how)
             is SwitcherItem.Recent -> goTo(item.source, how)
+            is SwitcherItem.FollowedCommit -> goTo(item.source, how)
             is SwitcherItem.GitHubRepository -> Unit
         }
     }

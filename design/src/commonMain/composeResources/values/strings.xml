@@ -159,6 +159,10 @@
     <string name="switcher_search_repo">Search repository</string>
     <string name="switcher_github_repo">GitHub</string>
     <string name="switcher_followed_note">not open</string>
+    <plurals name="switcher_ahead">
+        <item quantity="one">%1$d ahead</item>
+        <item quantity="other">%1$d ahead</item>
+    </plurals>
     <plurals name="switcher_commits">
         <item quantity="one">%1$d commit</item>
         <item quantity="other">%1$d commits</item>

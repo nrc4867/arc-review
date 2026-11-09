@@ -1,5 +1,8 @@
 package dev.chieppa.arc.ui
 
+import dev.chieppa.arc.ui.switcher.CommitQuery
+import dev.chieppa.arc.core.change.ObjectId
+import dev.chieppa.arc.core.change.CommitInfo
 import dev.chieppa.arc.core.change.ChangeStatus
 import dev.chieppa.arc.core.change.ChangedFile
 import dev.chieppa.arc.core.source.BranchName
@@ -137,6 +140,32 @@ class SwitcherLogicTest {
     }
 
     @Test
+    fun commitsMatchByTheStartOfTheirShaOrTheirTitle() {
+        val a = CommitInfo(ObjectId("1098b8f0b5bd33a26ce520279bbbccd37949b9c7"), "Drop the key hint", "jpark", 0)
+        val b = CommitInfo(ObjectId("a5fdccfd40881d6b09a1a6574b7dd0d700bafb3f"), "Close the window even when a step fails", "jpark", 0)
+        val commits = listOf(a, b).map { SwitcherItem.FollowedCommit(Source.Commit(api, CommitSha(it.id.value)), it) }
+        val range = SwitcherItem.FollowedCommit(Source.CommitRange(api, CommitSha(a.id.value), CommitSha(b.id.value)), b)
+        val found = FollowedResults.of(emptyList(), emptyMap(), origins, emptyList(), commits = commits + range)
+        fun first(query: String) = sourceOf(SwitcherSearch.sections(query, SwitcherScope.Sources, SwitcherInputs(followed = found)).single().items.first())
+        assertEquals(Source.Commit(api, CommitSha(a.id.value)), first("1098b8f0b5bd33a26ce520279bbbccd37949b9c7"))
+        assertEquals(Source.Commit(api, CommitSha(a.id.value)), first("1098b8f"))
+        assertEquals(Source.Commit(api, CommitSha(b.id.value)), first("windw step"))
+        assertEquals(range.source, first("1098b8f..a5fdccf"))
+        assertEquals(CommitQuery(null, "1098b8f"), CommitQuery.read(" 1098B8F "))
+        assertNull(CommitQuery.read("abc12"))
+        assertNull(CommitQuery.read("token"))
+    }
+
+    @Test
+    fun branchesWithNothingAheadComeLast() {
+        val branches = mapOf(api to listOf(LocalBranch("main", "x", 9, ahead = 0), LocalBranch("spike/token", "x", 1, ahead = 3)))
+        val found = FollowedResults.of(emptyList(), branches, origins, emptyList())
+        assertEquals(listOf("spike/token", "main"), found.map { (it as SwitcherItem.FollowedBranch).branch.name })
+        val typed = SwitcherSearch.sections("main", SwitcherScope.Sources, SwitcherInputs(followed = found + SwitcherItem.FollowedBranch(Source.BranchAgainstBase(web, BranchName("maintenance")), LocalBranch("maintenance", "x", 0, ahead = 2))))
+        assertEquals("maintenance", (typed.single().items.first() as SwitcherItem.FollowedBranch).branch.name)
+    }
+
+    @Test
     fun aPastedFolderIsReadAsARepoToFollow() {
         val folder = Path.of("").toAbsolutePath().toString()
         assertEquals(Path.of(folder), FolderTarget.read("\"$folder\""))
@@ -148,6 +177,7 @@ class SwitcherLogicTest {
         is SwitcherItem.FollowedPull -> item.source
         is SwitcherItem.FollowedBranch -> item.source
         is SwitcherItem.Recent -> item.source
+        is SwitcherItem.FollowedCommit -> item.source
         else -> error("not followed")
     }
 

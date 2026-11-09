@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.switcher
 
 import dev.chieppa.arc.core.change.ChangedFile
+import dev.chieppa.arc.core.change.CommitInfo
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.git.repo.LocalBranch
@@ -23,6 +24,9 @@ sealed interface SwitcherItem {
 
     /** A local branch of a followed repo, not in the strip. */
     data class FollowedBranch(val source: Source.BranchAgainstBase, val branch: LocalBranch) : SwitcherItem
+
+    /** A commit, or a range ending at [commit], in a followed repo, not in the strip. */
+    data class FollowedCommit(val source: Source, val commit: CommitInfo) : SwitcherItem
 
     /** A GitHub repo named in the field, to follow by cloning it, or to search when it is followed already as [local]. */
     data class GitHubRepository(val repo: GitHubRepo, val local: RepoName?) : SwitcherItem

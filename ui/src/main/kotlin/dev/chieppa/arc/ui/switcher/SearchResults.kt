@@ -49,6 +49,7 @@ fun SearchResults(workbench: Workbench, sections: List<SwitcherSection>, query: 
                     is SwitcherItem.FollowedPull -> FollowedPullRow(item, workbench.watch.viewer, query, highlighted, pick)
                     is SwitcherItem.FollowedBranch -> FollowedBranchRow(item, query, nowSeconds, highlighted, pick)
                     is SwitcherItem.Recent -> RecentRow(item, query, nowSeconds, highlighted, pick)
+                    is SwitcherItem.FollowedCommit -> FollowedCommitRow(item, query, nowSeconds, highlighted, pick)
                     is SwitcherItem.GitHubRepository -> GitHubRepoRow(item, workbench, highlighted, pick)
                 }
             }

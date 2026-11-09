@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui.services
 
+import dev.chieppa.arc.core.change.CommitInfo
 import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.change.SourceRevisions
 import dev.chieppa.arc.core.change.SourceSnapshot
@@ -41,6 +42,12 @@ interface ReviewData {
 
     /** The branches of [repo]'s clone, newest commit first; none for a repo not known. */
     suspend fun branches(repo: RepoName): List<LocalBranch> = emptyList()
+
+    /** The newest [limit] commits on [repo]'s branches, newest first; none for a repo not known. */
+    suspend fun recentCommits(repo: RepoName, limit: Int): List<CommitInfo> = emptyList()
+
+    /** The commit [rev] names in [repo], such as a sha or a short one, or null when it names none there. */
+    suspend fun findCommit(repo: RepoName, rev: String): CommitInfo? = null
 
     /** The open pull requests in [repos] whose titles hold [text]; null when the host cannot be asked, as without a token. */
     suspend fun openPulls(repos: Collection<GitHubRepo>, text: String): List<PullRequestSummary>? = null

@@ -13,6 +13,9 @@ object SwitcherLimits {
     /** How much worse a match in a file's folder ranks than one in its name. */
     const val FOLDER_MATCH = 4
 
+    /** How many of each repo's newest commits the switcher searches by title and sha. */
+    const val COMMITS = 300
+
     /** How long typing must pause before followed repos are asked of GitHub. */
     const val DEBOUNCE_MILLIS = 300L
 
