@@ -26,8 +26,20 @@ class NodeLaunch(
         return LaunchSpec(command, workDir, NodeEnvironment.of(parent, node.path.toAbsolutePath().parent))
     }
 
+    /** A process of its own type checking the plugin in [folder] from [entry], reading only it and the host's files. */
+    suspend fun checkSpec(folder: Path, entry: String): LaunchSpec {
+        val node = tools.node()
+        val host = hostFiles()
+        withContext(Dispatchers.IO) { Files.createDirectories(workDir) }
+        val command = listOf(node.path.toString()) + PermissionFlags.of(setOf(folder, host.folder)) + QUIET + host.script.toString() + CHECK + folder.toString() + entry
+        return LaunchSpec(command, workDir, NodeEnvironment.of(parent, node.path.toAbsolutePath().parent))
+    }
+
     private companion object {
         const val SOURCE_MAPS = "--enable-source-maps"
+
+        /** The host's flag to type check one plugin, as `TypeCheck.ts` names it. */
+        const val CHECK = "--check"
 
         // Node warns on every thread that --allow-worker widens what may run; Arc grants it knowingly, for its own host.
         const val QUIET = "--disable-warning=PERM0006"

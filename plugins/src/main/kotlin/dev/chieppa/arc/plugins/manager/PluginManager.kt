@@ -9,6 +9,7 @@ import dev.chieppa.arc.plugins.protocol.AppEventParams
 import dev.chieppa.arc.plugins.protocol.SettingType
 import dev.chieppa.arc.plugins.source.FoundPlugin
 import dev.chieppa.arc.plugins.source.PluginDiscovery
+import dev.chieppa.arc.plugins.typecheck.TypeErrors
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,7 @@ class PluginManager(private val services: PluginServices) {
     private val known = MutableStateFlow<List<PluginEntry>>(emptyList())
     private val watching = mutableMapOf<PluginSourceSpec, Job>()
     private val secrets = PluginSecrets(services.secrets)
+    private val checks = TypeChecks(services.scope, services.typeChecker, services.typeCheckMillis)
 
     val config: StateFlow<PluginsConfig> get() = setup
 
@@ -42,6 +44,9 @@ class PluginManager(private val services: PluginServices) {
 
     /** Every plugin found, in source order. */
     val entries: StateFlow<List<PluginEntry>> get() = known
+
+    /** Each running directory plugin's type errors, by id, found after it is enabled and after each save. */
+    val typeErrors: StateFlow<Map<String, TypeErrors>> get() = checks.errors
 
     /** Reads the setup, finds every source's plugins, starts those enabled and watches the sources. */
     fun start() {
@@ -126,7 +131,10 @@ class PluginManager(private val services: PluginServices) {
         val found = config.sources.flatMap(PluginDiscovery::find).distinctBy { it.id }
         val before = known.value.associateBy { it.id }
         val entries = found.map { plugin -> entry(plugin, before[plugin.id], config, reload) }
-        (before.keys - entries.map { it.id }.toSet()).forEach { before[it]?.instance?.stop() }
+        (before.keys - entries.map { it.id }.toSet()).forEach {
+            before[it]?.instance?.stop()
+            checks.clear(it)
+        }
         known.value = entries
         watch(config.sources)
     }
@@ -138,6 +146,7 @@ class PluginManager(private val services: PluginServices) {
         val asks = manifest?.let { Capability.added(it.capabilities, config.approved[plugin.id] ?: Capabilities()) }.orEmpty()
         if (manifest == null || !enabled || asks.isNotEmpty()) {
             kept?.stop()
+            checks.clear(plugin.id)
             return PluginEntry(plugin, enabled, null, if (enabled) asks else emptyList())
         }
         val root = PluginDiscovery.root(plugin)
@@ -145,12 +154,22 @@ class PluginManager(private val services: PluginServices) {
             kept.manifest = manifest
             kept.folder = plugin.folder
             kept.root = root
-            if (reload == plugin.source) kept.start()
+            if (reload == plugin.source) {
+                kept.start()
+                check(plugin)
+            }
             return PluginEntry(plugin, true, kept)
         }
         val instance = PluginInstance(manifest, plugin.folder, root, services, { settings(plugin.id) }, { setSettings(plugin.id, it) })
         instance.start()
+        check(plugin)
         return PluginEntry(plugin, true, instance)
+    }
+
+    /** Type checks [plugin] when it comes from a folder the person edits. */
+    private fun check(plugin: FoundPlugin) {
+        val manifest = plugin.manifest ?: return
+        if (plugin.source is PluginSourceSpec.Directory) checks.request(plugin.id, plugin.folder, manifest.entry)
     }
 
     private fun watch(sources: List<PluginSourceSpec>) {

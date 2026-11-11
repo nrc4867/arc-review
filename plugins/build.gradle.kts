@@ -30,6 +30,9 @@ val bundlePluginHost = tasks.register<BundlePluginHost>("bundlePluginHost") {
     entry = "host/main.ts"
     packages = listOf("react", "react-reconciler", "scheduler", "typescript")
     copies = mapOf("typescript/lib/typescript.js" to "typescript.js")
+    // What the type check reads: TypeScript's own declarations, the SDK's types, and React's when a plugin has none.
+    packageFiles = mapOf("typescript/lib/lib.*.d.ts" to ".")
+    sourceFiles = mapOf("sdk/*.ts" to "types/sdk", "generated/*.d.ts" to "types/generated", "check/shims/*.d.ts" to "types/shims")
     // The resource PluginHostScript reads.
     resourcePath = "dev/chieppa/arc/plugins/host/host.js"
     cacheDir = File(gradle.gradleUserHomeDir, "arc-plugin-tools")

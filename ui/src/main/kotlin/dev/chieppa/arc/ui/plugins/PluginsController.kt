@@ -14,6 +14,7 @@ import dev.chieppa.arc.plugins.manager.PluginManager
 import dev.chieppa.arc.plugins.manager.PluginUi
 import dev.chieppa.arc.plugins.notes.PluginNotes
 import dev.chieppa.arc.plugins.protocol.PanesOpenParams
+import dev.chieppa.arc.plugins.typecheck.TypeErrors
 import dev.chieppa.arc.plugins.protocol.AppEventParams
 import dev.chieppa.arc.plugins.protocol.Contributions
 import dev.chieppa.arc.ui.plugins.notes.WindowNotes
@@ -57,6 +58,10 @@ class PluginsController(private val workbench: Workbench, makeManager: (PluginUi
     var statuses by mutableStateOf<Map<String, PluginStatus>>(emptyMap())
         private set
 
+    /** Each running directory plugin's type errors, by id. */
+    var typeErrors by mutableStateOf<Map<String, TypeErrors>>(emptyMap())
+        private set
+
     val actions = PluginActions(workbench)
 
     /** Reads the plugins' setup, starts those enabled and follows them. */
@@ -65,6 +70,7 @@ class PluginsController(private val workbench: Workbench, makeManager: (PluginUi
         val manager = manager ?: return
         manager.start()
         workbench.scope.launch { manager.config.collect { config = it } }
+        workbench.scope.launch { manager.typeErrors.collect { typeErrors = it } }
         workbench.scope.launch {
             manager.entries.flatMapLatest { list ->
                 entries = list

@@ -24,8 +24,9 @@ import javax.inject.Inject
 /**
  * Bundles the plugin host, the TypeScript in [sources] from [entry], with React, react-reconciler and Arc's SDK into
  * one JavaScript file at `<outputDir>/<resourcePath>`, using the esbuild and npm packages [pins] pins, kept in
- * [cacheDir]; each of [copies] (a file inside an installed package, to the name it ships as) is copied beside it.
- * They are resources Arc ships and writes out for the plugins' Node process to run.
+ * [cacheDir]; each of [copies] (a file inside an installed package, to the name it ships as) is copied beside it,
+ * with the files [packageFiles] and [sourceFiles] match, and an [INDEX] naming every file shipped. They are resources
+ * Arc ships and writes out for the plugins' Node process to run and type check with.
  */
 @CacheableTask
 abstract class BundlePluginHost : DefaultTask() {
@@ -51,6 +52,14 @@ abstract class BundlePluginHost : DefaultTask() {
     /** Files of the installed packages shipped beside the host as they are, by path under `node_modules`, to their names. */
     @get:Input
     abstract val copies: MapProperty<String, String>
+
+    /** Files of the installed packages by a glob under `node_modules` (`*` in the file name only), to a folder beside the host. */
+    @get:Input
+    abstract val packageFiles: MapProperty<String, String>
+
+    /** Files of [sources] by a glob relative to it (`*` in the file name only), to a folder beside the host. */
+    @get:Input
+    abstract val sourceFiles: MapProperty<String, String>
 
     @get:Internal
     abstract val cacheDir: DirectoryProperty
@@ -86,13 +95,29 @@ abstract class BundlePluginHost : DefaultTask() {
                 "--outfile=${target.path}",
             )
         }
-        copies.get().forEach { (from, name) -> modules.resolve(from).copyTo(File(target.parentFile, name), overwrite = true) }
+        val folder = target.parentFile
+        copies.get().forEach { (from, name) -> modules.resolve(from).copyTo(File(folder, name), overwrite = true) }
+        packageFiles.get().forEach { (glob, to) -> copyMatching(modules, glob, File(folder, to)) }
+        sourceFiles.get().forEach { (glob, to) -> copyMatching(sources.get().asFile, glob, File(folder, to)) }
+        val shipped = folder.walkTopDown().filter { it.isFile }.map { it.relativeTo(folder).invariantSeparatorsPath }.sorted()
+        File(folder, INDEX).writeText(shipped.joinToString(LINE, postfix = LINE))
     }
 
-    private companion object {
-        const val NODE_PATH = "NODE_PATH"
+    private fun copyMatching(root: File, glob: String, into: File) {
+        val dir = root.resolve(glob.substringBeforeLast('/', ""))
+        val name = Regex(glob.substringAfterLast('/').split('*').joinToString(".*") { Regex.escape(it) })
+        val files = dir.listFiles().orEmpty().filter { it.isFile && name.matches(it.name) }
+        files.forEach { it.copyTo(File(into, it.name), overwrite = true) }
+    }
+
+    companion object {
+        /** The file beside the host naming every file shipped with it, one path per line. */
+        const val INDEX = "files.txt"
+
+        private const val NODE_PATH = "NODE_PATH"
+        private const val LINE = "\n"
 
         // A JSON string; Windows' argument parsing drops bare quotes, so there they are escaped.
-        val PRODUCTION = if (HostSystem.isWindows) "\\\"production\\\"" else "\"production\""
+        private val PRODUCTION = if (HostSystem.isWindows) "\\\"production\\\"" else "\"production\""
     }
 }

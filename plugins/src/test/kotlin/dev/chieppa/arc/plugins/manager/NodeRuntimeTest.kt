@@ -26,6 +26,7 @@ import dev.chieppa.arc.plugins.runtime.NodeLaunch
 import dev.chieppa.arc.plugins.runtime.PluginTools
 import dev.chieppa.arc.plugins.runtime.ToolInstaller
 import dev.chieppa.arc.plugins.runtime.ToolPins
+import dev.chieppa.arc.plugins.typecheck.NodeTypeChecker
 import dev.chieppa.arc.plugins.view.Props
 import dev.chieppa.arc.plugins.view.ViewNode
 import kotlinx.coroutines.CoroutineScope
@@ -146,11 +147,15 @@ class NodeRuntimeTest {
         ),
     )
 
-    private fun manager(approved: Capabilities = Capabilities(panels = true, actions = true), ui: PluginUi = PluginUi.NONE): PluginManager {
+    private fun launch(): NodeLaunch {
         val node = Path.of(System.getProperty("arc.plugins.node"))
         val tools = PluginTools(ToolInstaller(dir.resolve("runtimes"), { _, _, _ -> throw IOException("offline") }), ToolPins(Properties()), ProcessCommandRunner, node)
         val parent = System.getenv() + mapOf("GH_TOKEN" to "gho_secret", "GITHUB_TOKEN" to "ghp_secret")
-        val launch = NodeLaunch(tools, PluginHostScript(dir.resolve("runtime"))::files, dir.resolve("work"), parent)
+        return NodeLaunch(tools, PluginHostScript(dir.resolve("runtime"))::files, dir.resolve("work"), parent)
+    }
+
+    private fun manager(approved: Capabilities = Capabilities(panels = true, actions = true), ui: PluginUi = PluginUi.NONE): PluginManager {
+        val launch = launch()
         val system = SystemProcessLauncher(scope)
         val counted = ProcessLauncher { spec -> launches.incrementAndGet(); system.launch(spec) }
         val host = NodeHost(scope, counted, launch::spec)
@@ -240,6 +245,27 @@ class NodeRuntimeTest {
         } finally {
             manager.stop()
         }
+    }
+
+    @Test
+    fun aPluginsTypeErrorsAreFoundInAProcessOfItsOwnAgainstTheSdksTypes() = runBlocking<Unit> {
+        plugin("typed", "{}", mapOf("src/index.tsx" to """
+            import { definePlugin } from "@review/plugin";
+            import type { GrepHit } from "@review/plugin";
+            import { useState } from "react";
+
+            export function first(hits: GrepHit[]): number {
+                const [n] = useState(0);
+                return hits[n].lines;
+            }
+
+            export default definePlugin({});
+        """))
+        val errors = NodeTypeChecker(launch()::checkSpec).check(sources.resolve("typed"), "src/index.tsx")
+        val error = errors.single()
+        assertEquals(DiagnosticKind.Type, error.kind)
+        assertEquals("src/index.tsx" to 7, error.file to error.line)
+        assertTrue("'lines' does not exist on type 'GrepHit'" in error.message, error.message)
     }
 
     private companion object {

@@ -23,6 +23,7 @@ import dev.chieppa.arc.plugins.protocol.MountParams
 import dev.chieppa.arc.plugins.protocol.PluginInfo
 import dev.chieppa.arc.plugins.secrets.MemorySecretStore
 import dev.chieppa.arc.plugins.secrets.SecretStore
+import dev.chieppa.arc.plugins.typecheck.TypeChecker
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.util.ArcDispatchers
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -66,12 +67,16 @@ class PluginRig(capabilitiesJson: String, contributions: Contributions, val appr
         }
     }
 
-    /** The window with the plugins [config] sets up, prepared by [preparer], their secrets kept in [secrets]. */
+    /**
+     * The window with the plugins [config] sets up, prepared by [preparer], their secrets kept in [secrets] and their
+     * types checked by [typeChecker].
+     */
     fun open(
         test: ComposeUiTest,
         preparer: PluginPreparer = ready,
         config: PluginsConfig = enabled,
         secrets: SecretStore = MemorySecretStore(lasting = true),
+        typeChecker: TypeChecker = TypeChecker.NONE,
     ): Workbench {
         val dispatcher = UnconfinedTestDispatcher(test.mainClock.scheduler)
         // The plugins' timers (heartbeat, restarts) wait on a clock of their own that the test never advances.
@@ -81,7 +86,8 @@ class PluginRig(capabilitiesJson: String, contributions: Contributions, val appr
             dispatchers = ArcDispatchers.on(dispatcher),
             plugins = { ui ->
                 val grep = GitGrep({ _, _ -> CommandResult(1, "", "") })
-                PluginManager(PluginServices(scope, process, storage, ConsoleProcesses(console, scope), grep, preparer, ui = ui, secrets = secrets))
+                val consoles = ConsoleProcesses(console, scope)
+                PluginManager(PluginServices(scope, process, storage, consoles, grep, preparer, ui = ui, secrets = secrets, typeChecker = typeChecker, typeCheckMillis = 0))
             },
         )
         test.setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
