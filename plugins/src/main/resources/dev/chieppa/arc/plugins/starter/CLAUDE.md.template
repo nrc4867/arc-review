@@ -1,8 +1,8 @@
 # {{name}}
 
 An Arc plugin: TypeScript and JSX that Arc runs in a worker of its own Node process and draws with its own native
-components. Arc made this folder with `arc-review plugin new` (or Settings › Plugins › New plugin) and watches it: every
-save reloads the plugin in the running Arc, with no build step.
+components. Arc made this folder with `java -jar arc-review.jar plugin new` (or Settings › Plugins › New plugin) and
+watches it: every save reloads the plugin in the running Arc, with no build step.
 
 ## Files
 

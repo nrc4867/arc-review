@@ -89,8 +89,8 @@ class PluginManager(private val services: PluginServices) {
     }
 
     /**
-     * Takes the sources added to the setup where it is kept since it was read, as `arc-review plugin new` adds them,
-     * and nothing else: which plugins are enabled and what they may do stay the person's choice in this window.
+     * Takes the sources added to the setup where it is kept since it was read, as `java -jar arc-review.jar plugin new`
+     * adds them, and nothing else: which plugins are enabled and what they may do stay the person's choice in this window.
      */
     @Synchronized
     private fun adoptSources() {

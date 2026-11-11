@@ -30,6 +30,12 @@ tasks.test {
     jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
 
+// The uber jar Arc ships as, one per OS: it may call restricted methods (skiko loading its library, FFM for
+// tree-sitter and the keychain) without Java warning on every run.
+tasks.withType<org.gradle.jvm.tasks.Jar>().matching { it.name.startsWith("packageUberJar") }.configureEach {
+    manifest.attributes("Enable-Native-Access" to "ALL-UNNAMED")
+}
+
 compose.desktop {
     application {
         mainClass = "dev.chieppa.arc.app.MainKt"

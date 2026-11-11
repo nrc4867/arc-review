@@ -15,10 +15,10 @@ import java.io.PrintStream
 import java.nio.file.Path
 
 /**
- * Arc's binary run as a command rather than a window: `arc-review plugin new <name> [--in <folder>]` makes a starter
- * plugin in a folder of its id under the folder named (the working folder by default) and adds it to the plugin
- * sources in the data folder [dataDir], where a running Arc picks it up. The plugin is not enabled: the person enables
- * it, as any plugin.
+ * Arc's jar run as a command rather than a window: `java -jar arc-review.jar plugin new <name> [--in <folder>]` makes
+ * a starter plugin in a folder of its id under the folder named (the working folder by default) and adds it to the
+ * plugin sources in the data folder [dataDir], where a running Arc picks it up. The plugin is not enabled: the person
+ * enables it, as any plugin. Its messages keep to ASCII, so any console's code page prints them.
  */
 internal class CommandLine(private val dataDir: Path, private val workingDir: Path, private val out: PrintStream, private val err: PrintStream) {
     /** Runs [args], printing what happened, and gives the process's exit code. */

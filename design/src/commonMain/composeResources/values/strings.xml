@@ -966,8 +966,8 @@
     <string name="plugins_new_create">Create</string>
     <string name="plugins_new_bad_name">A name needs a letter or digit, and only letters, digits, spaces, dots, dashes and underscores</string>
     <string name="plugins_new_folder_taken">Holds files already</string>
-    <string name="cli_usage">Usage: arc-review plugin new &lt;name&gt; [--in &lt;folder&gt;]</string>
-    <string name="cli_plugin_created">Made %1$s in %2$s and added it to Arc as a plugin source. Enable it in Arc under Settings › Plugins.</string>
+    <string name="cli_usage">Usage: java -jar arc-review.jar plugin new &lt;name&gt; [--in &lt;folder&gt;]</string>
+    <string name="cli_plugin_created">Made %1$s in %2$s and added it to Arc as a plugin source. Enable it in Arc under Settings > Plugins.</string>
     <string name="cli_plugin_bad_name">%1$s: a name needs a letter or digit, and only letters, digits, spaces, dots, dashes and underscores.</string>
     <string name="cli_plugin_folder_taken">%1$s holds files already.</string>
     <string name="cli_plugin_not_written">Could not write the plugin: %1$s</string>

@@ -40,7 +40,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * A starter plugin as `arc-review plugin new` makes it, in a real Node named by `arc.plugins.node`: it type checks
+ * A starter plugin as `java -jar arc-review.jar plugin new` makes it, in a real Node named by `arc.plugins.node`: it type checks
  * clean against the SDK's types, its panel draws and takes a press, and its action runs. Run with
  * `./gradlew :plugins:nodeTest -Parc.plugins.node=<node>`.
  */

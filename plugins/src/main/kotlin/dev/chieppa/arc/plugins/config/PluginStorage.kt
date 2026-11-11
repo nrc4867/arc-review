@@ -10,7 +10,10 @@ interface PluginStorage {
 
     fun saveConfig(config: PluginsConfig)
 
-    /** Says when the setup changed where it is kept, as when `arc-review plugin new` adds a source; never by default. */
+    /**
+     * Says when the setup changed where it is kept, as when `java -jar arc-review.jar plugin new` adds a source; never
+     * by default.
+     */
     fun configChanges(): Flow<Unit> = emptyFlow()
 
     /** Plugin [plugin]'s private store, empty when it has none. */
