@@ -32,8 +32,8 @@ import java.nio.file.Path
 
 /**
  * The plugin sources card: each folder or git repo plugins come from, with how many plugins it holds and a button to
- * remove it, a git source's pin and its waiting update, and a field to add a folder by its path or a git repo by its
- * url and ref.
+ * remove it, a git source's pin and its waiting update, a field to add a folder by its path or a git repo by its url
+ * and ref, and a row making a new plugin from Arc's starter.
  */
 @Composable
 fun PluginSourcesCard(workbench: Workbench) {
@@ -57,6 +57,8 @@ fun PluginSourcesCard(workbench: Workbench) {
             Divider()
         }
         AddSourceRow({ manager.addDirectory(it) }, { url, ref -> manager.addGit(url, ref) })
+        Divider()
+        NewPluginRow(workbench.dispatchers.io) { manager.addDirectory(it) }
     }
 }
 

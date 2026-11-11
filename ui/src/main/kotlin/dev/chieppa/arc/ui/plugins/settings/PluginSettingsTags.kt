@@ -5,6 +5,11 @@ object PluginSettingsTags {
     /** The field a source's folder is typed in. */
     const val ADD_SOURCE = "plugins.add-source"
 
+    /** The fields a new plugin's folder and name are typed in, and its button. */
+    const val NEW_PARENT = "plugins.new-parent"
+    const val NEW_NAME = "plugins.new-name"
+    const val NEW_CREATE = "plugins.new-create"
+
     /** A plugin's row, followed by its id. */
     const val PLUGIN = "plugins.plugin."
 
