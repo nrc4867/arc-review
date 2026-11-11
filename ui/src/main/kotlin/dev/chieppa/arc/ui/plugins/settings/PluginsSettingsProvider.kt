@@ -24,15 +24,16 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The Plugins section of Settings, board 9: the plugin sources, every plugin with its toggle, capabilities and
  * problems, and beside them each running plugin's own page, drawn by the plugin with the components of its panels.
- * Every card is hosted, drawn here rather than from entries.
+ * Every card is hosted, drawn here rather than from entries. Where plugins are off there is no section.
  */
 class PluginsSettingsProvider(private val workbench: Workbench) : SettingsProvider {
     @Composable
     override fun sections(): List<SettingsSection> {
         val plugins = workbench.plugins
+        val manager = plugins.manager ?: return emptyList()
         val keywords = settingsKeywords(Res.string.plugins_keywords)
-        val node = plugins.manager?.nodeVersion?.let { version ->
-            if (plugins.manager.nodeReady()) stringResource(Res.string.plugins_node, version) else stringResource(Res.string.plugins_node_download, version)
+        val node = manager.nodeVersion?.let { version ->
+            if (manager.nodeReady()) stringResource(Res.string.plugins_node, version) else stringResource(Res.string.plugins_node_download, version)
         }
         val pages = plugins.running.filter { (_, contributions) -> contributions.settingsPage }.map { (entry, _) ->
             val title = entry.found.manifest?.title ?: entry.id
