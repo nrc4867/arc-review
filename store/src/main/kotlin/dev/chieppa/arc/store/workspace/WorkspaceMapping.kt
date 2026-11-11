@@ -65,6 +65,7 @@ object WorkspaceMapping {
         is Page.Runs -> StoredPage.Runs(page.id.value, page.filter)
         is Page.Run -> StoredPage.Run(page.id.value, page.run.repo, page.run.id)
         is Page.Settings -> StoredPage.Settings(page.id.value, page.section)
+        is Page.Plugin -> StoredPage.Plugin(page.id.value, page.plugin, page.pane, page.props, page.source?.ref)
     }
 
     private fun toPage(stored: StoredPage): Page? = readOrNull {
@@ -75,6 +76,7 @@ object WorkspaceMapping {
             is StoredPage.Runs -> Page.Runs(PaneId(stored.id), stored.filter)
             is StoredPage.Run -> Page.Run(PaneId(stored.id), RunRef(stored.repo, stored.run))
             is StoredPage.Settings -> Page.Settings(PaneId(stored.id), stored.section)
+            is StoredPage.Plugin -> Page.Plugin(PaneId(stored.id), stored.plugin, stored.pane, stored.props, stored.source?.let(SourceRefs::parse))
         }
     }
 

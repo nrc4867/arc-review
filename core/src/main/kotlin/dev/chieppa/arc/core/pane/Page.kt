@@ -33,6 +33,18 @@ sealed interface Page {
         override val pinned: Boolean get() = true
     }
 
+    /**
+     * A pane of plugin [plugin]'s kind [pane], opened with [props] (a JSON object) for [source]. It belongs to no
+     * source's layout, so it is always pinned.
+     */
+    data class Plugin(override val id: PaneId, val plugin: String, val pane: String, val props: String = EMPTY_PROPS, val source: Source? = null) : Page {
+        override val pinned: Boolean get() = true
+
+        companion object {
+            const val EMPTY_PROPS = "{}"
+        }
+    }
+
     /** The Settings page, showing the section [section] by id, or the first one when null. It belongs to no source, so it is always pinned. */
     data class Settings(override val id: PaneId, val section: String? = null) : Page {
         override val pinned: Boolean get() = true

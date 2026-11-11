@@ -33,6 +33,7 @@ class WorkspaceFileTest {
         .withPage(Page.Filter(PaneId("p3"), "f1"))
         .withPage(Page.RevisionMatrix(PaneId("p4"), branch))
         .withPage(Page.Settings(PaneId("p5"), "arc.appearance"))
+        .withPage(Page.Plugin(PaneId("p6"), "todos", "console", """{"handle":"todos-1"}""", branch))
         .record(branch, RecordedHead(ObjectId("c".repeat(40)), ObjectId("d".repeat(40)), 1_700_000_000))
         .mark(
             FileMark(

@@ -33,6 +33,11 @@ sealed interface StoredPage {
     @SerialName("run")
     data class Run(override val id: String, val repo: String, val run: Long) : StoredPage
 
+    /** A plugin's pane, by the plugin, its pane kind, the props it was opened with as JSON and the source's ref. */
+    @Serializable
+    @SerialName("plugin")
+    data class Plugin(override val id: String, val plugin: String, val pane: String, val props: String = "{}", val source: String? = null) : StoredPage
+
     /** The Settings page, by the section it shows. */
     @Serializable
     @SerialName("settings")

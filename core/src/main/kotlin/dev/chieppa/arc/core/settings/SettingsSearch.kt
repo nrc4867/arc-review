@@ -2,8 +2,8 @@ package dev.chieppa.arc.core.settings
 
 /**
  * Finds settings by what a person types. Every word of the query must appear, ignoring case, in an entry's label,
- * detail or keywords, or in its card's title or its section's label. The parts of the label the words match are given
- * for marking.
+ * detail or keywords, or in its card's title or its section's label; a hosted card is found whole by its title,
+ * keywords and section label. The parts of the label the words match are given for marking.
  */
 object SettingsSearch {
     private val SPACES = Regex("\\s+")
@@ -18,6 +18,10 @@ object SettingsSearch {
         return sections.mapNotNull { owned ->
             val matches = mutableMapOf<String, List<IntRange>>()
             val cards = owned.section.cards.mapNotNull { card ->
+                if (card.hosted) {
+                    val text = (listOf(card.title, owned.section.label) + card.keywords).map { it.lowercase() }
+                    return@mapNotNull card.takeIf { words.all { word -> text.any { it.contains(word) } } }
+                }
                 val entries = card.entries.filter { entry ->
                     val text = (listOfNotNull(entry.label, entry.detail, card.title, owned.section.label) + entry.keywords).map { it.lowercase() }
                     words.all { word -> text.any { it.contains(word) } }

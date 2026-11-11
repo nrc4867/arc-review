@@ -60,4 +60,13 @@ class SettingsSearchTest {
         assertEquals("plugin", merged.last().contributor)
         assertEquals("General", merged.first().section.label)
     }
+
+    @Test
+    fun aHostedCardKeepsItsSectionAndIsFoundByItsTitleAndKeywords() {
+        val plugins = SettingsSection("arc.plugins", "Plugins", cards = listOf(SettingsCard("speckit", "speckit settings", hosted = true, keywords = listOf("tracker"))))
+        assertEquals(listOf("arc.plugins"), SettingsMerge.merge(listOf(SettingsContributor("arc", listOf(plugins)))).map { it.section.id })
+        val owned = SettingsOwned("arc", plugins)
+        assertEquals(listOf("speckit"), SettingsSearch.find(listOf(owned), "tracker").single().cards.map { it.id })
+        assertTrue(SettingsSearch.find(listOf(owned), "zoom").isEmpty())
+    }
 }
