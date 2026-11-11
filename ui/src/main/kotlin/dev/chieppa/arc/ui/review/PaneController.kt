@@ -131,6 +131,16 @@ class PaneController(private val state: WorkspaceState) {
         openPinnedPage({ it is Page.Run && it.run == run }) { Page.Run(it, run) }
     }
 
+    /** Opens the Settings page, or shows its tab when one is open already. */
+    fun openSettings() {
+        openPinnedPage({ it is Page.Settings }) { Page.Settings(it) }
+    }
+
+    /** Makes the Settings page [page] show the section [section]. */
+    fun showSettings(page: Page.Settings, section: String) {
+        state.workspace = state.workspace.withPage(page.copy(section = section))
+    }
+
     /** Shows the pinned page [matches] finds, opening the one [make] makes when none shows. */
     private fun openPinnedPage(matches: (Page) -> Boolean, make: (PaneId) -> Page) {
         val existing = state.workspace.pages.firstOrNull(matches)

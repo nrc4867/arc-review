@@ -33,7 +33,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The Settings card's rows: the theme, the interface size, whether panes wrap long lines and whether changed lines are
- * highlighted whole, each applied as it changes, as the Settings popover does.
+ * highlighted whole, each applied as it changes, as on the Settings page.
  */
 @Composable
 fun SettingsRows(workbench: Workbench) {

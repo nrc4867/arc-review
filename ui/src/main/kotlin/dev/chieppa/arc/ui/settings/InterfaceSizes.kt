@@ -15,4 +15,10 @@ object InterfaceSizes {
 
     /** [size] as a whole percentage. */
     fun percent(size: Float): Int = (size * PERCENT).roundToInt()
+
+    /** The id a setting's choice gives [size]: its percentage. */
+    fun id(size: Float): String = percent(size).toString()
+
+    /** The offered size with [id], or null when none has it. */
+    fun byId(id: String): Float? = all.firstOrNull { id(it) == id }
 }

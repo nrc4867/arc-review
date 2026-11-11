@@ -84,7 +84,7 @@ fun ArcWindow(
         SaveRuns(runWatch, workbench.dispatchers, session::saveRunWatchlist, session::saveTimings)
         RunPolling(workbench)
         CompositionLocalProvider(LocalActionText provides actionText()) {
-            MacMenuBar(appMenus(), workbench.registry, workbench.keymap, null, onSettings = { workbench.settingsOpen = true }, onQuit = { exitStep { save(workbench) }; onExit() })
+            MacMenuBar(appMenus(), workbench.registry, workbench.keymap, null, onSettings = workbench.panes::openSettings, onQuit = { exitStep { save(workbench) }; onExit() })
         }
         StretchTheme(workbench.preferences.theme, scale = workbench.preferences.interfaceSize) {
             ArcFrame(workbench)

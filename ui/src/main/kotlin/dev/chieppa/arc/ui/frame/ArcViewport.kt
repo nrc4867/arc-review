@@ -12,6 +12,7 @@ import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.conversation_tab
 import dev.chieppa.arc.design.generated.revisions_tab
 import dev.chieppa.arc.design.generated.run_tab
+import dev.chieppa.arc.design.generated.settings_title
 import dev.chieppa.arc.design.generated.runs_tab
 import dev.chieppa.arc.core.actions.RunRef
 import dev.chieppa.arc.ui.menus.TabMenu
@@ -42,13 +43,14 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
     val conversationOf = { source: Source -> conversationTitle.replace(TITLE_ARG, SourceLabels.of(source)) }
     val runsTab = stringResource(Res.string.runs_tab)
     val runsOf = { id: String -> runsTab.replace(TITLE_ARG, workbench.runs.watch.watchlist.filter(id)?.name ?: id) }
+    val settingsTitle = stringResource(Res.string.settings_title)
     val runTab = stringResource(Res.string.run_tab)
     val runOf = { ref: RunRef -> workbench.runs.watch.run(ref)?.let { runTab.replace(NAME_ARG, it.workflowName).replace(NUMBER_ARG, it.number.toString()) } ?: ref.toString() }
     Box(modifier) {
         PaneGrid(
             layout = workbench.paneLayout,
             onChange = { workbench.paneLayout = it },
-            item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf, conversationOf, runsOf, runOf) } ?: paneTab(id, workbench.state.pane(id)) },
+            item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf, conversationOf, runsOf, runOf, settingsTitle) } ?: paneTab(id, workbench.state.pane(id)) },
             modifier = Modifier.fillMaxSize().onGloballyPositioned { coordinates ->
                 val topLeft = coordinates.positionInWindow()
                 val size = Offset(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())

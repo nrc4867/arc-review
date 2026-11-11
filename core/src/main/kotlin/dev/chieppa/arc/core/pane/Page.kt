@@ -32,4 +32,9 @@ sealed interface Page {
     data class Run(override val id: PaneId, val run: RunRef) : Page {
         override val pinned: Boolean get() = true
     }
+
+    /** The Settings page, showing the section [section] by id, or the first one when null. It belongs to no source, so it is always pinned. */
+    data class Settings(override val id: PaneId, val section: String? = null) : Page {
+        override val pinned: Boolean get() = true
+    }
 }

@@ -9,7 +9,6 @@ import dev.chieppa.stretch.frame.BarAction
 import dev.chieppa.stretch.ui.badgeCount
 import dev.chieppa.arc.ui.actions.ArcActionIds
 import dev.chieppa.arc.ui.menus.ArcBarMenus
-import dev.chieppa.arc.ui.settings.SettingsPopover
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.TopBarActions
 import dev.chieppa.stretch.frame.WindowTopBar
@@ -18,7 +17,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The window's top bar: the app's name and menus, "Go to anything" centred on the whole bar, which opens the switcher, and at the end the notifications bell, its badge counting notifications not
- * seen yet, which opens the Pull requests drawer, then the command palette, showing its own key, and settings.
+ * seen yet, which opens the Pull requests drawer, then the command palette, showing its own key, and settings, which opens the Settings page.
  */
 @Composable
 fun ArcTopBar(workbench: Workbench) {
@@ -34,18 +33,9 @@ fun ArcTopBar(workbench: Workbench) {
                 onUndo = null,
                 onRedo = null,
                 onCommands = { workbench.paletteOpen = true },
-                onSettings = { workbench.settingsOpen = true },
+                onSettings = workbench.panes::openSettings,
                 leading = listOf(BarAction(ArcIcons.Bell, stringResource(Res.string.notifications), workbench::openPullRequests, badge = badgeCount(workbench.watch.unseen))),
-                settingsOpen = workbench.settingsOpen,
                 commandsKeys = commandsKeys,
-                settingsPopup = {
-                    SettingsPopover(
-                        open = workbench.settingsOpen,
-                        preferences = workbench.preferences,
-                        onChange = { workbench.preferences = it },
-                        onDismiss = { workbench.settingsOpen = false },
-                    )
-                },
             )
         },
     )

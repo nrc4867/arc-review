@@ -32,4 +32,9 @@ sealed interface StoredPage {
     @Serializable
     @SerialName("run")
     data class Run(override val id: String, val repo: String, val run: Long) : StoredPage
+
+    /** The Settings page, by the section it shows. */
+    @Serializable
+    @SerialName("settings")
+    data class Settings(override val id: String, val section: String? = null) : StoredPage
 }

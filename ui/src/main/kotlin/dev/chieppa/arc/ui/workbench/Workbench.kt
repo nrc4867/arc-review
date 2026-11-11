@@ -61,7 +61,10 @@ import dev.chieppa.arc.ui.services.SystemClipboard
 import dev.chieppa.arc.ui.services.LinkOpener
 import dev.chieppa.arc.ui.services.SystemBrowser
 import dev.chieppa.arc.ui.services.TextClipboard
+import dev.chieppa.arc.ui.settings.ArcSettingsProvider
+import dev.chieppa.arc.ui.settings.SettingsRegistry
 import dev.chieppa.arc.ui.settings.UiPreferences
+import dev.chieppa.arc.core.settings.SettingsContributor
 import dev.chieppa.arc.ui.tree.TreeKeys
 import dev.chieppa.arc.ui.util.ArcDispatchers
 import dev.chieppa.stretch.core.ActionRegistry
@@ -111,7 +114,6 @@ class Workbench(
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
     var paletteOpen by mutableStateOf(false)
-    var settingsOpen by mutableStateOf(false)
 
     /** What the tree's files drag into the pane grid through. */
     val dropTarget = PaneDropTarget()
@@ -192,6 +194,9 @@ class Workbench(
     val keymap = Keymap(registry)
     val start = StartState(startLayout, recent)
 
+    /** The Settings page's contributors, Arc's own among them. */
+    val settings = SettingsRegistry()
+
     init {
         registerArcActions(registry, this, onQuit)
         registerReviewActions(registry, this)
@@ -201,6 +206,7 @@ class Workbench(
         navigation.start()
         registerStartActions(registry, this)
         start.registry.register(StartContributor.ARC, arcStartProvider(this))
+        settings.register(SettingsContributor.ARC, ArcSettingsProvider(this))
     }
 
     /** Opens the Pull requests drawer and counts every notification as seen. */

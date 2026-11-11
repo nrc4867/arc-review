@@ -6,6 +6,7 @@ import dev.chieppa.stretch.core.KeyChord
 object ArcKeys {
     val GO_TO_ANYTHING: KeyChord = KeyChord.parse("Ctrl K")
     val COMMANDS: KeyChord = KeyChord.parse("Ctrl Shift P")
+    val SETTINGS: KeyChord = KeyChord.parse("Ctrl Comma")
     val NEXT_FILE: KeyChord = KeyChord.parse("Alt Down")
     val PREVIOUS_FILE: KeyChord = KeyChord.parse("Alt Up")
     val NEXT_CHANGE: KeyChord = KeyChord.parse("F7")

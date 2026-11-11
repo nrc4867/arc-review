@@ -14,7 +14,7 @@ fun registerArcActions(registry: ActionRegistry, workbench: Workbench, onQuit: (
 
     action(ArcActionIds.GO_TO_ANYTHING, listOf(ArcKeys.GO_TO_ANYTHING)) { workbench.switcher.show() }
     action(ArcActionIds.COMMANDS, listOf(ArcKeys.COMMANDS)) { workbench.paletteOpen = true }
-    action(ArcActionIds.SETTINGS) { workbench.settingsOpen = true }
+    action(ArcActionIds.SETTINGS, listOf(ArcKeys.SETTINGS)) { workbench.panes.openSettings() }
     action(ArcActionIds.RESET_LAYOUT) { workbench.resetLayout() }
     action(ArcActionIds.QUIT, run = onQuit)
     for (slot in ArcDrawerSlots.all) {

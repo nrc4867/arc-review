@@ -32,6 +32,7 @@ class WorkspaceFileTest {
         .withPane(Pane(PaneId("p2"), RepoName("squash"), "README.md", Revision("main"), PaneView.Rendered, pinned = true))
         .withPage(Page.Filter(PaneId("p3"), "f1"))
         .withPage(Page.RevisionMatrix(PaneId("p4"), branch))
+        .withPage(Page.Settings(PaneId("p5"), "arc.appearance"))
         .record(branch, RecordedHead(ObjectId("c".repeat(40)), ObjectId("d".repeat(40)), 1_700_000_000))
         .mark(
             FileMark(
