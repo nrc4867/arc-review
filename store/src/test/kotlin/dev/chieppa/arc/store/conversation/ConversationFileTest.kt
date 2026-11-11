@@ -25,7 +25,7 @@ class ConversationFileTest {
             listOf(
                 LocalComment("d1", pull, LocalKind.Draft, "draft", 1, anchor),
                 LocalComment("s1", pull, LocalKind.Staged, "reply", 2, CommentAnchor("src/a.kt", 3), inReplyTo = "T_1", failed = true),
-                LocalComment("n1", pull, LocalKind.Note, "free note", 3),
+                LocalComment("n1", pull, LocalKind.Note, "free note", 3, editedAt = 9),
             ),
             mapOf(pull to ReviewSummary(Verdict.RequestChanges, "Two blockers.")),
         )

@@ -71,6 +71,12 @@ class ConversationController(
     /** Starts a comment at [anchor] of [source] and opens it for writing; returns its id. */
     fun startComment(source: Source, anchor: CommentAnchor): String = add(LocalComment(newId(), source, LocalKind.Draft, "", now(), anchor))
 
+    /** Keeps a note with [body] on [source], at [anchor] when given, as a plugin adds one; returns it. */
+    fun addNote(source: Source, body: String, anchor: CommentAnchor? = null): LocalComment = keep(LocalComment(newId(), source, LocalKind.Note, body, now(), anchor))
+
+    /** Starts a comment draft with [body] on [source], at [anchor] when given, without opening it; returns it. */
+    fun addDraft(source: Source, body: String, anchor: CommentAnchor? = null): LocalComment = keep(LocalComment(newId(), source, LocalKind.Draft, body, now(), anchor))
+
     /** Opens a reply to [thread] for writing, the one being written if there is one; returns its id. */
     fun startReply(thread: ReviewThread): String {
         val open = local.comments.firstOrNull { it.inReplyTo == thread.id && it.kind == LocalKind.Draft }
@@ -100,7 +106,7 @@ class ConversationController(
     }
 
     fun write(id: String, body: String) {
-        local = local.change(id) { it.copy(body = body) }
+        local = local.change(id) { it.copy(body = body, editedAt = now()) }
     }
 
     /** Stages comment [id] to go up with the next push; an empty one is dropped instead. */
@@ -143,7 +149,7 @@ class ConversationController(
             note == null && body.isBlank() -> local
             note == null -> local.put(LocalComment(newId(), source, LocalKind.Note, body, now()))
             body.isBlank() -> local.remove(note.id)
-            else -> local.change(note.id) { it.copy(body = body) }
+            else -> local.change(note.id) { it.copy(body = body, editedAt = now()) }
         }
     }
 
@@ -175,6 +181,11 @@ class ConversationController(
         local = local.put(comment)
         writing = writing + comment.id
         return comment.id
+    }
+
+    private fun keep(comment: LocalComment): LocalComment {
+        local = local.put(comment)
+        return comment
     }
 
     private fun settle(id: String, kind: LocalKind) {

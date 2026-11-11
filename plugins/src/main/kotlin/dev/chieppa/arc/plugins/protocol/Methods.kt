@@ -91,4 +91,13 @@ object Methods {
 
     /** [FetchParams] → [FetchResult]: an HTTP request Arc makes to a host the manifest names. */
     const val NET_FETCH = "net.fetch"
+
+    /** [NotesListParams] → [NotesListResult]: the person's notes. */
+    const val NOTES_LIST = "notes.list"
+
+    /** [NoteCreateParams] → [NoteInfo]: add a note. */
+    const val NOTES_CREATE = "notes.create"
+
+    /** [NoteCreateParams] → [NoteInfo]: start a comment draft, which only the person stages and pushes. */
+    const val COMMENTS_DRAFT = "comments.draft"
 }

@@ -9,7 +9,7 @@ data class StoredConversation(
     val summaries: List<StoredSummary> = emptyList(),
 )
 
-/** One draft, staged comment or note: its source ref, kind name, text, when it was written and where it sits. */
+/** One draft, staged comment or note: its source ref, kind name, text, when it was written and edited, and where it sits. */
 @Serializable
 data class StoredComment(
     val id: String,
@@ -24,6 +24,7 @@ data class StoredComment(
     val madeOn: String? = null,
     val inReplyTo: String? = null,
     val failed: Boolean = false,
+    val editedAt: Long? = null,
 )
 
 /** A source's verdict name and summary text. */

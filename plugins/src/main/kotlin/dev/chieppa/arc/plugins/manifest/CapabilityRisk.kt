@@ -7,7 +7,7 @@ data class CapabilityRisk(val kind: RiskKind, val capabilities: List<Capability>
         fun of(capabilities: Capabilities): List<CapabilityRisk> {
             val all = Capability.of(capabilities)
             val network = all.filterIsInstance<Capability.Network>()
-            val reads = all.filter { it == Capability.Git || it is Capability.ReadFiles }
+            val reads = all.filter { it == Capability.Git || it == Capability.ReadNotes || it is Capability.ReadFiles }
             val writes = all.filterIsInstance<Capability.WriteFiles>()
             return buildList {
                 if (network.isNotEmpty() && reads.isNotEmpty()) add(CapabilityRisk(RiskKind.ReadsAndSends, reads + network))

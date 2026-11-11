@@ -14,7 +14,13 @@ import dev.chieppa.arc.plugins.host.PluginStatus
 import dev.chieppa.arc.plugins.host.ProcessLauncher
 import dev.chieppa.arc.plugins.host.SystemProcessLauncher
 import dev.chieppa.arc.plugins.manifest.Capabilities
+import dev.chieppa.arc.plugins.manifest.CommentsAccess
+import dev.chieppa.arc.plugins.manifest.NotesAccess
+import dev.chieppa.arc.plugins.notes.FakeNotes
+import dev.chieppa.arc.plugins.protocol.NoteKind
 import dev.chieppa.arc.plugins.protocol.CallContext
+import dev.chieppa.arc.plugins.protocol.RepoInfo
+import dev.chieppa.arc.plugins.protocol.SourceInfo
 import dev.chieppa.arc.plugins.protocol.ViewKind
 import dev.chieppa.arc.plugins.runtime.NodeLaunch
 import dev.chieppa.arc.plugins.runtime.PluginTools
@@ -116,7 +122,31 @@ class NodeRuntimeTest {
 
     private fun broken() = plugin("broken", "{}", mapOf("src/index.tsx" to "import { definePlugin } from \"@review/plugin\";\nconst x: number = (\nexport default definePlugin({});\n"))
 
-    private fun manager(): PluginManager {
+    private fun notes() = plugin(
+        "notes",
+        NOTES,
+        mapOf(
+            "src/index.tsx" to """
+                import { definePlugin, Column, Text } from "@review/plugin";
+                import type { App } from "@review/plugin";
+
+                function Notes({ app }: { app: App }) {
+                    const notes = app.useQuery(() => app.notes.list({ source: "api#1" }));
+                    return <Column><Text>{notes ? notes.map((n) => `${'$'}{n.kind}:${'$'}{n.text}@${'$'}{n.path}:${'$'}{n.line}`).join(",") : "loading"}</Text></Column>;
+                }
+
+                export default definePlugin({
+                    panels: [{ id: "notes", title: "Notes", render: (app) => <Notes app={app} /> }],
+                    actions: [{ id: "add", label: "Add", run: async (app) => {
+                        await app.notes.create({ text: "from node", path: "a.ts", line: 3 });
+                        await app.comments.draft({ text: "a draft", source: "api#1" });
+                    } }],
+                });
+            """,
+        ),
+    )
+
+    private fun manager(approved: Capabilities = Capabilities(panels = true, actions = true), ui: PluginUi = PluginUi.NONE): PluginManager {
         val node = Path.of(System.getProperty("arc.plugins.node"))
         val tools = PluginTools(ToolInstaller(dir.resolve("runtimes"), { _, _, _ -> throw IOException("offline") }), ToolPins(Properties()), ProcessCommandRunner, node)
         val parent = System.getenv() + mapOf("GH_TOKEN" to "gho_secret", "GITHUB_TOKEN" to "ghp_secret")
@@ -124,11 +154,11 @@ class NodeRuntimeTest {
         val system = SystemProcessLauncher(scope)
         val counted = ProcessLauncher { spec -> launches.incrementAndGet(); system.launch(spec) }
         val host = NodeHost(scope, counted, launch::spec)
-        val approved = Capabilities(panels = true, actions = true)
         val settings = buildJsonObject { put("outside", outside.toString()) }
         val config = PluginsConfig(enabled = ids.toSet(), approved = ids.associateWith { approved }, settings = mapOf("counter" to settings))
         val services = PluginServices(
             scope, host, PluginStorage.InMemory(config), ConsoleProcesses(ProcessConsoleLauncher(scope), scope), GitGrep({ _, _ -> CommandResult(1, "", "") }),
+            ui = ui,
             shutdown = host::close,
         )
         return PluginManager(services).apply {
@@ -192,7 +222,29 @@ class NodeRuntimeTest {
         }
     }
 
+    @Test
+    fun aPluginReadsAndAddsNotesAndDraftsThroughTheAppObject() = runBlocking<Unit> {
+        notes()
+        val window = FakeNotes()
+        val manager = manager(NOTES_APPROVED, window)
+        try {
+            val plugin = manager.instance("notes")!!
+            withTimeout(TIMEOUT) { plugin.status.first { it is PluginStatus.Running } }
+            plugin.runAction("add", CallContext(SourceInfo("api#1", "pull", RepoInfo("api", "api"))))
+            val added = withTimeout(TIMEOUT) { window.all.first { it.size == 2 } }
+            assertEquals(listOf(NoteKind.Note, NoteKind.Draft), added.map { it.kind })
+            assertEquals("api#1", added.first().source)
+            val view = plugin.mount(ViewKind.Panel, "notes", CallContext())
+            val shown = withTimeout(TIMEOUT) { view.nodes.first { it.isNotEmpty() && texts(it) != listOf("loading") } }
+            assertEquals(listOf("note:from node@a.ts:3"), texts(shown))
+        } finally {
+            manager.stop()
+        }
+    }
+
     private companion object {
         const val TIMEOUT = 30_000L
+        const val NOTES = """{"panels":true,"actions":true,"notes":{"read":true,"write":true},"comments":{"draft":true}}"""
+        val NOTES_APPROVED = Capabilities(panels = true, actions = true, notes = NotesAccess(read = true, write = true), comments = CommentsAccess(draft = true))
     }
 }

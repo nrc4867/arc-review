@@ -45,7 +45,7 @@ class ConversationFile(private val path: Path) {
             val madeOn = stored.madeOn?.let { runCatching { ObjectId(it) }.getOrNull() }
             CommentAnchor(path, line, side, stored.startLine, madeOn)
         }
-        return LocalComment(stored.id, source, kind, stored.body, stored.writtenAt, anchor, stored.inReplyTo, failed = stored.failed)
+        return LocalComment(stored.id, source, kind, stored.body, stored.writtenAt, anchor, stored.inReplyTo, failed = stored.failed, editedAt = stored.editedAt)
     }
 
     private fun toStored(comment: LocalComment): StoredComment = StoredComment(
@@ -61,5 +61,6 @@ class ConversationFile(private val path: Path) {
         madeOn = comment.anchor?.madeOn?.value,
         inReplyTo = comment.inReplyTo,
         failed = comment.failed,
+        editedAt = comment.editedAt,
     )
 }

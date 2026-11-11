@@ -9,7 +9,7 @@ import dev.chieppa.arc.plugins.protocol.AppEvents
 object AppApi {
     private fun member(name: String, ts: String, doc: String, optional: Boolean = false) = PropSpec(name, PropType.Named(ts), doc, optional)
 
-    val eventNames: List<String> = listOf(AppEvents.SOURCE_OPENED, AppEvents.FILE_MARKED, AppEvents.PUSH_FINISHED)
+    val eventNames: List<String> = listOf(AppEvents.SOURCE_OPENED, AppEvents.FILE_MARKED, AppEvents.PUSH_FINISHED, AppEvents.NOTES_CHANGED)
 
     val interfaces: List<InterfaceSpec> = listOf(
         InterfaceSpec(
@@ -27,6 +27,8 @@ object AppApi {
                 member("console", "ConsoleApi", "Processes Arc runs for the plugin. Needs the console capability."),
                 member("panes", "PanesApi", "The plugin's panes in the grid. Needs the panes capability."),
                 member("git", "GitApi", "Queries on the sources' repos. Needs the git capability."),
+                member("notes", "NotesApi", "The person's notes. Needs the notes capability: read to list them, write to add one."),
+                member("comments", "CommentsApi", "Comment drafts, which only the person stages and pushes. Needs the comments capability's draft."),
                 member("files", "FilesApi", "Files in the folders the manifest's files capability names."),
                 member("fetch", "(url: string, init?: FetchInit) => Promise<FetchResponse>", "An HTTP request Arc makes to a host the manifest's network capability names, with no credentials of Arc's and no redirects followed."),
                 member("on", "(event: AppEventName, listener: (event: AppEvent) => void) => () => void", "Listens for an event in Arc; gives a function that stops."),
@@ -71,6 +73,39 @@ object AppApi {
             "GitApi",
             "Queries on the repos of the open sources.",
             listOf(member("grep", "(pattern: string, options?: { limit?: number }) => Promise<GrepHit[]>", "Lines matching a regular expression in the active source's files.")),
+        ),
+        InterfaceSpec(
+            "NotesApi",
+            "The person's notes, kept on this machine.",
+            listOf(
+                member("list", "(filter?: NotesFilter) => Promise<NoteInfo[]>", "The notes, oldest first, only those on a source or file when the filter names one. Needs notes.read."),
+                member("create", "(note: NewNote) => Promise<NoteInfo>", "Adds a note, on the active source unless it names another. Needs notes.write."),
+            ),
+        ),
+        InterfaceSpec(
+            "CommentsApi",
+            "Comments the person may push to the host.",
+            listOf(member("draft", "(comment: NewNote) => Promise<NoteInfo>", "Starts a comment draft, which stays on this machine until the person stages and pushes it. Needs comments.draft.")),
+        ),
+        InterfaceSpec(
+            "NotesFilter",
+            "Which notes app.notes.list gives.",
+            listOf(
+                member("source", "string", "Only those on the source with this ref.", optional = true),
+                member("path", "string", "Only those on this file.", optional = true),
+            ),
+        ),
+        InterfaceSpec(
+            "NewNote",
+            "A note or comment draft to add: on lines of a file, or on the source as a whole.",
+            listOf(
+                member("text", "string", "Its text, as Markdown."),
+                member("source", "string", "The ref of the source it is on; the active source when absent.", optional = true),
+                member("path", "string", "The file it is on.", optional = true),
+                member("line", "number", "The line it is on, from 1; needs path.", optional = true),
+                member("startLine", "number", "The first line of a range ending at line.", optional = true),
+                member("side", "NoteSide", "The side of the change its lines are on; new when absent.", optional = true),
+            ),
         ),
         InterfaceSpec(
             "FilesApi",

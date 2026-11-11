@@ -1,6 +1,7 @@
 package dev.chieppa.arc.plugins.manager
 
 import dev.chieppa.arc.plugins.manifest.Capabilities
+import dev.chieppa.arc.plugins.protocol.AppEvents
 import dev.chieppa.arc.plugins.protocol.Contributions
 import dev.chieppa.arc.plugins.protocol.ErrorCodes
 import dev.chieppa.arc.plugins.protocol.Methods
@@ -20,6 +21,12 @@ object CapabilityGate {
         Methods.FILES_READ to { it.files.read.isNotEmpty() },
         Methods.FILES_WRITE to { it.files.write.isNotEmpty() },
         Methods.NET_FETCH to { it.network.isNotEmpty() },
+        Methods.NOTES_LIST to { it.notes.read },
+        Methods.NOTES_CREATE to { it.notes.write },
+        Methods.COMMENTS_DRAFT to { it.comments.draft },
+    )
+    private val EVENT_NEEDS: Map<String, (Capabilities) -> Boolean> = mapOf(
+        AppEvents.NOTES_CHANGED to { it.notes.read },
     )
     private val SCHEMES = setOf("https", "http")
     private const val WILDCARD = "*."
@@ -31,6 +38,9 @@ object CapabilityGate {
         val allowed = NEEDS[method] ?: return
         if (!allowed(capabilities)) throw denied("$UNDECLARED $method needs")
     }
+
+    /** Whether a plugin with [capabilities] is told of event [name]. */
+    fun hears(name: String, capabilities: Capabilities): Boolean = EVENT_NEEDS[name]?.invoke(capabilities) ?: true
 
     /** Throws [RpcException] with [ErrorCodes.DENIED] unless [url] is http or https to a host [capabilities] name. */
     fun checkHost(url: String, capabilities: Capabilities) {

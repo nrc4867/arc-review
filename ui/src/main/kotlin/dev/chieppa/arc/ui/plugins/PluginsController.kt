@@ -12,8 +12,11 @@ import dev.chieppa.arc.plugins.manager.CapabilityGate
 import dev.chieppa.arc.plugins.manager.PluginEntry
 import dev.chieppa.arc.plugins.manager.PluginManager
 import dev.chieppa.arc.plugins.manager.PluginUi
+import dev.chieppa.arc.plugins.notes.PluginNotes
+import dev.chieppa.arc.plugins.protocol.PanesOpenParams
 import dev.chieppa.arc.plugins.protocol.AppEventParams
 import dev.chieppa.arc.plugins.protocol.Contributions
+import dev.chieppa.arc.ui.plugins.notes.WindowNotes
 import dev.chieppa.arc.ui.workbench.Workbench
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
@@ -25,16 +28,22 @@ import kotlinx.coroutines.withContext
 
 /**
  * The window's side of plugins: the [manager] that runs them (none where plugins are off), what each one is and
- * contributes as Compose state, its actions in the window's registry, and what plugins ask of the window, such as
- * opening their panes.
+ * contributes as Compose state, its actions in the window's registry, and what plugins ask of the window: opening
+ * their panes, and the person's notes.
  */
 class PluginsController(private val workbench: Workbench, makeManager: (PluginUi) -> PluginManager?) {
-    val manager: PluginManager? = makeManager { plugin, params ->
-        withContext(workbench.dispatchers.main) {
-            val source = params.context.source?.ref?.let(SourceRefs::parse)
-            workbench.panes.openPluginPane(plugin, params.pane, params.props.toString(), source)
-        }
-    }
+    val manager: PluginManager? = makeManager(
+        object : PluginUi {
+            override suspend fun openPane(plugin: String, params: PanesOpenParams) {
+                withContext(workbench.dispatchers.main) {
+                    val source = params.context.source?.ref?.let(SourceRefs::parse)
+                    workbench.panes.openPluginPane(plugin, params.pane, params.props.toString(), source)
+                }
+            }
+
+            override val notes: PluginNotes = WindowNotes(workbench)
+        },
+    )
 
     /** Every plugin found, in source order. */
     var entries by mutableStateOf<List<PluginEntry>>(emptyList())

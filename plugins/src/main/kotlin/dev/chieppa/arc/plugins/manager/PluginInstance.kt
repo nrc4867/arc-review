@@ -90,9 +90,9 @@ class PluginInstance internal constructor(
         services.scope.launch { supervisor.notify(Methods.SETTINGS_CHANGED, ProtocolJson.toElement(SettingsChangedParams.serializer(), SettingsChangedParams(settingsOf()))) }
     }
 
-    /** Tells it [event] happened. */
+    /** Tells it [event] happened, when its capabilities let it hear of it. */
     fun emit(event: AppEventParams) {
-        if (supervisor.status.value !is PluginStatus.Running) return
+        if (supervisor.status.value !is PluginStatus.Running || !CapabilityGate.hears(event.name, manifest.capabilities)) return
         services.scope.launch { supervisor.notify(Methods.EVENT, ProtocolJson.toElement(AppEventParams.serializer(), event)) }
     }
 

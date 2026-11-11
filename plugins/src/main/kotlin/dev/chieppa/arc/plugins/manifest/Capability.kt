@@ -8,6 +8,15 @@ sealed interface Capability {
     data object Console : Capability
     data object Git : Capability
 
+    /** Reading the person's notes. */
+    data object ReadNotes : Capability
+
+    /** Adding notes. */
+    data object WriteNotes : Capability
+
+    /** Starting comment drafts, which only the person stages and pushes. */
+    data object DraftComments : Capability
+
     /** Reading files under [path]. */
     data class ReadFiles(val path: String) : Capability
 
@@ -31,6 +40,9 @@ sealed interface Capability {
             if (capabilities.actions) add(Actions)
             if (capabilities.console) add(Console)
             if (capabilities.git) add(Git)
+            if (capabilities.notes.read) add(ReadNotes)
+            if (capabilities.notes.write) add(WriteNotes)
+            if (capabilities.comments.draft) add(DraftComments)
             capabilities.files.read.forEach { add(ReadFiles(it)) }
             capabilities.files.write.forEach { add(WriteFiles(it)) }
             capabilities.network.forEach { add(Network(it)) }

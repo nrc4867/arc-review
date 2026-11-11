@@ -937,6 +937,9 @@
     <string name="plugins_capability_actions">actions</string>
     <string name="plugins_capability_console">console</string>
     <string name="plugins_capability_git">git</string>
+    <string name="plugins_capability_notes_read">notes: read</string>
+    <string name="plugins_capability_notes_write">notes: write</string>
+    <string name="plugins_capability_comments_draft">comments: draft</string>
     <string name="plugins_capability_read">read: %1$s</string>
     <string name="plugins_capability_write">write: %1$s</string>
     <string name="plugins_capability_network">network: %1$s</string>

@@ -3,6 +3,9 @@ package dev.chieppa.arc.plugins.api
 import dev.chieppa.arc.plugins.manifest.ApiVersion
 import dev.chieppa.arc.plugins.protocol.FileInfo
 import dev.chieppa.arc.plugins.protocol.GrepHit
+import dev.chieppa.arc.plugins.protocol.NoteInfo
+import dev.chieppa.arc.plugins.protocol.NoteKind
+import dev.chieppa.arc.plugins.protocol.NoteSide
 import dev.chieppa.arc.plugins.protocol.RepoInfo
 import dev.chieppa.arc.plugins.protocol.SettingType
 import dev.chieppa.arc.plugins.protocol.SourceInfo
@@ -22,7 +25,10 @@ object TypesGenerator {
         append("export type IconName = ${PluginIcons.NAMES.joinToString(" | ") { "\"$it\"" }};\n\n")
         append("export type AppEventName = ${AppApi.eventNames.joinToString(" | ") { "\"$it\"" }};\n\n")
         append("export type SettingType = ${DescriptorTypes.unionOf(SettingType.serializer().descriptor)};\n\n")
-        listOf(RepoInfo.serializer(), SourceInfo.serializer(), FileInfo.serializer(), GrepHit.serializer()).forEach {
+        listOf(NoteKind.serializer().descriptor, NoteSide.serializer().descriptor).forEach {
+            append("export type ${DescriptorTypes.nameOf(it)} = ${DescriptorTypes.unionOf(it)};\n\n")
+        }
+        listOf(RepoInfo.serializer(), SourceInfo.serializer(), FileInfo.serializer(), GrepHit.serializer(), NoteInfo.serializer()).forEach {
             append(DescriptorTypes.interfaceOf(it.descriptor)).append('\n')
         }
         append(SETTINGS)

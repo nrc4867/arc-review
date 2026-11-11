@@ -1,6 +1,9 @@
 package dev.chieppa.arc.plugins.manager
 
 import dev.chieppa.arc.plugins.manifest.Capabilities
+import dev.chieppa.arc.plugins.manifest.CommentsAccess
+import dev.chieppa.arc.plugins.manifest.NotesAccess
+import dev.chieppa.arc.plugins.protocol.AppEvents
 import dev.chieppa.arc.plugins.manifest.FileAccess
 import dev.chieppa.arc.plugins.protocol.ErrorCodes
 import dev.chieppa.arc.plugins.protocol.Methods
@@ -22,6 +25,23 @@ class CapabilityGateTest {
         for (method in listOf(Methods.NET_FETCH, Methods.FILES_READ, Methods.FILES_WRITE, Methods.CONSOLE_RUN, Methods.GIT_GREP)) {
             assertEquals(ErrorCodes.DENIED, assertFailsWith<RpcException> { CapabilityGate.check(method, Capabilities()) }.error.code)
         }
+    }
+
+    @Test
+    fun notesAndDraftsNeedTheirOwnCapabilities() {
+        CapabilityGate.check(Methods.NOTES_LIST, Capabilities(notes = NotesAccess(read = true)))
+        CapabilityGate.check(Methods.NOTES_CREATE, Capabilities(notes = NotesAccess(write = true)))
+        CapabilityGate.check(Methods.COMMENTS_DRAFT, Capabilities(comments = CommentsAccess(draft = true)))
+        assertFailsWith<RpcException> { CapabilityGate.check(Methods.NOTES_LIST, Capabilities(notes = NotesAccess(write = true))) }
+        assertFailsWith<RpcException> { CapabilityGate.check(Methods.NOTES_CREATE, Capabilities(notes = NotesAccess(read = true))) }
+        assertFailsWith<RpcException> { CapabilityGate.check(Methods.COMMENTS_DRAFT, Capabilities(notes = NotesAccess(read = true, write = true))) }
+    }
+
+    @Test
+    fun onlyAPluginThatReadsNotesHearsThemChange() {
+        assertTrue(CapabilityGate.hears(AppEvents.NOTES_CHANGED, Capabilities(notes = NotesAccess(read = true))))
+        assertFalse(CapabilityGate.hears(AppEvents.NOTES_CHANGED, Capabilities(notes = NotesAccess(write = true))))
+        assertTrue(CapabilityGate.hears(AppEvents.SOURCE_OPENED, Capabilities()))
     }
 
     @Test

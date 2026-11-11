@@ -28,6 +28,9 @@ export const Methods = {
     filesRead: "files.read",
     filesWrite: "files.write",
     netFetch: "net.fetch",
+    notesList: "notes.list",
+    notesCreate: "notes.create",
+    commentsDraft: "comments.draft",
 } as const;
 
 /** The key that marks a prop as a function the plugin holds. */

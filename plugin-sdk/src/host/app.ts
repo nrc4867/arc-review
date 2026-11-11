@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { App, AppEvent, AppEventName, FetchInit, FetchResponse, GrepHit } from "../generated/arc";
+import type { App, AppEvent, AppEventName, FetchInit, FetchResponse, GrepHit, NewNote, NoteInfo, NotesFilter } from "../generated/arc";
 import type { Channel } from "./channel";
 import type { Listeners } from "./Listeners";
 import type { Processes } from "./processes";
@@ -52,6 +52,13 @@ export function createApp(shared: Shared, context: CallContext, props: Record<st
                 const result = await channel.request(Methods.gitGrep, { pattern, context, ...(options?.limit ? { limit: options.limit } : {}) });
                 return result.hits;
             },
+        },
+        notes: {
+            list: async (filter?: NotesFilter): Promise<NoteInfo[]> => (await channel.request(Methods.notesList, { ...filter })).notes,
+            create: (note: NewNote): Promise<NoteInfo> => channel.request(Methods.notesCreate, { ...note, context }),
+        },
+        comments: {
+            draft: (comment: NewNote): Promise<NoteInfo> => channel.request(Methods.commentsDraft, { ...comment, context }),
         },
         files: {
             read: async (path: string) => (await channel.request(Methods.filesRead, { path })).text,

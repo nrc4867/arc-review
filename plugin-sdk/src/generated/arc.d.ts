@@ -6,9 +6,13 @@ export type ApiVersion = 1;
 
 export type IconName = "branch" | "check" | "close" | "code" | "comment" | "commit" | "console" | "file" | "filter" | "folder" | "info" | "link" | "note" | "play" | "plugin" | "plus" | "pull-request" | "refresh" | "runs" | "search" | "settings" | "spec" | "stop" | "tag" | "warning";
 
-export type AppEventName = "source.opened" | "file.marked" | "push.finished";
+export type AppEventName = "source.opened" | "file.marked" | "push.finished" | "notes.changed";
 
 export type SettingType = "text" | "number" | "boolean" | "choice" | "glob" | "list" | "map";
+
+export type NoteKind = "note" | "draft";
+
+export type NoteSide = "old" | "new";
 
 export interface RepoInfo {
     readonly id: string;
@@ -33,6 +37,21 @@ export interface GrepHit {
     readonly path: string;
     readonly line: number;
     readonly text: string;
+}
+
+export interface NoteInfo {
+    readonly id: string;
+    readonly kind: NoteKind;
+    readonly source: string;
+    readonly repo: RepoInfo;
+    readonly text: string;
+    readonly createdAt: number;
+    readonly updatedAt: number;
+    readonly path?: string;
+    readonly line?: number;
+    readonly startLine?: number;
+    readonly side?: NoteSide;
+    readonly revision?: string;
 }
 
 /** A setting a plugin declares in definePlugin. */
@@ -264,6 +283,10 @@ export interface App<S = Record<string, unknown>> {
     readonly panes: PanesApi;
     /** Queries on the sources' repos. Needs the git capability. */
     readonly git: GitApi;
+    /** The person's notes. Needs the notes capability: read to list them, write to add one. */
+    readonly notes: NotesApi;
+    /** Comment drafts, which only the person stages and pushes. Needs the comments capability's draft. */
+    readonly comments: CommentsApi;
     /** Files in the folders the manifest's files capability names. */
     readonly files: FilesApi;
     /** An HTTP request Arc makes to a host the manifest's network capability names, with no credentials of Arc's and no redirects followed. */
@@ -318,6 +341,44 @@ export interface PanesApi {
 export interface GitApi {
     /** Lines matching a regular expression in the active source's files. */
     readonly grep: (pattern: string, options?: { limit?: number }) => Promise<GrepHit[]>;
+}
+
+/** The person's notes, kept on this machine. */
+export interface NotesApi {
+    /** The notes, oldest first, only those on a source or file when the filter names one. Needs notes.read. */
+    readonly list: (filter?: NotesFilter) => Promise<NoteInfo[]>;
+    /** Adds a note, on the active source unless it names another. Needs notes.write. */
+    readonly create: (note: NewNote) => Promise<NoteInfo>;
+}
+
+/** Comments the person may push to the host. */
+export interface CommentsApi {
+    /** Starts a comment draft, which stays on this machine until the person stages and pushes it. Needs comments.draft. */
+    readonly draft: (comment: NewNote) => Promise<NoteInfo>;
+}
+
+/** Which notes app.notes.list gives. */
+export interface NotesFilter {
+    /** Only those on the source with this ref. */
+    readonly source?: string;
+    /** Only those on this file. */
+    readonly path?: string;
+}
+
+/** A note or comment draft to add: on lines of a file, or on the source as a whole. */
+export interface NewNote {
+    /** Its text, as Markdown. */
+    readonly text: string;
+    /** The ref of the source it is on; the active source when absent. */
+    readonly source?: string;
+    /** The file it is on. */
+    readonly path?: string;
+    /** The line it is on, from 1; needs path. */
+    readonly line?: number;
+    /** The first line of a range ending at line. */
+    readonly startLine?: number;
+    /** The side of the change its lines are on; new when absent. */
+    readonly side?: NoteSide;
 }
 
 /** Files a plugin reads and writes through Arc. Paths are absolute or relative to the plugin's folder. */

@@ -11,6 +11,13 @@ class CapabilityRiskTest {
     }
 
     @Test
+    fun readingNotesWithNetworkIsFlaggedButWritingThemOrDraftingIsNot() {
+        val capabilities = Capabilities(notes = NotesAccess(read = true, write = true), comments = CommentsAccess(draft = true), network = listOf("api.example.com"))
+        assertEquals(listOf(CapabilityRisk(RiskKind.ReadsAndSends, listOf(Capability.ReadNotes, Capability.Network("api.example.com")))), CapabilityRisk.of(capabilities))
+        assertEquals(emptyList(), CapabilityRisk.of(Capabilities(notes = NotesAccess(read = true))))
+    }
+
+    @Test
     fun fetchingIntoFilesAndRunningProgramsAreFlagged() {
         val capabilities = Capabilities(console = true, files = FileAccess(write = listOf("out")), network = listOf("cdn.example.com"))
         assertEquals(listOf(RiskKind.FetchesIntoFiles, RiskKind.RunsPrograms), CapabilityRisk.of(capabilities).map { it.kind })

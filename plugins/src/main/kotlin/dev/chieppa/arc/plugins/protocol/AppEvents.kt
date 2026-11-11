@@ -11,6 +11,12 @@ object AppEvents {
     /** A push of a review to its host ended; the context names the source. */
     const val PUSH_FINISHED = "push.finished"
 
+    /** The person's notes on a source changed; the context names it, `data.ids` the notes added, changed or removed. */
+    const val NOTES_CHANGED = "notes.changed"
+
     /** The data key of [FILE_MARKED]'s mark kind. */
     const val KIND = "kind"
+
+    /** The data key of [NOTES_CHANGED]'s note ids. */
+    const val IDS = "ids"
 }
