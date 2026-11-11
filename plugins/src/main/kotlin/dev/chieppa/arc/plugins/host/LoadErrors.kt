@@ -1,7 +1,7 @@
 package dev.chieppa.arc.plugins.host
 
 /**
- * Reads the error a plugin's host gives when its bundle fails to load: the message, and ` @ file:line:column` for the
+ * Reads the error a plugin's worker gives when its entry fails to convert or load: the message, and ` @ file:line:column` for the
  * place in the plugin's own files it came from, when the host found one.
  */
 object LoadErrors {

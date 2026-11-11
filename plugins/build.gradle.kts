@@ -19,15 +19,17 @@ dependencies {
 
 val sdk = rootProject.layout.projectDirectory.dir("plugin-sdk")
 
-// The plugin host: plugin-sdk's host bootstrap with React, react-reconciler and the SDK in one file, bundled with the
-// esbuild pinned in tools.properties; the npm packages and esbuild are kept in ~/.gradle/arc-plugin-tools.
+// The plugin host: plugin-sdk's host with React, react-reconciler and the SDK in one file, bundled with the esbuild
+// pinned in plugin-sdk/host-tools.properties, and TypeScript's compiler beside it; the npm packages and esbuild are
+// kept in ~/.gradle/arc-plugin-tools.
 val bundlePluginHost = tasks.register<BundlePluginHost>("bundlePluginHost") {
     group = "build"
     description = "Bundles the plugin host with esbuild"
-    pins = layout.projectDirectory.file("src/main/resources/dev/chieppa/arc/plugins/runtime/tools.properties")
+    pins = sdk.file("host-tools.properties")
     sources = sdk.dir("src")
     entry = "host/main.ts"
-    packages = listOf("react", "react-reconciler", "scheduler")
+    packages = listOf("react", "react-reconciler", "scheduler", "typescript")
+    copies = mapOf("typescript/lib/typescript.js" to "typescript.js")
     // The resource PluginHostScript reads.
     resourcePath = "dev/chieppa/arc/plugins/host/host.js"
     cacheDir = File(gradle.gradleUserHomeDir, "arc-plugin-tools")

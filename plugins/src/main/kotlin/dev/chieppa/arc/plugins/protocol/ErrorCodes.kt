@@ -11,6 +11,9 @@ object ErrorCodes {
     /** The plugin's manifest does not declare the capability the call needs. */
     const val DENIED = "denied"
 
+    /** The plugin's code does not convert from TypeScript; the message names the place. */
+    const val TRANSPILE = "transpile"
+
     /** The method ran and failed. */
     const val FAILED = "failed"
 }

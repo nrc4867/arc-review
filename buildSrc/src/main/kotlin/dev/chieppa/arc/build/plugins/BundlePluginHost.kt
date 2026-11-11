@@ -5,6 +5,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
@@ -23,7 +24,8 @@ import javax.inject.Inject
 /**
  * Bundles the plugin host, the TypeScript in [sources] from [entry], with React, react-reconciler and Arc's SDK into
  * one JavaScript file at `<outputDir>/<resourcePath>`, using the esbuild and npm packages [pins] pins, kept in
- * [cacheDir]. The file is a resource Arc ships and writes out for each plugin process to run.
+ * [cacheDir]; each of [copies] (a file inside an installed package, to the name it ships as) is copied beside it.
+ * They are resources Arc ships and writes out for the plugins' Node process to run.
  */
 @CacheableTask
 abstract class BundlePluginHost : DefaultTask() {
@@ -45,6 +47,10 @@ abstract class BundlePluginHost : DefaultTask() {
 
     @get:Input
     abstract val resourcePath: Property<String>
+
+    /** Files of the installed packages shipped beside the host as they are, by path under `node_modules`, to their names. */
+    @get:Input
+    abstract val copies: MapProperty<String, String>
 
     @get:Internal
     abstract val cacheDir: DirectoryProperty
@@ -80,6 +86,7 @@ abstract class BundlePluginHost : DefaultTask() {
                 "--outfile=${target.path}",
             )
         }
+        copies.get().forEach { (from, name) -> modules.resolve(from).copyTo(File(target.parentFile, name), overwrite = true) }
     }
 
     private companion object {

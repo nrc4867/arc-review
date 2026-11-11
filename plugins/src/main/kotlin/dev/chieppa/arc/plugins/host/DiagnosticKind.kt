@@ -5,15 +5,15 @@ enum class DiagnosticKind {
     /** Its `plugin.json` cannot be used. */
     Manifest,
 
-    /** Its code does not transpile. */
+    /** Its code does not convert from TypeScript. */
     Transpile,
 
     /** Its code fails type checking. */
     Type,
 
-    /** Node, esbuild or the plugin's process could not be started, or its bundle failed to load. */
+    /** Node or the plugin's worker could not be started, or its entry failed to load. */
     Load,
 
-    /** Its process kept ending. */
+    /** Its worker kept ending. */
     Crash,
 }
