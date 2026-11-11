@@ -19,6 +19,7 @@ import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.plugins_add_source
 import dev.chieppa.arc.design.generated.plugins_remove_source
 import dev.chieppa.arc.design.generated.plugins_source_count
+import org.jetbrains.compose.resources.pluralStringResource
 import dev.chieppa.arc.design.generated.plugins_source_directory
 import dev.chieppa.arc.design.generated.plugins_source_git
 import dev.chieppa.arc.design.generated.plugins_source_placeholder
@@ -62,7 +63,7 @@ fun PluginSourcesCard(workbench: Workbench) {
                         is PluginSourceSpec.Directory -> stringResource(Res.string.plugins_source_directory)
                         is PluginSourceSpec.Git -> stringResource(Res.string.plugins_source_git, source.ref)
                     }
-                    Label(stringResource(Res.string.plugins_source_count, kind, count), Stretch.type.bodySm, c.inkSubtle)
+                    Label(pluralStringResource(Res.plurals.plugins_source_count, count, kind, count), Stretch.type.bodySm, c.inkSubtle)
                 }
                 IconButton(StretchIcons.Close, stringResource(Res.string.plugins_remove_source), { manager.removeSource(source) })
             }

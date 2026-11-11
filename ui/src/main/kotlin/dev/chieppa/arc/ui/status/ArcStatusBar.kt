@@ -15,7 +15,11 @@ import dev.chieppa.arc.ui.runs.RunStatusStart
 import dev.chieppa.arc.ui.runs.RunsStatusEnd
 import dev.chieppa.arc.ui.runs.RunsStatusStart
 import dev.chieppa.arc.ui.navigation.SyntaxTokens
+import dev.chieppa.arc.ui.settings.SettingsShown
 import dev.chieppa.arc.ui.settings.SettingsStatusStart
+import dev.chieppa.arc.ui.plugins.PluginsStatusEnd
+import dev.chieppa.arc.ui.plugins.PluginsStatusStart
+import dev.chieppa.arc.ui.plugins.settings.PluginsSettingsProvider
 import dev.chieppa.arc.ui.sources.sourceIcon
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.code.CodeLanguages
@@ -25,7 +29,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The status bar: the active source, its commits and head, and what the code index holds; at the end, the focused
- * pane's find matches while it is finding, its caret, its file's language, and tree-sitter when tree-sitter reads it. A saved filter's tab, a run filter's, a run's, a revision matrix's and the Settings page show their own instead.
+ * pane's find matches while it is finding, its caret, its file's language, and tree-sitter when tree-sitter reads it. A saved filter's tab, a run filter's, a run's, a revision matrix's and the Settings page show their own instead; the Settings page's Plugins section adds how many plugins are on and their problems.
  */
 @Composable
 fun ArcStatusBar(workbench: Workbench) {
@@ -51,7 +55,14 @@ fun ArcStatusBar(workbench: Workbench) {
         return
     }
     if (page is Page.Settings) {
-        StatusBar(start = { SettingsStatusStart(page, workbench.settings) }, end = {})
+        val plugins = SettingsShown.of(workbench.settings.sections(), page)?.section?.id == PluginsSettingsProvider.SECTION
+        StatusBar(
+            start = {
+                SettingsStatusStart(page, workbench.settings)
+                if (plugins) PluginsStatusStart(workbench.plugins)
+            },
+            end = { if (plugins) PluginsStatusEnd(workbench.plugins) },
+        )
         return
     }
     val matrix = page as? Page.RevisionMatrix

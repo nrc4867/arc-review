@@ -908,7 +908,10 @@
     <string name="plugins_source_placeholder">Folder of a plugin, or of a plugins.json</string>
     <string name="plugins_source_directory">Directory · watching</string>
     <string name="plugins_source_git">Git · %1$s</string>
-    <string name="plugins_source_count">%1$s · %2$d plugins</string>
+    <plurals name="plugins_source_count">
+        <item quantity="one">%1$s · %2$d plugin</item>
+        <item quantity="other">%1$s · %2$d plugins</item>
+    </plurals>
     <string name="plugins_remove_source">Remove source</string>
     <string name="plugins_card">Plugins</string>
     <string name="plugins_node_download">Node %1$s LTS · downloaded on first use</string>
@@ -921,18 +924,27 @@
     <string name="plugins_open_file">Open</string>
     <string name="plugins_starting">Starting</string>
     <string name="plugins_restarting">Restarting</string>
-    <string name="plugins_status">%1$d of %2$d plugins on</string>
-    <string name="plugins_problems">%1$d with problems</string>
+    <plurals name="plugins_status">
+        <item quantity="one">%1$d of %2$d plugin on</item>
+        <item quantity="other">%1$d of %2$d plugins on</item>
+    </plurals>
+    <plurals name="plugins_problems">
+        <item quantity="one">%1$d problem</item>
+        <item quantity="other">%1$d problems</item>
+    </plurals>
     <string name="plugins_capability_panels">panels</string>
     <string name="plugins_capability_panes">panes</string>
     <string name="plugins_capability_actions">actions</string>
     <string name="plugins_capability_console">console</string>
     <string name="plugins_capability_git">git</string>
-    <string name="plugins_capability_processes">processes</string>
     <string name="plugins_capability_read">read: %1$s</string>
     <string name="plugins_capability_write">write: %1$s</string>
     <string name="plugins_capability_network">network: %1$s</string>
     <string name="plugins_capability_mcp">mcp: %1$s</string>
+    <string name="plugins_asks">%1$s, asked for since it was enabled</string>
+    <string name="plugins_risk_reads_and_sends">%1$s, with network: can send what it reads</string>
+    <string name="plugins_risk_fetches_into_files">%1$s, with network: can write what it fetches</string>
+    <string name="plugins_risk_runs_programs">%1$s: runs any program as you</string>
     <string name="plugin_console_input">Type and press Enter</string>
     <string name="plugin_console_exited">Exited with %1$d</string>
 </resources>
