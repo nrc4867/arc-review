@@ -125,7 +125,7 @@ class PluginSupervisor(
         val result = try {
             rpc.request(Methods.INITIALIZE, ProtocolJson.toElement(InitializeParams.serializer(), params), timings.initializeMillis)
         } catch (e: RpcException) {
-            return PluginDiagnostic(DiagnosticKind.Load, e.error.message)
+            return LoadErrors.diagnostic(e.error.message)
         } catch (_: PluginTimeoutException) {
             return PluginDiagnostic(DiagnosticKind.Load, HUNG)
         } catch (_: PluginGoneException) {

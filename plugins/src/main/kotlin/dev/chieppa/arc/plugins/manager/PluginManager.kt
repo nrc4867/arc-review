@@ -2,6 +2,7 @@ package dev.chieppa.arc.plugins.manager
 
 import dev.chieppa.arc.plugins.config.PluginSourceSpec
 import dev.chieppa.arc.plugins.config.PluginsConfig
+import dev.chieppa.arc.plugins.console.ConsoleProcesses
 import dev.chieppa.arc.plugins.protocol.AppEventParams
 import dev.chieppa.arc.plugins.source.FoundPlugin
 import dev.chieppa.arc.plugins.source.PluginDiscovery
@@ -25,6 +26,14 @@ class PluginManager(private val services: PluginServices) {
     private val watching = mutableMapOf<PluginSourceSpec, Job>()
 
     val config: StateFlow<PluginsConfig> get() = setup
+
+    /** The Node plugins run on, and whether it is on this machine already. */
+    val nodeVersion: String? get() = services.nodeVersion
+
+    fun nodeReady(): Boolean = services.nodeReady()
+
+    /** The processes plugins run, which their Console components show. */
+    val consoles: ConsoleProcesses get() = services.consoles
 
     /** Every plugin found, in source order. */
     val entries: StateFlow<List<PluginEntry>> get() = known

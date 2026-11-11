@@ -20,11 +20,11 @@ class ConsoleProcess(
     onChunk: (ConsoleChunk) -> Unit = {},
     onExit: (Int) -> Unit = {},
 ) {
-    private val printed = MutableStateFlow<List<ConsoleChunk>>(emptyList())
+    private val printed = MutableStateFlow(ConsolePrinted())
     private val ended = MutableStateFlow<Int?>(null)
 
-    /** Everything printed so far, oldest first, at most the last lines kept. */
-    val output: StateFlow<List<ConsoleChunk>> get() = printed
+    /** What it has printed: the last lines kept, oldest first, and how many it has printed in all. */
+    val output: StateFlow<ConsolePrinted> get() = printed
 
     /** The exit code once it has ended. */
     val exitCode: StateFlow<Int?> get() = ended
@@ -50,7 +50,8 @@ class ConsoleProcess(
 
     @Synchronized
     private fun add(chunk: ConsoleChunk, onChunk: (ConsoleChunk) -> Unit) {
-        printed.value = (printed.value + chunk).takeLast(maxLines)
+        val before = printed.value
+        printed.value = ConsolePrinted((before.chunks + chunk).takeLast(maxLines), before.total + 1)
         onChunk(chunk)
     }
 

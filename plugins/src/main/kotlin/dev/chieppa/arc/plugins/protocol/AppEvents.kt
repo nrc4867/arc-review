@@ -8,10 +8,9 @@ object AppEvents {
     /** A file was marked or unmarked; the context names the file, `data.kind` the mark or null. */
     const val FILE_MARKED = "file.marked"
 
-    /** A review was pushed to its host; the context names the source, `data.ok` whether it went through. */
+    /** A push of a review to its host ended; the context names the source. */
     const val PUSH_FINISHED = "push.finished"
 
-    /** The data key of [FILE_MARKED]'s mark kind and [PUSH_FINISHED]'s outcome. */
+    /** The data key of [FILE_MARKED]'s mark kind. */
     const val KIND = "kind"
-    const val OK = "ok"
 }

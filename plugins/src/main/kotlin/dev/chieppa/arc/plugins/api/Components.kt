@@ -6,6 +6,7 @@ import dev.chieppa.arc.plugins.api.PropNames as P
  * Every component plugins render in API version 1, the source of the generated types. Arc reads the same prop names
  * when it maps an element to its Stretch composable. A `List` element reaches Arc with `onSelect` taking the row's
  * index and a `Console` with `handle`, the process's id; the SDK's wrappers turn them into items and process handles.
+ * Every component takes `grow`, which gives it the room its parent column or row leaves.
  */
 object Components {
     private val icon = PropSpec(P.ICON, PropType.Named("IconName"), "An icon by name.", optional = true)
@@ -120,5 +121,5 @@ object Components {
                 PropSpec(P.HEIGHT, PropType.Number, "Its height in dp; it fills its parent without one.", optional = true),
             ),
         ),
-    )
+    ).map { spec -> if (spec.props.any { it.name == P.GROW }) spec else spec.copy(props = spec.props + grow) }
 }

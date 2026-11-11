@@ -8,7 +8,7 @@ export function List<T>(props: ListProps<T>): ReactElement {
     const onSelect = props.onSelect;
     return createElement(
         "List",
-        { selected: props.selected, onSelect: onSelect ? (index: number) => onSelect(items[index] as T) : undefined },
+        { selected: props.selected, grow: props.grow, onSelect: onSelect ? (index: number) => onSelect(items[index] as T) : undefined },
         items.map((item, index) => createElement(Fragment, { key: index }, props.children(item, index))),
     );
 }

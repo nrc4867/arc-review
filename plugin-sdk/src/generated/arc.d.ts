@@ -90,6 +90,8 @@ export interface SplitProps {
     readonly direction?: "horizontal" | "vertical";
     /** The first child's share, from 0 to 1. */
     readonly ratio?: number;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** Children that scroll when they do not fit. */
@@ -112,6 +114,8 @@ export interface ListProps<T> {
     readonly onSelect?: (item: T) => void;
     /** The selected row's index. */
     readonly selected?: number;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** One row of a List. */
@@ -122,6 +126,8 @@ export interface ListRowProps {
     readonly detail?: string;
     /** An icon by name. */
     readonly icon?: IconName;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** Rows of cells under column headings. */
@@ -132,6 +138,8 @@ export interface TableProps {
     readonly rows: readonly readonly string[][];
     /** A row was clicked, by its index. */
     readonly onSelect?: (row: number) => void;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** A button. */
@@ -146,6 +154,8 @@ export interface ButtonProps {
     readonly disabled?: boolean;
     /** An icon by name. */
     readonly icon?: IconName;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** An on/off switch. */
@@ -156,6 +166,8 @@ export interface ToggleProps {
     readonly onChange: (checked: boolean) => void;
     /** What it switches, for assistive tools. */
     readonly label: string;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** A one-line text field. */
@@ -170,6 +182,8 @@ export interface FieldProps {
     readonly placeholder?: string;
     /** Set in the code face, for paths and patterns. */
     readonly mono?: boolean;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** A menu of choices. */
@@ -182,6 +196,8 @@ export interface SelectProps {
     readonly onChange: (value: string) => void;
     /** What it chooses, for assistive tools. */
     readonly label: string;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** A run of text. */
@@ -192,12 +208,16 @@ export interface TextProps {
     readonly tone?: "default" | "muted" | "strong" | "error";
     /** Set in the code face. */
     readonly mono?: boolean;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** Markdown, rendered. */
 export interface MarkdownProps {
     /** The Markdown. */
     readonly text: string;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** Code with line numbers and colours. */
@@ -206,6 +226,8 @@ export interface CodeProps {
     readonly text: string;
     /** Its language, such as typescript. */
     readonly language?: string;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** A process's output, taking typed input, as Arc's console draws it. */
@@ -214,6 +236,8 @@ export interface ConsoleProps {
     readonly process: ProcessHandle | string;
     /** Its height in dp; it fills its parent without one. */
     readonly height?: number;
+    /** Take the room left in its parent. */
+    readonly grow?: boolean;
 }
 
 /** What a plugin can read and do. Every call carries the source it acts on. */

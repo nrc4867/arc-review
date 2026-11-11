@@ -88,10 +88,13 @@ class PluginSupervisorTest {
 
     @Test
     fun aLoadErrorOrAFailedPreparationLeavesItFailed() = runTest {
-        val plugin = FakePlugin(backgroundScope).apply { loadError = "src/index.tsx:3 ReferenceError" }
+        val plugin = FakePlugin(backgroundScope).apply { loadError = "x is not defined @ src/index.tsx:3:7" }
         val loading = supervisor(plugin).apply { start() }
         runCurrent()
-        assertEquals(DiagnosticKind.Load, assertIs<PluginStatus.Failed>(loading.status.value).diagnostics.single().kind)
+        assertEquals(
+            PluginDiagnostic(DiagnosticKind.Load, "x is not defined", "src/index.tsx", 3, 7),
+            assertIs<PluginStatus.Failed>(loading.status.value).diagnostics.single(),
+        )
         val diagnostic = PluginDiagnostic(DiagnosticKind.Transpile, "Expected ;", "src/index.tsx", 14, 5)
         val transpiling = supervisor(FakePlugin(backgroundScope), Preparation.Failed(listOf(diagnostic))).apply { start() }
         runCurrent()
