@@ -7,7 +7,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 
 /** A plugin process played by a test: what Arc sends lands in [sent], and the test writes lines and ends it. */
-class FakeConnection : PluginConnection {
+class FakeConnection : LineConnection {
     val sent = Channel<Envelope>(Channel.UNLIMITED)
 
     /** Every line Arc sent, envelope or not. */

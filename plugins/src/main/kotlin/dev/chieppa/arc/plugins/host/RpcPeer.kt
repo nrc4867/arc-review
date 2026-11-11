@@ -23,7 +23,7 @@ import kotlin.coroutines.cancellation.CancellationException
  * output that is not an envelope goes to [onStray], as for a plugin that printed there. Runs on [scope].
  */
 class RpcPeer(
-    private val connection: PluginConnection,
+    private val connection: LineConnection,
     private val scope: CoroutineScope,
     private val handler: RpcHandler,
     private val timeoutMillis: Long,

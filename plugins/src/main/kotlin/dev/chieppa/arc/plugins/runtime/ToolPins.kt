@@ -4,7 +4,7 @@ import java.util.Properties
 
 /**
  * The pinned tools in `tools.properties`, read from [properties]: for each tool its version and, per host, the
- * archive's url, SHA-256 and program. The build reads the same file.
+ * archive's url, SHA-256 and program.
  */
 class ToolPins(private val properties: Properties) {
     /** The pin of [tool] for [host], or null when none is pinned for it. */
@@ -19,7 +19,6 @@ class ToolPins(private val properties: Properties) {
 
     companion object {
         const val NODE = "node"
-        const val ESBUILD = "esbuild"
         private const val VERSION = "version"
         private const val URL = "url"
         private const val SHA256 = "sha256"

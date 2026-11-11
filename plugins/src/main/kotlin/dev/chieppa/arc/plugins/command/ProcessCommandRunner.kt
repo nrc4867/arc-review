@@ -1,4 +1,4 @@
-package dev.chieppa.arc.plugins.bundle
+package dev.chieppa.arc.plugins.command
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

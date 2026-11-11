@@ -41,9 +41,8 @@ compose.desktop {
         jvmArgs += listOf("--enable-native-access=ALL-UNNAMED")
         // -Pdevtools=<port> serves screenshots of the windows on 127.0.0.1.
         providers.gradleProperty("devtools").orNull?.let { jvmArgs += "-Dstretch.devtools=$it" }
-        // -PpluginsNode=<node> and -PpluginsEsbuild=<esbuild> run plugins on installed programs, not the pinned downloads.
+        // -PpluginsNode=<node> runs plugins on an installed Node, not the pinned download.
         providers.gradleProperty("pluginsNode").orNull?.let { jvmArgs += "-Darc.plugins.node=$it" }
-        providers.gradleProperty("pluginsEsbuild").orNull?.let { jvmArgs += "-Darc.plugins.esbuild=$it" }
         nativeDistributions {
             packageName = "arc-review"
             packageVersion = project.version.toString().substringBefore('-')

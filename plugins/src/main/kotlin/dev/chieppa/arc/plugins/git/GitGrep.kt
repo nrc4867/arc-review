@@ -1,6 +1,6 @@
 package dev.chieppa.arc.plugins.git
 
-import dev.chieppa.arc.plugins.bundle.CommandRunner
+import dev.chieppa.arc.plugins.command.CommandRunner
 import dev.chieppa.arc.plugins.protocol.GrepHit
 import java.nio.file.Path
 

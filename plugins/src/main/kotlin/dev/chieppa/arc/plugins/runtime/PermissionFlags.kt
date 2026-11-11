@@ -1,27 +1,21 @@
 package dev.chieppa.arc.plugins.runtime
 
-import dev.chieppa.arc.plugins.manifest.Capabilities
 import java.nio.file.Path
 
 /**
- * The Node permission model flags a plugin's process starts with: reading only the plugin's own folder, the folders
- * in [readable] (the host script and the bundle), and what its [Capabilities] declare; writing only what they declare;
- * starting programs and using the network only when declared. Node before [NET_MAJOR] cannot limit the network, so
- * there it is left open.
+ * The Node permission flags the plugins' process starts with, the same for every plugin: reading only the folders in
+ * [of]'s list (the plugins' sources and the host's own files) and starting worker threads. Writing files, starting
+ * programs, the network, native addons and WASI stay denied; a plugin does those through the app object, which Arc
+ * checks against its manifest.
  */
 object PermissionFlags {
-    const val NET_MAJOR = 25
     private const val PERMISSION = "--permission"
     private const val READ = "--allow-fs-read="
-    private const val WRITE = "--allow-fs-write="
-    private const val CHILD_PROCESS = "--allow-child-process"
-    private const val NET = "--allow-net"
+    private const val WORKER = "--allow-worker"
 
-    fun of(capabilities: Capabilities, folder: Path, readable: List<Path>, nodeMajor: Int): List<String> = buildList {
+    fun of(readable: Collection<Path>): List<String> = buildList {
         add(PERMISSION)
-        (listOf(folder) + readable + capabilities.files.read.map { folder.resolve(it) }).map { it.normalize() }.distinct().forEach { add("$READ$it") }
-        capabilities.files.write.map { folder.resolve(it).normalize() }.distinct().forEach { add("$WRITE$it") }
-        if (capabilities.processes) add(CHILD_PROCESS)
-        if (capabilities.network.isNotEmpty() && nodeMajor >= NET_MAJOR) add(NET)
+        readable.map { it.toAbsolutePath().normalize() }.distinct().sorted().forEach { add("$READ$it") }
+        add(WORKER)
     }
 }

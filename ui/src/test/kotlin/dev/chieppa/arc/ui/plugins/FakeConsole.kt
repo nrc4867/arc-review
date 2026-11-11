@@ -1,14 +1,14 @@
 package dev.chieppa.arc.ui.plugins
 
 import dev.chieppa.arc.plugins.host.LaunchSpec
-import dev.chieppa.arc.plugins.host.PluginConnection
-import dev.chieppa.arc.plugins.host.PluginLauncher
+import dev.chieppa.arc.plugins.host.LineConnection
+import dev.chieppa.arc.plugins.host.ProcessLauncher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 
 /** A console process played by a test: it prints what [print] gives and keeps what is typed into it in [typed]. */
-class FakeConsole : PluginLauncher, PluginConnection {
+class FakeConsole : ProcessLauncher, LineConnection {
     private val out = Channel<String>(Channel.UNLIMITED)
     private val err = Channel<String>(Channel.UNLIMITED)
     private val exit = CompletableDeferred<Int>()
@@ -17,7 +17,7 @@ class FakeConsole : PluginLauncher, PluginConnection {
     override val lines: ReceiveChannel<String> get() = out
     override val logs: ReceiveChannel<String> get() = err
 
-    override fun launch(spec: LaunchSpec): PluginConnection = this
+    override fun launch(spec: LaunchSpec): LineConnection = this
 
     fun print(line: String) {
         out.trySend(line)

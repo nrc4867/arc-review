@@ -12,8 +12,8 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Writer
 
-/** A [PluginConnection] to a real [process], its streams read and written on [scope]'s IO threads as UTF-8 lines. */
-class ProcessConnection(private val process: Process, scope: CoroutineScope) : PluginConnection {
+/** A [LineConnection] to a real [process], its streams read and written on [scope]'s IO threads as UTF-8 lines. */
+class ProcessConnection(private val process: Process, scope: CoroutineScope) : LineConnection {
     private val out = Channel<String>(Channel.UNLIMITED)
     private val err = Channel<String>(Channel.UNLIMITED)
     private val input: Writer = process.outputStream.writer(Charsets.UTF_8)

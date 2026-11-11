@@ -1,36 +1,19 @@
 package dev.chieppa.arc.plugins.runtime
 
-import dev.chieppa.arc.plugins.manifest.Capabilities
-import dev.chieppa.arc.plugins.manifest.FileAccess
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PermissionFlagsTest {
-    private val folder = Path.of("plugins", "todos").toAbsolutePath()
-    private val host = Path.of("runtime", "host.js").toAbsolutePath()
+    private val sources = Path.of("plugins").toAbsolutePath()
+    private val host = Path.of("runtime", "host-1").toAbsolutePath()
 
     @Test
-    fun grantsOnlyThePluginsOwnFolderAndTheHostWhenNothingIsDeclared() {
-        assertEquals(listOf("--permission", "--allow-fs-read=$folder", "--allow-fs-read=$host"), PermissionFlags.of(Capabilities(), folder, listOf(host), 26))
-    }
-
-    @Test
-    fun grantsWhatTheManifestDeclares() {
-        val capabilities = Capabilities(files = FileAccess(read = listOf("../shared"), write = listOf("out")), network = listOf("api.github.com"), processes = true)
-        val flags = PermissionFlags.of(capabilities, folder, listOf(host), 26)
+    fun grantReadingTheGivenFoldersAndWorkersOnly() {
         assertEquals(
-            listOf(
-                "--permission",
-                "--allow-fs-read=$folder",
-                "--allow-fs-read=$host",
-                "--allow-fs-read=${folder.resolve("../shared").normalize()}",
-                "--allow-fs-write=${folder.resolve("out")}",
-                "--allow-child-process",
-                "--allow-net",
-            ),
-            flags,
+            listOf("--permission", "--allow-fs-read=$sources", "--allow-fs-read=$host", "--allow-worker").sorted(),
+            PermissionFlags.of(listOf(host, sources, sources)).sorted(),
         )
-        assertEquals(false, "--allow-net" in PermissionFlags.of(capabilities, folder, listOf(host), 24))
+        assertEquals("--permission", PermissionFlags.of(emptyList()).first())
     }
 }

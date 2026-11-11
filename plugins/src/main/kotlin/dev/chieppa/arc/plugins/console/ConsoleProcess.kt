@@ -1,6 +1,6 @@
 package dev.chieppa.arc.plugins.console
 
-import dev.chieppa.arc.plugins.host.PluginConnection
+import dev.chieppa.arc.plugins.host.LineConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +14,7 @@ class ConsoleProcess(
     val id: String,
     val plugin: String,
     val command: List<String>,
-    private val connection: PluginConnection,
+    private val connection: LineConnection,
     scope: CoroutineScope,
     private val maxLines: Int = MAX_LINES,
     onChunk: (ConsoleChunk) -> Unit = {},

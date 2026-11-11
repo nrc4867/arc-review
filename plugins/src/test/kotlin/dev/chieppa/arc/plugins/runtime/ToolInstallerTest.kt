@@ -82,7 +82,6 @@ class ToolInstallerTest {
         val pins = ToolPins.bundled()
         val node = assertNotNull(pins.pin(ToolPins.NODE))
         assertEquals(64, node.sha256.length)
-        assertNotNull(pins.pin(ToolPins.ESBUILD))
         assertEquals(26, PluginTools.major(node.version))
         assertEquals(24, PluginTools.major("v24.16.0"))
     }
