@@ -10,7 +10,7 @@ export function Todos({ app }: { app: TodoApp }) {
     return (
         <Column grow gap={6} padding={8}>
             <Row gap={8}>
-                <Text tone="muted">{source ? `${source.ref} · ${todos?.length ?? 0} found` : "No source open"}</Text>
+                <Text grow tone="muted">{source ? `${source.ref} · ${todos?.length ?? 0} found` : "No source open"}</Text>
                 <Button label="Refresh" kind="quiet" icon="refresh" onClick={() => setRound(round + 1)} />
             </Row>
             <List grow items={todos} onSelect={(todo) => app.log("picked", `${todo.path}:${todo.line}`)}>
