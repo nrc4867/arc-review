@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import dev.chieppa.arc.core.watch.NotifyRule
 import dev.chieppa.arc.core.watch.SavedFilter
 import dev.chieppa.arc.core.watch.Watchlist
+import dev.chieppa.arc.host.github.auth.TokenOrigin
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.pulls.RateBudget
 import dev.chieppa.arc.host.github.pulls.Viewer
@@ -14,7 +15,7 @@ import kotlinx.coroutines.channels.Channel
 
 /**
  * The saved filters and notification rules, with what GitHub answered for them: each
- * search's result by key, the rate budget, who the person is, and how polling stands. [unseen] counts notifications
+ * search's result by key, the rate budget, who the person is and where their token came from, and how polling stands. [unseen] counts notifications
  * since the bell was last opened. Views read it and recompose when it changes; edits that change what is polled ask
  * for a poll at once.
  */
@@ -23,6 +24,7 @@ class PullWatch(watchlist: Watchlist = Watchlist(), private val clock: () -> Lon
     var results by mutableStateOf<Map<String, FilterResult>>(emptyMap())
     var budget by mutableStateOf<RateBudget?>(null)
     var viewer by mutableStateOf<Viewer?>(null)
+    var tokenOrigin by mutableStateOf<TokenOrigin?>(null)
     var status by mutableStateOf(WatchStatus.Waiting)
     var unseen by mutableIntStateOf(0)
 

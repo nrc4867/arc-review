@@ -30,7 +30,8 @@ class PullPoller(
 
     /** One poll of every search, with what it sets off. */
     suspend fun pollOnce() {
-        if (!withContext(dispatchers.io) { github.hasToken() }) {
+        watch.tokenOrigin = withContext(dispatchers.io) { github.tokenOrigin() }
+        if (watch.tokenOrigin == null) {
             watch.status = WatchStatus.Unavailable
             return
         }
