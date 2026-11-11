@@ -274,7 +274,7 @@ export interface App<S = Record<string, unknown>> {
     /** The plugin's settings, as stored or their defaults. */
     readonly settings: Readonly<S>;
     /** Stores a setting; open views redraw. */
-    readonly setSetting: <K extends keyof S & string>(key: K, value: S[K]) => Promise<void>;
+    setSetting<K extends keyof S & string>(key: K, value: S[K]): Promise<void>;
     /** Listens for setting changes; gives a function that stops. */
     readonly onSettingsChange: (listener: (settings: Readonly<S>) => void) => () => void;
     /** The plugin's private store. */
