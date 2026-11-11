@@ -17,6 +17,8 @@ import dev.chieppa.arc.plugins.protocol.SettingsChangedParams
 import dev.chieppa.arc.plugins.protocol.UnmountParams
 import dev.chieppa.arc.plugins.protocol.ViewEventParams
 import dev.chieppa.arc.plugins.protocol.ViewKind
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -44,6 +46,7 @@ class PluginInstance internal constructor(
 ) : RpcHandler {
     private val viewIds = AtomicLong()
     private val views = ConcurrentHashMap<String, PluginView>()
+    private val open = MutableStateFlow<List<PluginView>>(emptyList())
     private val calls = PluginCalls({ manifest }, { folder }, services, settingsOf, setSettings) { method, params -> supervisor.notify(method, params) }
 
     val id: String get() = manifest.id
@@ -71,16 +74,34 @@ class PluginInstance internal constructor(
 
     /** Runs its action [action] on [context]; failures go to its log. */
     fun runAction(action: String, context: CallContext) {
-        services.scope.launch {
-            runCatching { supervisor.request(Methods.ACTION_RUN, ProtocolJson.toElement(ActionRunParams.serializer(), ActionRunParams(action, context))) }
-                .onFailure { log.add("$action: ${it.message}") }
+        services.scope.launch { runCatching { run(action, context) } }
+    }
+
+    /**
+     * Runs its action [action] on [context] and returns once the action has; a failure goes to its log and is thrown,
+     * as [dev.chieppa.arc.plugins.protocol.RpcException] or [dev.chieppa.arc.plugins.host.PluginGoneException].
+     */
+    suspend fun run(action: String, context: CallContext) {
+        try {
+            supervisor.request(Methods.ACTION_RUN, ProtocolJson.toElement(ActionRunParams.serializer(), ActionRunParams(action, context)))
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            log.add("$action: ${e.message}")
+            throw e
         }
     }
+
+    /** The views Arc shows of it now: its open panels, panes and settings page. */
+    fun views(): List<PluginView> = open.value
+
+    /** The views Arc shows of it, as they open and close. */
+    val opened: StateFlow<List<PluginView>> get() = open
 
     /** Shows its [contribution] of [kind] on [context] with [props]; the view draws once the plugin runs. */
     fun mount(kind: ViewKind, contribution: String, context: CallContext, props: JsonObject = JsonObject(emptyMap())): PluginView {
         val view = PluginView("$id/${viewIds.incrementAndGet()}", kind, contribution, context, props, ::event, ::unmount)
         views[view.id] = view
+        open.value = views.values.toList()
         if (supervisor.status.value is PluginStatus.Running) services.scope.launch { mountOne(view) }
         return view
     }
@@ -123,6 +144,7 @@ class PluginInstance internal constructor(
 
     private fun unmount(view: PluginView) {
         if (views.remove(view.id) == null) return
+        open.value = views.values.toList()
         services.scope.launch { supervisor.notify(Methods.VIEW_UNMOUNT, ProtocolJson.toElement(UnmountParams.serializer(), UnmountParams(view.id))) }
     }
 }

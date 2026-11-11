@@ -3,6 +3,7 @@ package dev.chieppa.arc.plugins.manager
 import dev.chieppa.arc.plugins.config.PluginSourceSpec
 import dev.chieppa.arc.plugins.config.PluginsConfig
 import dev.chieppa.arc.plugins.gitsource.GitSourceState
+import dev.chieppa.arc.plugins.host.PluginDiagnostic
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
 import dev.chieppa.arc.plugins.manifest.Capabilities
 import dev.chieppa.arc.plugins.manifest.Capability
@@ -126,6 +127,24 @@ class PluginManager(private val services: PluginServices) {
             },
         )
         refresh()
+    }
+
+    /**
+     * Type checks directory plugin [id] now and gives every error, which its row shows too; null when it is no
+     * directory plugin with a readable manifest.
+     */
+    suspend fun typeCheck(id: String): List<PluginDiagnostic>? {
+        val plugin = known.value.firstOrNull { it.id == id }?.found?.takeIf { it.source is PluginSourceSpec.Directory } ?: return null
+        val manifest = plugin.manifest ?: return null
+        return checks.checkNow(id, plugin.folder, manifest.entry)
+    }
+
+    /** Starts running plugin [id] again from its files and checks its types again, as a save in its folder does. */
+    fun reload(id: String) {
+        val entry = known.value.firstOrNull { it.id == id } ?: return
+        val instance = entry.instance ?: return
+        instance.start()
+        check(entry.found)
     }
 
     /** The running instance of plugin [id], if it is enabled. */

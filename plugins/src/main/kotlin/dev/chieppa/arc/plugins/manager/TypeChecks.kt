@@ -1,5 +1,6 @@
 package dev.chieppa.arc.plugins.manager
 
+import dev.chieppa.arc.plugins.host.PluginDiagnostic
 import dev.chieppa.arc.plugins.typecheck.TypeChecker
 import dev.chieppa.arc.plugins.typecheck.TypeErrors
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,14 @@ internal class TypeChecks(private val scope: CoroutineScope, private val checker
             val all = checker.check(folder, entry)
             found.update { it + (id to TypeErrors(all.take(SHOWN), all.size)) }
         }
+    }
+
+    /** Checks plugin [id] in [folder] from [entry] now, in place of a waiting check, and gives every error found. */
+    suspend fun checkNow(id: String, folder: Path, entry: String): List<PluginDiagnostic> {
+        checks.remove(id)?.cancel()
+        val all = checker.check(folder, entry)
+        found.update { it + (id to TypeErrors(all.take(SHOWN), all.size)) }
+        return all
     }
 
     /** Forgets plugin [id]'s errors and stops its check. */

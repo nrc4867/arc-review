@@ -48,6 +48,7 @@ class PluginSupervisor(
     /** Starts the plugin, or starts it again from its files when it runs. */
     fun start() {
         job?.cancel()
+        state.value = PluginStatus.Starting
         job = scope.launch { supervise() }
     }
 
