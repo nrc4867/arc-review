@@ -1,6 +1,9 @@
 // The protocol's method names, as Arc's Kotlin `Methods` names them; PluginHostSourcesTest checks they match.
 
 export const Methods = {
+    hostStartWorker: "host.startWorker",
+    hostStopWorker: "host.stopWorker",
+    hostWorkerExit: "host.workerExit",
     initialize: "initialize",
     ping: "ping",
     actionRun: "action.run",
@@ -11,6 +14,7 @@ export const Methods = {
     event: "event",
     consoleOutput: "console.output",
     consoleExit: "console.exit",
+    log: "log",
     viewPatch: "view.patch",
     settingsSet: "settings.set",
     storeGet: "store.get",
@@ -21,6 +25,9 @@ export const Methods = {
     consoleKill: "console.kill",
     panesOpen: "panes.open",
     gitGrep: "git.grep",
+    filesRead: "files.read",
+    filesWrite: "files.write",
+    netFetch: "net.fetch",
 } as const;
 
 /** The key that marks a prop as a function the plugin holds. */
@@ -31,8 +38,20 @@ export const ROOT = 0;
 
 export const ErrorCodes = {
     unknownMethod: "unknown-method",
+    transpile: "transpile",
     failed: "failed",
 } as const;
+
+/** One message of the protocol; [plugin] names the plugin it is to or from. */
+export interface Envelope {
+    readonly kind: "request" | "response" | "notification";
+    readonly id?: number;
+    readonly method?: string;
+    readonly params?: any;
+    readonly result?: unknown;
+    readonly error?: { readonly code: string; readonly message: string };
+    readonly plugin?: string;
+}
 
 export interface CallContext {
     readonly source?: import("../generated/arc").SourceInfo;

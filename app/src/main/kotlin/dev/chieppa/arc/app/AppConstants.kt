@@ -41,13 +41,13 @@ internal object AppConstants {
     /** Each plugin's private store, as `<id>.json`. */
     const val PLUGIN_STORE_FOLDER = "plugin-store"
 
-    /** Each plugin's transpiled bundle, as `<id>/bundle.js`. */
-    const val PLUGIN_CACHE_FOLDER = "plugin-cache"
-
-    /** The plugin host script every plugin process runs. */
+    /** The plugin host the plugins' Node process runs, as `host-<hash>/`, and the folder it runs in, `work`. */
     const val PLUGIN_RUNTIME_FOLDER = "plugin-runtime"
 
-    /** The pinned Node and esbuild, downloaded the first time a plugin is enabled. */
+    /** The neutral folder the plugins' Node process runs in, inside [PLUGIN_RUNTIME_FOLDER]. */
+    const val PLUGIN_WORK_FOLDER = "work"
+
+    /** The pinned Node, downloaded the first time a plugin is enabled. */
     const val RUNTIMES_FOLDER = "runtimes"
 
     /** How long the workspace waits after a change before it is saved. */

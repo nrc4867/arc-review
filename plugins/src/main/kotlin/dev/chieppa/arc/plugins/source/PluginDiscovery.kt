@@ -17,6 +17,13 @@ object PluginDiscovery {
         is PluginSourceSpec.Git -> emptyList()
     }
 
+    /** The folder [plugin]'s source reads from: the source's folder, or the plugin's own when it lies outside it. */
+    fun root(plugin: FoundPlugin): Path {
+        val folder = plugin.folder.toAbsolutePath().normalize()
+        val source = (plugin.source as? PluginSourceSpec.Directory)?.let { Path.of(it.path).toAbsolutePath().normalize() } ?: return folder
+        return if (folder.startsWith(source)) source else folder
+    }
+
     private fun directory(source: PluginSourceSpec, folder: Path): List<FoundPlugin> {
         val list = folder.resolve(ManifestFiles.PLUGINS)
         if (!Files.isRegularFile(list)) return listOf(plugin(source, folder))

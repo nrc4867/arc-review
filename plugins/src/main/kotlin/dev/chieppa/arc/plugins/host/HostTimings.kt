@@ -1,16 +1,16 @@
 package dev.chieppa.arc.plugins.host
 
-/** How a plugin host times its processes. */
+/** How Arc times the plugins' Node process and their workers. */
 data class HostTimings(
     /** How long a request may wait for its answer. */
     val requestMillis: Long = REQUEST_MILLIS,
-    /** How long the plugin has to load its bundle and answer `initialize`. */
+    /** How long the plugin has to load its entry and answer `initialize`. */
     val initializeMillis: Long = INITIALIZE_MILLIS,
-    /** How often a running plugin is pinged; one that misses a ping's answer is hung and is ended. */
+    /** How often a running worker and the process are pinged; one that misses a ping's answer is hung and is ended. */
     val heartbeatMillis: Long = HEARTBEAT_MILLIS,
-    /** How long a plugin that ended waits before it starts again. */
+    /** How long a worker that ended waits before it starts again. */
     val restartMillis: Long = RESTART_MILLIS,
-    /** How many times a plugin may end within [crashWindowMillis] before it is left stopped as failed. */
+    /** How many times a worker may end within [crashWindowMillis] before it is left stopped as failed. */
     val maxCrashes: Int = MAX_CRASHES,
     val crashWindowMillis: Long = CRASH_WINDOW_MILLIS,
 ) {

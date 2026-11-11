@@ -40,7 +40,7 @@ class PluginView(
         shown.value = tree.snapshot()
     }
 
-    /** Starts over empty, as when the plugin's process starts again and draws the view anew. */
+    /** Starts over empty, as when the plugin's worker starts again and draws the view anew. */
     @Synchronized
     internal fun reset() {
         tree = ViewTree()

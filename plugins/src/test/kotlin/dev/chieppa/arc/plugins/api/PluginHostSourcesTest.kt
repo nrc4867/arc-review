@@ -14,7 +14,7 @@ class PluginHostSourcesTest {
     @Test
     fun everyMethodIsNamedTheSameOnBothSides() {
         val kotlin = Methods::class.java.declaredFields.filter { it.type == String::class.java }.map { it.get(null) as String }.toSet()
-        val typescript = Regex("""^\s+\w+: "([a-z.]+)",$""", RegexOption.MULTILINE).findAll(protocol.substringBefore("} as const")).map { it.groupValues[1] }.toSet()
+        val typescript = Regex("""^\s+\w+: "([A-Za-z.]+)",$""", RegexOption.MULTILINE).findAll(protocol.substringBefore("} as const")).map { it.groupValues[1] }.toSet()
         assertEquals(kotlin, typescript)
     }
 

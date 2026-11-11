@@ -30,12 +30,14 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
 /**
- * One enabled plugin: its process kept running by a [PluginSupervisor], the views Arc shows of it, its actions and
- * events, and its calls into Arc. Its [manifest] and [folder] change when its files are read again.
+ * One enabled plugin: its worker kept running by a [PluginSupervisor], the views Arc shows of it, its actions and
+ * events, and its calls into Arc. Its [manifest], [folder] and the [root] its source reads from change when its files
+ * are read again.
  */
 class PluginInstance internal constructor(
     @Volatile var manifest: PluginManifest,
     @Volatile var folder: Path,
+    @Volatile var root: Path,
     private val services: PluginServices,
     private val settingsOf: () -> JsonObject,
     setSettings: (JsonObject) -> Unit,
@@ -47,8 +49,8 @@ class PluginInstance internal constructor(
     val id: String get() = manifest.id
     val log = PluginLog()
 
-    private val supervisor = PluginSupervisor(services.scope, services.launcher, this, log, services.timings, services.clock, ::mountAll) {
-        services.preparer.prepare(folder, manifest, settingsOf())
+    private val supervisor = PluginSupervisor(services.scope, services.workers, this, log, services.timings, services.clock, ::mountAll) {
+        services.preparer.prepare(folder, root, manifest, settingsOf())
     }
 
     val status: StateFlow<PluginStatus> get() = supervisor.status

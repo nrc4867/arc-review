@@ -1,14 +1,15 @@
 import type { AppEvent, AppEventName } from "../generated/arc";
 import type { PluginDefinition } from "../sdk/definition";
 import { createApp, type Shared } from "./app";
-import { Channel, RpcError, setPluginFolder } from "./channel";
+import { Channel, RpcError } from "./channel";
+import { setPluginFolder } from "./errors";
 import { Listeners } from "./Listeners";
-import { loadBundle } from "./loader";
+import { loadEntry } from "./loader";
 import { Processes } from "./processes";
-import { ErrorCodes, Methods, type CallContext } from "./protocol";
+import { ErrorCodes, Methods, type CallContext, type Envelope } from "./protocol";
 import { Views } from "./Views";
 
-/** One plugin in this process: it loads the bundle, says what it contributes and answers Arc's calls. */
+/** The plugin in this worker: it loads the entry, says what it contributes and answers Arc's calls. */
 export class PluginRuntime {
     readonly channel: Channel;
     private definition: PluginDefinition<any> = {};
@@ -16,8 +17,8 @@ export class PluginRuntime {
     private shared!: Shared;
     private views!: Views;
 
-    constructor(write: (line: string) => void) {
-        this.channel = new Channel(write, (method, params) => this.request(method, params), (method, params) => this.notification(method, params));
+    constructor(send: (envelope: Envelope) => void) {
+        this.channel = new Channel(send, (method, params) => this.request(method, params), (method, params) => this.notification(method, params));
     }
 
     private request(method: string, params: any): unknown {
@@ -65,7 +66,7 @@ export class PluginRuntime {
             settingsChanged: new Listeners<"change", [Record<string, unknown>]>(),
             settings: () => this.settings(),
         };
-        this.definition = loadBundle(params.bundle) ?? {};
+        this.definition = loadEntry(params.entry) ?? {};
         this.views = new Views(this.channel, this.shared, this.definition);
         const strip = <T extends { id: string; title?: string; label?: string; icon?: string; keys?: string }>(items: readonly T[] | undefined) =>
             (items ?? []).map(({ id, title, label, icon, keys }) => ({ id, title, label, icon, keys }));

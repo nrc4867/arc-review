@@ -5,9 +5,20 @@ package dev.chieppa.arc.plugins.protocol
  * plugin written for version 1 keeps working.
  */
 object Methods {
-    // Arc to the plugin.
+    // Arc to the Node process itself, with no plugin named.
 
-    /** [InitializeParams] → [InitializeResult]: load the plugin's bundle and say what it contributes. */
+    /** [StartWorkerParams] → nothing, once the plugin's worker thread is started. */
+    const val HOST_START_WORKER = "host.startWorker"
+
+    /** [StopWorkerParams] → nothing, once the plugin's worker thread is ended. */
+    const val HOST_STOP_WORKER = "host.stopWorker"
+
+    /** Notification from the process, [WorkerExitParams]: a plugin's worker ended. */
+    const val HOST_WORKER_EXIT = "host.workerExit"
+
+    // Arc to the plugin; `ping` also goes to the process itself.
+
+    /** [InitializeParams] → [InitializeResult]: load the plugin's entry and say what it contributes. */
     const val INITIALIZE = "initialize"
 
     /** [PingParams] → nothing: answered at once while the process is alive and not stuck. */
@@ -39,6 +50,9 @@ object Methods {
 
     // The plugin to Arc.
 
+    /** Notification, [LogParams]: something the plugin printed. */
+    const val LOG = "log"
+
     /** Notification, [PatchParams]: changes to a mounted view's component tree. */
     const val VIEW_PATCH = "view.patch"
 
@@ -68,4 +82,13 @@ object Methods {
 
     /** [GitGrepParams] → [GitGrepResult]: search a source's files. */
     const val GIT_GREP = "git.grep"
+
+    /** [FilesReadParams] → [FilesReadResult]: read a file in a folder the manifest names. */
+    const val FILES_READ = "files.read"
+
+    /** [FilesWriteParams] → nothing: write a file in a folder the manifest names. */
+    const val FILES_WRITE = "files.write"
+
+    /** [FetchParams] → [FetchResult]: an HTTP request Arc makes to a host the manifest names. */
+    const val NET_FETCH = "net.fetch"
 }

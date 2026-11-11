@@ -2,12 +2,12 @@ package dev.chieppa.arc.plugins.host
 
 import dev.chieppa.arc.plugins.protocol.Contributions
 
-/** Where a plugin's process stands. */
+/** Where a plugin's worker stands. */
 sealed interface PluginStatus {
     /** Not enabled, or stopped. */
     data object Off : PluginStatus
 
-    /** Transpiling, starting or loading its bundle. */
+    /** Starting, or loading its entry. */
     data object Starting : PluginStatus
 
     /** Running and contributing [contributions]. */

@@ -1,5 +1,6 @@
 package dev.chieppa.arc.plugins.host
 
+import dev.chieppa.arc.plugins.protocol.ErrorCodes
 import dev.chieppa.arc.plugins.protocol.InitializeParams
 import dev.chieppa.arc.plugins.protocol.InitializeResult
 import dev.chieppa.arc.plugins.protocol.Methods
@@ -19,16 +20,16 @@ import kotlinx.serialization.json.JsonNull
 import java.io.IOException
 
 /**
- * Keeps one plugin's process running: [prepare] makes it ready (transpiled, with its command), [launcher] starts it,
- * and it is sent `initialize`. While it runs it is pinged every [HostTimings.heartbeatMillis]; one that misses an
- * answer is hung and ended. A process that ends starts again after a pause, unless it has ended
- * [HostTimings.maxCrashes] times within [HostTimings.crashWindowMillis] by [clock], when it stays [PluginStatus.Failed]
- * until started again. Its requests go to [handler], its log to [log]; [onRunning] runs once each start has
- * initialized, as to mount its open views again.
+ * Keeps one plugin's worker running: [prepare] makes it ready, [launcher] starts it, and it is sent `initialize`.
+ * While it runs it is pinged every [HostTimings.heartbeatMillis]; one that misses an answer is hung and ended. A worker
+ * that ends starts again after a pause, unless it has ended [HostTimings.maxCrashes] times within
+ * [HostTimings.crashWindowMillis] by [clock], when it stays [PluginStatus.Failed] until started again; one ended only
+ * because the shared process started again starts again at once. Its requests go to [handler], its log to [log];
+ * [onRunning] runs once each start has initialized, as to mount its open views again.
  */
 class PluginSupervisor(
     private val scope: CoroutineScope,
-    private val launcher: PluginLauncher,
+    private val launcher: WorkerLauncher,
     private val handler: RpcHandler,
     private val log: PluginLog,
     private val timings: HostTimings = HostTimings(),
@@ -78,7 +79,7 @@ class PluginSupervisor(
                 }
                 is Preparation.Ready -> prepared
             }
-            val ended = runOnce(ready)
+            val ended = runOnce(ready) ?: continue
             val now = clock()
             crashes.addLast(now)
             while (crashes.first() < now - timings.crashWindowMillis) crashes.removeFirst()
@@ -91,10 +92,10 @@ class PluginSupervisor(
         }
     }
 
-    /** Runs one process until it ends, and says how it ended. */
-    private suspend fun runOnce(ready: Preparation.Ready): PluginDiagnostic {
+    /** Runs one worker until it ends, and says how it ended; null when it is to start again at once. */
+    private suspend fun runOnce(ready: Preparation.Ready): PluginDiagnostic? {
         val connection = try {
-            launcher.launch(ready.launch)
+            launcher.launch(ready.worker)
         } catch (e: IOException) {
             return PluginDiagnostic(DiagnosticKind.Load, e.message ?: e.toString())
         }
@@ -108,8 +109,11 @@ class PluginSupervisor(
                     onRunning()
                     var hung = false
                     launch { hung = !heartbeat(rpc); if (hung) connection.kill() }
-                    val code = connection.awaitExit()
-                    PluginDiagnostic(DiagnosticKind.Crash, if (hung) HUNG else "$EXITED $code${lastLog()}")
+                    when (val code = connection.awaitExit()) {
+                        WorkerExits.HOST_RESTARTED -> null
+                        WorkerExits.HOST_ENDED -> PluginDiagnostic(DiagnosticKind.Crash, "$HOST_ENDED${lastLog()}")
+                        else -> PluginDiagnostic(DiagnosticKind.Crash, if (hung) HUNG else "$EXITED $code${lastLog()}")
+                    }
                 }
                 coroutineContext.cancelChildren()
                 ended
@@ -125,7 +129,7 @@ class PluginSupervisor(
         val result = try {
             rpc.request(Methods.INITIALIZE, ProtocolJson.toElement(InitializeParams.serializer(), params), timings.initializeMillis)
         } catch (e: RpcException) {
-            return LoadErrors.diagnostic(e.error.message)
+            return LoadErrors.diagnostic(e.error.message, if (e.error.code == ErrorCodes.TRANSPILE) DiagnosticKind.Transpile else DiagnosticKind.Load)
         } catch (_: PluginTimeoutException) {
             return PluginDiagnostic(DiagnosticKind.Load, HUNG)
         } catch (_: PluginGoneException) {
@@ -158,6 +162,7 @@ class PluginSupervisor(
         const val HUNG = "Stopped answering"
         const val EXITED = "Exited with code"
         const val EXITED_EARLY = "Exited while loading"
+        const val HOST_ENDED = "The plugin host ended"
         const val BAD_INITIALIZE = "Answered initialize with something else"
     }
 }

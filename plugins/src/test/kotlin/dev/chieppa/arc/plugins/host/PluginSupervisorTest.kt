@@ -2,6 +2,7 @@ package dev.chieppa.arc.plugins.host
 
 import dev.chieppa.arc.plugins.protocol.Contributions
 import dev.chieppa.arc.plugins.protocol.Envelope
+import dev.chieppa.arc.plugins.protocol.ErrorCodes
 import dev.chieppa.arc.plugins.protocol.InitializeParams
 import dev.chieppa.arc.plugins.protocol.PanelContribution
 import dev.chieppa.arc.plugins.protocol.PluginInfo
@@ -22,7 +23,7 @@ import kotlin.test.assertTrue
 class PluginSupervisorTest {
     private val timings = HostTimings(requestMillis = 100, initializeMillis = 100, heartbeatMillis = 1_000, restartMillis = 500, maxCrashes = 3, crashWindowMillis = 10_000)
     private val contributions = Contributions(panels = listOf(PanelContribution("todos", "TODOs")))
-    private val ready = Preparation.Ready(LaunchSpec(listOf("node"), Path.of(".")), InitializeParams(1, PluginInfo("todos", "0.1.0", "."), "bundle.js"))
+    private val ready = Preparation.Ready(WorkerSpec("todos", Path.of(".")), InitializeParams(1, PluginInfo("todos", "0.1.0", "."), "src/index.tsx"))
     private val calls = mutableListOf<String>()
     private val handler = object : RpcHandler {
         override suspend fun request(method: String, params: JsonElement): JsonElement {
@@ -70,6 +71,40 @@ class PluginSupervisorTest {
         val failed = assertIs<PluginStatus.Failed>(supervisor.status.value)
         assertEquals(DiagnosticKind.Crash, failed.diagnostics.single().kind)
         assertTrue("boom" in failed.diagnostics.single().message)
+    }
+
+    @Test
+    fun aWorkerEndedByTheHostStartingAgainStartsAgainAtOnceWithoutCounting() = runTest {
+        val plugin = FakePlugin(backgroundScope, contributions)
+        val supervisor = supervisor(plugin).apply { start() }
+        runCurrent()
+        repeat(timings.maxCrashes + 1) {
+            plugin.current.end(WorkerExits.HOST_RESTARTED)
+            runCurrent()
+            assertIs<PluginStatus.Running>(supervisor.status.value)
+        }
+        assertEquals(timings.maxCrashes + 2, plugin.launched.size)
+    }
+
+    @Test
+    fun theHostEndingCountsAsACrash() = runTest {
+        val plugin = FakePlugin(backgroundScope, contributions)
+        val supervisor = supervisor(plugin).apply { start() }
+        runCurrent()
+        plugin.current.end(WorkerExits.HOST_ENDED)
+        runCurrent()
+        assertEquals(PluginStatus.Restarting(1), supervisor.status.value)
+    }
+
+    @Test
+    fun aTranspileErrorNamesItsPlace() = runTest {
+        val plugin = FakePlugin(backgroundScope).apply { loadError = "Expression expected. @ src/index.tsx:3:0"; loadErrorCode = ErrorCodes.TRANSPILE }
+        val supervisor = supervisor(plugin).apply { start() }
+        runCurrent()
+        assertEquals(
+            PluginDiagnostic(DiagnosticKind.Transpile, "Expression expected.", "src/index.tsx", 3, 0),
+            assertIs<PluginStatus.Failed>(supervisor.status.value).diagnostics.single(),
+        )
     }
 
     @Test

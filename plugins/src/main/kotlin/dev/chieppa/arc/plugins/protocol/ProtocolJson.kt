@@ -4,6 +4,9 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.jsonObject
 
 /** The JSON both sides write: unknown fields ignored, so a newer peer's additions do no harm. */
 object ProtocolJson {
@@ -24,6 +27,14 @@ object ProtocolJson {
     } catch (_: IllegalArgumentException) {
         null
     }
+
+    /** [line], an envelope, addressed to [plugin]. */
+    fun stamp(line: String, plugin: String): String {
+        val message = json.parseToJsonElement(line).jsonObject
+        return json.encodeToString(JsonObject.serializer(), JsonObject(message + (PLUGIN to JsonPrimitive(plugin))))
+    }
+
+    private const val PLUGIN = "plugin"
 
     fun <T> toElement(serializer: KSerializer<T>, value: T): JsonElement = json.encodeToJsonElement(serializer, value)
 
