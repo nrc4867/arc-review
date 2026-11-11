@@ -27,6 +27,8 @@ object AppApi {
                 member("console", "ConsoleApi", "Processes Arc runs for the plugin. Needs the console capability."),
                 member("panes", "PanesApi", "The plugin's panes in the grid. Needs the panes capability."),
                 member("git", "GitApi", "Queries on the sources' repos. Needs the git capability."),
+                member("files", "FilesApi", "Files in the folders the manifest's files capability names."),
+                member("fetch", "(url: string, init?: FetchInit) => Promise<FetchResponse>", "An HTTP request Arc makes to a host the manifest's network capability names, with no credentials of Arc's and no redirects followed."),
                 member("on", "(event: AppEventName, listener: (event: AppEvent) => void) => () => void", "Listens for an event in Arc; gives a function that stops."),
                 member("useQuery", "<T>(load: () => Promise<T>, deps?: readonly unknown[]) => T | undefined", "A hook: what load gives, undefined until it has, loaded again when deps or the source change."),
                 member("log", "(...values: unknown[]) => void", "Writes to the plugin's log."),
@@ -69,6 +71,34 @@ object AppApi {
             "GitApi",
             "Queries on the repos of the open sources.",
             listOf(member("grep", "(pattern: string, options?: { limit?: number }) => Promise<GrepHit[]>", "Lines matching a regular expression in the active source's files.")),
+        ),
+        InterfaceSpec(
+            "FilesApi",
+            "Files a plugin reads and writes through Arc. Paths are absolute or relative to the plugin's folder.",
+            listOf(
+                member("read", "(path: string) => Promise<string>", "A file's text, under a folder the manifest lets it read."),
+                member("write", "(path: string, text: string) => Promise<void>", "Writes a file's text, under a folder the manifest lets it write."),
+            ),
+        ),
+        InterfaceSpec(
+            "FetchInit",
+            "How app.fetch sends a request.",
+            listOf(
+                member("method", "string", "GET when absent.", optional = true),
+                member("headers", "Readonly<Record<string, string>>", "Request headers.", optional = true),
+                member("body", "string", "The request's body as text.", optional = true),
+            ),
+        ),
+        InterfaceSpec(
+            "FetchResponse",
+            "What app.fetch answers with.",
+            listOf(
+                member("status", "number", "The HTTP status."),
+                member("ok", "boolean", "Whether the status is 200 to 299."),
+                member("headers", "Readonly<Record<string, string>>", "The first value of each header, by lowercase name."),
+                member("text", "() => Promise<string>", "The body as text."),
+                member("json", "<T = unknown>() => Promise<T>", "The body read as JSON."),
+            ),
         ),
         InterfaceSpec(
             "AppEvent",

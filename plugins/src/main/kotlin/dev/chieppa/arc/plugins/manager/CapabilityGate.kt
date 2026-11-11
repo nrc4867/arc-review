@@ -6,6 +6,8 @@ import dev.chieppa.arc.plugins.protocol.ErrorCodes
 import dev.chieppa.arc.plugins.protocol.Methods
 import dev.chieppa.arc.plugins.protocol.RpcError
 import dev.chieppa.arc.plugins.protocol.RpcException
+import java.net.URI
+import java.net.URISyntaxException
 
 /** Checks a plugin's calls and contributions against the capabilities its manifest declares. */
 object CapabilityGate {
@@ -15,13 +17,41 @@ object CapabilityGate {
         Methods.CONSOLE_KILL to Capabilities::console,
         Methods.PANES_OPEN to Capabilities::panes,
         Methods.GIT_GREP to Capabilities::git,
+        Methods.FILES_READ to { it.files.read.isNotEmpty() },
+        Methods.FILES_WRITE to { it.files.write.isNotEmpty() },
+        Methods.NET_FETCH to { it.network.isNotEmpty() },
     )
+    private val SCHEMES = setOf("https", "http")
+    private const val WILDCARD = "*."
     private const val UNDECLARED = "The plugin's manifest does not declare what"
+    private const val UNDECLARED_HOST = "The plugin's manifest does not name the host of"
 
     /** Throws [RpcException] with [ErrorCodes.DENIED] unless [capabilities] allow calling [method]. */
     fun check(method: String, capabilities: Capabilities) {
         val allowed = NEEDS[method] ?: return
-        if (!allowed(capabilities)) throw RpcException(RpcError(ErrorCodes.DENIED, "$UNDECLARED $method needs"))
+        if (!allowed(capabilities)) throw denied("$UNDECLARED $method needs")
+    }
+
+    /** Throws [RpcException] with [ErrorCodes.DENIED] unless [url] is http or https to a host [capabilities] name. */
+    fun checkHost(url: String, capabilities: Capabilities) {
+        if (!allowsHost(url, capabilities)) throw denied("$UNDECLARED_HOST $url")
+    }
+
+    /**
+     * Whether [url] goes to a host the manifest's network list names: the host itself, or under it when the entry is
+     * `*.host`.
+     */
+    fun allowsHost(url: String, capabilities: Capabilities): Boolean {
+        val uri = try {
+            URI(url)
+        } catch (_: URISyntaxException) {
+            return false
+        }
+        val host = uri.host?.lowercase() ?: return false
+        if (uri.scheme?.lowercase() !in SCHEMES || uri.userInfo != null) return false
+        return capabilities.network.map { it.lowercase() }.any { declared ->
+            if (declared.startsWith(WILDCARD)) host.endsWith(declared.substring(1)) else host == declared
+        }
     }
 
     /** [contributions] without the kinds [capabilities] do not declare. */
@@ -30,4 +60,6 @@ object CapabilityGate {
         panels = if (capabilities.panels) contributions.panels else emptyList(),
         panes = if (capabilities.panes) contributions.panes else emptyList(),
     )
+
+    private fun denied(message: String) = RpcException(RpcError(ErrorCodes.DENIED, message))
 }

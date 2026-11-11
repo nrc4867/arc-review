@@ -9,6 +9,11 @@ import dev.chieppa.arc.plugins.protocol.ConsoleRunParams
 import dev.chieppa.arc.plugins.protocol.ConsoleRunResult
 import dev.chieppa.arc.plugins.protocol.ConsoleWriteParams
 import dev.chieppa.arc.plugins.protocol.ErrorCodes
+import dev.chieppa.arc.plugins.protocol.FetchParams
+import dev.chieppa.arc.plugins.protocol.FetchResult
+import dev.chieppa.arc.plugins.protocol.FilesReadParams
+import dev.chieppa.arc.plugins.protocol.FilesReadResult
+import dev.chieppa.arc.plugins.protocol.FilesWriteParams
 import dev.chieppa.arc.plugins.protocol.GitGrepParams
 import dev.chieppa.arc.plugins.protocol.GitGrepResult
 import dev.chieppa.arc.plugins.protocol.Methods
@@ -30,7 +35,7 @@ import java.nio.file.Path
 
 /**
  * Answers one plugin's calls into Arc, each checked against its manifest's capabilities first: its settings and
- * private store, the processes it runs, its panes and git searches. [folder] is the plugin's own; [settings] and
+ * private store, the processes it runs, its panes, git searches, files and HTTP requests. [folder] is the plugin's own; [settings] and
  * [setSettings] read and write its stored settings; [notify] sends it a notification.
  */
 internal class PluginCalls(
@@ -42,6 +47,8 @@ internal class PluginCalls(
     private val notify: suspend (String, JsonElement) -> Unit,
 ) {
     private val id: String get() = manifest().id
+    private val files = FileCalls(folder) { manifest().capabilities }
+    private val fetch = FetchCalls(services.fetcher) { manifest().capabilities }
 
     suspend fun answer(method: String, params: JsonElement): JsonElement {
         CapabilityGate.check(method, manifest().capabilities)
@@ -55,6 +62,9 @@ internal class PluginCalls(
             Methods.CONSOLE_KILL -> process(read(ConsoleHandleParams.serializer(), params).handle).kill().let { JsonNull }
             Methods.PANES_OPEN -> services.ui.openPane(id, read(PanesOpenParams.serializer(), params)).let { JsonNull }
             Methods.GIT_GREP -> grep(read(GitGrepParams.serializer(), params))
+            Methods.FILES_READ -> ProtocolJson.toElement(FilesReadResult.serializer(), files.read(read(FilesReadParams.serializer(), params)))
+            Methods.FILES_WRITE -> files.write(read(FilesWriteParams.serializer(), params)).let { JsonNull }
+            Methods.NET_FETCH -> ProtocolJson.toElement(FetchResult.serializer(), fetch.fetch(read(FetchParams.serializer(), params)))
             else -> throw RpcException(RpcError(ErrorCodes.UNKNOWN_METHOD, method))
         }
     }

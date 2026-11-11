@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
-import type { App, AppEvent, AppEventName, GrepHit } from "../generated/arc";
+import type { App, AppEvent, AppEventName, FetchInit, FetchResponse, GrepHit } from "../generated/arc";
 import type { Channel } from "./channel";
 import type { Listeners } from "./Listeners";
 import type { Processes } from "./processes";
 import { Methods, type CallContext } from "./protocol";
+
+/** The statuses fetch counts as ok. */
+const OK_FIRST = 200;
+const OK_LAST = 299;
 
 /** What every app object of one plugin shares. */
 export interface Shared {
@@ -48,6 +52,16 @@ export function createApp(shared: Shared, context: CallContext, props: Record<st
                 const result = await channel.request(Methods.gitGrep, { pattern, context, ...(options?.limit ? { limit: options.limit } : {}) });
                 return result.hits;
             },
+        },
+        files: {
+            read: async (path: string) => (await channel.request(Methods.filesRead, { path })).text,
+            write: async (path: string, text: string) => void (await channel.request(Methods.filesWrite, { path, text })),
+        },
+        fetch: async (url: string, init?: FetchInit): Promise<FetchResponse> => {
+            const answer = await channel.request(Methods.netFetch, { url, method: init?.method ?? "GET", headers: init?.headers ?? {}, body: init?.body ?? null });
+            const headers = Object.fromEntries(Object.entries(answer.headers ?? {}).map(([name, value]) => [name.toLowerCase(), value as string]));
+            const body: string = answer.body ?? "";
+            return { status: answer.status, ok: answer.status >= OK_FIRST && answer.status <= OK_LAST, headers, text: async () => body, json: async () => JSON.parse(body) };
         },
         on: (event: AppEventName, listener: (event: AppEvent) => void) => shared.events.add(event, listener),
         useQuery: <T>(load: () => Promise<T>, deps: readonly unknown[] = []) => {

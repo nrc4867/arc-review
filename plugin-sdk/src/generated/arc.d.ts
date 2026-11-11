@@ -264,6 +264,10 @@ export interface App<S = Record<string, unknown>> {
     readonly panes: PanesApi;
     /** Queries on the sources' repos. Needs the git capability. */
     readonly git: GitApi;
+    /** Files in the folders the manifest's files capability names. */
+    readonly files: FilesApi;
+    /** An HTTP request Arc makes to a host the manifest's network capability names, with no credentials of Arc's and no redirects followed. */
+    readonly fetch: (url: string, init?: FetchInit) => Promise<FetchResponse>;
     /** Listens for an event in Arc; gives a function that stops. */
     readonly on: (event: AppEventName, listener: (event: AppEvent) => void) => () => void;
     /** A hook: what load gives, undefined until it has, loaded again when deps or the source change. */
@@ -314,6 +318,38 @@ export interface PanesApi {
 export interface GitApi {
     /** Lines matching a regular expression in the active source's files. */
     readonly grep: (pattern: string, options?: { limit?: number }) => Promise<GrepHit[]>;
+}
+
+/** Files a plugin reads and writes through Arc. Paths are absolute or relative to the plugin's folder. */
+export interface FilesApi {
+    /** A file's text, under a folder the manifest lets it read. */
+    readonly read: (path: string) => Promise<string>;
+    /** Writes a file's text, under a folder the manifest lets it write. */
+    readonly write: (path: string, text: string) => Promise<void>;
+}
+
+/** How app.fetch sends a request. */
+export interface FetchInit {
+    /** GET when absent. */
+    readonly method?: string;
+    /** Request headers. */
+    readonly headers?: Readonly<Record<string, string>>;
+    /** The request's body as text. */
+    readonly body?: string;
+}
+
+/** What app.fetch answers with. */
+export interface FetchResponse {
+    /** The HTTP status. */
+    readonly status: number;
+    /** Whether the status is 200 to 299. */
+    readonly ok: boolean;
+    /** The first value of each header, by lowercase name. */
+    readonly headers: Readonly<Record<string, string>>;
+    /** The body as text. */
+    readonly text: () => Promise<string>;
+    /** The body read as JSON. */
+    readonly json: <T = unknown>() => Promise<T>;
 }
 
 /** Something that happened in Arc. */
