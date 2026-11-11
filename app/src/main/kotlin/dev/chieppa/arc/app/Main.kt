@@ -17,8 +17,14 @@ import dev.chieppa.arc.design.generated.runs_seed_mine
 import dev.chieppa.arc.design.generated.runs_seed_waiting
 import dev.chieppa.stretch.frame.DesktopNotifications
 import org.jetbrains.compose.resources.getString
+import java.nio.file.Path
+import kotlin.system.exitProcess
 
-fun main() {
+fun main(args: Array<String>) {
+    if (CommandLine.handles(args)) {
+        val code = runBlocking { CommandLine(appDataDirectory(AppConstants.APP_ID), Path.of("").toAbsolutePath(), System.out, System.err).run(args.toList()) }
+        exitProcess(code)
+    }
     DevTools.startIfRequested()
     val session = AppSession(appDataDirectory(AppConstants.APP_ID), Conversations.load())
     val initial = session.settings.toPreferences()
