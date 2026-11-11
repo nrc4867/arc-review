@@ -15,10 +15,10 @@ import java.lang.foreign.ValueLayout.JAVA_LONG
 import java.lang.invoke.MethodHandle
 
 /**
- * Plugin secrets in Windows Credential Manager, as generic credentials named by [SecretNames.target], kept for this
- * user on this machine, through `CredWriteW`, `CredReadW`, `CredDeleteW` and `CredFree` in `Advapi32`.
+ * Secrets in Windows Credential Manager, as generic credentials named by [SecretNames.target], kept for this user on
+ * this machine, through `CredWriteW`, `CredReadW`, `CredDeleteW` and `CredFree` in `Advapi32`.
  */
-object WindowsCredentials : SecretStore {
+object WindowsCredentials : Keychain {
     private const val LIBRARY = "Advapi32"
     private const val GENERIC = 1
     private const val PERSIST_LOCAL_MACHINE = 2
@@ -76,12 +76,10 @@ object WindowsCredentials : SecretStore {
     private val credDelete by lazy { function(DELETE, FunctionDescriptor.of(JAVA_INT, ADDRESS, JAVA_INT, JAVA_INT), callState) }
     private val credFree by lazy { function(FREE, FunctionDescriptor.ofVoid(ADDRESS)) }
 
-    override val lasting: Boolean = true
-
-    override fun read(plugin: String, key: String): String? = Arena.ofConfined().use { arena ->
+    override fun read(service: String, account: String): String? = Arena.ofConfined().use { arena ->
         val state = arena.allocate(stateLayout)
         val found = arena.allocate(ADDRESS)
-        val ok = credRead.invokeWithArguments(state, wide(arena, SecretNames.target(plugin, key)), GENERIC, 0, found) as Int
+        val ok = credRead.invokeWithArguments(state, wide(arena, SecretNames.target(service, account)), GENERIC, 0, found) as Int
         if (ok == FAILED) {
             val error = lastError(state)
             if (error == NOT_FOUND) return null
@@ -97,27 +95,27 @@ object WindowsCredentials : SecretStore {
         }
     }
 
-    override fun write(plugin: String, key: String, value: String) {
+    override fun write(service: String, account: String, value: String) {
         Arena.ofConfined().use { arena ->
             val bytes = value.toByteArray(Charsets.UTF_8)
             val blob = arena.allocate(bytes.size.coerceAtLeast(1).toLong())
             MemorySegment.copy(bytes, 0, blob, JAVA_BYTE, 0, bytes.size)
             val written = arena.allocate(credential)
             written.set(JAVA_INT, offset(TYPE), GENERIC)
-            written.set(ADDRESS, offset(TARGET_NAME), wide(arena, SecretNames.target(plugin, key)))
+            written.set(ADDRESS, offset(TARGET_NAME), wide(arena, SecretNames.target(service, account)))
             written.set(JAVA_INT, offset(CREDENTIAL_BLOB_SIZE), bytes.size)
             written.set(ADDRESS, offset(CREDENTIAL_BLOB), blob)
             written.set(JAVA_INT, offset(PERSIST), PERSIST_LOCAL_MACHINE)
-            written.set(ADDRESS, offset(USER_NAME), wide(arena, SecretNames.account(plugin, key)))
+            written.set(ADDRESS, offset(USER_NAME), wide(arena, account))
             val state = arena.allocate(stateLayout)
             if (credWrite.invokeWithArguments(state, written, 0) as Int == FAILED) throw failed(WRITE, lastError(state))
         }
     }
 
-    override fun delete(plugin: String, key: String) {
+    override fun delete(service: String, account: String) {
         Arena.ofConfined().use { arena ->
             val state = arena.allocate(stateLayout)
-            if (credDelete.invokeWithArguments(state, wide(arena, SecretNames.target(plugin, key)), GENERIC, 0) as Int != FAILED) return
+            if (credDelete.invokeWithArguments(state, wide(arena, SecretNames.target(service, account)), GENERIC, 0) as Int != FAILED) return
             val error = lastError(state)
             if (error != NOT_FOUND) throw failed(DELETE, error)
         }

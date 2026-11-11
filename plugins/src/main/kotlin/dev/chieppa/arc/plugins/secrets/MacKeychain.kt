@@ -13,10 +13,9 @@ import java.lang.invoke.MethodHandle
 import java.nio.file.Path
 
 /**
- * Plugin secrets in the macOS Keychain, as generic passwords of service [SecretNames.SERVICE] and account
- * [SecretNames.account] in the person's default keychain, through the Security framework's generic password calls.
+ * Secrets in the macOS Keychain, as generic passwords by service and account in the person's default keychain, through the Security framework's generic password calls.
  */
-object MacKeychain : SecretStore {
+object MacKeychain : Keychain {
     private const val SECURITY = "/System/Library/Frameworks/Security.framework/Security"
     private const val CORE_FOUNDATION = "/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation"
     private const val FIND = "SecKeychainFindGenericPassword"
@@ -46,12 +45,10 @@ object MacKeychain : SecretStore {
     private val free by lazy { function(security, FREE, FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS)) }
     private val release by lazy { function(coreFoundation, RELEASE, FunctionDescriptor.ofVoid(ADDRESS)) }
 
-    override val lasting: Boolean = true
-
-    override fun read(plugin: String, key: String): String? = Arena.ofConfined().use { arena ->
+    override fun read(service: String, account: String): String? = Arena.ofConfined().use { arena ->
         val length = arena.allocate(JAVA_INT)
         val data = arena.allocate(ADDRESS)
-        val status = findItem(arena, plugin, key, length, data, MemorySegment.NULL)
+        val status = findItem(arena, service, account, length, data, MemorySegment.NULL)
         if (status == NOT_FOUND) return null
         check(FIND, status)
         val secret = data.get(ADDRESS, 0)
@@ -62,17 +59,17 @@ object MacKeychain : SecretStore {
         }
     }
 
-    override fun write(plugin: String, key: String, value: String) {
+    override fun write(service: String, account: String, value: String) {
         Arena.ofConfined().use { arena ->
             val bytes = value.toByteArray(Charsets.UTF_8)
             val password = arena.allocate(bytes.size.coerceAtLeast(1).toLong())
             MemorySegment.copy(bytes, 0, password, JAVA_BYTE, 0, bytes.size)
             val item = arena.allocate(ADDRESS)
-            when (val status = findItem(arena, plugin, key, MemorySegment.NULL, MemorySegment.NULL, item)) {
+            when (val status = findItem(arena, service, account, MemorySegment.NULL, MemorySegment.NULL, item)) {
                 NOT_FOUND -> {
-                    val (service, serviceLength) = utf8(arena, SecretNames.SERVICE)
-                    val (account, accountLength) = utf8(arena, SecretNames.account(plugin, key))
-                    check(ADD, add.invokeWithArguments(MemorySegment.NULL, serviceLength, service, accountLength, account, bytes.size, password, MemorySegment.NULL) as Int)
+                    val (serviceName, serviceLength) = utf8(arena, service)
+                    val (accountName, accountLength) = utf8(arena, account)
+                    check(ADD, add.invokeWithArguments(MemorySegment.NULL, serviceLength, serviceName, accountLength, accountName, bytes.size, password, MemorySegment.NULL) as Int)
                 }
                 else -> {
                     check(FIND, status)
@@ -82,20 +79,20 @@ object MacKeychain : SecretStore {
         }
     }
 
-    override fun delete(plugin: String, key: String) {
+    override fun delete(service: String, account: String) {
         Arena.ofConfined().use { arena ->
             val item = arena.allocate(ADDRESS)
-            val status = findItem(arena, plugin, key, MemorySegment.NULL, MemorySegment.NULL, item)
+            val status = findItem(arena, service, account, MemorySegment.NULL, MemorySegment.NULL, item)
             if (status == NOT_FOUND) return
             check(FIND, status)
             withItem(item) { check(DELETE, delete.invokeWithArguments(it) as Int) }
         }
     }
 
-    private fun findItem(arena: Arena, plugin: String, key: String, length: MemorySegment, data: MemorySegment, item: MemorySegment): Int {
-        val (service, serviceLength) = utf8(arena, SecretNames.SERVICE)
-        val (account, accountLength) = utf8(arena, SecretNames.account(plugin, key))
-        return find.invokeWithArguments(MemorySegment.NULL, serviceLength, service, accountLength, account, length, data, item) as Int
+    private fun findItem(arena: Arena, service: String, account: String, length: MemorySegment, data: MemorySegment, item: MemorySegment): Int {
+        val (serviceName, serviceLength) = utf8(arena, service)
+        val (accountName, accountLength) = utf8(arena, account)
+        return find.invokeWithArguments(MemorySegment.NULL, serviceLength, serviceName, accountLength, accountName, length, data, item) as Int
     }
 
     private inline fun withItem(item: MemorySegment, use: (MemorySegment) -> Unit) {

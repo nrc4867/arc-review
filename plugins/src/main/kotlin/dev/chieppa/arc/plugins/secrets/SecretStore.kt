@@ -1,7 +1,7 @@
 package dev.chieppa.arc.plugins.secrets
 
 /**
- * Where plugins' secret settings are kept, by plugin id and setting key: the system's keychain, or memory where Arc
+ * Where secrets are kept, by owner (such as a plugin id) and key (such as a setting): the system's keychain, or memory where Arc
  * has none to use. Each call throws [java.io.IOException] when the keychain refuses it.
  */
 interface SecretStore {

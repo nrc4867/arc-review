@@ -1,13 +1,13 @@
 package dev.chieppa.arc.plugins.secrets
 
-/** What Arc names a plugin's secret in the system's keychain. */
+/** What Arc names a secret in the system's keychain. */
 object SecretNames {
     /** The service every plugin secret is kept under. */
     const val SERVICE = "dev.chieppa.arc.plugins"
 
-    /** The account a secret is kept as: the plugin and its setting. */
-    fun account(plugin: String, key: String): String = "$plugin/$key"
+    /** The account a secret is kept as: its owner, such as a plugin, and its key, such as a setting. */
+    fun account(owner: String, key: String): String = "$owner/$key"
 
     /** The one name Windows Credential Manager keeps a secret by. */
-    fun target(plugin: String, key: String): String = "$SERVICE/${account(plugin, key)}"
+    fun target(service: String, account: String): String = "$service/$account"
 }
