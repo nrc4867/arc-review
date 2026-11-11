@@ -1,0 +1,89 @@
+package dev.chieppa.arc.ui.mcp
+
+import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.v2.runComposeUiTest
+import dev.chieppa.arc.mcp.server.McpEndpoint
+import dev.chieppa.arc.mcp.server.McpServerState
+import dev.chieppa.arc.mcp.server.McpSetup
+import dev.chieppa.arc.mcp.server.McpToken
+import dev.chieppa.arc.mcp.tools.ArcTool
+import dev.chieppa.arc.plugins.secrets.MemorySecretStore
+import dev.chieppa.arc.ui.frame.ArcFrame
+import dev.chieppa.arc.ui.plugins.PluginRig.Companion.shows
+import dev.chieppa.arc.ui.util.ArcDispatchers
+import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.stretch.test.setStretchContent
+import dev.chieppa.stretch.theme.StretchThemes
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+@OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
+class McpServerUiTest {
+    private class FakeEndpoint : McpEndpoint {
+        override val clients = MutableStateFlow(0)
+        var stopped = false
+
+        override suspend fun start(port: Int): Int = port
+
+        override fun stop() {
+            stopped = true
+        }
+    }
+
+    private val endpoint = FakeEndpoint()
+    private val choices = mutableListOf<Boolean>()
+    private val copied = mutableListOf<String>()
+    private var tools: List<ArcTool> = emptyList()
+
+    @Test
+    fun theServerIsSwitchedOnInSettingsShowsItsCommandAndItsClientsInTheStatusBar() = runComposeUiTest {
+        val token = McpToken(MemorySecretStore(lasting = true))
+        val setup = McpSetup(token, port = PORT, version = "test", onChange = { choices += it }, endpoint = { all, _ -> tools = all; endpoint })
+        val workbench = Workbench(dispatchers = ArcDispatchers.on(UnconfinedTestDispatcher(mainClock.scheduler)), clipboard = { copied += it }, mcp = setup)
+        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
+        waitForIdle()
+        assertEquals(McpServerState.Off, workbench.mcp.state)
+        workbench.panes.openSettings()
+        waitForIdle()
+        onNodeWithText("MCP server").performClick()
+        waitForIdle()
+        assertTrue(shows("Off"))
+        onNodeWithTag(McpSettingsTags.SWITCH).performClick()
+        waitForIdle()
+        assertEquals(listOf(true), choices)
+        assertEquals(McpServerState.Listening(PORT, 0), workbench.mcp.state)
+        val command = "claude mcp add --transport http arc http://127.0.0.1:$PORT/mcp --header \"Authorization: Bearer ${token.current()}\""
+        assertTrue(shows(command))
+        onNodeWithTag(McpSettingsTags.COPY).performClick()
+        assertEquals(listOf(command), copied)
+
+        endpoint.clients.value = 2
+        waitForIdle()
+        assertTrue(shows("2 clients connected"))
+        onNodeWithTag(McpSettingsTags.SWITCH).performClick()
+        waitForIdle()
+        assertTrue(endpoint.stopped)
+        assertEquals(listOf(true, false), choices)
+        assertTrue(!shows("clients connected") && !shows(command))
+    }
+
+    @Test
+    fun withoutASetupThereIsNoSection() = runComposeUiTest {
+        val workbench = Workbench(dispatchers = ArcDispatchers.on(UnconfinedTestDispatcher(mainClock.scheduler)))
+        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
+        workbench.panes.openSettings()
+        waitForIdle()
+        assertTrue(!shows("MCP server"))
+    }
+
+    private companion object {
+        const val PORT = 47830
+    }
+}

@@ -64,6 +64,9 @@ import dev.chieppa.arc.ui.services.TextClipboard
 import dev.chieppa.arc.plugins.manager.PluginManager
 import dev.chieppa.arc.plugins.manager.PluginUi
 import dev.chieppa.arc.ui.plugins.PluginsController
+import dev.chieppa.arc.mcp.server.McpSetup
+import dev.chieppa.arc.ui.mcp.McpController
+import dev.chieppa.arc.ui.mcp.McpSettingsProvider
 import dev.chieppa.arc.ui.plugins.settings.PluginsSettingsProvider
 import dev.chieppa.arc.ui.settings.ArcSettingsProvider
 import dev.chieppa.arc.ui.settings.SettingsRegistry
@@ -93,7 +96,8 @@ import kotlinx.coroutines.launch
  * notification rules. [start] holds the start screen, starting from the person's [startLayout] and [recent] sources.
  * All of the window's work runs on [dispatchers], [scope] on their main. Questions about code go to [codeNavigation].
  * Runs are watched in [runWatch] through [actions], their notifications going to [desktop]. [plugins] makes the
- * plugin manager, given what plugins ask of the window; none runs plugins.
+ * plugin manager, given what plugins ask of the window; none runs plugins. [mcp] sets up Arc's MCP server; none
+ * serves no MCP.
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -116,6 +120,7 @@ class Workbench(
     runKeeper: RunKeeper = RunKeeper.NONE,
     desktop: DesktopNotifier = DesktopNotifier.NONE,
     plugins: (PluginUi) -> PluginManager? = { null },
+    mcp: McpSetup? = null,
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -206,6 +211,9 @@ class Workbench(
     /** Plugins: their processes, contributions and settings. */
     val plugins = PluginsController(this, plugins)
 
+    /** Arc's MCP server, with the plugin development tools. */
+    val mcp = McpController(this, mcp)
+
     init {
         registerArcActions(registry, this, onQuit)
         registerReviewActions(registry, this)
@@ -217,7 +225,9 @@ class Workbench(
         start.registry.register(StartContributor.ARC, arcStartProvider(this))
         settings.register(SettingsContributor.ARC, ArcSettingsProvider(this))
         settings.register(PluginsSettingsProvider.CONTRIBUTOR, PluginsSettingsProvider(this))
+        settings.register(McpSettingsProvider.CONTRIBUTOR, McpSettingsProvider(this))
         this.plugins.start()
+        this.mcp.start()
     }
 
     /** Opens the Pull requests drawer and counts every notification as seen. */

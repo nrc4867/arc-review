@@ -68,9 +68,15 @@ fun ArcWindow(
             runKeeper = session.runKeeper,
             desktop = notifier,
             plugins = session::plugins,
+            mcp = McpSetupFactory.of(session),
         ).also { opened = it }
     }
-    DisposableEffect(workbench) { onDispose { workbench.scope.cancel() } }
+    DisposableEffect(workbench) {
+        onDispose {
+            workbench.mcp.stop()
+            workbench.scope.cancel()
+        }
+    }
     StretchWindow(
         onCloseRequest = { exitStep { save(workbench) }; onExit() },
         title = stringResource(Res.string.app_name),

@@ -971,4 +971,20 @@
     <string name="cli_plugin_bad_name">%1$s: a name needs a letter or digit, and only letters, digits, spaces, dots, dashes and underscores.</string>
     <string name="cli_plugin_folder_taken">%1$s holds files already.</string>
     <string name="cli_plugin_not_written">Could not write the plugin: %1$s</string>
+    <string name="settings_section_mcp">MCP server</string>
+    <string name="mcp_card">Server</string>
+    <string name="mcp_keywords">mcp, claude, agent, server, token, localhost, plugin development</string>
+    <string name="mcp_switch">Serve Arc's tools over MCP</string>
+    <string name="mcp_off">Off</string>
+    <string name="mcp_starting">Starting</string>
+    <string name="mcp_listening">Listening on %1$s</string>
+    <string name="mcp_failed">Not listening: %1$s</string>
+    <plurals name="mcp_clients">
+        <item quantity="one">%1$d client connected</item>
+        <item quantity="other">%1$d clients connected</item>
+    </plurals>
+    <string name="mcp_connect">Connect Claude Code</string>
+    <string name="mcp_copy">Copy command</string>
+    <string name="mcp_token_not_kept">Token kept only until Arc closes: no keychain here</string>
+    <string name="mcp_status_tooltip">An MCP client is connected to Arc</string>
 </resources>

@@ -25,6 +25,7 @@ object SettingsIcons {
     const val PLUGIN = "plugin"
     const val PULL_REQUEST = "pull-request"
     const val RUNS = "runs"
+    const val SERVER = "server"
     const val SETTINGS = "settings"
     const val SPLIT_VIEW = "split-view"
     const val THEME = "theme"
@@ -51,6 +52,7 @@ object SettingsIcons {
             PLUGIN to ArcIcons.Plugin,
             PULL_REQUEST to ArcIcons.PullRequest,
             RUNS to ArcIcons.Runs,
+            SERVER to ArcIcons.Server,
             SETTINGS to StretchIcons.Settings,
             SPLIT_VIEW to StretchIcons.SplitView,
             THEME to StretchIcons.Theme,
