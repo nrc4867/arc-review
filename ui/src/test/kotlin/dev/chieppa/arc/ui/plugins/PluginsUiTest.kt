@@ -14,14 +14,15 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.v2.runComposeUiTest
 import androidx.compose.ui.input.key.Key
 import dev.chieppa.arc.core.pane.Page
-import dev.chieppa.arc.plugins.bundle.CommandResult
+import dev.chieppa.arc.plugins.command.CommandResult
 import dev.chieppa.arc.plugins.config.PluginSourceSpec
 import dev.chieppa.arc.plugins.config.PluginStorage
 import dev.chieppa.arc.plugins.config.PluginsConfig
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
 import dev.chieppa.arc.plugins.git.GitGrep
 import dev.chieppa.arc.plugins.host.DiagnosticKind
-import dev.chieppa.arc.plugins.host.LaunchSpec
+import dev.chieppa.arc.plugins.host.WorkerSpec
+import dev.chieppa.arc.plugins.manifest.Capabilities
 import dev.chieppa.arc.plugins.host.PluginDiagnostic
 import dev.chieppa.arc.plugins.host.Preparation
 import dev.chieppa.arc.plugins.manager.PluginManager
@@ -53,6 +54,7 @@ import kotlin.io.path.createTempDirectory
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class, ExperimentalCoroutinesApi::class)
@@ -73,9 +75,11 @@ class PluginsUiTest {
     )
     private val process = FakePluginProcess(contributions, ::draw)
     private val console = FakeConsole()
-    private val ready = PluginPreparer { f, manifest, settings ->
-        Preparation.Ready(LaunchSpec(listOf("node"), f), InitializeParams(1, PluginInfo(manifest.id, manifest.version, f.toString()), "bundle.js", settings))
+    private val ready = PluginPreparer { f, root, manifest, settings ->
+        Preparation.Ready(WorkerSpec(manifest.id, root), InitializeParams(1, PluginInfo(manifest.id, manifest.version, f.toString()), "src/index.tsx", settings))
     }
+    private val approved = Capabilities(panels = true, panes = true, actions = true, console = true)
+    private val enabled = PluginsConfig(sources = listOf(PluginSourceSpec.Directory(folder.toString())), enabled = setOf("todos"), approved = mapOf("todos" to approved))
 
     private var scope: CoroutineScope? = null
 
@@ -99,15 +103,15 @@ class PluginsUiTest {
         ViewKind.Pane -> """[{"op":"create","id":1,"type":"Console","props":{"handle":"todos-1"}},{"op":"append","parent":0,"child":1}]"""
     }
 
-    private fun ComposeUiTest.open(preparer: PluginPreparer = ready): Workbench {
+    private fun ComposeUiTest.open(preparer: PluginPreparer = ready, config: PluginsConfig = enabled): Workbench {
         val dispatcher = UnconfinedTestDispatcher(mainClock.scheduler)
         // The plugins' timers (heartbeat, restarts) wait on a clock of their own that the test never advances.
         val scope = CoroutineScope(UnconfinedTestDispatcher(TestCoroutineScheduler())).also { scope = it }
-        val storage = PluginStorage.InMemory(PluginsConfig(sources = listOf(PluginSourceSpec.Directory(folder.toString())), enabled = setOf("todos")))
+        val storage = PluginStorage.InMemory(config)
         val workbench = Workbench(
             dispatchers = ArcDispatchers.on(dispatcher),
             plugins = { ui ->
-                PluginManager(PluginServices(scope, process, preparer, storage, ConsoleProcesses(console, scope), GitGrep({ _, _ -> CommandResult(1, "", "") }), ui))
+                PluginManager(PluginServices(scope, process, storage, ConsoleProcesses(console, scope), GitGrep({ _, _ -> CommandResult(1, "", "") }), preparer, ui = ui))
             },
         )
         setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
@@ -160,13 +164,46 @@ class PluginsUiTest {
     @Test
     fun aPluginThatDoesNotTranspileShowsItsProblemInPlace() = pluginTest {
         val problem = PluginDiagnostic(DiagnosticKind.Transpile, "Unexpected end of file", "src/index.tsx", 23, 0)
-        val workbench = open { _, _, _ -> Preparation.Failed(listOf(problem)) }
+        val workbench = open({ _, _, _, _ -> Preparation.Failed(listOf(problem)) })
         workbench.panes.openSettings()
         waitForIdle()
         onNodeWithText("Plugins").performClick()
         waitForIdle()
         assertTrue(showsTag(PluginSettingsTags.PROBLEM + "todos"))
         assertTrue(shows("src/index.tsx:23") && shows("Unexpected end of file"))
+        assertTrue(shows("1 of 1 plugin on") && shows("1 problem"))
+    }
+
+    @Test
+    fun anActionFollowsItsPluginThroughReloadsWithItsKeys() = pluginTest {
+        val workbench = open()
+        val id = PluginIds.action("todos", "run")
+        assertEquals(emptyList(), workbench.registry[id]!!.keys)
+        process.contributions = contributions.copy(actions = listOf(ActionContribution("run", "Run the tests", keys = "Ctrl+Shift+Y")))
+        workbench.plugins.manager!!.instance("todos")!!.start()
+        waitForIdle()
+        assertEquals(listOfNotNull(PluginIds.keys("Ctrl+Shift+Y")), workbench.registry[id]!!.keys)
+        process.contributions = contributions.copy(actions = emptyList())
+        workbench.plugins.manager!!.instance("todos")!!.start()
+        waitForIdle()
+        assertNull(workbench.registry[id])
+        assertEquals(3, process.starts)
+    }
+
+    @Test
+    fun anOffPluginsRiskyCapabilitiesAreWarnings() = pluginTest {
+        val workbench = open(config = enabled.copy(enabled = emptySet(), approved = emptyMap()))
+        workbench.panes.openSettings()
+        waitForIdle()
+        onNodeWithText("Plugins").performClick()
+        waitForIdle()
+        assertTrue(onAllNodes(hasContentDescription("runs any program as you", substring = true)).fetchSemanticsNodes().size == 1)
+        assertTrue(shows("0 of 1 plugin on"))
+        onNode(hasContentDescription("Enable TODOs")).performClick()
+        waitForIdle()
+        assertEquals(approved, workbench.plugins.config.approved["todos"])
+        assertTrue(onAllNodes(hasContentDescription("runs any program as you", substring = true)).fetchSemanticsNodes().isEmpty())
+        assertTrue(shows("1 of 1 plugin on"))
     }
 
     @Test

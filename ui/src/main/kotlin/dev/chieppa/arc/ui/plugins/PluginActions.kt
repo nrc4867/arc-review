@@ -10,8 +10,8 @@ import dev.chieppa.stretch.core.ActionId
 
 /**
  * Plugins' actions in the window's action registry, so they run from the palette, menus and keys like Arc's own.
- * Each is registered the first time its plugin offers it and stays registered, shown only while its plugin offers
- * it; it runs on the focused source and file. Its label, from the plugin, is its text.
+ * Each is registered while its plugin offers it, with the keys it offers now, and unregistered when the plugin stops
+ * offering it; it runs on the focused source and file. Its label, from the plugin, is its text.
  */
 class PluginActions(private val workbench: Workbench) {
     private val offered = mutableStateMapOf<ActionId, Pair<String, ActionContribution>>()
@@ -25,9 +25,13 @@ class PluginActions(private val workbench: Workbench) {
     /** Follows what [entries] offer now, as [contributions] gives each one's. */
     fun sync(entries: List<PluginEntry>, contributions: (String) -> Contributions) {
         val now = entries.flatMap { entry -> contributions(entry.id).actions.map { PluginIds.action(entry.id, it.id) to (entry.id to it) } }.toMap()
-        (offered.keys - now.keys).forEach(offered::remove)
+        (offered.keys - now.keys).forEach { id ->
+            offered.remove(id)
+            workbench.registry.unregister(id)
+        }
         now.forEach { (id, offer) ->
-            offered[id] = offer
+            val before = offered.put(id, offer)
+            if (before?.second?.keys != offer.second.keys) workbench.registry.unregister(id)
             if (workbench.registry[id] == null) register(id, offer.second)
         }
     }
