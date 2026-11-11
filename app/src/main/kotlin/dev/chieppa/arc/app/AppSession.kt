@@ -75,7 +75,8 @@ class AppSession(dataDir: Path, val conversation: ReviewConversation, val github
     val codeNavigation: CodeNavigation = run {
         val blobs = GitBlobStore(git)
         val index = WorkspaceIndex(blobs, Dispatchers.Default)
-        CodeNavigation(CodeIntel(), index).also { TreeSitterNavigation(index, blobs).register(it.intel) }
+        val treeSitter = TreeSitterNavigation(index, blobs)
+        CodeNavigation(CodeIntel(), index, treeSitter.links).also { treeSitter.register(it.intel) }
     }
 
     private val conversationFile = ConversationFile(dataDir.resolve(AppConstants.CONVERSATION_FILE))

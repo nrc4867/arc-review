@@ -20,6 +20,7 @@ import dev.chieppa.arc.ui.workbench.Workbench
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.produceState
+import dev.chieppa.arc.ui.hints.PaneHintCard
 import dev.chieppa.arc.ui.navigation.NameSpan
 import dev.chieppa.arc.ui.navigation.NavigationPopover
 import dev.chieppa.arc.ui.navigation.NavigationSizes
@@ -110,6 +111,7 @@ fun DiffBody(pane: Pane, text: PaneText, diff: FileDiff, workbench: Workbench, f
             val name = NameSpan(click.range.line, click.range.start, click.range.end)
             navigation.click(id, documents.getValue(click.position.side), name, click.bounds)
         },
+        symbolCard = { at, _, card -> PaneHintCard(documents.getValue(at.side), at.line, at.column, card, workbench.hints) },
     )
     Box(modifier) {
         DiffViewer(

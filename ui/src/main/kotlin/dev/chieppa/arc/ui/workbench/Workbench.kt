@@ -42,6 +42,7 @@ import dev.chieppa.arc.core.conversation.LocalConversation
 import dev.chieppa.arc.ui.services.ConversationService
 import dev.chieppa.arc.ui.services.NoConversations
 import dev.chieppa.arc.ui.navigation.CodeNavigation
+import dev.chieppa.arc.ui.hints.HintController
 import dev.chieppa.arc.ui.navigation.NavigationController
 import dev.chieppa.arc.ui.navigation.SymbolOpener
 import dev.chieppa.arc.ui.panes.PaneCommands
@@ -153,6 +154,9 @@ class Workbench(
 
     /** Code navigation over [codeNavigation]: the index of the open sources, Ctrl+click and its lists. */
     val navigation = NavigationController(state, codeNavigation, SymbolOpener(state, panes), scope, dispatchers)
+
+    /** What symbol cards ask and where their clicks go. */
+    val hints = HintController(state, data, navigation, links, scope, dispatchers)
 
     /** The switcher over the window, and what followed repos hold, asked as it searches. */
     val switcher = SwitcherState()

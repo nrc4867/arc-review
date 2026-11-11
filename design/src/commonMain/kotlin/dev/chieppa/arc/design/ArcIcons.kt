@@ -258,6 +258,12 @@ object ArcIcons {
             stroke("M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4")
         }
     }
+    val Pin: ImageVector by lazy {
+        icon("pin") {
+            stroke("M6 2.5h4M7 2.5v4L4.5 9.5h7L9 6.5v-4")
+            stroke("M8 9.5v4")
+        }
+    }
     val Plugin: ImageVector by lazy {
         icon("plugin") {
             stroke("M5.5 2v3M10.5 2v3")

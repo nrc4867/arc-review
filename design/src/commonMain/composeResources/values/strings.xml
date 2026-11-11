@@ -569,6 +569,27 @@
         <item quantity="one">tree-sitter index · names matched in %1$d source</item>
         <item quantity="other">tree-sitter index · names matched across %1$d sources</item>
     </plurals>
+    <string name="hint_parameters">Parameters</string>
+    <string name="hint_properties">Properties</string>
+    <string name="hint_type_parameters">Type parameters</string>
+    <string name="hint_returns">Returns</string>
+    <string name="hint_throws">Throws</string>
+    <string name="hint_see">See also</string>
+    <string name="hint_since">Since</string>
+    <string name="hint_examples">Example</string>
+    <string name="hint_authors">Author</string>
+    <string name="hint_deprecated">Deprecated</string>
+    <string name="hint_format_javadoc">JavaDoc</string>
+    <string name="hint_format_kdoc">KDoc</string>
+    <string name="hint_format_jsdoc">JSDoc</string>
+    <string name="hint_format_sql">Comment</string>
+    <string name="hint_origin">%1$s · %2$s</string>
+    <string name="hint_container">%1$s %2$s</string>
+    <string name="hint_count">%1$d / %2$d</string>
+    <string name="hint_keep_open">Keep open</string>
+    <string name="hint_previous">Previous definition</string>
+    <string name="hint_next">Next definition</string>
+    <string name="hint_click_to_go">click to go</string>
     <string name="language_kotlin">Kotlin</string>
     <string name="language_java">Java</string>
     <string name="language_javascript">JavaScript</string>

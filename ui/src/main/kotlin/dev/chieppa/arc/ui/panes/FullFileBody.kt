@@ -20,6 +20,7 @@ import dev.chieppa.arc.ui.workbench.Workbench
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.produceState
+import dev.chieppa.arc.ui.hints.PaneHintCard
 import dev.chieppa.arc.ui.navigation.NameSpan
 import dev.chieppa.arc.ui.navigation.NavigationPopover
 import dev.chieppa.arc.ui.navigation.NavigationSizes
@@ -91,6 +92,7 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
                 onLineNumberClick = { line -> if (!removed) PaneComments.click(workbench, pane, LineSide.New, line, line, threadsAt[line].orEmpty()) },
                 symbolAt = { at -> navigation.nameAt(document, at.line, at.column)?.let { CodeRange(it.line, it.start, it.end) } },
                 onSymbolClick = { click -> navigation.click(id, document, NameSpan(click.range.line, click.range.start, click.range.end), click.bounds) },
+                symbolCard = { at, _, card -> PaneHintCard(document, at.line, at.column, card, workbench.hints) },
             ),
             tokens = tokens,
             matches = matches,

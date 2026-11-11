@@ -2,6 +2,7 @@ package dev.chieppa.arc.index.nav
 
 import dev.chieppa.arc.codeintel.CodeIntel
 import dev.chieppa.arc.index.WorkspaceIndex
+import dev.chieppa.arc.index.hint.SymbolLinks
 import dev.chieppa.arc.index.hint.TreeSitterHovers
 import dev.chieppa.arc.index.store.BlobStore
 
@@ -12,6 +13,9 @@ class TreeSitterNavigation(index: WorkspaceIndex, store: BlobStore) {
     val usages = TreeSitterUsages(index, previews)
     val outline = TreeSitterOutline(index)
     val hovers = TreeSitterHovers(index, previews)
+
+    /** Where doc comments' links to other symbols lead. */
+    val links = SymbolLinks(index, previews)
 
     fun register(intel: CodeIntel): AutoCloseable {
         val registrations = listOf(intel.definitions.register(definitions), intel.usages.register(usages), intel.outlines.register(outline), intel.hovers.register(hovers))
