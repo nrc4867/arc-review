@@ -38,7 +38,8 @@ import java.nio.file.Path
 /**
  * One plugin in the plugins card, as board 9 draws it: its icon, name, version and where it is from, its switch, its
  * capability chips beneath, and each problem highlighted in place with its file and line. A plugin with problems is
- * set apart by an accent edge.
+ * set apart by an accent edge. While it is off, or an update asks for more than the person approved, its risky and
+ * newly asked capabilities are warning chips, and its switch is off until the person turns it on, approving them.
  */
 @Composable
 fun PluginEntryRow(entry: PluginEntry, status: PluginStatus?, problems: List<PluginDiagnostic>, workbench: Workbench, onEnable: (Boolean) -> Unit) {
@@ -56,10 +57,10 @@ fun PluginEntryRow(entry: PluginEntry, status: PluginStatus?, problems: List<Plu
                 Label(title, Stretch.type.body.copy(fontWeight = FontWeight.SemiBold), c.inkStrong)
                 Label(stringResource(Res.string.plugins_origin, manifest?.version.orEmpty(), originOf(entry)), Stretch.type.bodySm, c.inkSubtle, Modifier.weight(1f))
                 statusText(status)?.let { Label(it, Stretch.type.bodySm, c.inkSubtle) }
-                Toggle(entry.enabled, onEnable, stringResource(Res.string.plugins_enable, title))
+                Toggle(entry.on, onEnable, stringResource(Res.string.plugins_enable, title))
             }
             Column(Modifier.padding(start = PluginSettingsSizes.detailIndent), verticalArrangement = Arrangement.spacedBy(StretchSpacing.space6)) {
-                manifest?.let { PluginCapabilityChips(it.capabilities) }
+                manifest?.let { PluginCapabilityChips(it.capabilities, entry.asks, flagged = !entry.on) }
                 problems.forEach { PluginProblemRow(entry, it, workbench) }
             }
         }

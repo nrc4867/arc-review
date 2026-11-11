@@ -7,7 +7,6 @@ sealed interface Capability {
     data object Actions : Capability
     data object Console : Capability
     data object Git : Capability
-    data object Processes : Capability
 
     /** Reading files under [path]. */
     data class ReadFiles(val path: String) : Capability
@@ -22,6 +21,9 @@ sealed interface Capability {
     data class Mcp(val role: String) : Capability
 
     companion object {
+        /** The capabilities [capabilities] declares that [approved] does not. */
+        fun added(capabilities: Capabilities, approved: Capabilities): List<Capability> = of(capabilities) - of(approved).toSet()
+
         /** Every capability [capabilities] declares, in the order a plugin's row lists them. */
         fun of(capabilities: Capabilities): List<Capability> = buildList {
             if (capabilities.panels) add(Panels)
@@ -32,7 +34,6 @@ sealed interface Capability {
             capabilities.files.read.forEach { add(ReadFiles(it)) }
             capabilities.files.write.forEach { add(WriteFiles(it)) }
             capabilities.network.forEach { add(Network(it)) }
-            if (capabilities.processes) add(Processes)
             capabilities.mcp.forEach { add(Mcp(it)) }
         }
     }

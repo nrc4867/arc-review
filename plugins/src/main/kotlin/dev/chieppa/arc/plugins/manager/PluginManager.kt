@@ -3,6 +3,8 @@ package dev.chieppa.arc.plugins.manager
 import dev.chieppa.arc.plugins.config.PluginSourceSpec
 import dev.chieppa.arc.plugins.config.PluginsConfig
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
+import dev.chieppa.arc.plugins.manifest.Capabilities
+import dev.chieppa.arc.plugins.manifest.Capability
 import dev.chieppa.arc.plugins.protocol.AppEventParams
 import dev.chieppa.arc.plugins.source.FoundPlugin
 import dev.chieppa.arc.plugins.source.PluginDiscovery
@@ -56,10 +58,20 @@ class PluginManager(private val services: PluginServices) {
         refresh()
     }
 
-    /** Turns plugin [id] on or off, as only the person does. */
+    /**
+     * Turns plugin [id] on, approving what its manifest asks for now, or off; as only the person does. A later manifest
+     * that asks for more keeps it from running until it is turned on again.
+     */
     fun setEnabled(id: String, on: Boolean) {
-        val enabled = if (on) setup.value.enabled + id else setup.value.enabled - id
-        save(setup.value.copy(enabled = enabled))
+        val config = setup.value
+        val capabilities = known.value.firstOrNull { it.id == id }?.found?.manifest?.capabilities
+        save(
+            if (on) {
+                config.copy(enabled = config.enabled + id, approved = capabilities?.let { config.approved + (id to it) } ?: config.approved)
+            } else {
+                config.copy(enabled = config.enabled - id)
+            },
+        )
         refresh()
     }
 
@@ -80,11 +92,12 @@ class PluginManager(private val services: PluginServices) {
         known.value.forEach { it.instance?.emit(event) }
     }
 
-    /** Stops every plugin and the watching. */
+    /** Stops every plugin, the watching and the Node process. */
     fun stop() {
         watching.values.forEach(Job::cancel)
         watching.clear()
         known.value.forEach { it.instance?.stop() }
+        services.shutdown()
     }
 
     @Synchronized
@@ -109,17 +122,20 @@ class PluginManager(private val services: PluginServices) {
         val manifest = plugin.manifest
         val enabled = plugin.id in config.enabled
         val kept = before?.instance
-        if (manifest == null || !enabled) {
+        val asks = manifest?.let { Capability.added(it.capabilities, config.approved[plugin.id] ?: Capabilities()) }.orEmpty()
+        if (manifest == null || !enabled || asks.isNotEmpty()) {
             kept?.stop()
-            return PluginEntry(plugin, enabled, null)
+            return PluginEntry(plugin, enabled, null, if (enabled) asks else emptyList())
         }
+        val root = PluginDiscovery.root(plugin)
         if (kept != null) {
             kept.manifest = manifest
             kept.folder = plugin.folder
+            kept.root = root
             if (reload == plugin.source) kept.start()
             return PluginEntry(plugin, true, kept)
         }
-        val instance = PluginInstance(manifest, plugin.folder, services, { settings(plugin.id) }, { setSettings(plugin.id, it) })
+        val instance = PluginInstance(manifest, plugin.folder, root, services, { settings(plugin.id) }, { setSettings(plugin.id, it) })
         instance.start()
         return PluginEntry(plugin, true, instance)
     }

@@ -1,12 +1,14 @@
 package dev.chieppa.arc.plugins.manager
 
-import dev.chieppa.arc.plugins.bundle.CommandResult
+import dev.chieppa.arc.plugins.command.CommandResult
 import dev.chieppa.arc.plugins.config.PluginStorage
 import dev.chieppa.arc.plugins.config.PluginsConfig
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
 import dev.chieppa.arc.plugins.git.GitGrep
 import dev.chieppa.arc.plugins.host.FakePlugin
-import dev.chieppa.arc.plugins.host.LaunchSpec
+import dev.chieppa.arc.plugins.host.WorkerSpec
+import dev.chieppa.arc.plugins.manifest.Capabilities
+import dev.chieppa.arc.plugins.manifest.Capability
 import dev.chieppa.arc.plugins.host.PluginStatus
 import dev.chieppa.arc.plugins.host.Preparation
 import dev.chieppa.arc.plugins.protocol.ActionContribution
@@ -50,7 +52,8 @@ class PluginManagerTest {
     }
     private val contributions = Contributions(actions = listOf(ActionContribution("run", "Run")), panels = listOf(PanelContribution("todos", "TODOs")))
     private val changes = MutableSharedFlow<Unit>()
-    private val storage = PluginStorage.InMemory(PluginsConfig(enabled = setOf("todos")))
+    private val approved = Capabilities(panels = true, git = true, console = true)
+    private val storage = PluginStorage.InMemory(PluginsConfig(enabled = setOf("todos"), approved = mapOf("todos" to approved)))
 
     @AfterTest
     fun cleanUp() {
@@ -58,12 +61,12 @@ class PluginManagerTest {
     }
 
     private fun TestScope.manager(plugin: FakePlugin, consoles: FakePlugin = FakePlugin(backgroundScope)): PluginManager {
-        val preparer = PluginPreparer { f, manifest, settings ->
-            Preparation.Ready(LaunchSpec(listOf("node"), f), InitializeParams(1, PluginInfo(manifest.id, manifest.version, f.toString()), "bundle.js", settings))
+        val preparer = PluginPreparer { f, root, manifest, settings ->
+            Preparation.Ready(WorkerSpec(manifest.id, root), InitializeParams(1, PluginInfo(manifest.id, manifest.version, f.toString()), "index.tsx", settings))
         }
         val grep = GitGrep({ _, _ -> CommandResult(0, "src/a.ts:3:// TODO one\n", "") })
         val services = PluginServices(
-            backgroundScope, plugin, preparer, storage, ConsoleProcesses(consoles, backgroundScope), grep,
+            backgroundScope, plugin, storage, ConsoleProcesses(consoles, backgroundScope), grep, preparer,
             watcher = DirectoryWatcher { changes }, clock = { testScheduler.currentTime },
         )
         return PluginManager(services).apply {
@@ -84,6 +87,30 @@ class PluginManagerTest {
         runCurrent()
         assertNull(manager.instance("todos"))
         assertEquals(false, manager.entries.value.single().enabled)
+    }
+
+    @Test
+    fun itsWorkerReadsFromItsSourcesFolder() = runTest {
+        val plugin = FakePlugin(backgroundScope, contributions)
+        manager(plugin)
+        assertEquals(WorkerSpec("todos", folder.toAbsolutePath().normalize()), plugin.workers.single())
+    }
+
+    @Test
+    fun anUpdateAskingForMoreWaitsUntilThePersonEnablesItAgain() = runTest {
+        val plugin = FakePlugin(backgroundScope, contributions)
+        val manager = manager(plugin)
+        Files.writeString(folder.resolve("plugin.json"), """{"id":"todos","version":"0.2.0","apiVersion":1,"entry":"index.tsx","capabilities":{"panels":true,"git":true,"network":["api.example.com"]}}""")
+        changes.emit(Unit)
+        advanceTimeBy(1_000)
+        val waiting = manager.entries.value.single()
+        assertNull(waiting.instance)
+        assertEquals(listOf<Capability>(Capability.Network("api.example.com")), waiting.asks)
+        assertEquals(false, waiting.on)
+        manager.setEnabled("todos", true)
+        runCurrent()
+        assertIs<PluginStatus.Running>(manager.instance("todos")!!.status.value)
+        assertEquals(listOf("api.example.com"), storage.loadConfig().approved.getValue("todos").network)
     }
 
     @Test
