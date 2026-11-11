@@ -1,14 +1,6 @@
 package dev.chieppa.arc.plugins.api
 
 import dev.chieppa.arc.plugins.manifest.ApiVersion
-import dev.chieppa.arc.plugins.protocol.FileInfo
-import dev.chieppa.arc.plugins.protocol.GrepHit
-import dev.chieppa.arc.plugins.protocol.NoteInfo
-import dev.chieppa.arc.plugins.protocol.NoteKind
-import dev.chieppa.arc.plugins.protocol.NoteSide
-import dev.chieppa.arc.plugins.protocol.RepoInfo
-import dev.chieppa.arc.plugins.protocol.SettingType
-import dev.chieppa.arc.plugins.protocol.SourceInfo
 
 /**
  * Writes `arc.d.ts`, the TypeScript types of the plugin API, from Arc's Kotlin definitions: the protocol's data
@@ -19,18 +11,16 @@ object TypesGenerator {
     /** Where the committed file lives, relative to the repo's root. */
     const val PATH = "plugin-sdk/src/generated/arc.d.ts"
 
+    /** The command that writes it and the reference. */
+    const val COMMAND = "./gradlew :plugins:generatePluginTypes"
+
     fun generate(): String = buildString {
         append(HEADER)
         append("export type ApiVersion = ${ApiVersion.CURRENT};\n\n")
         append("export type IconName = ${PluginIcons.NAMES.joinToString(" | ") { "\"$it\"" }};\n\n")
         append("export type AppEventName = ${AppApi.eventNames.joinToString(" | ") { "\"$it\"" }};\n\n")
-        append("export type SettingType = ${DescriptorTypes.unionOf(SettingType.serializer().descriptor)};\n\n")
-        listOf(NoteKind.serializer().descriptor, NoteSide.serializer().descriptor).forEach {
-            append("export type ${DescriptorTypes.nameOf(it)} = ${DescriptorTypes.unionOf(it)};\n\n")
-        }
-        listOf(RepoInfo.serializer(), SourceInfo.serializer(), FileInfo.serializer(), GrepHit.serializer(), NoteInfo.serializer()).forEach {
-            append(DescriptorTypes.interfaceOf(it.descriptor)).append('\n')
-        }
+        DataTypes.unions.forEach { append("export type ${DescriptorTypes.nameOf(it)} = ${DescriptorTypes.unionOf(it)};\n\n") }
+        DataTypes.interfaces.forEach { append(DescriptorTypes.interfaceOf(it)).append('\n') }
         append(SETTINGS)
         Components.all.forEach { append(propsOf(it)).append('\n') }
         AppApi.interfaces.forEach { append(interfaceOf(it)).append('\n') }
@@ -51,10 +41,12 @@ object TypesGenerator {
         append("}\n")
     }
 
-    private fun member(prop: PropSpec): String =
-        "    /** ${prop.doc} */\n    readonly ${prop.name}${if (prop.optional) "?" else ""}: ${prop.type.ts};\n"
+    private fun member(prop: PropSpec): String {
+        val declared = if (prop.method) "${prop.name}${prop.type.ts}" else "readonly ${prop.name}${if (prop.optional) "?" else ""}: ${prop.type.ts}"
+        return "    /** ${prop.doc} */\n    $declared;\n"
+    }
 
-    private const val HEADER = "// Generated from Arc's Kotlin definitions by ./gradlew :plugins:generatePluginTypes. Do not edit.\n\n" +
+    private const val HEADER = "// Generated from Arc's Kotlin definitions by $COMMAND. Do not edit.\n\n" +
         "import type { ReactNode } from \"react\";\n\n"
 
     private const val SETTINGS = """/** A setting a plugin declares in definePlugin. */

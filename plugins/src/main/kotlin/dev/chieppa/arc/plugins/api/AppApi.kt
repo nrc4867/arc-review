@@ -9,7 +9,17 @@ import dev.chieppa.arc.plugins.protocol.AppEvents
 object AppApi {
     private fun member(name: String, ts: String, doc: String, optional: Boolean = false) = PropSpec(name, PropType.Named(ts), doc, optional)
 
-    val eventNames: List<String> = listOf(AppEvents.SOURCE_OPENED, AppEvents.FILE_MARKED, AppEvents.PUSH_FINISHED, AppEvents.NOTES_CHANGED)
+    private fun method(name: String, signature: String, doc: String) = PropSpec(name, PropType.Named(signature), doc, method = true)
+
+    /** The events a plugin hears, through definePlugin's `on` and `app.on`. */
+    val events: List<FieldDoc> = listOf(
+        FieldDoc(AppEvents.SOURCE_OPENED, "AppEvent", "A source opened in the strip; event.source names it."),
+        FieldDoc(AppEvents.FILE_MARKED, "AppEvent", "A file was marked or unmarked; event.file names it, event.data.kind the mark or null."),
+        FieldDoc(AppEvents.PUSH_FINISHED, "AppEvent", "A push of a review to its host ended; event.source names the source."),
+        FieldDoc(AppEvents.NOTES_CHANGED, "AppEvent", "The person's notes on a source changed; event.data.ids names them. Needs notes.read."),
+    )
+
+    val eventNames: List<String> = events.map { it.name }
 
     val interfaces: List<InterfaceSpec> = listOf(
         InterfaceSpec(
@@ -21,7 +31,7 @@ object AppApi {
                 member("focus", "{ readonly file: FileInfo | null }", "The file in focus in it."),
                 member("props", "Readonly<Record<string, unknown>>", "What a pane was opened with."),
                 member("settings", "Readonly<S>", "The plugin's settings, as stored or their defaults."),
-                member("setSetting", "<K extends keyof S & string>(key: K, value: S[K]) => Promise<void>", "Stores a setting; open views redraw."),
+                method("setSetting", "<K extends keyof S & string>(key: K, value: S[K]): Promise<void>", "Stores a setting; open views redraw."),
                 member("onSettingsChange", "(listener: (settings: Readonly<S>) => void) => () => void", "Listens for setting changes; gives a function that stops."),
                 member("store", "PluginStore", "The plugin's private store."),
                 member("console", "ConsoleApi", "Processes Arc runs for the plugin. Needs the console capability."),

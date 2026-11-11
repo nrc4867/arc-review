@@ -12,12 +12,14 @@ object DescriptorTypes {
     /** The interface for [descriptor], named by its class's simple name, with its fields' types. */
     fun interfaceOf(descriptor: SerialDescriptor): String = buildString {
         append("export interface ${nameOf(descriptor)} {\n")
-        for (index in 0 until descriptor.elementsCount) {
-            val element = descriptor.getElementDescriptor(index)
-            val optional = if (element.isNullable) "?" else ""
-            append("    readonly ${descriptor.getElementName(index)}$optional: ${typeOf(element)};\n")
-        }
+        fieldsOf(descriptor).forEach { append("    readonly ${it.name}${if (it.optional) "?" else ""}: ${it.type.ts};\n") }
         append("}\n")
+    }
+
+    /** Each field of [descriptor] with its TypeScript type, optional where it may be null. */
+    fun fieldsOf(descriptor: SerialDescriptor): List<PropSpec> = (0 until descriptor.elementsCount).map { index ->
+        val element = descriptor.getElementDescriptor(index)
+        PropSpec(descriptor.getElementName(index), PropType.Named(typeOf(element)), "", element.isNullable)
     }
 
     /** The union of an enum's serial names. */

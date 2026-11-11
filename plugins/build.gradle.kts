@@ -33,7 +33,13 @@ val bundlePluginHost = tasks.register<BundlePluginHost>("bundlePluginHost") {
     copies = mapOf("typescript/lib/typescript.js" to "typescript.js")
     // What the type check reads: TypeScript's own declarations, the SDK's types, and React's when a plugin has none.
     packageFiles = mapOf("typescript/lib/lib.*.d.ts" to ".")
-    sourceFiles = mapOf("sdk/*.ts" to "types/sdk", "generated/*.d.ts" to "types/generated", "check/shims/*.d.ts" to "types/shims")
+    sourceFiles = mapOf(
+        "sdk/*.ts" to "types/sdk",
+        "generated/*.d.ts" to "types/generated",
+        "check/shims/*.d.ts" to "types/shims",
+        // What a starter plugin carries beside its types.
+        "generated/*.md" to "docs",
+    )
     // The resource PluginHostScript reads.
     resourcePath = "dev/chieppa/arc/plugins/host/host.js"
     cacheDir = File(gradle.gradleUserHomeDir, "arc-plugin-tools")
@@ -44,13 +50,13 @@ sourceSets.main {
     resources.srcDir(bundlePluginHost.flatMap { it.outputDir })
 }
 
-// plugin-sdk/src/generated/arc.d.ts from the Kotlin definitions; PluginTypesTest fails while it is stale.
+// plugin-sdk/src/generated/arc.d.ts and reference.md from the Kotlin definitions; PluginTypesTest fails while either is stale.
 tasks.register<JavaExec>("generatePluginTypes") {
     group = "arc"
-    description = "Writes the plugin API's TypeScript types"
+    description = "Writes the plugin API's TypeScript types and Markdown reference"
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass = "dev.chieppa.arc.plugins.api.GeneratePluginTypesKt"
-    args(sdk.file("src/generated/arc.d.ts").asFile.path)
+    args(sdk.file("src/generated/arc.d.ts").asFile.path, sdk.file("src/generated/reference.md").asFile.path)
 }
 
 tasks.test {
