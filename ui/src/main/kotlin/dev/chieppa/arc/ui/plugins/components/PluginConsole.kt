@@ -29,7 +29,7 @@ import dev.chieppa.arc.plugins.view.ViewNode
 import dev.chieppa.arc.ui.plugins.PluginScope
 import dev.chieppa.stretch.console.Console
 import dev.chieppa.stretch.console.ConsoleStream
-import dev.chieppa.stretch.console.rememberConsoleState
+import dev.chieppa.stretch.console.ConsoleState
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Divider
 import dev.chieppa.stretch.ui.TextField
@@ -54,7 +54,7 @@ fun PluginConsole(node: ViewNode, scope: PluginScope, modifier: Modifier = Modif
 
 @Composable
 private fun ProcessOutput(process: ConsoleProcess, modifier: Modifier) {
-    val state = rememberConsoleState()
+    val state = remember(process) { ConsoleState() }
     LaunchedEffect(process) {
         var shown = 0L
         process.output.collect { printed ->
