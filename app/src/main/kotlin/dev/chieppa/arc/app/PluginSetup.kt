@@ -15,6 +15,7 @@ import dev.chieppa.arc.plugins.runtime.NodeLaunch
 import dev.chieppa.arc.plugins.runtime.PluginTools
 import dev.chieppa.arc.plugins.runtime.ToolInstaller
 import dev.chieppa.arc.plugins.runtime.ToolPins
+import dev.chieppa.arc.plugins.secrets.SecretStores
 import dev.chieppa.arc.plugins.source.NioDirectoryWatcher
 import dev.chieppa.arc.store.plugins.PluginFiles
 import kotlinx.coroutines.CoroutineScope
@@ -43,6 +44,7 @@ internal object PluginSetup {
             nodeVersion = tools.pinnedNode,
             nodeReady = { !tools.needsDownload() },
             shutdown = host::close,
+            secrets = SecretStores.system(),
         )
         return PluginManager(services)
     }

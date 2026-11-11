@@ -21,6 +21,8 @@ import dev.chieppa.arc.plugins.protocol.Contributions
 import dev.chieppa.arc.plugins.protocol.InitializeParams
 import dev.chieppa.arc.plugins.protocol.MountParams
 import dev.chieppa.arc.plugins.protocol.PluginInfo
+import dev.chieppa.arc.plugins.secrets.MemorySecretStore
+import dev.chieppa.arc.plugins.secrets.SecretStore
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.util.ArcDispatchers
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -64,12 +66,12 @@ class PluginRig(capabilitiesJson: String, contributions: Contributions, val appr
         }
     }
 
-    /** The window with the plugins [config] sets up, prepared by [preparer], on the services [services] makes. */
+    /** The window with the plugins [config] sets up, prepared by [preparer], their secrets kept in [secrets]. */
     fun open(
         test: ComposeUiTest,
         preparer: PluginPreparer = ready,
         config: PluginsConfig = enabled,
-        services: (PluginServices) -> PluginServices = { it },
+        secrets: SecretStore = MemorySecretStore(lasting = true),
     ): Workbench {
         val dispatcher = UnconfinedTestDispatcher(test.mainClock.scheduler)
         // The plugins' timers (heartbeat, restarts) wait on a clock of their own that the test never advances.
@@ -78,8 +80,8 @@ class PluginRig(capabilitiesJson: String, contributions: Contributions, val appr
         val workbench = Workbench(
             dispatchers = ArcDispatchers.on(dispatcher),
             plugins = { ui ->
-                val base = PluginServices(scope, process, storage, ConsoleProcesses(console, scope), GitGrep({ _, _ -> CommandResult(1, "", "") }), preparer, ui = ui)
-                PluginManager(services(base))
+                val grep = GitGrep({ _, _ -> CommandResult(1, "", "") })
+                PluginManager(PluginServices(scope, process, storage, ConsoleProcesses(console, scope), grep, preparer, ui = ui, secrets = secrets))
             },
         )
         test.setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }

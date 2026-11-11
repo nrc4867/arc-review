@@ -12,16 +12,20 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import dev.chieppa.arc.design.generated.Res
+import dev.chieppa.arc.design.generated.plugin_secret_not_kept
 import dev.chieppa.arc.plugins.api.PropNames
 import dev.chieppa.arc.plugins.view.Props
 import dev.chieppa.arc.plugins.view.ViewNode
 import dev.chieppa.arc.ui.plugins.PluginScope
 import dev.chieppa.stretch.ui.TextField
 import kotlinx.serialization.json.JsonPrimitive
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * A `Field` element as Stretch's text field. Typing shows at once and calls `onChange`; the plugin's `value` replaces
- * the text when it differs. Enter calls `onSubmit`.
+ * the text when it differs. Enter calls `onSubmit`. A `secret` field is masked, and highlighted where secrets do not
+ * outlast this run of Arc.
  */
 @Composable
 fun PluginField(node: ViewNode, scope: PluginScope, modifier: Modifier = Modifier) {
@@ -29,6 +33,7 @@ fun PluginField(node: ViewNode, scope: PluginScope, modifier: Modifier = Modifie
     var text by remember(node.id) { mutableStateOf(value) }
     LaunchedEffect(value) { text = value }
     val submits = Props.handler(node.props, PropNames.ON_SUBMIT)
+    val secret = Props.boolean(node.props, PropNames.SECRET) == true
     TextField(
         text,
         {
@@ -41,6 +46,8 @@ fun PluginField(node: ViewNode, scope: PluginScope, modifier: Modifier = Modifie
             enter
         },
         placeholder = Props.string(node.props, PropNames.PLACEHOLDER).orEmpty(),
+        error = if (secret && !scope.secretsLast) stringResource(Res.string.plugin_secret_not_kept) else null,
         mono = Props.boolean(node.props, PropNames.MONO) == true,
+        masked = secret,
     )
 }

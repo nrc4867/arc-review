@@ -50,7 +50,7 @@ tasks.register<JavaExec>("generatePluginTypes") {
 }
 
 tasks.test {
-    useJUnitPlatform { excludeTags("node") }
+    useJUnitPlatform { excludeTags("node", "keychain") }
     systemProperty("arc.repoRoot", rootProject.layout.projectDirectory.asFile.path)
     inputs.dir(sdk.dir("src/generated"))
 }
@@ -64,4 +64,14 @@ tasks.register<Test>("nodeTest") {
     useJUnitPlatform { includeTags("node") }
     systemProperty("arc.plugins.node", providers.gradleProperty("arc.plugins.node").getOrElse("node"))
     systemProperty("arc.repoRoot", rootProject.layout.projectDirectory.asFile.path)
+}
+
+// The test that writes, reads and deletes one made-up secret in this system's real keychain. Not part of build.
+tasks.register<Test>("keychainTest") {
+    group = "verification"
+    description = "Runs the plugin secrets against the system keychain"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform { includeTags("keychain") }
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
 }

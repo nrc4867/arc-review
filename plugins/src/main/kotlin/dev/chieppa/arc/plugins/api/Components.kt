@@ -86,6 +86,7 @@ object Components {
                 PropSpec(P.ON_SUBMIT, PropType.Handler(listOf("value" to PropType.Text)), "Enter was pressed.", optional = true),
                 PropSpec(P.PLACEHOLDER, PropType.Text, "Shown while empty.", optional = true),
                 PropSpec(P.MONO, PropType.Bool, "Set in the code face, for paths and patterns.", optional = true),
+                PropSpec(P.SECRET, PropType.Bool, "Shows a dot for each character, for a setting of type secret.", optional = true),
             ),
         ),
         ComponentSpec(

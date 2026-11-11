@@ -6,6 +6,7 @@ import dev.chieppa.arc.plugins.console.ConsoleProcesses
 import dev.chieppa.arc.plugins.manifest.Capabilities
 import dev.chieppa.arc.plugins.manifest.Capability
 import dev.chieppa.arc.plugins.protocol.AppEventParams
+import dev.chieppa.arc.plugins.protocol.SettingType
 import dev.chieppa.arc.plugins.source.FoundPlugin
 import dev.chieppa.arc.plugins.source.PluginDiscovery
 import kotlinx.coroutines.Job
@@ -20,12 +21,14 @@ import java.nio.file.Path
 /**
  * Every plugin Arc knows of, from the sources in its setup: finding them, starting the ones the person enabled,
  * reloading them when their folders change, and their settings. Only the person enables a plugin; after that, saves in
- * its folder reload it without asking. Changes to the setup are saved through [PluginServices.storage].
+ * its folder reload it without asking. Changes to the setup are saved through [PluginServices.storage]; secret settings
+ * go to [PluginServices.secrets], and removing a plugin's source forgets them.
  */
 class PluginManager(private val services: PluginServices) {
     private val setup = MutableStateFlow(PluginsConfig())
     private val known = MutableStateFlow<List<PluginEntry>>(emptyList())
     private val watching = mutableMapOf<PluginSourceSpec, Job>()
+    private val secrets = PluginSecrets(services.secrets)
 
     val config: StateFlow<PluginsConfig> get() = setup
 
@@ -54,9 +57,15 @@ class PluginManager(private val services: PluginServices) {
     }
 
     fun removeSource(spec: PluginSourceSpec) {
-        save(setup.value.copy(sources = setup.value.sources - spec))
+        val sources = setup.value.sources - spec
+        val kept = sources.flatMap(PluginDiscovery::find).map { it.id }.toSet()
+        val gone = known.value.filter { it.found.source == spec && it.id !in kept }.map { it.id }
+        save(gone.fold(setup.value.copy(sources = sources)) { config, id -> secrets.removeAll(config, id) })
         refresh()
     }
+
+    /** Whether plugins' secret settings outlast this run of Arc, kept in the system's keychain. */
+    val secretsLast: Boolean get() = secrets.lasting
 
     /**
      * Turns plugin [id] on, approving what its manifest asks for now, or off; as only the person does. A later manifest
@@ -78,12 +87,16 @@ class PluginManager(private val services: PluginServices) {
     /** The running instance of plugin [id], if it is enabled. */
     fun instance(id: String): PluginInstance? = known.value.firstOrNull { it.id == id }?.instance
 
-    /** Plugin [id]'s stored settings. */
-    fun settings(id: String): JsonObject = setup.value.settings[id] ?: JsonObject(emptyMap())
+    /** Plugin [id]'s stored settings, its secret ones read from the keychain; only plugin [id] is given them. */
+    fun settings(id: String): JsonObject {
+        val config = setup.value
+        return JsonObject(config.settings[id].orEmpty() + secrets.values(config, id))
+    }
 
-    /** Stores plugin [id]'s settings and tells it, so its open views redraw. */
+    /** Stores plugin [id]'s settings, its secret ones in the keychain, and tells it, so its open views redraw. */
     fun setSettings(id: String, values: JsonObject) {
-        save(setup.value.copy(settings = setup.value.settings + (id to values)))
+        val declared = instance(id)?.contributions?.value?.settings.orEmpty().filterValues { it.type == SettingType.Secret }.keys
+        save(secrets.keep(setup.value, id, values, declared + setup.value.secrets[id].orEmpty()))
         instance(id)?.settingsChanged()
     }
 

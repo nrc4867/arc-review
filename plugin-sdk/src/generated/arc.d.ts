@@ -8,7 +8,7 @@ export type IconName = "branch" | "check" | "close" | "code" | "comment" | "comm
 
 export type AppEventName = "source.opened" | "file.marked" | "push.finished" | "notes.changed";
 
-export type SettingType = "text" | "number" | "boolean" | "choice" | "glob" | "list" | "map";
+export type SettingType = "text" | "number" | "boolean" | "choice" | "glob" | "list" | "map" | "secret";
 
 export type NoteKind = "note" | "draft";
 
@@ -201,6 +201,8 @@ export interface FieldProps {
     readonly placeholder?: string;
     /** Set in the code face, for paths and patterns. */
     readonly mono?: boolean;
+    /** Shows a dot for each character, for a setting of type secret. */
+    readonly secret?: boolean;
     /** Take the room left in its parent. */
     readonly grow?: boolean;
 }

@@ -32,6 +32,6 @@ fun PluginViewHost(
     val view = remember(instance, kind, contribution, context, props) { instance.mount(kind, contribution, context, props) }
     DisposableEffect(view) { onDispose { view.close() } }
     val nodes by view.nodes.collectAsState()
-    val scope = remember(view) { PluginScope(view) { manager.consoles[it] } }
+    val scope = remember(view) { PluginScope(view, manager.secretsLast) { manager.consoles[it] } }
     Column(modifier) { PluginChildren(nodes, scope) }
 }

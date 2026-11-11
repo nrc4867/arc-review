@@ -26,6 +26,7 @@ object PropNames {
     const val VALUE = "value"
     const val PLACEHOLDER = "placeholder"
     const val MONO = "mono"
+    const val SECRET = "secret"
     const val ON_SUBMIT = "onSubmit"
     const val OPTIONS = "options"
     const val TONE = "tone"
