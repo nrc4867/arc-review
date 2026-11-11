@@ -41,16 +41,21 @@ import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.services.GitHubPulls
 import dev.chieppa.arc.ui.services.GitReviewData
 import dev.chieppa.arc.ui.services.ReviewData
+import dev.chieppa.arc.plugins.manager.PluginManager
+import dev.chieppa.arc.plugins.manager.PluginUi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import java.io.Closeable
 import java.nio.file.Path
 
 /**
  * What the app keeps between runs, in [dataDir]: the settings, the workspace, the repos, the saved filters and
  * notification rules, the run filters, step timings, kept runs and downloaded artifacts, the person's drafts, staged
- * comments and notes, the recently opened sources, people's pictures, and the app's own clones of GitHub repos. Repos are read through git for the workspace in
+ * comments and notes, the recently opened sources, people's pictures, the app's own clones of GitHub repos, and plugins (their setup, stores, bundles and the Node they run on). Repos are read through git for the workspace in
  * [current], and pull requests through [github].
  */
-class AppSession(dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub()) : Closeable {
+class AppSession(private val dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub()) : Closeable {
     private val settingsFile = SettingsFile(dataDir.resolve(AppConstants.SETTINGS_FILE))
     private val workspaceFile = WorkspaceFile(dataDir.resolve(AppConstants.WORKSPACE_FILE))
     private val reviewFolder = ReviewFolder(dataDir.resolve(AppConstants.REVIEWS_FOLDER))
@@ -170,7 +175,15 @@ class AppSession(dataDir: Path, val conversation: ReviewConversation, val github
         settingsFile.save(settings)
     }
 
+    private val pluginScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private var plugins: PluginManager? = null
+
+    /** The plugin manager, made once, with what plugins ask of the window going to [ui]. */
+    fun plugins(ui: PluginUi): PluginManager = plugins ?: PluginSetup.manager(dataDir, pluginScope, ui).also { plugins = it }
+
     override fun close() {
+        plugins?.stop()
+        pluginScope.cancel()
         git.close()
     }
 }

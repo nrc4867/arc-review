@@ -67,6 +67,7 @@ fun ArcWindow(
             actions = session.actions,
             runKeeper = session.runKeeper,
             desktop = notifier,
+            plugins = session::plugins,
         ).also { opened = it }
     }
     DisposableEffect(workbench) { onDispose { workbench.scope.cancel() } }

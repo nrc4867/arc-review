@@ -35,6 +35,21 @@ internal object AppConstants {
     /** People's pictures from GitHub, kept for a day. */
     const val AVATARS_FOLDER = "avatars"
 
+    /** The plugins' sources, which are enabled and their settings. */
+    const val PLUGINS_FILE = "plugins.json"
+
+    /** Each plugin's private store, as `<id>.json`. */
+    const val PLUGIN_STORE_FOLDER = "plugin-store"
+
+    /** Each plugin's transpiled bundle, as `<id>/bundle.js`. */
+    const val PLUGIN_CACHE_FOLDER = "plugin-cache"
+
+    /** The plugin host script every plugin process runs. */
+    const val PLUGIN_RUNTIME_FOLDER = "plugin-runtime"
+
+    /** The pinned Node and esbuild, downloaded the first time a plugin is enabled. */
+    const val RUNTIMES_FOLDER = "runtimes"
+
     /** How long the workspace waits after a change before it is saved. */
     const val SAVE_DELAY_MILLIS = 400L
     val WINDOW_WIDTH = 1440.dp
