@@ -50,9 +50,10 @@ fun HintFooter(hint: SymbolHint, pinned: Boolean, onPin: () -> Unit, onOpen: () 
             append(document.path)
             withStyle(SpanStyle(color = c.inkSubtle)) { append(stringResource(Res.string.navigation_line, target.location.range.start.line)) }
         }
-        BasicText(place, Modifier.weight(1f, fill = false).clickable(onClick = onOpen), style = small, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        BasicText(target.source ?: document.revision.take(SHORT_SHA), style = small.merge(TextStyle(color = c.inkMuted)), maxLines = 1)
-        Row(Modifier.weight(1f)) {}
+        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(HintSizes.nameGap), verticalAlignment = Alignment.CenterVertically) {
+            BasicText(place, Modifier.weight(1f, fill = false).clickable(onClick = onOpen), style = small, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            BasicText(target.source ?: document.revision.take(SHORT_SHA), style = small.merge(TextStyle(color = c.inkMuted)), maxLines = 1)
+        }
         val precision = stringResource(if (target.origin.precision == Precision.Exact) Res.string.navigation_exact else Res.string.navigation_by_name)
         val origin = hint.doc?.let { stringResource(Res.string.hint_origin, HintLabels.format(it.format), precision) } ?: precision
         BasicText(origin, style = Stretch.type.bodySm.merge(TextStyle(color = c.inkSubtle)), maxLines = 1)
