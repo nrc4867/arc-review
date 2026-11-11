@@ -54,7 +54,8 @@ class PluginManagerTest {
     private val contributions = Contributions(actions = listOf(ActionContribution("run", "Run")), panels = listOf(PanelContribution("todos", "TODOs")))
     private val changes = MutableSharedFlow<Unit>()
     private val approved = Capabilities(panels = true, git = true, console = true)
-    private val storage = PluginStorage.InMemory(PluginsConfig(enabled = setOf("todos"), approved = mapOf("todos" to approved)))
+    private val configChanges = MutableSharedFlow<Unit>()
+    private val storage = PluginStorage.InMemory(PluginsConfig(enabled = setOf("todos"), approved = mapOf("todos" to approved)), configChanges)
 
     @AfterTest
     fun cleanUp() {
@@ -158,6 +159,25 @@ class PluginManagerTest {
         assertEquals(JsonPrimitive("spec/**"), storage.loadConfig().settings.getValue("todos")["folder"])
         assertTrue(plugin.received.any { it is Envelope.Notification && it.method == Methods.SETTINGS_CHANGED })
         assertEquals(JsonPrimitive(3), plugin.received.filterIsInstance<Envelope.Response>().single { it.id == 3L }.result)
+    }
+
+    @Test
+    fun aSourceAddedToTheStoredSetupIsTakenButItsPluginIsNotEnabled() = runTest {
+        val plugin = FakePlugin(backgroundScope, contributions)
+        val manager = manager(plugin)
+        val added = dir.resolve("starter").also {
+            Files.createDirectories(it)
+            Files.writeString(it.resolve("plugin.json"), """{"id":"starter","version":"0.1.0","apiVersion":1,"entry":"index.tsx","capabilities":{"panels":true}}""")
+        }
+        val stored = storage.loadConfig()
+        storage.saveConfig(stored.withDirectory(added).copy(enabled = stored.enabled + "starter", approved = stored.approved + ("starter" to Capabilities(panels = true))))
+        configChanges.emit(Unit)
+        advanceTimeBy(1_000)
+        val starter = manager.entries.value.single { it.id == "starter" }
+        assertEquals(false, starter.enabled)
+        assertNull(starter.instance)
+        assertEquals(setOf("todos"), storage.loadConfig().enabled)
+        assertIs<PluginStatus.Running>(manager.instance("todos")!!.status.value)
     }
 
     @Test

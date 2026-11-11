@@ -3,6 +3,7 @@ package dev.chieppa.arc.plugins.config
 import dev.chieppa.arc.plugins.manifest.Capabilities
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
+import java.nio.file.Path
 
 /**
  * What the person set up for plugins: the [sources] plugins come from, the ids of those [enabled], the capabilities
@@ -18,4 +19,16 @@ data class PluginsConfig(
     val approved: Map<String, Capabilities> = emptyMap(),
     val settings: Map<String, JsonObject> = emptyMap(),
     val secrets: Map<String, Set<String>> = emptyMap(),
-)
+) {
+    /** This setup with the folder [path] as a source, added last unless it is one already. */
+    fun withDirectory(path: Path): PluginsConfig {
+        val spec = PluginSourceSpec.Directory(path.toAbsolutePath().normalize().toString())
+        return if (spec in sources) this else copy(sources = sources + spec)
+    }
+
+    /** This setup with the sources [other] has and it lacks, added last; nothing else of [other] is taken. */
+    fun withSourcesOf(other: PluginsConfig): PluginsConfig {
+        val added = other.sources.filter { it !in sources }
+        return if (added.isEmpty()) this else copy(sources = sources + added)
+    }
+}

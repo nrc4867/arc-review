@@ -63,6 +63,12 @@ class PluginManager(private val services: PluginServices) {
         setup.value = services.storage.loadConfig()
         refresh()
         git.start()
+        services.scope.launch {
+            services.storage.configChanges().collectLatest {
+                delay(services.reloadMillis)
+                adoptSources()
+            }
+        }
     }
 
     /** Adds the git repo at [url] as a source at [ref] (a branch, tag or commit), pinned to the commit it names now. */
@@ -75,9 +81,21 @@ class PluginManager(private val services: PluginServices) {
     fun gitClone(url: String): Path? = git.clone(url)
 
     fun addDirectory(path: Path) {
-        val spec = PluginSourceSpec.Directory(path.toAbsolutePath().normalize().toString())
-        if (spec in setup.value.sources) return
-        save(setup.value.copy(sources = setup.value.sources + spec))
+        val config = setup.value.withDirectory(path)
+        if (config == setup.value) return
+        save(config)
+        refresh()
+    }
+
+    /**
+     * Takes the sources added to the setup where it is kept since it was read, as `arc-review plugin new` adds them,
+     * and nothing else: which plugins are enabled and what they may do stay the person's choice in this window.
+     */
+    @Synchronized
+    private fun adoptSources() {
+        val config = setup.value.withSourcesOf(services.storage.loadConfig())
+        if (config == setup.value) return
+        save(config)
         refresh()
     }
 
