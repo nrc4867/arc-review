@@ -1,0 +1,9 @@
+{
+  "name": "@review/plugin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Arc's plugin SDK: definePlugin, the components Arc draws with Stretch, and the app object's types. Arc gives it to every plugin at run time.",
+  "license": "AGPL-3.0-only",
+  "types": "src/sdk/index.ts",
+  "main": "src/sdk/index.ts"
+}
