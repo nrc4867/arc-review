@@ -14,10 +14,9 @@ import kotlinx.serialization.json.JsonNull
 /**
  * Launches [FakeConnection]s that answer like a plugin's worker: `initialize` with [contributions] (or [loadError]),
  * pings while [responsive], and every other request with what [answers] gives for its method, else null. Each launch is
- * kept in [launched], with the worker asked for in [workers], and everything Arc sent in [received]. As a
- * [ProcessLauncher] it plays a program the same way.
+ * kept in [launched], with the worker asked for in [workers], and everything Arc sent in [received].
  */
-class FakePlugin(private val scope: CoroutineScope, private val contributions: Contributions = Contributions()) : WorkerLauncher, ProcessLauncher {
+class FakePlugin(private val scope: CoroutineScope, private val contributions: Contributions = Contributions()) : WorkerLauncher {
     val launched = mutableListOf<FakeConnection>()
     val received = mutableListOf<Envelope>()
     val workers = mutableListOf<WorkerSpec>()
@@ -30,12 +29,6 @@ class FakePlugin(private val scope: CoroutineScope, private val contributions: C
 
     override suspend fun launch(spec: WorkerSpec): LineConnection {
         workers += spec
-        return start()
-    }
-
-    override fun launch(spec: LaunchSpec): LineConnection = start()
-
-    private fun start(): LineConnection {
         val connection = FakeConnection()
         launched += connection
         scope.launch {

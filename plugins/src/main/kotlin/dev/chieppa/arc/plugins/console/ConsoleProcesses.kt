@@ -1,7 +1,6 @@
 package dev.chieppa.arc.plugins.console
 
 import dev.chieppa.arc.plugins.host.LaunchSpec
-import dev.chieppa.arc.plugins.host.ProcessLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,7 +8,7 @@ import java.nio.file.Path
 import java.util.concurrent.atomic.AtomicLong
 
 /** The processes Arc runs for plugins, started through [launcher] on [scope] and kept by id until their plugin stops. */
-class ConsoleProcesses(private val launcher: ProcessLauncher, private val scope: CoroutineScope) {
+class ConsoleProcesses(private val launcher: ConsoleLauncher, private val scope: CoroutineScope) {
     private val ids = AtomicLong()
     private val running = MutableStateFlow<Map<String, ConsoleProcess>>(emptyMap())
 

@@ -1,26 +1,25 @@
 package dev.chieppa.arc.ui.plugins
 
+import dev.chieppa.arc.plugins.console.ConsoleChunk
+import dev.chieppa.arc.plugins.console.ConsoleConnection
+import dev.chieppa.arc.plugins.console.ConsoleLauncher
 import dev.chieppa.arc.plugins.host.LaunchSpec
-import dev.chieppa.arc.plugins.host.LineConnection
-import dev.chieppa.arc.plugins.host.ProcessLauncher
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ReceiveChannel
 
 /** A console process played by a test: it prints what [print] gives and keeps what is typed into it in [typed]. */
-class FakeConsole : ProcessLauncher, LineConnection {
-    private val out = Channel<String>(Channel.UNLIMITED)
-    private val err = Channel<String>(Channel.UNLIMITED)
+class FakeConsole : ConsoleLauncher, ConsoleConnection {
+    private val out = Channel<ConsoleChunk>(Channel.UNLIMITED)
     private val exit = CompletableDeferred<Int>()
     val typed = mutableListOf<String>()
 
-    override val lines: ReceiveChannel<String> get() = out
-    override val logs: ReceiveChannel<String> get() = err
+    override val output: ReceiveChannel<ConsoleChunk> get() = out
 
-    override fun launch(spec: LaunchSpec): LineConnection = this
+    override fun launch(spec: LaunchSpec): ConsoleConnection = this
 
-    fun print(line: String) {
-        out.trySend(line)
+    fun print(text: String) {
+        out.trySend(ConsoleChunk(text))
     }
 
     override suspend fun send(line: String) {

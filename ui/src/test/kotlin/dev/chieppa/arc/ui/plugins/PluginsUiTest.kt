@@ -210,12 +210,13 @@ class PluginsUiTest {
     fun aPaneShowsAConsoleThatTakesInput() = pluginTest {
         val workbench = open()
         workbench.plugins.manager!!.consoles.start("todos", listOf("npm", "test"), folder, { _, _ -> }, { _, _ -> })
-        console.print("3 passing")
+        console.print("3 passing\nContinue? [y/N] ")
         workbench.panes.openPluginPane("todos", "console", "{}", null)
         waitForIdle()
         val page = workbench.state.workspace.pages.single() as Page.Plugin
         assertEquals("Command", workbench.plugins.tabOf(page).title)
         assertTrue(shows("3 passing"))
+        assertTrue(shows("Continue? [y/N] "))
         val field = onNode(hasSetTextAction())
         field.performTextInput("y")
         field.performKeyInput { pressKey(Key.Enter) }

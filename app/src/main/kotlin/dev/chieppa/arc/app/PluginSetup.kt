@@ -2,6 +2,7 @@ package dev.chieppa.arc.app
 
 import dev.chieppa.arc.plugins.command.ProcessCommandRunner
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
+import dev.chieppa.arc.plugins.console.ProcessConsoleLauncher
 import dev.chieppa.arc.plugins.git.GitGrep
 import dev.chieppa.arc.plugins.host.NodeHost
 import dev.chieppa.arc.plugins.host.PluginHostScript
@@ -35,7 +36,7 @@ internal object PluginSetup {
             scope = scope,
             workers = host,
             storage = PluginFiles(dataDir.resolve(AppConstants.PLUGINS_FILE), dataDir.resolve(AppConstants.PLUGIN_STORE_FOLDER)),
-            consoles = ConsoleProcesses(processes, scope),
+            consoles = ConsoleProcesses(ProcessConsoleLauncher(scope), scope),
             grep = GitGrep(ProcessCommandRunner),
             ui = ui,
             watcher = NioDirectoryWatcher,

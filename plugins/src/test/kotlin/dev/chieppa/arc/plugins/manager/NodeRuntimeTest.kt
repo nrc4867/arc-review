@@ -5,6 +5,7 @@ import dev.chieppa.arc.plugins.command.ProcessCommandRunner
 import dev.chieppa.arc.plugins.config.PluginStorage
 import dev.chieppa.arc.plugins.config.PluginsConfig
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
+import dev.chieppa.arc.plugins.console.ProcessConsoleLauncher
 import dev.chieppa.arc.plugins.git.GitGrep
 import dev.chieppa.arc.plugins.host.DiagnosticKind
 import dev.chieppa.arc.plugins.host.NodeHost
@@ -127,7 +128,7 @@ class NodeRuntimeTest {
         val settings = buildJsonObject { put("outside", outside.toString()) }
         val config = PluginsConfig(enabled = ids.toSet(), approved = ids.associateWith { approved }, settings = mapOf("counter" to settings))
         val services = PluginServices(
-            scope, host, PluginStorage.InMemory(config), ConsoleProcesses(system, scope), GitGrep({ _, _ -> CommandResult(1, "", "") }),
+            scope, host, PluginStorage.InMemory(config), ConsoleProcesses(ProcessConsoleLauncher(scope), scope), GitGrep({ _, _ -> CommandResult(1, "", "") }),
             shutdown = host::close,
         )
         return PluginManager(services).apply {

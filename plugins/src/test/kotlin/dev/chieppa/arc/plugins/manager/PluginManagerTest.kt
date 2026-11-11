@@ -4,6 +4,7 @@ import dev.chieppa.arc.plugins.command.CommandResult
 import dev.chieppa.arc.plugins.config.PluginStorage
 import dev.chieppa.arc.plugins.config.PluginsConfig
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
+import dev.chieppa.arc.plugins.console.FakeConsole
 import dev.chieppa.arc.plugins.git.GitGrep
 import dev.chieppa.arc.plugins.host.FakePlugin
 import dev.chieppa.arc.plugins.host.WorkerSpec
@@ -60,7 +61,7 @@ class PluginManagerTest {
         dir.toFile().deleteRecursively()
     }
 
-    private fun TestScope.manager(plugin: FakePlugin, consoles: FakePlugin = FakePlugin(backgroundScope)): PluginManager {
+    private fun TestScope.manager(plugin: FakePlugin, consoles: FakeConsole = FakeConsole()): PluginManager {
         val preparer = PluginPreparer { f, root, manifest, settings ->
             Preparation.Ready(WorkerSpec(manifest.id, root), InitializeParams(1, PluginInfo(manifest.id, manifest.version, f.toString()), "index.tsx", settings))
         }
@@ -173,16 +174,16 @@ class PluginManagerTest {
     fun aConsoleProcessPrintsToThePluginAndTakesInput() = runTest {
         Files.writeString(folder.resolve("plugin.json"), """{"id":"todos","version":"0.1.0","apiVersion":1,"entry":"index.tsx","capabilities":{"console":true}}""")
         val plugin = FakePlugin(backgroundScope, contributions)
-        val consoles = FakePlugin(backgroundScope)
+        val consoles = FakeConsole()
         manager(plugin, consoles)
         plugin.current.write(Envelope.Request(1, Methods.CONSOLE_RUN, Json.parseToJsonElement("""{"command":["npm","test"],"cwd":"plugin"}""")))
         runCurrent()
         val handle = (plugin.received.last() as Envelope.Response).result.jsonObject.getValue("handle")
-        consoles.current.write(Envelope.Notification("ignored"))
+        consoles.print("Continue? ")
         plugin.current.write(Envelope.Request(2, Methods.CONSOLE_WRITE, buildJsonObject { put("handle", handle); put("text", "y") }))
         runCurrent()
-        assertEquals(listOf("y"), consoles.current.raw)
-        consoles.current.end(0)
+        assertEquals(listOf("y"), consoles.typed)
+        consoles.end(0)
         runCurrent()
         val sent = plugin.received.filterIsInstance<Envelope.Notification>().map { it.method }
         assertTrue(Methods.CONSOLE_OUTPUT in sent && Methods.CONSOLE_EXIT in sent)
