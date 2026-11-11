@@ -1,6 +1,7 @@
 package dev.chieppa.arc.host.github.api
 
 import dev.chieppa.arc.host.github.auth.GitHubTokens
+import dev.chieppa.arc.host.github.auth.TokenOrigin
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -23,6 +24,9 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
 
     /** Whether a token is to hand, without asking GitHub. */
     fun hasToken(): Boolean = tokens.token() != null
+
+    /** Where the token in use came from, or null when there is none. */
+    fun tokenOrigin(): TokenOrigin? = tokens.tokenOrigin()
 
     /** The person's token, for a request to GitHub this client does not send itself, such as a picture. */
     fun token(): String? = tokens.token()

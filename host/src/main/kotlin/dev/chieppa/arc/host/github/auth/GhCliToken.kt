@@ -19,6 +19,8 @@ class GhCliToken(private val program: String = PROGRAM) : TokenSource {
         null
     }
 
+    override fun origin(): TokenOrigin = TokenOrigin.GhCli
+
     private companion object {
         const val PROGRAM = "gh"
         const val TIMEOUT_SECONDS = 10L

@@ -4,4 +4,7 @@ package dev.chieppa.arc.host.github.auth
 fun interface TokenSource {
     /** The token, or null when this source has none. */
     fun token(): String?
+
+    /** Where the token this source gives comes from. */
+    fun origin(): TokenOrigin = TokenOrigin.Other
 }

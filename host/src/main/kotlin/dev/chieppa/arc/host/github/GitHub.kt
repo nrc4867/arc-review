@@ -1,5 +1,6 @@
 package dev.chieppa.arc.host.github
 
+import dev.chieppa.arc.host.github.auth.TokenOrigin
 import dev.chieppa.arc.host.github.api.GitHubApi
 import dev.chieppa.arc.host.github.actions.ActionsClient
 import dev.chieppa.arc.host.github.actions.ActionsWriter
@@ -67,6 +68,9 @@ class GitHub(
 
     /** Whether a token is to hand. */
     fun hasToken(): Boolean = client.hasToken()
+
+    /** Where the token in use came from, or null when there is none. */
+    fun tokenOrigin(): TokenOrigin? = client.tokenOrigin()
 
     /** The person signed in, with their teams. */
     suspend fun viewer(): Viewer {
