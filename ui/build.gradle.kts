@@ -14,6 +14,7 @@ dependencies {
     api(project(":git"))
     api(project(":host"))
     api(project(":index"))
+    api(project(":plugins"))
     implementation(project(":store"))
     api("dev.chieppa.stretch:stretch-core")
     api("dev.chieppa.stretch:stretch-ui")

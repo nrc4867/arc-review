@@ -61,6 +61,10 @@ import dev.chieppa.arc.ui.services.SystemClipboard
 import dev.chieppa.arc.ui.services.LinkOpener
 import dev.chieppa.arc.ui.services.SystemBrowser
 import dev.chieppa.arc.ui.services.TextClipboard
+import dev.chieppa.arc.plugins.manager.PluginManager
+import dev.chieppa.arc.plugins.manager.PluginUi
+import dev.chieppa.arc.ui.plugins.PluginsController
+import dev.chieppa.arc.ui.plugins.settings.PluginsSettingsProvider
 import dev.chieppa.arc.ui.settings.ArcSettingsProvider
 import dev.chieppa.arc.ui.settings.SettingsRegistry
 import dev.chieppa.arc.ui.settings.UiPreferences
@@ -88,7 +92,8 @@ import kotlinx.coroutines.launch
  * paths and refs go to [clipboard], and web links open through [links]. [watch] holds the saved filters and
  * notification rules. [start] holds the start screen, starting from the person's [startLayout] and [recent] sources.
  * All of the window's work runs on [dispatchers], [scope] on their main. Questions about code go to [codeNavigation].
- * Runs are watched in [runWatch] through [actions], their notifications going to [desktop].
+ * Runs are watched in [runWatch] through [actions], their notifications going to [desktop]. [plugins] makes the
+ * plugin manager, given what plugins ask of the window; none runs plugins.
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -110,6 +115,7 @@ class Workbench(
     val actions: ActionsService = NoActions,
     runKeeper: RunKeeper = RunKeeper.NONE,
     desktop: DesktopNotifier = DesktopNotifier.NONE,
+    plugins: (PluginUi) -> PluginManager? = { null },
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -197,6 +203,9 @@ class Workbench(
     /** The Settings page's contributors, Arc's own among them. */
     val settings = SettingsRegistry()
 
+    /** Plugins: their processes, contributions and settings. */
+    val plugins = PluginsController(this, plugins)
+
     init {
         registerArcActions(registry, this, onQuit)
         registerReviewActions(registry, this)
@@ -207,6 +216,8 @@ class Workbench(
         registerStartActions(registry, this)
         start.registry.register(StartContributor.ARC, arcStartProvider(this))
         settings.register(SettingsContributor.ARC, ArcSettingsProvider(this))
+        settings.register(PluginsSettingsProvider.CONTRIBUTOR, PluginsSettingsProvider(this))
+        this.plugins.start()
     }
 
     /** Opens the Pull requests drawer and counts every notification as seen. */

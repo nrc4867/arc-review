@@ -16,11 +16,13 @@ object SettingsIcons {
     const val EYE = "eye"
     const val FILTER = "filter"
     const val FIT = "fit"
+    const val FOLDER = "folder"
     const val GATE = "gate"
     const val LABEL = "label"
     const val PALETTE = "palette"
     const val PEOPLE = "people"
     const val PERSON = "person"
+    const val PLUGIN = "plugin"
     const val PULL_REQUEST = "pull-request"
     const val RUNS = "runs"
     const val SETTINGS = "settings"
@@ -40,11 +42,13 @@ object SettingsIcons {
             EYE to StretchIcons.Eye,
             FILTER to ArcIcons.Filter,
             FIT to StretchIcons.Fit,
+            FOLDER to StretchIcons.Folder,
             GATE to ArcIcons.Gate,
             LABEL to ArcIcons.Label,
             PALETTE to ArcIcons.Palette,
             PEOPLE to ArcIcons.People,
             PERSON to ArcIcons.Person,
+            PLUGIN to ArcIcons.Plugin,
             PULL_REQUEST to ArcIcons.PullRequest,
             RUNS to ArcIcons.Runs,
             SETTINGS to StretchIcons.Settings,

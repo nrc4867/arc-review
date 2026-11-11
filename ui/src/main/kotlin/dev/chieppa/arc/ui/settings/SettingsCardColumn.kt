@@ -8,10 +8,16 @@ import dev.chieppa.arc.core.settings.SettingsCard
 import dev.chieppa.arc.core.settings.SettingsValue
 import dev.chieppa.stretch.theme.StretchSpacing
 
-/** A column of settings [cards], one under another. */
+/** A column of settings [cards], one under another; [hosted] draws a hosted card's content. */
 @Composable
-fun SettingsCardColumn(cards: List<SettingsCard>, matches: Map<String, List<IntRange>>, onChange: (String, SettingsValue) -> Unit, modifier: Modifier = Modifier) {
+fun SettingsCardColumn(
+    cards: List<SettingsCard>,
+    matches: Map<String, List<IntRange>>,
+    onChange: (String, SettingsValue) -> Unit,
+    hosted: @Composable (SettingsCard) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(StretchSpacing.space16)) {
-        cards.forEach { SettingsCardView(it, matches, onChange) }
+        cards.forEach { SettingsCardView(it, matches, onChange, hosted = hosted) }
     }
 }

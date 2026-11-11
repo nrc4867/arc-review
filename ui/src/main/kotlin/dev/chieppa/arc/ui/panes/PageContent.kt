@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.ui.conversation.ConversationPage
+import dev.chieppa.arc.ui.plugins.PluginPanePage
 import dev.chieppa.arc.ui.pulls.FilterPage
 import dev.chieppa.arc.ui.revisions.RevisionMatrixPage
 import dev.chieppa.arc.ui.runs.RunPage
@@ -21,5 +22,6 @@ fun PageContent(page: Page, workbench: Workbench, modifier: Modifier = Modifier)
         is Page.Runs -> RunsPage(page, workbench, modifier)
         is Page.Run -> RunPage(page, workbench, modifier)
         is Page.Settings -> SettingsPage(page, workbench, modifier)
+        is Page.Plugin -> PluginPanePage(page, workbench, modifier)
     }
 }

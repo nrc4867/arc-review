@@ -3,6 +3,7 @@ package dev.chieppa.arc.ui.settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
+import dev.chieppa.arc.core.settings.SettingsCard
 import dev.chieppa.arc.core.settings.SettingsContributor
 import dev.chieppa.arc.core.settings.SettingsMerge
 import dev.chieppa.arc.core.settings.SettingsOwned
@@ -32,6 +33,12 @@ class SettingsRegistry {
     @Composable
     fun sections(): List<SettingsOwned> =
         SettingsMerge.merge(all.map { (id, provider) -> key(id) { SettingsContributor(id, provider.sections()) } })
+
+    /** Hosted [card]'s content, as contributor [contributor] draws it. */
+    @Composable
+    fun Hosted(contributor: String, card: SettingsCard) {
+        providers[contributor]?.Hosted(card)
+    }
 
     /** Sends [value] for entry [entry] to the contributor [contributor]. */
     fun change(contributor: String, entry: String, value: SettingsValue) {

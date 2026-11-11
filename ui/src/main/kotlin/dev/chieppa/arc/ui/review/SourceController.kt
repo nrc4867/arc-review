@@ -55,7 +55,7 @@ class SourceController(
     private fun Page.belongsTo(source: Source) = when (this) {
         is Page.RevisionMatrix -> this.source == source
         is Page.Conversation -> this.source == source
-        is Page.Filter, is Page.Runs, is Page.Run, is Page.Settings -> false
+        is Page.Filter, is Page.Runs, is Page.Run, is Page.Settings, is Page.Plugin -> false
     }
 
     fun removeSource(source: Source) {

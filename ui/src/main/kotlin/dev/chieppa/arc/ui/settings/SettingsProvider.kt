@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.settings
 
 import androidx.compose.runtime.Composable
+import dev.chieppa.arc.core.settings.SettingsCard
 import dev.chieppa.arc.core.settings.SettingsSection
 import dev.chieppa.arc.core.settings.SettingsValue
 
@@ -14,4 +15,8 @@ interface SettingsProvider {
 
     /** The person gave entry [entry] the value [value]; the contributor saves and applies it. */
     fun change(entry: String, value: SettingsValue)
+
+    /** Draws hosted [card]'s content under its header. */
+    @Composable
+    fun Hosted(card: SettingsCard) {}
 }

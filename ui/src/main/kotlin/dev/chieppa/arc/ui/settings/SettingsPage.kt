@@ -38,9 +38,11 @@ fun SettingsPage(page: Page.Settings, workbench: Workbench, modifier: Modifier =
         Box(Modifier.weight(1f).fillMaxHeight().background(Stretch.colors.surfaceCanvas)) {
             ScrollColumn(Modifier.fillMaxSize().padding(horizontal = StretchSpacing.space28, vertical = StretchSpacing.space20)) {
                 if (SettingsSearch.words(query).isNotEmpty()) {
-                    SettingsSearchResults(SettingsSearch.find(sections, query), registry::change)
+                    SettingsSearchResults(SettingsSearch.find(sections, query), registry::change) { contributor, card -> registry.Hosted(contributor, card) }
                 } else if (shown != null) {
-                    SettingsCardsView(shown.section.cards, emptyMap()) { entry, value -> registry.change(shown.contributor, entry, value) }
+                    SettingsCardsView(shown.section.cards, emptyMap(), { entry, value -> registry.change(shown.contributor, entry, value) }) {
+                        registry.Hosted(shown.contributor, it)
+                    }
                 }
             }
         }

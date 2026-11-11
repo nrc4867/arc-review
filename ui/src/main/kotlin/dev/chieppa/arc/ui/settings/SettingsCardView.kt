@@ -19,11 +19,18 @@ import dev.chieppa.stretch.ui.Divider
 import dev.chieppa.stretch.ui.Label
 
 /**
- * A settings card: its icon and title over its entries, each with the parts of its label a search marked in [matches].
- * A change to an entry goes to [onChange] with the entry's id. The card is tagged with its id.
+ * A settings card: its icon, title and note over its entries, each with the parts of its label a search marked in
+ * [matches], or over what [hosted] draws for a hosted card. A change to an entry goes to [onChange] with the entry's
+ * id. The card is tagged with its id.
  */
 @Composable
-fun SettingsCardView(card: SettingsCard, matches: Map<String, List<IntRange>>, onChange: (String, SettingsValue) -> Unit, modifier: Modifier = Modifier) {
+fun SettingsCardView(
+    card: SettingsCard,
+    matches: Map<String, List<IntRange>>,
+    onChange: (String, SettingsValue) -> Unit,
+    modifier: Modifier = Modifier,
+    hosted: @Composable (SettingsCard) -> Unit = {},
+) {
     val c = Stretch.colors
     Card(modifier.fillMaxWidth().testTag(card.id)) {
         Row(
@@ -33,6 +40,11 @@ fun SettingsCardView(card: SettingsCard, matches: Map<String, List<IntRange>>, o
         ) {
             SettingsIcons.of(card.icon)?.let { Icon(it, c.inkControl) }
             Label(card.title, Stretch.type.drawerTitle, c.inkStrong, Modifier.weight(1f))
+            card.note?.let { Label(it, Stretch.type.bodySm, c.inkSubtle) }
+        }
+        if (card.hosted) {
+            Divider()
+            hosted(card)
         }
         for (entry in card.entries) {
             Divider()

@@ -50,7 +50,7 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
         PaneGrid(
             layout = workbench.paneLayout,
             onChange = { workbench.paneLayout = it },
-            item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf, conversationOf, runsOf, runOf, settingsTitle) } ?: paneTab(id, workbench.state.pane(id)) },
+            item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf, conversationOf, runsOf, runOf, settingsTitle, workbench.plugins::tabOf) } ?: paneTab(id, workbench.state.pane(id)) },
             modifier = Modifier.fillMaxSize().onGloballyPositioned { coordinates ->
                 val topLeft = coordinates.positionInWindow()
                 val size = Offset(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())

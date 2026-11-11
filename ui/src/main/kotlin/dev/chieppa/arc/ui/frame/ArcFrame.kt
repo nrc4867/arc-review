@@ -11,6 +11,9 @@ import dev.chieppa.arc.ui.actions.actionText
 import dev.chieppa.arc.ui.conversation.ConversationEffects
 import dev.chieppa.arc.ui.conversation.OpenStagedWhenFilled
 import dev.chieppa.arc.ui.drawers.arcDrawerSpecs
+import dev.chieppa.arc.ui.plugins.PluginDrawers
+import dev.chieppa.arc.ui.plugins.PluginEvents
+import dev.chieppa.arc.ui.plugins.PluginIconNames
 import dev.chieppa.arc.ui.switcher.Switcher
 import dev.chieppa.arc.ui.runs.RunOverlays
 import dev.chieppa.arc.ui.sources.SourceStrip
@@ -36,15 +39,17 @@ fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
     LaunchedEffect(workbench, workbench.gitHubRepos) { workbench.runs.watch.followed = workbench.gitHubRepos.values.toSet() }
     OpenStagedWhenFilled(workbench)
     ConversationEffects(workbench)
+    PluginEvents(workbench)
     ArcTheme {
-        CompositionLocalProvider(LocalActionText provides actionText()) {
+        CompositionLocalProvider(LocalActionText provides actionText(workbench.plugins.actions::label)) {
             StretchApp(
                 layout = workbench.frameLayout,
                 onLayoutChange = { workbench.frameLayout = it },
-                drawers = arcDrawerSpecs(workbench),
+                drawers = arcDrawerSpecs(workbench) + PluginDrawers.specs(workbench),
                 onResetLayout = workbench::resetLayout,
                 modifier = modifier.actionKeys(workbench.keymap, null),
                 statusBar = { ArcStatusBar(workbench) },
+                placeNewDrawer = PluginDrawers::place,
                 topStrip = { SourceStrip(workbench) },
                 topBar = { ArcTopBar(workbench) },
             ) {
@@ -55,7 +60,7 @@ fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
                 actions = workbench.registry.available(null).filter { it.id != ArcActionIds.COMMANDS },
                 keymap = workbench.keymap,
                 onDismiss = { workbench.paletteOpen = false },
-                icons = ::actionIcon,
+                icons = { actionIcon(it) ?: PluginIconNames.of(workbench.plugins.actions.icon(it)) },
             )
             Switcher(workbench)
             RunOverlays(workbench.runs)

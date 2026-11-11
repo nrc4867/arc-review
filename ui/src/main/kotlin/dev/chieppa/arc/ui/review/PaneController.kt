@@ -136,6 +136,14 @@ class PaneController(private val state: WorkspaceState) {
         openPinnedPage({ it is Page.Settings }) { Page.Settings(it) }
     }
 
+    /**
+     * Opens plugin [plugin]'s pane kind [pane] with [props] (a JSON object) for [source], or shows its tab when one with
+     * the same props is open already.
+     */
+    fun openPluginPane(plugin: String, pane: String, props: String, source: Source?) {
+        openPinnedPage({ it is Page.Plugin && it.plugin == plugin && it.pane == pane && it.props == props }) { Page.Plugin(it, plugin, pane, props, source) }
+    }
+
     /** Makes the Settings page [page] show the section [section]. */
     fun showSettings(page: Page.Settings, section: String) {
         state.workspace = state.workspace.withPage(page.copy(section = section))

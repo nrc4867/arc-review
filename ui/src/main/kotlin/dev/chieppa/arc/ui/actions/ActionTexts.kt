@@ -139,9 +139,9 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.RESTORE_START_CARDS.value to Res.string.action_restore_start_cards,
 ) + RunActionTexts.texts + ArcDrawerSlots.all.associate { ArcActionIds.toggleDrawer(it.id).value to it.title }
 
-/** Turns an action's text key into its label, for Stretch's `LocalActionText`. */
+/** Turns an action's text key into its label, for Stretch's `LocalActionText`; keys Arc lacks are asked of [other], as for plugins' actions. */
 @Composable
-fun actionText(): (String) -> String {
+fun actionText(other: (String) -> String? = { null }): (String) -> String {
     val labels = texts.mapValues { (_, resource) -> stringResource(resource) }
-    return { key -> labels[key] ?: key }
+    return { key -> labels[key] ?: other(key) ?: key }
 }
