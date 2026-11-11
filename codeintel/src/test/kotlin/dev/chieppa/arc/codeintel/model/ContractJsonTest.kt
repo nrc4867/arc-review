@@ -21,6 +21,17 @@ class ContractJsonTest {
     }
 
     @Test
+    fun aSymbolHintRoundTripsThroughJson() {
+        val doc = HintDoc(
+            "kdoc", "Revokes every live token.", 20, 26, deprecated = "",
+            sections = listOf(HintSection(HintSectionKind.Parameters, listOf(HintEntry("the family", 22, "familyId")))),
+        )
+        val hint = SymbolHint(Answers.target("a/T.kt", 28), listOf(HintLine("fun revoke(familyId: String): Int", 28)), "TokenFamilyService", "class", doc)
+        val hover = HoverAnswer("fun revoke", Answers.byName, CodeRange.onLine(52, 19, 6), listOf(hint))
+        assertEquals(hover, json.decodeFromString<HoverAnswer>(json.encodeToString(hover)))
+    }
+
+    @Test
     fun aPluginWritesPlainJson() {
         val text = """{"markdown":"Rotates on use","origin":{"provider":"auth-plugin","precision":"Exact"}}"""
         val hover = json.decodeFromString<HoverAnswer>(text)
