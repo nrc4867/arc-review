@@ -114,6 +114,13 @@ object ArcIcons {
             stroke("M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.5 9h6l.5-9")
         }
     }
+    val Docs: ImageVector by lazy {
+        icon("docs") {
+            stroke("M3 2.5h7l3 3v8H3z")
+            stroke("M5.5 8h5M5.5 10.5h3.5")
+            stroke("M5.5 5.5h2")
+        }
+    }
     val Download: ImageVector by lazy {
         icon("download") {
             stroke("M8 2.5v8M4.5 7L8 10.5 11.5 7")

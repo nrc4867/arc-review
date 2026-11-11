@@ -3,6 +3,8 @@ package dev.chieppa.arc.index
 import dev.chieppa.arc.codeintel.model.HintSectionKind
 import dev.chieppa.arc.codeintel.model.HoverRequest
 import dev.chieppa.arc.core.source.RepoName
+import dev.chieppa.arc.index.hint.FileDocs
+import dev.chieppa.arc.index.nav.Documents
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -111,5 +113,14 @@ class HintTest {
         val hint = ws.hover("api", "a1", "src/main/kotlin/auth/TokenService.kt", "refresh").symbols.single()
         assertEquals(listOf("fun refresh(id: String)"), hint.signature.map { it.text })
         assertNull(hint.doc)
+    }
+
+    @Test
+    fun aFileListsItsDocCommentsTopToBottom() = runTest {
+        val ws = workspace(StandardTestDispatcher(testScheduler))
+        ws.index.update(ws.targets)
+        val path = "src/main/kotlin/auth/TokenFamilyService.kt"
+        val docs = FileDocs(ws.index).of(Documents.of(RepoName("api"), "a1", path), api.getValue(path))
+        assertEquals(listOf(4 to 11), docs.map { it.firstLine to it.lastLine })
     }
 }

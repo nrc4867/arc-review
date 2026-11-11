@@ -17,6 +17,9 @@ object HintSizes {
     val smallIcon = 14.dp
     val button = 22.dp
 
+    /** How wide a rendered doc comment grows, so its lines stay readable. */
+    val blockWidth = 720.dp
+
     /** How many files' changed lines the cards keep at hand. */
     const val KEPT_CHANGES = 16
 }

@@ -24,7 +24,7 @@ internal object WorkspacePersistence {
             val commit = view.commit?.let { runCatching { ObjectId(it) }.getOrNull() }
             source to SourceView(layout ?: PaneLayout(), view.expanded.toSet(), commit)
         }.toMap()
-        val paneStates = stored.paneStates.filterKeys { it in panes }.mapValues { (_, s) -> PaneUiState(s.split, s.line, s.wrap) }
+        val paneStates = stored.paneStates.filterKeys { it in panes }.mapValues { (_, s) -> PaneUiState(s.split, s.line, s.wrap, s.docs) }
         return WorkspaceState(workspace, repos, views, paneStates)
     }
 
@@ -41,7 +41,7 @@ internal object WorkspacePersistence {
         }
         val paneStates = state.workspace.panes.associate { pane ->
             val id = pane.id.value
-            id to state.paneState(id).let { StoredPaneState(it.split, state.paneLines[id] ?: 0, it.wrap) }
+            id to state.paneState(id).let { StoredPaneState(it.split, state.paneLines[id] ?: 0, it.wrap, it.docs) }
         }
         return WorkspaceMapping.toStored(state.workspace, views, paneStates)
     }

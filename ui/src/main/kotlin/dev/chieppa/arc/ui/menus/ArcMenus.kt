@@ -15,7 +15,7 @@ object ArcMenus {
         ArcMenu(
             Res.string.menu_view,
             ArcDrawerSlots.all.map { ArcActionIds.toggleDrawer(it.id) } + null +
-                listOf(ArcActionIds.TOGGLE_FULL_FILE, ArcActionIds.TOGGLE_SPLIT, ArcActionIds.TOGGLE_WRAP, ArcActionIds.TOGGLE_PIN, ArcActionIds.CLOSE_PANE, null, ArcActionIds.RESET_LAYOUT),
+                listOf(ArcActionIds.TOGGLE_FULL_FILE, ArcActionIds.TOGGLE_SPLIT, ArcActionIds.TOGGLE_WRAP, ArcActionIds.TOGGLE_DOCS, ArcActionIds.TOGGLE_PIN, ArcActionIds.CLOSE_PANE, null, ArcActionIds.RESET_LAYOUT),
         ),
         ArcMenu(
             Res.string.menu_review,

@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.produceState
 import dev.chieppa.arc.ui.hints.PaneHintCard
+import dev.chieppa.arc.ui.hints.RenderedDocBlock
+import dev.chieppa.arc.ui.hints.rememberPaneDocs
 import dev.chieppa.arc.ui.navigation.NameSpan
 import dev.chieppa.arc.ui.navigation.NavigationPopover
 import dev.chieppa.arc.ui.navigation.NavigationSizes
@@ -74,6 +76,9 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
     }.value
     val lineDecorations = rememberDecorations(workbench, document) { line -> code.lines.getOrNull(line - 1)?.length }
     val decorations = remember(lineDecorations) { lineDecorations.map { CodeDecoration(it.range, it.style, it.tooltip) } }
+    val chosen = choice?.takeIf { it.side == LineSide.New }?.line
+    val kept = remember(changed, threadsAt, matches, chosen) { changed + threadsAt.keys + matches.map { it.line } + listOfNotNull(chosen) }
+    val docs = rememberPaneDocs(workbench, id, document, text.takeUnless { removed }, kept)
     Box(modifier) {
         CodeViewer(
             code,
@@ -93,6 +98,7 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
                 symbolAt = { at -> navigation.nameAt(document, at.line, at.column)?.let { CodeRange(it.line, it.start, it.end) } },
                 onSymbolClick = { click -> navigation.click(id, document, NameSpan(click.range.line, click.range.start, click.range.end), click.bounds) },
                 symbolCard = { at, _, card -> PaneHintCard(document, at.line, at.column, card, workbench.hints) },
+                lineBlock = { lines -> docs.at(lines.first)?.let { doc -> RenderedDocBlock(doc, document, workbench.hints) { docs.showRaw(doc) } } },
             ),
             tokens = tokens,
             matches = matches,
@@ -100,6 +106,7 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
             marks = marks,
             changeWash = workbench.preferences.changeWash,
             decorations = decorations,
+            blocks = docs.ranges,
         )
         NavigationPopover(workbench, id)
     }

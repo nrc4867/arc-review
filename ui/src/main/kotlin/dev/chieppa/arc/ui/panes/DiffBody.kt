@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.produceState
 import dev.chieppa.arc.ui.hints.PaneHintCard
+import dev.chieppa.arc.ui.hints.RenderedDocBlock
+import dev.chieppa.arc.ui.hints.rememberPaneDocs
 import dev.chieppa.arc.ui.navigation.NameSpan
 import dev.chieppa.arc.ui.navigation.NavigationPopover
 import dev.chieppa.arc.ui.navigation.NavigationSizes
@@ -29,6 +31,7 @@ import dev.chieppa.arc.ui.navigation.PaneCaret
 import dev.chieppa.arc.ui.navigation.SyntaxTokens
 import dev.chieppa.arc.ui.navigation.rememberDecorations
 import dev.chieppa.stretch.code.CodeRange
+import dev.chieppa.stretch.diff.DiffBlock
 import dev.chieppa.stretch.diff.DiffDecoration
 import dev.chieppa.stretch.diff.DiffLineRef
 import dev.chieppa.stretch.diff.DiffPosition
@@ -93,6 +96,12 @@ fun DiffBody(pane: Pane, text: PaneText, diff: FileDiff, workbench: Workbench, f
         oldDecorations.map { DiffDecoration(0, DiffSide.Old, it.range, it.style, it.tooltip) } +
             newDecorations.map { DiffDecoration(0, DiffSide.New, it.range, it.style, it.tooltip) }
     }
+    val newDocument = documents.getValue(DiffSide.New)
+    val chosen = choice?.takeIf { it.side == LineSide.New }?.line
+    val kept = remember(threads, matches, chosen) {
+        threads.filter { it.side == LineSide.New }.map { it.line }.toSet() + matches.filter { it.side == DiffSide.New }.map { it.line } + listOfNotNull(chosen)
+    }
+    val docs = rememberPaneDocs(workbench, id, newDocument, text.new, kept)
     val slots = DiffSlots(
         gutterMark = { ref -> here(ref).firstOrNull()?.let { GutterMark(it.state) } },
         lineAnnotation = { ref ->
@@ -112,6 +121,7 @@ fun DiffBody(pane: Pane, text: PaneText, diff: FileDiff, workbench: Workbench, f
             navigation.click(id, documents.getValue(click.position.side), name, click.bounds)
         },
         symbolCard = { at, _, card -> PaneHintCard(documents.getValue(at.side), at.line, at.column, card, workbench.hints) },
+        lineBlock = { block, _ -> docs.at(block.lines.first)?.let { doc -> RenderedDocBlock(doc, newDocument, workbench.hints) { docs.showRaw(doc) } } },
     )
     Box(modifier) {
         DiffViewer(
@@ -126,6 +136,7 @@ fun DiffBody(pane: Pane, text: PaneText, diff: FileDiff, workbench: Workbench, f
             marks = marks,
             changeWash = workbench.preferences.changeWash,
             decorations = decorations,
+            blocks = docs.ranges.map { DiffBlock(0, it) },
         )
         NavigationPopover(workbench, id)
     }

@@ -44,6 +44,7 @@ object ArcActionIds {
     val EXPAND_ALL = ActionId("expand-all")
     val COLLAPSE_ALL = ActionId("collapse-all")
     val TOGGLE_WRAP = ActionId("toggle-wrap")
+    val TOGGLE_DOCS = ActionId("toggle-docs")
     val OPEN_REVISIONS = ActionId("open-revisions")
     val OPEN_PULL = ActionId("open-pull")
     val ADD_PULL = ActionId("add-pull")

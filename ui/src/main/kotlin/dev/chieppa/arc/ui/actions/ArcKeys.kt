@@ -18,6 +18,7 @@ object ArcKeys {
     val OPEN_FILE: KeyChord = KeyChord.parse("Ctrl P")
     val CLOSE_PANE: KeyChord = KeyChord.parse("Ctrl W")
     val TOGGLE_WRAP: KeyChord = KeyChord.parse("Alt Z")
+    val TOGGLE_DOCS: KeyChord = KeyChord.parse("Alt D")
     val COMMENT_HERE: KeyChord = KeyChord.parse("C")
     val PUSH_REVIEW: KeyChord = KeyChord.parse("Ctrl Shift Enter")
 

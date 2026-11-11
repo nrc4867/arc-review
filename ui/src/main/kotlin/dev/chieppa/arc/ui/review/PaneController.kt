@@ -178,6 +178,11 @@ class PaneController(private val state: WorkspaceState) {
         state.setPaneState(id, state.paneState(id).copy(split = split))
     }
 
+    /** Draws doc comments in pane [id] rendered in place, or as written. */
+    fun setDocs(id: String, docs: Boolean) {
+        state.setPaneState(id, state.paneState(id).copy(docs = docs))
+    }
+
     fun setWrap(id: String, wrap: Boolean) {
         state.setPaneState(id, state.paneState(id).copy(wrap = wrap))
     }

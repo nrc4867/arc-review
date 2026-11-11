@@ -65,6 +65,10 @@ fun registerReviewActions(registry: ActionRegistry, workbench: Workbench) {
         val pane = ActionTargets.pane(workbench) ?: return@action
         workbench.panes.setWrap(pane.id.value, !workbench.wrap(pane.id.value))
     }
+    action(ArcActionIds.TOGGLE_DOCS, ArcKeys.TOGGLE_DOCS, { ActionTargets.pane(workbench) != null }) {
+        val pane = ActionTargets.pane(workbench) ?: return@action
+        workbench.panes.setDocs(pane.id.value, !state.paneState(pane.id.value).docs)
+    }
     action(ArcActionIds.TOGGLE_SPLIT, available = { workbench.panes.focused?.hasChange == true }) {
         val pane = workbench.panes.focused ?: return@action
         workbench.panes.setSplit(pane.id.value, !state.paneState(pane.id.value).split)

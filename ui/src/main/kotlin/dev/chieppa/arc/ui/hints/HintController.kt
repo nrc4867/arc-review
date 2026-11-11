@@ -2,6 +2,7 @@ package dev.chieppa.arc.ui.hints
 
 import dev.chieppa.arc.codeintel.model.CodePosition
 import dev.chieppa.arc.codeintel.model.DocumentRef
+import dev.chieppa.arc.codeintel.model.HintDoc
 import dev.chieppa.arc.codeintel.model.HoverAnswer
 import dev.chieppa.arc.codeintel.model.HoverRequest
 import dev.chieppa.arc.codeintel.model.SymbolHint
@@ -42,15 +43,21 @@ class HintController(
     /** Goes to [hint]'s definition. */
     fun open(hint: SymbolHint) = navigation.open(hint.target)
 
-    /** Follows a link in [hint]'s doc comment: a link to a symbol goes to its definition, any other opens in the browser. */
-    fun follow(link: String, hint: SymbolHint) {
+    /** The doc comments of [document], whose content is [text], read. */
+    suspend fun docs(document: DocumentRef, text: String): List<HintDoc> = withContext(dispatchers.default) { navigation.service.docs(document, text) }
+
+    /**
+     * Follows a link in a doc comment written in [near]: a link to a symbol goes to its definition, any other opens in
+     * the browser.
+     */
+    fun follow(link: String, near: DocumentRef) {
         if (!link.startsWith(SYMBOL_LINK)) {
             links.open(link)
             return
         }
         scope.launch {
             val target = withContext(dispatchers.default) {
-                navigation.service.symbolLink(link.removePrefix(SYMBOL_LINK), hint.target.location.document)
+                navigation.service.symbolLink(link.removePrefix(SYMBOL_LINK), near)
             }
             target?.let(navigation::open)
         }

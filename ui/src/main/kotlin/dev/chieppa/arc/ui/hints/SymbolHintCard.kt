@@ -40,7 +40,7 @@ fun SymbolHintCard(answer: HoverAnswer, card: SymbolCard, hints: HintController)
         HintHead(hint, changed, index, answer.symbols.size) { step -> index = (index + step).coerceIn(answer.symbols.indices) }
         hint.doc?.let { doc ->
             Divider()
-            HintDocBody(doc, changed) { link -> hints.follow(link, hint) }
+            HintDocBody(doc, changed) { link -> hints.follow(link, hint.target.location.document) }
         }
         Divider()
         HintFooter(hint, card.pinned, onPin = { card.pinned = !card.pinned }) {

@@ -62,6 +62,7 @@
     <string name="action_expand_all">Expand all</string>
     <string name="action_collapse_all">Collapse all</string>
     <string name="action_toggle_wrap">Wrap long lines</string>
+    <string name="action_toggle_docs">Rendered docs</string>
     <string name="action_open_revisions">Revision matrix</string>
     <string name="action_open_pull">Open</string>
     <string name="action_add_pull">Open without switching</string>
@@ -122,6 +123,7 @@
     <string name="pane_kind_binary">Binary</string>
     <string name="pane_repo_separator">%1$s ·</string>
     <string name="pane_wrap">Wrap long lines</string>
+    <string name="pane_docs">Rendered docs</string>
 
     <string name="find_placeholder">Find</string>
     <string name="find_match_case">Match case</string>

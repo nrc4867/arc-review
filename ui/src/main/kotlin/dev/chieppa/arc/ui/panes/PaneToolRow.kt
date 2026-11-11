@@ -28,6 +28,7 @@ import dev.chieppa.arc.design.generated.pane_source
 import dev.chieppa.arc.design.generated.pane_split
 import dev.chieppa.arc.design.generated.pane_unified
 import dev.chieppa.arc.design.generated.pane_unpin
+import dev.chieppa.arc.design.generated.pane_docs
 import dev.chieppa.arc.design.generated.pane_wrap
 import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.util.ArcSizes
@@ -90,6 +91,8 @@ fun PaneToolRow(pane: Pane, kind: FileKind?, binary: Boolean, workbench: Workben
                 }
                 val wrap = workbench.wrap(id)
                 IconButton(ArcIcons.Wrap, stringResource(Res.string.pane_wrap), { workbench.panes.setWrap(id, !wrap) }, size = StretchSizes.seg, on = wrap)
+                val docs = workbench.state.paneState(id).docs
+                IconButton(ArcIcons.Docs, stringResource(Res.string.pane_docs), { workbench.panes.setDocs(id, !docs) }, size = StretchSizes.seg, on = docs)
                 IconButton(StretchIcons.Search, stringResource(Res.string.action_find_in_file), { if (find.open) find.open = false else find.show() }, size = StretchSizes.seg, on = find.open)
             }
             IconButton(StretchIcons.Pin, stringResource(if (pane.pinned) Res.string.pane_unpin else Res.string.pane_pin), { workbench.panes.togglePin(id) }, size = StretchSizes.seg, on = pane.pinned)
