@@ -24,6 +24,12 @@ object McpConstants {
     const val TOKEN_OWNER = "server"
     const val TOKEN_KEY = "token"
 
+    /**
+     * How long a client's session lasts without a request; a client that never ends its session, as a script may not,
+     * stops counting as connected then, and one that comes back after it starts a new session.
+     */
+    const val SESSION_IDLE_MINUTES = 10
+
     /** How long a stopping server lets requests in flight finish, and how long it waits in all. */
     const val STOP_GRACE_MILLIS = 200L
     const val STOP_TIMEOUT_MILLIS = 1_000L

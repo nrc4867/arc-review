@@ -19,6 +19,7 @@ import io.modelcontextprotocol.kotlin.sdk.types.ServerCapabilities
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Arc's MCP server: the protocol through the MCP SDK's streamable HTTP transport, served by Ktor's CIO engine on
@@ -58,7 +59,11 @@ class McpHttpServer(private val tools: List<ArcTool>, private val token: String,
                 finish()
             }
         }
-        mcpStreamableHttp(path = McpConstants.PATH, allowedHosts = listOf(McpConstants.HOST, McpConstants.LOCALHOST)) { server }
+        mcpStreamableHttp(
+            path = McpConstants.PATH,
+            allowedHosts = listOf(McpConstants.HOST, McpConstants.LOCALHOST),
+            sessionIdleTimeout = McpConstants.SESSION_IDLE_MINUTES.minutes,
+        ) { server }
     }
 
     /** One protocol server for every session, so each session's tools are the same. */
