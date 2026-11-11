@@ -2,6 +2,7 @@ package dev.chieppa.arc.plugins.manager
 
 import dev.chieppa.arc.plugins.config.PluginSourceSpec
 import dev.chieppa.arc.plugins.config.PluginsConfig
+import dev.chieppa.arc.plugins.gitsource.GitSourceState
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
 import dev.chieppa.arc.plugins.manifest.Capabilities
 import dev.chieppa.arc.plugins.manifest.Capability
@@ -31,6 +32,9 @@ class PluginManager(private val services: PluginServices) {
     private val watching = mutableMapOf<PluginSourceSpec, Job>()
     private val secrets = PluginSecrets(services.secrets)
     private val checks = TypeChecks(services.scope, services.typeChecker, services.typeCheckMillis)
+    private val git = GitSources(services, services.gitSources, { setup.value }, ::save, { refresh(it) }) {
+        known.value.mapNotNull { it.found.manifest }.associateBy { it.id }
+    }
 
     val config: StateFlow<PluginsConfig> get() = setup
 
@@ -48,11 +52,27 @@ class PluginManager(private val services: PluginServices) {
     /** Each running directory plugin's type errors, by id, found after it is enabled and after each save. */
     val typeErrors: StateFlow<Map<String, TypeErrors>> get() = checks.errors
 
-    /** Reads the setup, finds every source's plugins, starts those enabled and watches the sources. */
+    /** Each git source's state, by url: when it was checked, the update waiting, whether it failed. */
+    val gitStates: StateFlow<Map<String, GitSourceState>> get() = git.states
+
+    /**
+     * Reads the setup, finds every source's plugins, starts those enabled, watches the folder sources and checks the git
+     * sources for new commits.
+     */
     fun start() {
         setup.value = services.storage.loadConfig()
         refresh()
+        git.start()
     }
+
+    /** Adds the git repo at [url] as a source at [ref] (a branch, tag or commit), pinned to the commit it names now. */
+    fun addGit(url: String, ref: String) = git.add(url, ref)
+
+    /** Moves git source [url]'s pin to the update waiting, reloading its plugins. */
+    fun acceptUpdate(url: String) = git.accept(url)
+
+    /** The folder git source [url] is cloned in. */
+    fun gitClone(url: String): Path? = git.clone(url)
 
     fun addDirectory(path: Path) {
         val spec = PluginSourceSpec.Directory(path.toAbsolutePath().normalize().toString())
@@ -63,10 +83,11 @@ class PluginManager(private val services: PluginServices) {
 
     fun removeSource(spec: PluginSourceSpec) {
         val sources = setup.value.sources - spec
-        val kept = sources.flatMap(PluginDiscovery::find).map { it.id }.toSet()
+        val kept = sources.flatMap(::find).map { it.id }.toSet()
         val gone = known.value.filter { it.found.source == spec && it.id !in kept }.map { it.id }
         save(gone.fold(setup.value.copy(sources = sources)) { config, id -> secrets.removeAll(config, id) })
         refresh()
+        if (spec is PluginSourceSpec.Git) git.remove(spec)
     }
 
     /** Whether plugins' secret settings outlast this run of Arc, kept in the system's keychain. */
@@ -114,6 +135,7 @@ class PluginManager(private val services: PluginServices) {
     fun stop() {
         watching.values.forEach(Job::cancel)
         watching.clear()
+        git.stop()
         known.value.forEach { it.instance?.stop() }
         services.shutdown()
     }
@@ -128,7 +150,7 @@ class PluginManager(private val services: PluginServices) {
     @Synchronized
     private fun refresh(reload: PluginSourceSpec? = null) {
         val config = setup.value
-        val found = config.sources.flatMap(PluginDiscovery::find).distinctBy { it.id }
+        val found = config.sources.flatMap(::find).distinctBy { it.id }
         val before = known.value.associateBy { it.id }
         val entries = found.map { plugin -> entry(plugin, before[plugin.id], config, reload) }
         (before.keys - entries.map { it.id }.toSet()).forEach {
@@ -165,6 +187,8 @@ class PluginManager(private val services: PluginServices) {
         check(plugin)
         return PluginEntry(plugin, true, instance)
     }
+
+    private fun find(source: PluginSourceSpec): List<FoundPlugin> = PluginDiscovery.find(source, git::folder)
 
     /** Type checks [plugin] when it comes from a folder the person edits. */
     private fun check(plugin: FoundPlugin) {

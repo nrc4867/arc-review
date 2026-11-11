@@ -3,6 +3,7 @@ package dev.chieppa.arc.plugins.manager
 import dev.chieppa.arc.plugins.config.PluginStorage
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
 import dev.chieppa.arc.plugins.git.GitGrep
+import dev.chieppa.arc.plugins.gitsource.GitSourceCache
 import dev.chieppa.arc.plugins.host.HostTimings
 import dev.chieppa.arc.plugins.host.WorkerLauncher
 import dev.chieppa.arc.plugins.net.HttpFetcher
@@ -19,7 +20,8 @@ import kotlinx.coroutines.CoroutineScope
  * ([storage]) with their secret settings ([secrets]), the processes they run ([consoles]), git searches ([grep]), HTTP requests ([fetcher]), the window
  * ([ui]), and the [watcher] of their folders, whose changes reload them after [reloadMillis] of quiet. [nodeVersion]
  * is the Node plugins run on, and [nodeReady] whether it is on this machine already; [typeChecker] finds a directory
- * plugin's type errors, [typeCheckMillis] after it is enabled or saved; [shutdown] ends what runs them
+ * plugin's type errors, [typeCheckMillis] after it is enabled or saved; [gitSources] keeps the git sources' clones
+ * (none: git sources are not loaded), checked for new commits every [gitCheckMillis]; [shutdown] ends what runs them
  * once every plugin has stopped.
  */
 class PluginServices(
@@ -41,9 +43,12 @@ class PluginServices(
     val secrets: SecretStore = MemorySecretStore(),
     val typeChecker: TypeChecker = TypeChecker.NONE,
     val typeCheckMillis: Long = TYPE_CHECK_MILLIS,
+    val gitSources: GitSourceCache? = null,
+    val gitCheckMillis: Long = GIT_CHECK_MILLIS,
 ) {
     private companion object {
         const val RELOAD_MILLIS = 300L
         const val TYPE_CHECK_MILLIS = 1_000L
+        const val GIT_CHECK_MILLIS = 24L * 60 * 60 * 1000
     }
 }

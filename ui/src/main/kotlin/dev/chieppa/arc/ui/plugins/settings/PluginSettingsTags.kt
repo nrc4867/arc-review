@@ -10,4 +10,7 @@ object PluginSettingsTags {
 
     /** A plugin's problem, followed by its id. */
     const val PROBLEM = "plugins.problem."
+
+    /** A git source's row, followed by its url. */
+    const val GIT_SOURCE = "plugins.git-source."
 }

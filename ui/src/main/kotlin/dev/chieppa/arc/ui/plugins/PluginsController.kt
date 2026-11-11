@@ -7,6 +7,7 @@ import dev.chieppa.arc.core.pane.Page
 import dev.chieppa.arc.core.source.SourceRefs
 import dev.chieppa.stretch.frame.TabItem
 import dev.chieppa.arc.plugins.config.PluginsConfig
+import dev.chieppa.arc.plugins.gitsource.GitSourceState
 import dev.chieppa.arc.plugins.host.PluginStatus
 import dev.chieppa.arc.plugins.manager.CapabilityGate
 import dev.chieppa.arc.plugins.manager.PluginEntry
@@ -30,9 +31,10 @@ import kotlinx.coroutines.withContext
 /**
  * The window's side of plugins: the [manager] that runs them (none where plugins are off), what each one is and
  * contributes as Compose state, its actions in the window's registry, and what plugins ask of the window: opening
- * their panes, and the person's notes.
+ * their panes, and the person's notes. [now] is the time in epoch milliseconds, which a git source's last check is
+ * shown against.
  */
-class PluginsController(private val workbench: Workbench, makeManager: (PluginUi) -> PluginManager?) {
+class PluginsController(private val workbench: Workbench, makeManager: (PluginUi) -> PluginManager?, val now: () -> Long = System::currentTimeMillis) {
     val manager: PluginManager? = makeManager(
         object : PluginUi {
             override suspend fun openPane(plugin: String, params: PanesOpenParams) {
@@ -58,6 +60,10 @@ class PluginsController(private val workbench: Workbench, makeManager: (PluginUi
     var statuses by mutableStateOf<Map<String, PluginStatus>>(emptyMap())
         private set
 
+    /** Each git source's state, by url. */
+    var gitStates by mutableStateOf<Map<String, GitSourceState>>(emptyMap())
+        private set
+
     /** Each running directory plugin's type errors, by id. */
     var typeErrors by mutableStateOf<Map<String, TypeErrors>>(emptyMap())
         private set
@@ -71,6 +77,7 @@ class PluginsController(private val workbench: Workbench, makeManager: (PluginUi
         manager.start()
         workbench.scope.launch { manager.config.collect { config = it } }
         workbench.scope.launch { manager.typeErrors.collect { typeErrors = it } }
+        workbench.scope.launch { manager.gitStates.collect { gitStates = it } }
         workbench.scope.launch {
             manager.entries.flatMapLatest { list ->
                 entries = list

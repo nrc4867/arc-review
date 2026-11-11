@@ -11,7 +11,10 @@ sealed interface PluginSourceSpec {
     @SerialName("directory")
     data class Directory(val path: String) : PluginSourceSpec
 
-    /** A git repo at [ref] (a branch, tag or commit), cloned into Arc's cache and pinned at [pinned]. Not yet loaded. */
+    /**
+     * A git repo at [ref] (a branch, tag or commit), cloned into Arc's cache and run at the commit it is [pinned] to,
+     * which moves only when the person accepts an update. Never watched: its plugins are read-only.
+     */
     @Serializable
     @SerialName("git")
     data class Git(val url: String, val ref: String, val pinned: String? = null) : PluginSourceSpec

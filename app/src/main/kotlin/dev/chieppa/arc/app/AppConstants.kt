@@ -41,6 +41,9 @@ internal object AppConstants {
     /** Each plugin's private store, as `<id>.json`. */
     const val PLUGIN_STORE_FOLDER = "plugin-store"
 
+    /** Arc's own clones of git plugin sources, one folder per url. */
+    const val PLUGIN_GIT_FOLDER = "plugin-git"
+
     /** The plugin host the plugins' Node process runs, as `host-<hash>/`, and the folder it runs in, `work`. */
     const val PLUGIN_RUNTIME_FOLDER = "plugin-runtime"
 

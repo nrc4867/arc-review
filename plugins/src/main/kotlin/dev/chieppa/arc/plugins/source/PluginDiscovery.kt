@@ -10,11 +10,14 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 
-/** Finds the plugins a source holds: one folder with a `plugin.json`, or a folder whose `plugins.json` lists several. */
+/**
+ * Finds the plugins a source holds: one folder with a `plugin.json`, or a folder whose `plugins.json` lists several. A
+ * git source's folder is its clone, which [clone] names once it is cloned and pinned.
+ */
 object PluginDiscovery {
-    fun find(source: PluginSourceSpec): List<FoundPlugin> = when (source) {
+    fun find(source: PluginSourceSpec, clone: (PluginSourceSpec.Git) -> Path? = { null }): List<FoundPlugin> = when (source) {
         is PluginSourceSpec.Directory -> directory(source, Path.of(source.path))
-        is PluginSourceSpec.Git -> emptyList()
+        is PluginSourceSpec.Git -> clone(source)?.let { directory(source, it) }.orEmpty()
     }
 
     /** The folder [plugin]'s source reads from: the source's folder, or the plugin's own when it lies outside it. */

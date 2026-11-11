@@ -905,7 +905,7 @@
     <string name="settings_section_plugins">Plugins</string>
     <string name="plugins_sources">Plugin sources</string>
     <string name="plugins_add_source">Add source</string>
-    <string name="plugins_source_placeholder">Folder of a plugin, or of a plugins.json</string>
+    <string name="plugins_source_placeholder">Folder of a plugin or a plugins.json, or a git url#ref</string>
     <string name="plugins_source_directory">Directory · watching</string>
     <string name="plugins_source_git">Git · %1$s</string>
     <plurals name="plugins_source_count">
@@ -913,6 +913,15 @@
         <item quantity="other">%1$s · %2$d plugins</item>
     </plurals>
     <string name="plugins_remove_source">Remove source</string>
+    <string name="plugins_source_pinned">pinned %1$s</string>
+    <string name="plugins_source_checked_today">checked today %1$s</string>
+    <string name="plugins_source_checked">checked %1$s</string>
+    <string name="plugins_source_cloning">cloning</string>
+    <string name="plugins_source_unreadable">could not be read</string>
+    <string name="plugins_update_asks">%1$s asks for %2$s</string>
+    <string name="plugins_update_ready">%1$s ready</string>
+    <string name="plugins_review_update">Review update</string>
+    <string name="plugins_accept_update">Accept update</string>
     <string name="plugins_card">Plugins</string>
     <string name="plugins_node_download">Node %1$s LTS · downloaded on first use</string>
     <string name="plugins_node">Node %1$s LTS</string>

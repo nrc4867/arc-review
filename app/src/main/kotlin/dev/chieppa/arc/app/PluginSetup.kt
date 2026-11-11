@@ -4,6 +4,7 @@ import dev.chieppa.arc.plugins.command.ProcessCommandRunner
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
 import dev.chieppa.arc.plugins.console.ProcessConsoleLauncher
 import dev.chieppa.arc.plugins.git.GitGrep
+import dev.chieppa.arc.plugins.gitsource.GitSourceCache
 import dev.chieppa.arc.plugins.host.NodeHost
 import dev.chieppa.arc.plugins.host.PluginHostScript
 import dev.chieppa.arc.plugins.host.SystemProcessLauncher
@@ -47,6 +48,7 @@ internal object PluginSetup {
             shutdown = host::close,
             secrets = SecretStores.system(),
             typeChecker = NodeTypeChecker(launch::checkSpec),
+            gitSources = GitSourceCache(dataDir.resolve(AppConstants.PLUGIN_GIT_FOLDER)),
         )
         return PluginManager(services)
     }

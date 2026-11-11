@@ -6,18 +6,6 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.runtime.Composable
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.plugins_asks
-import dev.chieppa.arc.design.generated.plugins_capability_actions
-import dev.chieppa.arc.design.generated.plugins_capability_comments_draft
-import dev.chieppa.arc.design.generated.plugins_capability_console
-import dev.chieppa.arc.design.generated.plugins_capability_git
-import dev.chieppa.arc.design.generated.plugins_capability_mcp
-import dev.chieppa.arc.design.generated.plugins_capability_network
-import dev.chieppa.arc.design.generated.plugins_capability_notes_read
-import dev.chieppa.arc.design.generated.plugins_capability_notes_write
-import dev.chieppa.arc.design.generated.plugins_capability_panels
-import dev.chieppa.arc.design.generated.plugins_capability_panes
-import dev.chieppa.arc.design.generated.plugins_capability_read
-import dev.chieppa.arc.design.generated.plugins_capability_write
 import dev.chieppa.arc.design.generated.plugins_risk_fetches_into_files
 import dev.chieppa.arc.design.generated.plugins_risk_reads_and_sends
 import dev.chieppa.arc.design.generated.plugins_risk_runs_programs
@@ -43,7 +31,7 @@ fun PluginCapabilityChips(capabilities: Capabilities, asks: List<Capability>, fl
     val risks = if (flagged) CapabilityRisk.of(capabilities) else emptyList()
     FlowRow(horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space4), verticalArrangement = Arrangement.spacedBy(StretchSpacing.space4)) {
         all.forEach { capability ->
-            val label = labelOf(capability)
+            val label = capabilityLabel(capability)
             val risk = risks.firstOrNull { capability in it.capabilities }
             val asked = flagged && capability in asks
             val description = when {
@@ -61,20 +49,4 @@ private fun riskOf(kind: RiskKind, label: String): String = when (kind) {
     RiskKind.ReadsAndSends -> stringResource(Res.string.plugins_risk_reads_and_sends, label)
     RiskKind.FetchesIntoFiles -> stringResource(Res.string.plugins_risk_fetches_into_files, label)
     RiskKind.RunsPrograms -> stringResource(Res.string.plugins_risk_runs_programs, label)
-}
-
-@Composable
-private fun labelOf(capability: Capability): String = when (capability) {
-    Capability.Panels -> stringResource(Res.string.plugins_capability_panels)
-    Capability.Panes -> stringResource(Res.string.plugins_capability_panes)
-    Capability.Actions -> stringResource(Res.string.plugins_capability_actions)
-    Capability.Console -> stringResource(Res.string.plugins_capability_console)
-    Capability.Git -> stringResource(Res.string.plugins_capability_git)
-    Capability.ReadNotes -> stringResource(Res.string.plugins_capability_notes_read)
-    Capability.WriteNotes -> stringResource(Res.string.plugins_capability_notes_write)
-    Capability.DraftComments -> stringResource(Res.string.plugins_capability_comments_draft)
-    is Capability.ReadFiles -> stringResource(Res.string.plugins_capability_read, capability.path)
-    is Capability.WriteFiles -> stringResource(Res.string.plugins_capability_write, capability.path)
-    is Capability.Network -> stringResource(Res.string.plugins_capability_network, capability.host)
-    is Capability.Mcp -> stringResource(Res.string.plugins_capability_mcp, capability.role)
 }
