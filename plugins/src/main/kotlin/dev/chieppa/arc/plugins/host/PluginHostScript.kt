@@ -19,8 +19,7 @@ class PluginHostScript(private val folder: Path) {
 
     /** The host's files, written first if needed. Throws [IOException] when this build has no host. */
     suspend fun files(): HostFiles = written ?: withContext(Dispatchers.IO) {
-        val index = resource(INDEX).toString(Charsets.UTF_8).lines().filter { it.isNotBlank() }
-        val contents = (index + INDEX).associateWith(::resource)
+        val contents = (HostResources.names() + HostResources.INDEX_FILE).associateWith(HostResources::read)
         val digest = MessageDigest.getInstance(SHA_256)
         contents.values.forEach(digest::update)
         val hash = digest.digest().take(HASH_BYTES).joinToString("") { "%02x".format(it) }
@@ -43,14 +42,8 @@ class PluginHostScript(private val folder: Path) {
         HostFiles(target, target.resolve(SCRIPT)).also { written = it }
     }
 
-    private fun resource(name: String): ByteArray =
-        PluginHostScript::class.java.getResourceAsStream("$RESOURCES/$name")?.use { it.readAllBytes() } ?: throw IOException("$MISSING $name")
-
     private companion object {
-        const val RESOURCES = "/dev/chieppa/arc/plugins/host"
         const val SCRIPT = "host.js"
-        const val INDEX = "files.txt"
-        const val MISSING = "This build of Arc has no plugin host file"
         const val SHA_256 = "SHA-256"
         const val HASH_BYTES = 8
         const val PREFIX = "host-"

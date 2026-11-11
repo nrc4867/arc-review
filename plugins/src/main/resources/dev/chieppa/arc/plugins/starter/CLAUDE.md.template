@@ -1,0 +1,54 @@
+# {{name}}
+
+An Arc plugin: TypeScript and JSX that Arc runs in a worker of its own Node process and draws with its own native
+components. Arc made this folder with `arc-review plugin new` (or Settings › Plugins › New plugin) and watches it: every
+save reloads the plugin in the running Arc, with no build step.
+
+## Files
+
+| Path | What |
+| --- | --- |
+| `plugin.json` | The manifest: id `{{id}}`, entry `src/index.tsx`, plugin API version {{apiVersion}}, and the capabilities it declares. |
+| `src/index.tsx` | The entry: its default export is `definePlugin({ ... })`. |
+| `tsconfig.json` | Points `@review/plugin` at `arc/types`, so editors and `tsc` check against the API of the Arc that made this folder. |
+| `arc/reference.md` | The plugin API reference: manifest keys and capabilities, definePlugin, every component's props, the `app` object, events, data types, icon names. Read it first. |
+| `arc/types/` | The SDK's types (`sdk/`), the generated API types (`generated/arc.d.ts`) and React's types as far as plugins use them (`shims/`). |
+
+`arc/` is generated from the Arc that made this folder; do not edit it. Everything in this folder may be committed.
+
+## Writing the plugin
+
+- Import components and `definePlugin` from `@review/plugin`; there is no DOM, HTML or CSS. Lay out with `Column`, `Row`,
+  `Split` and `Scroll`, and use the props the reference lists.
+- React hooks (`useState`, `useEffect`, `useMemo`, ...) work in panels, panes and settings pages. `app.useQuery` loads data
+  and reloads it when the active source changes.
+- A component that takes the app object types it as `App` (or `App<Settings>` for typed settings).
+- Everything real goes through `app`: files, HTTP, processes, git, notes, panes, settings and the store. Each needs its
+  capability in `plugin.json`; Arc refuses a call the manifest does not declare. Node's process, network, worker and
+  child-process modules cannot be loaded.
+- A capability added to `plugin.json` keeps the plugin off until the person enables it again in Settings › Plugins, and
+  only the person enables a plugin. Ask them to.
+- Nothing a plugin does can push, stage or publish, or mark files reviewed.
+
+## The development loop with Arc's MCP server
+
+Arc serves development tools over MCP on 127.0.0.1 while the person has switched the server on (Settings › MCP server).
+Settings shows the exact `claude mcp add ...` command to connect, with Arc's token in it; the person runs it once.
+Never write that token into this folder.
+
+The tools reach only directory plugins the person has enabled:
+
+| Tool | Use |
+| --- | --- |
+| `plugins_list` | Every directory plugin with its state (enabled, running, failed, waiting for approval), its problems and log size. |
+| `plugin_type_check` | Type checks the plugin and gives every error with file, line, column and message. |
+| `plugin_reload` | Starts the plugin again from its files and says how it stands; saves reload it too. |
+| `plugin_log` | The last lines it logged (`app.log`, `console.log`) and its crash output. |
+| `plugin_view_tree` | The component tree a panel or pane of it draws now, as indented text. |
+| `plugin_view_screenshot` | A PNG of a panel or pane of it as the window draws it. |
+| `plugin_run_action` | Runs one of its actions, optionally on a source, as the palette would. |
+| `plugin_fire_event` | Sends it an event such as `source.opened`, as if it happened. |
+
+A good loop: edit, `plugin_type_check` until it is clean, `plugin_reload`, then check the result with `plugin_view_tree`
+or `plugin_view_screenshot`, drive it with `plugin_run_action` or `plugin_fire_event`, and read `plugin_log`. A panel's
+tree and picture need its drawer open in Arc's window; `plugin_view_tree` and `plugin_view_screenshot` open it when asked.

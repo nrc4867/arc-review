@@ -1,0 +1,39 @@
+import { Button, Column, Row, Text, definePlugin, type App } from "@review/plugin";
+import { useState } from "react";
+
+/** The panel: the source in focus, and how often its button was pressed. */
+function Hello({ app }: { app: App }) {
+    const [presses, setPresses] = useState(0);
+    const source = app.activeSource;
+    return (
+        <Column gap={8} padding={8}>
+            <Text tone="strong">{source ? source.ref : "No source open"}</Text>
+            <Row gap={8}>
+                <Text grow tone="muted">{`Pressed ${presses} times`}</Text>
+                <Button
+                    label="Press"
+                    icon="play"
+                    onClick={() => {
+                        setPresses(presses + 1);
+                        app.log("pressed", presses + 1);
+                    }}
+                />
+            </Row>
+        </Column>
+    );
+}
+
+export default definePlugin({
+    actions: [
+        {
+            id: "hello",
+            label: "{{name}}: say hello",
+            icon: "play",
+            run: (app, context) => app.log("hello from", context.source?.ref ?? "no source"),
+        },
+    ],
+    panels: [{ id: "panel", title: "{{name}}", icon: "plugin", render: (app) => <Hello app={app} /> }],
+    on: {
+        "source.opened": (app, event) => app.log("opened", event.source?.ref),
+    },
+});

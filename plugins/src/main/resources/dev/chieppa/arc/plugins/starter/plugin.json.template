@@ -1,0 +1,13 @@
+{
+  "id": "{{id}}",
+  "name": "{{name}}",
+  "version": "0.1.0",
+  "apiVersion": {{apiVersion}},
+  "entry": "src/index.tsx",
+  "icon": "plugin",
+  "description": "A panel and an action, from Arc's starter.",
+  "capabilities": {
+    "panels": true,
+    "actions": true
+  }
+}

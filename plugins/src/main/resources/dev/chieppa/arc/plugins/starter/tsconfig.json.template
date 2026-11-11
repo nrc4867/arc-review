@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "preserve",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": [],
+    "paths": { "@review/plugin": ["./arc/types/sdk/index.ts"] }
+  },
+  "include": ["src", "arc/types/shims"]
+}
