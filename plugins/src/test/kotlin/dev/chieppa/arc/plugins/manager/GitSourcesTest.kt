@@ -104,6 +104,18 @@ class GitSourcesTest {
     }
 
     @Test
+    fun aPinnedSourceWithNoCloneHereIsClonedAtItsPin() = runTest {
+        val first = remote.commit(mapOf("plugin.json" to remote.manifest("0.4.2", """{"panels":true}"""), "src/index.tsx" to "// one"))
+        remote.commit(mapOf("plugin.json" to remote.manifest("0.5.0", """{"panels":true}""")))
+        storage.saveConfig(storage.loadConfig().copy(sources = listOf(PluginSourceSpec.Git(remote.url, "main", first))))
+        val manager = manager(FakePlugin(backgroundScope))
+        val entry = manager.entries.first { it.isNotEmpty() }.single()
+        assertEquals("0.4.2", entry.found.manifest?.version)
+        assertEquals("0.5.0", manager.gitStates.first { it[remote.url]?.update != null }.getValue(remote.url).update?.version)
+        assertEquals(first, pinnedOf(manager))
+    }
+
+    @Test
     fun removingASourceForgetsItsClone() = runTest {
         remote.commit(mapOf("plugin.json" to remote.manifest("0.4.2"), "src/index.tsx" to "// one"))
         val manager = manager(FakePlugin(backgroundScope))

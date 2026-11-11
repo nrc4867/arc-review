@@ -97,9 +97,13 @@ internal class GitSources(
     private suspend fun check(url: String) {
         val cache = cache ?: return
         guarded(url) { spec ->
-            cache.fetch(spec.url)
-            val latest = cache.resolve(spec) ?: throw IOException("$NO_REF ${spec.ref}")
+            val cloned = cache.fetch(spec.url)
             val pinned = spec.pinned
+            if (cloned && pinned != null) {
+                cache.checkOut(spec.url, pinned)
+                refresh(spec)
+            }
+            val latest = cache.resolve(spec) ?: throw IOException("$NO_REF ${spec.ref}")
             if (pinned == null) {
                 cache.checkOut(spec.url, latest)
                 refresh(replace(spec, spec.copy(pinned = latest)))

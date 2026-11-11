@@ -30,12 +30,12 @@ class GitSourceCache(private val root: Path, private val git: GitRunner = GitRun
     /** The folder [spec]'s plugins run from: its clone, once it is pinned and cloned. */
     fun checkout(spec: PluginSourceSpec.Git): Path? = folder(spec.url).takeIf { spec.pinned != null && Files.isDirectory(it.resolve(GIT_DIR)) }
 
-    /** Clones [url] when it is not cloned yet, else fetches its branches and tags. */
-    suspend fun fetch(url: String) {
+    /** Clones [url] when it is not cloned yet, else fetches its branches and tags; true when it cloned it. */
+    suspend fun fetch(url: String): Boolean {
         val folder = folder(url)
         if (Files.isDirectory(folder.resolve(GIT_DIR))) {
             git.run(folder, listOf("fetch", "--quiet", "--force", "--tags", "--prune", ORIGIN))
-            return
+            return false
         }
         withContext(Dispatchers.IO) { Files.createDirectories(root) }
         if (Files.exists(folder)) folder.toFile().deleteRecursively()
@@ -45,6 +45,7 @@ class GitSourceCache(private val root: Path, private val git: GitRunner = GitRun
             folder.toFile().deleteRecursively()
             throw e
         }
+        return true
     }
 
     /** The commit [spec]'s ref names now, as last fetched: a branch, a tag or a commit; null when it names none. */
