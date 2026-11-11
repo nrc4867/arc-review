@@ -21,6 +21,7 @@ export interface SourceInfo {
     readonly kind: string;
     readonly repo: RepoInfo;
     readonly worktree?: string;
+    readonly head?: string;
 }
 
 export interface FileInfo {

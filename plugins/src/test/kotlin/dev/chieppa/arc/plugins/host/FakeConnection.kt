@@ -9,6 +9,9 @@ import kotlinx.coroutines.channels.ReceiveChannel
 /** A plugin process played by a test: what Arc sends lands in [sent], and the test writes lines and ends it. */
 class FakeConnection : PluginConnection {
     val sent = Channel<Envelope>(Channel.UNLIMITED)
+
+    /** Every line Arc sent, envelope or not. */
+    val raw = mutableListOf<String>()
     private val out = Channel<String>(Channel.UNLIMITED)
     private val err = Channel<String>(Channel.UNLIMITED)
     private val exit = CompletableDeferred<Int>()
@@ -19,7 +22,8 @@ class FakeConnection : PluginConnection {
     override val logs: ReceiveChannel<String> get() = err
 
     override suspend fun send(line: String) {
-        sent.send(requireNotNull(ProtocolJson.decode(line)))
+        raw += line
+        ProtocolJson.decode(line)?.let { sent.send(it) }
     }
 
     override suspend fun awaitExit(): Int = exit.await()
