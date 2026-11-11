@@ -2,6 +2,8 @@ package dev.chieppa.arc.ui.plugins.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -43,10 +45,11 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * A git source's row, as board 9 draws it: its repo as a place, then its ref, the commit it is pinned to, when it was
- * last checked and how many plugins it holds. An update waiting shows as a chip, a warning one naming what it asks for
- * beyond what was approved, with a button to review its commits in Arc and one to accept it. A source that could not
+ * last checked and how many plugins it holds. An update waiting shows under them as a chip, a warning one naming what
+ * it asks for beyond what was approved, with a button to review its commits in Arc and one to accept it. A source that could not
  * be cloned or checked has its line highlighted.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun GitSourceRow(
     source: PluginSourceSpec.Git,
@@ -64,15 +67,22 @@ fun GitSourceRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(ArcIcons.Repo, c.inkControl)
-        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(StretchSpacing.space2)) {
+        Column(Modifier.weight(1f).padding(vertical = StretchSpacing.space8), verticalArrangement = Arrangement.spacedBy(StretchSpacing.space2)) {
             Label(GitSourceLabels.place(source.url), Stretch.type.valueSm.copy(fontWeight = FontWeight.SemiBold), c.inkStrong)
             val failed = state?.failed == true
             Label(lineOf(source, state, plugins, now), Stretch.type.bodySm, if (failed) c.errorInk else c.inkSubtle)
-        }
-        state?.update?.let { update ->
-            UpdateChip(update)
-            Button(stringResource(Res.string.plugins_review_update), { onReview(update) }, icon = StretchIcons.Eye)
-            Button(stringResource(Res.string.plugins_accept_update), onAccept, kind = ButtonKind.Quiet, icon = StretchIcons.Check, enabled = state.busy.not())
+            state?.update?.let { update ->
+                FlowRow(
+                    Modifier.padding(top = StretchSpacing.space6),
+                    horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8),
+                    verticalArrangement = Arrangement.spacedBy(StretchSpacing.space6),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    UpdateChip(update)
+                    Button(stringResource(Res.string.plugins_review_update), { onReview(update) }, icon = StretchIcons.Eye)
+                    Button(stringResource(Res.string.plugins_accept_update), onAccept, kind = ButtonKind.Quiet, icon = StretchIcons.Check, enabled = state.busy.not())
+                }
+            }
         }
         IconButton(StretchIcons.Close, stringResource(Res.string.plugins_remove_source), onRemove)
     }
