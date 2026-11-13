@@ -1,4 +1,4 @@
-package dev.chieppa.arc.plugins.runtime
+package dev.chieppa.arc.tools
 
 /**
  * One pinned archive of a tool: where it is, the SHA-256 it must have, and the [program] inside it, a path relative to

@@ -16,8 +16,8 @@ import dev.chieppa.arc.plugins.protocol.CallContext
 import dev.chieppa.arc.plugins.protocol.ViewKind
 import dev.chieppa.arc.plugins.runtime.NodeLaunch
 import dev.chieppa.arc.plugins.runtime.PluginTools
-import dev.chieppa.arc.plugins.runtime.ToolInstaller
-import dev.chieppa.arc.plugins.runtime.ToolPins
+import dev.chieppa.arc.tools.ToolInstaller
+import dev.chieppa.arc.tools.ToolPins
 import dev.chieppa.arc.plugins.starter.PluginStarter
 import dev.chieppa.arc.plugins.starter.StarterFiles
 import dev.chieppa.arc.plugins.typecheck.NodeTypeChecker
@@ -57,7 +57,7 @@ class StarterNodeTest {
 
     private fun launch(): NodeLaunch {
         val node = Path.of(System.getProperty("arc.plugins.node"))
-        val tools = PluginTools(ToolInstaller(dir.resolve("runtimes"), { _, _, _ -> throw IOException("offline") }), ToolPins(Properties()), ProcessCommandRunner, node)
+        val tools = PluginTools(ToolInstaller(dir.resolve("runtimes"), { _, _, _, _ -> throw IOException("offline") }), ToolPins(Properties()), ProcessCommandRunner, node)
         return NodeLaunch(tools, PluginHostScript(dir.resolve("runtime"))::files, dir.resolve("work"))
     }
 

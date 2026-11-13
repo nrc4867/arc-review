@@ -1,6 +1,9 @@
 package dev.chieppa.arc.plugins.runtime
 
 import dev.chieppa.arc.plugins.command.CommandRunner
+import dev.chieppa.arc.tools.HostPlatform
+import dev.chieppa.arc.tools.ToolInstaller
+import dev.chieppa.arc.tools.ToolPins
 import java.io.IOException
 import java.nio.file.Path
 
@@ -22,7 +25,7 @@ class PluginTools(
     suspend fun node(): NodeProgram {
         node?.let { return it }
         val found = nodeOverride?.let { NodeProgram(it, versionOf(it)) } ?: run {
-            val pin = pins.pin(ToolPins.NODE) ?: throw IOException("$NO_PIN ${ToolPins.NODE} ${HostPlatform.current}")
+            val pin = pins.pin(NODE) ?: throw IOException("$NO_PIN ${NODE} ${HostPlatform.current}")
             NodeProgram(installer.install(pin), major(pin.version))
         }
         if (found.major < MIN_MAJOR) throw IOException("$TOO_OLD $MIN_MAJOR: ${found.path}")
@@ -30,10 +33,10 @@ class PluginTools(
     }
 
     /** Whether the pinned Node still has to be downloaded. */
-    fun needsDownload(): Boolean = nodeOverride == null && pins.pin(ToolPins.NODE)?.let { !installer.installed(it) } ?: false
+    fun needsDownload(): Boolean = nodeOverride == null && pins.pin(NODE)?.let { !installer.installed(it) } ?: false
 
     /** The pinned Node's version. */
-    val pinnedNode: String? get() = pins.version(ToolPins.NODE)
+    val pinnedNode: String? get() = pins.version(NODE)
 
     private suspend fun versionOf(program: Path): Int {
         val result = runner.run(listOf(program.toString(), VERSION_FLAG), program.parent ?: Path.of("."))
@@ -43,11 +46,18 @@ class PluginTools(
     companion object {
         const val NODE_PROPERTY = "arc.plugins.node"
 
+        /** Node's name in `tools.properties`. */
+        const val NODE = "node"
+        private const val PINS = "/dev/chieppa/arc/plugins/runtime/tools.properties"
+
         /** The first Node whose permission model covers the network. */
         const val MIN_MAJOR = 25
         private const val VERSION_FLAG = "--version"
         private const val NO_PIN = "Nothing pinned for"
         private const val TOO_OLD = "Plugins need Node"
+
+        /** The pins Arc ships with for plugins. */
+        fun bundledPins(): ToolPins = ToolPins.resource(PluginTools::class.java, PINS)
 
         /** The major version in `v26.13.0` or `26.13.0`; 0 when there is none. */
         fun major(version: String): Int = version.removePrefix("v").substringBefore('.').toIntOrNull() ?: 0

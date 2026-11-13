@@ -11,11 +11,10 @@ import dev.chieppa.arc.plugins.host.SystemProcessLauncher
 import dev.chieppa.arc.plugins.manager.PluginManager
 import dev.chieppa.arc.plugins.manager.PluginServices
 import dev.chieppa.arc.plugins.manager.PluginUi
-import dev.chieppa.arc.plugins.runtime.HttpDownloader
 import dev.chieppa.arc.plugins.runtime.NodeLaunch
 import dev.chieppa.arc.plugins.runtime.PluginTools
-import dev.chieppa.arc.plugins.runtime.ToolInstaller
-import dev.chieppa.arc.plugins.runtime.ToolPins
+import dev.chieppa.arc.tools.HttpDownloader
+import dev.chieppa.arc.tools.ToolInstaller
 import dev.chieppa.arc.plugins.secrets.SecretStores
 import dev.chieppa.arc.plugins.typecheck.NodeTypeChecker
 import dev.chieppa.arc.plugins.source.NioDirectoryWatcher
@@ -30,7 +29,7 @@ import java.nio.file.Path
  */
 internal object PluginSetup {
     fun manager(dataDir: Path, scope: CoroutineScope, ui: PluginUi): PluginManager {
-        val tools = PluginTools(ToolInstaller(dataDir.resolve(AppConstants.RUNTIMES_FOLDER), HttpDownloader), ToolPins.bundled(), ProcessCommandRunner)
+        val tools = PluginTools(ToolInstaller(dataDir.resolve(AppConstants.RUNTIMES_FOLDER), HttpDownloader), PluginTools.bundledPins(), ProcessCommandRunner)
         val runtime = dataDir.resolve(AppConstants.PLUGIN_RUNTIME_FOLDER)
         val launch = NodeLaunch(tools, PluginHostScript(runtime)::files, runtime.resolve(AppConstants.PLUGIN_WORK_FOLDER))
         val processes = SystemProcessLauncher(scope)

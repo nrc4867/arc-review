@@ -1,6 +1,6 @@
-package dev.chieppa.arc.plugins.runtime
+package dev.chieppa.arc.tools
 
-/** The machine Arc runs on, named as `tools.properties` names hosts: `windows-x64`, `macos-aarch64`, `macos-x64`, `linux-x64`. */
+/** The machine Arc runs on, named as pin files name hosts: `windows-x64`, `macos-aarch64`, `macos-x64`, `linux-x64`. */
 object HostPlatform {
     private val os = System.getProperty("os.name").lowercase()
     private val arm = System.getProperty("os.arch").lowercase().let { it == "aarch64" || it == "arm64" }

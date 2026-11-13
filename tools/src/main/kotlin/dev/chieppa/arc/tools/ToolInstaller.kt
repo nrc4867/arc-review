@@ -1,4 +1,4 @@
-package dev.chieppa.arc.plugins.runtime
+package dev.chieppa.arc.tools
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -17,16 +17,16 @@ import java.nio.file.StandardCopyOption
 class ToolInstaller(private val root: Path, private val downloader: Downloader) {
     private val lock = Mutex()
 
-    /** The program [pin] names, installed first if needed. Throws [IOException] when it cannot be. */
-    suspend fun install(pin: ToolPin): Path = lock.withLock {
-        val home = root.resolve(pin.folderName)
-        val program = home.resolve(pin.program)
+    /** The program [pin] names, installed first if needed, the download's progress going to [progress]. Throws [IOException] when it cannot be. */
+    suspend fun install(pin: ToolPin, progress: DownloadProgress = DownloadProgress.None): Path = lock.withLock {
+        val home = home(pin)
+        val program = program(pin)
         if (Files.isRegularFile(program)) return program
         withContext(Dispatchers.IO) { Files.createDirectories(root) }
         val work = withContext(Dispatchers.IO) { Files.createTempDirectory(root, WORK_PREFIX) }
         try {
             val archive = work.resolve(pin.url.substringAfterLast('/'))
-            downloader.download(pin.url, pin.sha256, archive)
+            downloader.download(pin.url, pin.sha256, archive, progress)
             withContext(Dispatchers.IO) {
                 val unpacked = work.resolve(UNPACKED)
                 ArchiveUnpacker.unpack(archive, pin.isZip, unpacked)
@@ -40,7 +40,13 @@ class ToolInstaller(private val root: Path, private val downloader: Downloader) 
     }
 
     /** Whether [pin] is installed already. */
-    fun installed(pin: ToolPin): Boolean = Files.isRegularFile(root.resolve(pin.folderName).resolve(pin.program))
+    fun installed(pin: ToolPin): Boolean = Files.isRegularFile(program(pin))
+
+    /** The folder [pin] installs into. */
+    fun home(pin: ToolPin): Path = root.resolve(pin.folderName)
+
+    /** Where [pin]'s program is once installed. */
+    fun program(pin: ToolPin): Path = home(pin).resolve(pin.program)
 
     private companion object {
         const val WORK_PREFIX = ".install-"

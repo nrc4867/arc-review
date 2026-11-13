@@ -1,10 +1,10 @@
-package dev.chieppa.arc.plugins.runtime
+package dev.chieppa.arc.tools
 
 import java.util.Properties
 
 /**
- * The pinned tools in `tools.properties`, read from [properties]: for each tool its version and, per host, the
- * archive's url, SHA-256 and program.
+ * Pinned tools read from [properties]: for each tool its `<tool>.version` and, per host, the archive's
+ * `<tool>.<host>.url`, `sha256` and `program`.
  */
 class ToolPins(private val properties: Properties) {
     /** The pin of [tool] for [host], or null when none is pinned for it. */
@@ -18,16 +18,14 @@ class ToolPins(private val properties: Properties) {
     fun version(tool: String): String? = properties.getProperty("$tool.$VERSION")
 
     companion object {
-        const val NODE = "node"
         private const val VERSION = "version"
         private const val URL = "url"
         private const val SHA256 = "sha256"
         private const val PROGRAM = "program"
-        private const val RESOURCE = "/dev/chieppa/arc/plugins/runtime/tools.properties"
 
-        /** The pins Arc ships with. */
-        fun bundled(): ToolPins = ToolPins(
-            Properties().apply { ToolPins::class.java.getResourceAsStream(RESOURCE)?.use { load(it) } },
+        /** The pins in the resource at absolute [path] on [owner]'s class path; none when it is missing. */
+        fun resource(owner: Class<*>, path: String): ToolPins = ToolPins(
+            Properties().apply { owner.getResourceAsStream(path)?.use { load(it) } },
         )
     }
 }

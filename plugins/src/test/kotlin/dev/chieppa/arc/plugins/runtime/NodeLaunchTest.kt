@@ -5,9 +5,12 @@ import dev.chieppa.arc.plugins.host.HostFiles
 import dev.chieppa.arc.plugins.host.LaunchSpec
 import dev.chieppa.arc.plugins.host.ProcessEnvironment
 import dev.chieppa.arc.plugins.host.SystemProcessLauncher
+import dev.chieppa.arc.tools.ToolInstaller
+import dev.chieppa.arc.tools.ToolPins
 import kotlinx.coroutines.test.runTest
 import java.io.IOException
 import java.nio.file.Path
+import java.util.Properties
 import kotlin.io.path.createTempDirectory
 import kotlin.test.AfterTest
 import kotlin.test.Test
@@ -37,7 +40,7 @@ class NodeLaunchTest {
         dir.toFile().deleteRecursively()
     }
 
-    private fun tools(version: String) = PluginTools(ToolInstaller(dir, { _, _, _ -> throw IOException("offline") }), ToolPins(java.util.Properties()), { _, _ -> CommandResult(0, version, "") }, node)
+    private fun tools(version: String) = PluginTools(ToolInstaller(dir, { _, _, _, _ -> throw IOException("offline") }), ToolPins(Properties()), { _, _ -> CommandResult(0, version, "") }, node)
 
     private suspend fun spec(): LaunchSpec = NodeLaunch(tools("v26.13.0"), { host }, dir.resolve("work"), parent).spec(setOf(sources))
 

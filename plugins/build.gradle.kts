@@ -10,6 +10,7 @@ kotlin {
 }
 
 dependencies {
+    api(project(":tools"))
     implementation(project(":git"))
     api(libs.kotlinx.coroutines.core)
     api(libs.kotlinx.serialization.json)

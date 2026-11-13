@@ -1,4 +1,4 @@
-package dev.chieppa.arc.plugins.runtime
+package dev.chieppa.arc.tools
 
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
@@ -19,7 +19,7 @@ object TestArchives {
         }
     }
 
-    /** A gzipped ustar archive; names ending in `/` are folders, and [executable] files get mode 755. */
+    /** A gzipped ustar archive; names ending in `/` are folders, [executable] files get mode 755, and [links] are symbolic links, name to target. */
     fun tarGz(target: Path, files: Map<String, String>, executable: Set<String> = emptySet(), links: Map<String, String> = emptyMap()) {
         val out = ByteArrayOutputStream()
         files.forEach { (name, text) ->
@@ -31,12 +31,12 @@ object TestArchives {
                 out.write(ByteArray((512 - bytes.size % 512) % 512))
             }
         }
-        links.forEach { (name, _) -> out.write(header(name, 0, "0000777", '2')) }
+        links.forEach { (name, target) -> out.write(header(name, 0, "0000777", '2', target)) }
         out.write(ByteArray(1024))
         GZIPOutputStream(Files.newOutputStream(target)).use { it.write(out.toByteArray()) }
     }
 
-    private fun header(name: String, size: Int, mode: String, type: Char): ByteArray {
+    private fun header(name: String, size: Int, mode: String, type: Char, link: String = ""): ByteArray {
         val block = ByteArray(512)
         fun put(at: Int, text: String) = text.toByteArray().copyInto(block, at)
         put(0, name)
@@ -46,6 +46,7 @@ object TestArchives {
         put(124, size.toString(8).padStart(11, '0'))
         put(136, "00000000000")
         block[156] = type.code.toByte()
+        put(157, link)
         put(257, "ustar")
         put(263, "00")
         "        ".toByteArray().copyInto(block, 148)

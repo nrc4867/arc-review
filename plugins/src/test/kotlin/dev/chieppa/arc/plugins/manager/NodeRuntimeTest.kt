@@ -24,8 +24,8 @@ import dev.chieppa.arc.plugins.protocol.SourceInfo
 import dev.chieppa.arc.plugins.protocol.ViewKind
 import dev.chieppa.arc.plugins.runtime.NodeLaunch
 import dev.chieppa.arc.plugins.runtime.PluginTools
-import dev.chieppa.arc.plugins.runtime.ToolInstaller
-import dev.chieppa.arc.plugins.runtime.ToolPins
+import dev.chieppa.arc.tools.ToolInstaller
+import dev.chieppa.arc.tools.ToolPins
 import dev.chieppa.arc.plugins.typecheck.NodeTypeChecker
 import dev.chieppa.arc.plugins.view.Props
 import dev.chieppa.arc.plugins.view.ViewNode
@@ -149,7 +149,7 @@ class NodeRuntimeTest {
 
     private fun launch(): NodeLaunch {
         val node = Path.of(System.getProperty("arc.plugins.node"))
-        val tools = PluginTools(ToolInstaller(dir.resolve("runtimes"), { _, _, _ -> throw IOException("offline") }), ToolPins(Properties()), ProcessCommandRunner, node)
+        val tools = PluginTools(ToolInstaller(dir.resolve("runtimes"), { _, _, _, _ -> throw IOException("offline") }), ToolPins(Properties()), ProcessCommandRunner, node)
         val parent = System.getenv() + mapOf("GH_TOKEN" to "gho_secret", "GITHUB_TOKEN" to "ghp_secret")
         return NodeLaunch(tools, PluginHostScript(dir.resolve("runtime"))::files, dir.resolve("work"), parent)
     }
