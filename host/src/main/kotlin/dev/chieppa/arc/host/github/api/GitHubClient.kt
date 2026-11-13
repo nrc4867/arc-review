@@ -68,10 +68,14 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
     }
 
     /** A REST GET of [url] whose status and body go to [read] as the body arrives. */
-    suspend fun <T> stream(url: String, read: (Int, InputStream) -> T): T {
+    suspend fun <T> stream(url: String, read: (Int, InputStream) -> T): T = stream(url, null, read)
+
+    /** A REST GET of [url] asking for [accept] when it is not GitHub's JSON, its status and body going to [read] as the body arrives. */
+    suspend fun <T> stream(url: String, accept: String?, read: (Int, InputStream) -> T): T {
         val token = tokens.token() ?: throw GitHubException(GitHubException.Reason.NoToken, "No GitHub token")
+        val headers = standardHeaders(token) + listOfNotNull(accept?.let { GitHubApi.ACCEPT to it })
         return try {
-            transport.stream(ApiRequest(GitHubApi.GET, url, standardHeaders(token)), read)
+            transport.stream(ApiRequest(GitHubApi.GET, url, headers), read)
         } catch (e: IOException) {
             throw GitHubException(GitHubException.Reason.Failed, "No answer: ${e.message}")
         }

@@ -8,6 +8,7 @@ kotlin {
 
 dependencies {
     api(project(":core"))
+    api(project(":tools"))
     api(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.snakeyaml.engine)

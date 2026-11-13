@@ -1,0 +1,47 @@
+[
+  {
+    "url": "https://api.github.com/repos/nrc4867/arc-review/releases/400",
+    "tag_name": "v0.5.0",
+    "name": "Arc 0.5.0",
+    "draft": true,
+    "prerelease": false,
+    "assets": [
+      { "url": "https://api.github.com/repos/nrc4867/arc-review/releases/assets/4001", "name": "arc-review-windows-x64-0.5.0.jar", "size": 9, "content_type": "application/java-archive" },
+      { "url": "https://api.github.com/repos/nrc4867/arc-review/releases/assets/4003", "name": "SHA256SUMS.txt", "size": 180, "content_type": "text/plain" }
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/nrc4867/arc-review/releases/300",
+    "tag_name": "v0.4.0-beta.1",
+    "name": "Arc 0.4.0-beta.1",
+    "draft": false,
+    "prerelease": true,
+    "assets": [
+      { "url": "https://api.github.com/repos/nrc4867/arc-review/releases/assets/3001", "name": "arc-review-windows-x64-0.4.0-beta.1.jar", "size": 9, "content_type": "application/java-archive" },
+      { "url": "https://api.github.com/repos/nrc4867/arc-review/releases/assets/3002", "name": "arc-review-macos-arm64-0.4.0-beta.1.jar", "size": 9, "content_type": "application/java-archive" },
+      { "url": "https://api.github.com/repos/nrc4867/arc-review/releases/assets/3003", "name": "SHA256SUMS.txt", "size": 180, "content_type": "text/plain" }
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/nrc4867/arc-review/releases/200",
+    "tag_name": "v0.3.0",
+    "name": "Arc 0.3.0",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      { "url": "https://api.github.com/repos/nrc4867/arc-review/releases/assets/2001", "name": "arc-review-windows-x64-0.3.0.jar", "size": 9, "content_type": "application/java-archive" },
+      { "url": "https://api.github.com/repos/nrc4867/arc-review/releases/assets/2002", "name": "arc-review-macos-arm64-0.3.0.jar", "size": 9, "content_type": "application/java-archive" },
+      { "url": "https://api.github.com/repos/nrc4867/arc-review/releases/assets/2003", "name": "SHA256SUMS.txt", "size": 180, "content_type": "text/plain" }
+    ]
+  },
+  {
+    "url": "https://api.github.com/repos/nrc4867/arc-review/releases/100",
+    "tag_name": "v0.2.0",
+    "name": "Arc 0.2.0",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      { "url": "https://api.github.com/repos/nrc4867/arc-review/releases/assets/1001", "name": "arc-review-windows-x64-0.2.0.jar", "size": 9, "content_type": "application/java-archive" }
+    ]
+  }
+]
