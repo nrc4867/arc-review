@@ -57,7 +57,6 @@ jobs:
           key: arc-natives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('arc-review/syntax/native/grammars.tsv', 'arc-review/syntax/native/arc_shim.c', 'arc-review/buildSrc/src/main/kotlin/dev/chieppa/arc/build/natives/ZigRelease.kt') }}
       - uses: gradle/actions/setup-gradle@v4
         with:
-          build-root-directory: arc-review
           cache-read-only: true
       - name: Build the jar
         run: ./gradlew :app:packageUberJarForCurrentOS -Parc.version="$VERSION"
@@ -69,7 +68,8 @@ jobs:
           jars=(arc-review/app/build/compose/jars/arc-review-${{ matrix.target }}-*.jar)
           [ "${#jars[@]}" -eq 1 ] && [ -s "${jars[0]}" ] || { echo "::error::Expected one jar"; ls arc-review/app/build/compose/jars; exit 1; }
           mkdir -p out
-          jar="$PWD/out/arc-review-${{ matrix.target }}-$VERSION.jar"
+          # Relative to the workspace: Git Bash's /d/a/... paths mean nothing to upload-artifact on Windows.
+          jar="out/arc-review-${{ matrix.target }}-$VERSION.jar"
           mv "${jars[0]}" "$jar"
           echo "JAR=$jar" >> "$GITHUB_ENV"
       # The command-line mode runs no window: a starter plugin in a temp folder, with a fresh data folder (user.home
