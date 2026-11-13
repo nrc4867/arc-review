@@ -1,6 +1,9 @@
 rootProject.name = "arc-review"
 
 pluginManagement {
+    // Stretch's Gradle plugins (the app identity: name, id, icon), from the same checkout as below.
+    val stretch = providers.gradleProperty("stretch.dir").orNull ?: file("../stretch").takeIf { it.isDirectory }?.path
+    if (stretch != null) includeBuild("$stretch/stretch-gradle-plugin")
     repositories {
         google {
             mavenContent {

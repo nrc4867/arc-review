@@ -2,6 +2,15 @@ plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    id("dev.chieppa.stretch.app")
+}
+
+// Arc's name, id and icon: drawn from design/app-icon (arc-16.svg, arc-24.svg and the like beside arc.svg are drawn
+// for their sizes), put on the windows, and carried in the jar for the launchers Arc makes when it installs itself.
+stretchApp {
+    name = "Arc"
+    id = "dev.chieppa.arc"
+    icon = rootProject.layout.projectDirectory.file("design/app-icon/arc.svg")
 }
 
 kotlin {
@@ -11,6 +20,7 @@ kotlin {
 dependencies {
     implementation(project(":ui"))
     implementation(project(":store"))
+    implementation(project(":install"))
     implementation("dev.chieppa.stretch:stretch-document")
     implementation("dev.chieppa.stretch:stretch-devtools")
     implementation(compose.desktop.currentOs)
@@ -31,9 +41,10 @@ tasks.test {
 }
 
 // The uber jar Arc ships as, one per OS: it may call restricted methods (skiko loading its library, FFM for
-// tree-sitter and the keychain) without Java warning on every run.
+// tree-sitter, the keychain and the Start menu shortcut) without Java warning on every run, and carries its version,
+// which installing and updating compare.
 tasks.withType<org.gradle.jvm.tasks.Jar>().matching { it.name.startsWith("packageUberJar") }.configureEach {
-    manifest.attributes("Enable-Native-Access" to "ALL-UNNAMED")
+    manifest.attributes("Enable-Native-Access" to "ALL-UNNAMED", "Implementation-Version" to project.version.toString())
 }
 
 compose.desktop {
