@@ -2,6 +2,7 @@ package dev.chieppa.arc.install
 
 import org.junit.jupiter.api.Assumptions.assumeTrue
 import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.writeText
 import kotlin.test.AfterTest
@@ -26,7 +27,8 @@ class WindowsShortcutTest {
         WindowsShortcut.write(ShortcutSpec(target, "\"@${dir.resolve("launch.args")}\"", dir, dir.resolve("Arc.ico"), "Arc", "dev.chieppa.arc"), link)
 
         assertEquals("dev.chieppa.arc", WindowsShortcut.appId(link))
-        assertEquals(target.toString(), WindowsShortcut.target(link))
+        // The shell may give the long or the short (8.3) form of a temp folder; both name the same file.
+        assertEquals(target.toRealPath(), Path.of(WindowsShortcut.target(link)).toRealPath())
 
         val other = dir.resolve("Other.lnk")
         WindowsShortcut.write(ShortcutSpec(target, "", dir, dir.resolve("x.ico"), "Other", ""), other)
