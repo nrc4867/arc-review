@@ -17,6 +17,7 @@ dependencies {
     api(project(":plugins"))
     api(project(":mcp"))
     implementation(project(":store"))
+    api(project(":install"))
     api("dev.chieppa.stretch:stretch-core")
     api("dev.chieppa.stretch:stretch-ui")
     api("dev.chieppa.stretch:stretch-frame")
