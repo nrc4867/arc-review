@@ -1,12 +1,14 @@
 name: Release
 
 # Pushing a tag v<version> (v0.2.0, v0.2.0-beta.1) builds Arc's jar on each supported platform's own runner, runs its
-# command-line mode once, and publishes a GitHub release for the tag with the jars attached. A version with a dash is
-# published as a prerelease. A release already made for the tag (drafted in GitHub's page) keeps its text and gets the
-# jars added.
+# command-line mode and installs it into a fresh data folder, and publishes a GitHub release for the tag with the jars
+# attached. A version with a dash is published as a prerelease. A release already made for the tag (drafted in
+# GitHub's page) keeps its text and gets the jars added. Run by hand (workflow_dispatch), it builds and checks the jars
+# as 0.0.1-dispatch.<run number> and publishes nothing.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 
 concurrency:
   group: release-${{ github.ref }}
@@ -35,6 +37,10 @@ jobs:
       - name: Read the version from the tag
         run: |
           set -eu
+          if [ "$GITHUB_REF_TYPE" != tag ]; then
+            echo "VERSION=0.0.1-dispatch.$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+            exit 0
+          fi
           version="${GITHUB_REF_NAME#v}"
           [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag $GITHUB_REF_NAME is not v<major>.<minor>.<patch>[-<label>]"; exit 1; }
           echo "VERSION=$version" >> "$GITHUB_ENV"
@@ -82,6 +88,32 @@ jobs:
             test -s "$RUNNER_TEMP/p/smoke/$f" || { echo "::error::Starter has no $f"; exit 1; }
           done
           test -n "$(find "$home" -name plugins.json -size +0)" || { echo "::error::No plugins.json written"; exit 1; }
+      # Arc installs itself from the jar into a fresh data folder: the pinned runtime unpacked, the jar copied,
+      # launch.args and the launcher written. Then the installed runtime runs the installed jar through launch.args,
+      # as the launcher does: on macOS through the bundle's own script, which also proves the runtime's links.
+      - name: Smoke test, install
+        run: |
+          set -eu
+          home="$RUNNER_TEMP/install-home"
+          mkdir -p "$home/roaming" "$RUNNER_TEMP/q"
+          export LOCALAPPDATA="$home" APPDATA="$home/roaming"
+          java -Duser.home="$home" -jar "$JAR" install --no-launch
+          data="$(dirname "$(find "$home" -name launch.args -path '*/app/*')")/.."
+          test -s "$data/app/launch.args" || { echo "::error::No launch.args"; exit 1; }
+          grep -q "arc-review-$VERSION.jar" "$data/app/launch.args" || { echo "::error::launch.args names no installed jar"; cat "$data/app/launch.args"; exit 1; }
+          test -s "$data/app/arc-review-$VERSION.jar" || { echo "::error::Jar not copied"; exit 1; }
+          if [ "${{ runner.os }}" = Windows ]; then
+            java_exe="$(find "$data/runtimes" -path '*/bin/java.exe' | head -1)"
+            test -n "$java_exe" || { echo "::error::Runtime not unpacked"; exit 1; }
+            test -s "$home/roaming/Microsoft/Windows/Start Menu/Programs/Arc.lnk" || { echo "::error::No Start menu shortcut"; exit 1; }
+            "$java_exe" "@$data/app/launch.args" plugin new launched --in "$RUNNER_TEMP/q"
+          else
+            bundle="$home/Applications/Arc.app"
+            test -s "$bundle/Contents/Info.plist" && test -x "$bundle/Contents/MacOS/Arc" && test -s "$bundle/Contents/Resources/Arc.icns" || { echo "::error::Arc.app incomplete"; ls -R "$bundle" || true; exit 1; }
+            test -n "$(find "$data/runtimes" -type l -path '*/legal/*' | head -1)" || { echo "::error::The runtime's links were not kept"; exit 1; }
+            "$bundle/Contents/MacOS/Arc" plugin new launched --in "$RUNNER_TEMP/q"
+          fi
+          test -s "$RUNNER_TEMP/q/launched/plugin.json" || { echo "::error::The installed Arc did not run"; exit 1; }
       - uses: actions/upload-artifact@v4
         with:
           name: arc-review-${{ matrix.target }}
@@ -90,6 +122,7 @@ jobs:
 
   publish:
     needs: package
+    if: github.ref_type == 'tag'
     runs-on: ubuntu-latest
     permissions:
       contents: write
