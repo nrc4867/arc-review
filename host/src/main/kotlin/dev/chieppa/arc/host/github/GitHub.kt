@@ -35,11 +35,12 @@ import dev.chieppa.arc.host.github.review.ReviewInputs
 import dev.chieppa.arc.host.github.review.ReviewMutations
 import dev.chieppa.arc.host.github.review.ReviewPublisher
 import dev.chieppa.arc.host.github.review.ReviewWriter
+import dev.chieppa.arc.host.github.releases.ReleaseChecker
 
 /**
  * What Arc reads from and writes to GitHub. It reads who the person is, the pull requests a set of searches finds, one
  * pull request, the heads it has had and its conversation, the checks on commits, the person's notifications, and
- * repos' Actions runs. It writes only when the person acts: reactions, resolving threads, pushing a staged batch as a
+ * repos' Actions runs, and Arc's own releases. It writes only when the person acts: reactions, resolving threads, pushing a staged batch as a
  * review or as commit comments, and starting, re-running, cancelling and approving runs, every write spaced by [pacer]. Every call throws [GitHubException] when GitHub gives nothing to use.
  */
 class GitHub(
@@ -62,6 +63,9 @@ class GitHub(
 
     /** The person's notifications, polled conditionally. */
     val notifications = NotificationsFeed(client)
+
+    /** Arc's own releases, which it updates itself from. */
+    val releases = ReleaseChecker(client)
 
     /** The picture at [url] in a comment, or null when it is not a picture or cannot be had. */
     suspend fun picture(url: String): ByteArray? = media.fetch(url)

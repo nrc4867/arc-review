@@ -18,6 +18,7 @@ import dev.chieppa.arc.ui.pulls.PullWatch
 import dev.chieppa.arc.ui.runs.RunWatch
 import dev.chieppa.arc.ui.services.DesktopNotifier
 import dev.chieppa.arc.ui.settings.UiPreferences
+import dev.chieppa.arc.ui.update.AppUpdates
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.LocalActionText
 import dev.chieppa.stretch.frame.MacMenuBar
@@ -30,7 +31,8 @@ import org.jetbrains.compose.resources.stringResource
  * Arc's main window on [session]'s saved state, opening with the [initial] look on the workspace. Each change to the
  * look goes to [onPreferencesChange], and the workspace is saved as it changes and when the window closes. The saved
  * filters and rules in [watch], and the runs in [runWatch], are polled while the window is open, with notifications
- * through [notifier], and saved as they change. [onExit] ends the app.
+ * through [notifier], and saved as they change. [updates] updates the installed Arc, asked for a newer release when the
+ * window opens and daily. [onExit] ends the app.
  */
 @Composable
 fun ArcWindow(
@@ -41,6 +43,7 @@ fun ArcWindow(
     notifier: DesktopNotifier,
     onPreferencesChange: suspend (UiPreferences) -> Unit,
     onExit: () -> Unit,
+    updates: AppUpdates? = null,
 ) {
     val exit by rememberUpdatedState(onExit)
     var preferences by remember { mutableStateOf(initial) }
@@ -69,6 +72,7 @@ fun ArcWindow(
             desktop = notifier,
             plugins = session::plugins,
             mcp = McpSetupFactory.of(session),
+            updates = updates,
         ).also { opened = it }
     }
     DisposableEffect(workbench) {
@@ -90,6 +94,7 @@ fun ArcWindow(
         WatchPolling(watch, session.github, notifier, workbench.dispatchers)
         SaveRuns(runWatch, workbench.dispatchers, session::saveRunWatchlist, session::saveTimings)
         RunPolling(workbench)
+        UpdatePolling(workbench)
         CompositionLocalProvider(LocalActionText provides actionText()) {
             MacMenuBar(appMenus(), workbench.registry, workbench.keymap, null, onSettings = workbench.panes::openSettings, onQuit = { exitStep { save(workbench) }; onExit() })
         }

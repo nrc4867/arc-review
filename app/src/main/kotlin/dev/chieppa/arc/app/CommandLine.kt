@@ -6,6 +6,7 @@ import dev.chieppa.arc.design.generated.cli_plugin_created
 import dev.chieppa.arc.design.generated.cli_plugin_folder_taken
 import dev.chieppa.arc.design.generated.cli_plugin_not_written
 import dev.chieppa.arc.design.generated.cli_usage
+import dev.chieppa.arc.install.SelfLocation
 import dev.chieppa.arc.plugins.starter.PluginStarter
 import dev.chieppa.arc.plugins.starter.StarterException
 import dev.chieppa.arc.plugins.starter.StarterProblem
@@ -18,11 +19,26 @@ import java.nio.file.Path
  * Arc's jar run as a command rather than a window: `java -jar arc-review.jar plugin new <name> [--in <folder>]` makes
  * a starter plugin in a folder of its id under the folder named (the working folder by default) and adds it to the
  * plugin sources in the data folder [dataDir], where a running Arc picks it up. The plugin is not enabled: the person
- * enables it, as any plugin. Its messages keep to ASCII, so any console's code page prints them.
+ * enables it, as any plugin. `install [--no-launch]` and `uninstall` install the jar at [self] into the data folder
+ * and take the installation away ([InstallCommand]). Its messages keep to ASCII, so any console's code page prints them.
  */
-internal class CommandLine(private val dataDir: Path, private val workingDir: Path, private val out: PrintStream, private val err: PrintStream) {
+internal class CommandLine(
+    private val dataDir: Path,
+    private val workingDir: Path,
+    private val out: PrintStream,
+    private val err: PrintStream,
+    private val self: SelfLocation = SelfLocation.current(),
+) {
     /** Runs [args], printing what happened, and gives the process's exit code. */
-    suspend fun run(args: List<String>): Int {
+    suspend fun run(args: List<String>): Int = when (args.firstOrNull()) {
+        INSTALL -> if (args.drop(1).all { it == NO_LAUNCH }) installCommand().install(launch = NO_LAUNCH !in args) else usage()
+        UNINSTALL -> if (args.size == 1) installCommand().uninstall() else usage()
+        else -> plugin(args)
+    }
+
+    private fun installCommand() = InstallCommand(Installation(dataDir), self, out, err)
+
+    private suspend fun plugin(args: List<String>): Int {
         if (args.size < MIN_ARGS || args[0] != PLUGIN || args[1] != NEW) return usage()
         val rest = args.drop(MIN_ARGS)
         val inAt = rest.indexOf(IN)
@@ -54,14 +70,17 @@ internal class CommandLine(private val dataDir: Path, private val workingDir: Pa
 
     companion object {
         private const val PLUGIN = "plugin"
+        private const val INSTALL = "install"
+        private const val UNINSTALL = "uninstall"
+        private const val NO_LAUNCH = "--no-launch"
         private const val NEW = "new"
         private const val IN = "--in"
         private const val MIN_ARGS = 2
-        private const val OK = 0
-        private const val FAILED = 1
+        const val OK = 0
+        const val FAILED = 1
         private const val USAGE = 2
 
         /** Whether [args] ask for a command rather than the window. */
-        fun handles(args: Array<String>): Boolean = args.firstOrNull() == PLUGIN
+        fun handles(args: Array<String>): Boolean = args.firstOrNull() in setOf(PLUGIN, INSTALL, UNINSTALL)
     }
 }

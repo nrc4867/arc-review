@@ -53,8 +53,13 @@ internal object AppConstants {
     /** The pinned Node, downloaded the first time a plugin is enabled. */
     const val RUNTIMES_FOLDER = "runtimes"
 
+    /** How often Arc asks GitHub for a newer release while the window is open. */
+    const val UPDATE_CHECK_MILLIS = 24 * 60 * 60 * 1000L
+
     /** How long the workspace waits after a change before it is saved. */
     const val SAVE_DELAY_MILLIS = 400L
     val WINDOW_WIDTH = 1440.dp
     val WINDOW_HEIGHT = 900.dp
+    val INSTALL_WIDTH = 480.dp
+    val INSTALL_HEIGHT = 320.dp
 }
