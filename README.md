@@ -28,6 +28,29 @@ The revision matrix sets a source's files against each revision it has had, to s
 
 ![The revision matrix of four revisions, marking which files changed in each](docs/images/revisions.png)
 
+## Installing
+
+Arc is released as one jar per platform, Windows x64 and Apple Silicon Macs, on the repo's GitHub releases page:
+`arc-review-windows-x64-<version>.jar` or `arc-review-macos-arm64-<version>.jar`. Run it once with any Java 25 or
+later:
+
+```
+java -jar arc-review-windows-x64-<version>.jar
+```
+
+Arc installs itself: it downloads the JetBrains Runtime it runs on (about 100 MB, once, checked against its pinned
+SHA-256), copies the jar into its data folder, and adds Arc to the Start menu on Windows or to `~/Applications` on
+macOS. Open Arc from there after that. Nothing needs an installer or signing, since Arc writes these files itself.
+
+Arc checks its releases when it opens and once a day, with the same GitHub sign-in it uses for reviews. A newer
+version shows as Update to <version> in the status bar and in Settings › General › Updates; Arc downloads it, checks it
+against the release's `SHA256SUMS.txt`, and starts it on Restart to update. The previous version stays, and Settings
+can switch back to it. Running a newer jar by hand updates the same way; an older jar opens the installed Arc instead.
+
+From a terminal, `java -jar <jar> install` installs without the window (`--no-launch` leaves Arc closed after), and
+`java -jar <jar> uninstall` removes the launcher, the runtime and the copied jars, keeping your data. Run uninstall
+from a downloaded jar while Arc is closed, since a running Arc holds its own files open.
+
 ## Developing locally
 
 You need:
