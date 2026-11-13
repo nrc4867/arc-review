@@ -41,6 +41,8 @@ The app's data folder is `%LOCALAPPDATA%\dev.chieppa.arc` on Windows and `~/Libr
 
 CI (`.github/workflows/ci.yml`) checks Stretch out beside the app and runs `build` on Windows and macOS. Linux builds too but is unsupported, so it cannot fail the run.
 
+Releases (`.github/workflows/release.yml`): pushing a tag `v<major>.<minor>.<patch>[-<label>]` builds the jar on Windows x64, macOS Apple Silicon (`macos-latest`) and macOS Intel (`macos-15-intel`) with `-Parc.version=<tag version>` (the version every module takes, `0.1.0-SNAPSHOT` without it), runs `plugin new` from each jar with a fresh data folder, and publishes the tag's GitHub release with `arc-review-<target>-<version>.jar` per platform and `SHA256SUMS.txt`; a label makes it a prerelease, and a release already drafted for the tag keeps its text and gets the files. Linux has no release jar. The release builds against Stretch's `main` as it is when the tag is pushed.
+
 ## Modules
 
 Each module is a Gradle subproject in package `dev.chieppa.arc.<module>`. A module declares only the modules below it; Gradle enforces the direction.

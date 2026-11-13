@@ -1,0 +1,118 @@
+name: Release
+
+# Pushing a tag v<version> (v0.2.0, v0.2.0-beta.1) builds Arc's jar on each supported platform's own runner, runs its
+# command-line mode once, and publishes a GitHub release for the tag with the jars attached. A version with a dash is
+# published as a prerelease. A release already made for the tag (drafted in GitHub's page) keeps its text and gets the
+# jars added.
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+# Stretch is built from source: it is checked out beside the app, where settings.gradle.kts looks for it.
+# The tree-sitter libraries are built by zig in ~/.gradle/arc-natives, cached on the pins as in CI.
+jobs:
+  package:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - target: windows-x64
+            runner: windows-latest
+          - target: macos-arm64
+            runner: macos-latest
+          - target: macos-x64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    steps:
+      - name: Read the version from the tag
+        run: |
+          set -eu
+          version="${GITHUB_REF_NAME#v}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] || { echo "::error::Tag $GITHUB_REF_NAME is not v<major>.<minor>.<patch>[-<label>]"; exit 1; }
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+        with:
+          path: arc-review
+      - uses: actions/checkout@v4
+        with:
+          repository: nrc4867/stretch
+          path: stretch
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: 25
+      - uses: actions/cache@v4
+        with:
+          path: ~/.gradle/arc-natives
+          key: arc-natives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('arc-review/syntax/native/grammars.tsv', 'arc-review/syntax/native/arc_shim.c', 'arc-review/buildSrc/src/main/kotlin/dev/chieppa/arc/build/natives/ZigRelease.kt') }}
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: arc-review
+          cache-read-only: true
+      - name: Build the jar
+        run: ./gradlew :app:packageUberJarForCurrentOS -Parc.version="$VERSION"
+        working-directory: arc-review
+      # Compose names the jar with the version before any dash; the release's jar carries the whole tag version.
+      - name: Name the jar
+        run: |
+          set -eu
+          jars=(arc-review/app/build/compose/jars/arc-review-${{ matrix.target }}-*.jar)
+          [ "${#jars[@]}" -eq 1 ] && [ -s "${jars[0]}" ] || { echo "::error::Expected one jar"; ls arc-review/app/build/compose/jars; exit 1; }
+          mkdir -p out
+          jar="$PWD/out/arc-review-${{ matrix.target }}-$VERSION.jar"
+          mv "${jars[0]}" "$jar"
+          echo "JAR=$jar" >> "$GITHUB_ENV"
+      # The command-line mode runs no window: a starter plugin in a temp folder, with a fresh data folder (user.home
+      # moves it on macOS, LOCALAPPDATA on Windows).
+      - name: Smoke test, plugin new
+        run: |
+          set -eu
+          home="$RUNNER_TEMP/home"
+          mkdir -p "$home" "$RUNNER_TEMP/p"
+          LOCALAPPDATA="$home" java -Duser.home="$home" -jar "$JAR" plugin new smoke --in "$RUNNER_TEMP/p"
+          for f in plugin.json tsconfig.json CLAUDE.md src/index.tsx; do
+            test -s "$RUNNER_TEMP/p/smoke/$f" || { echo "::error::Starter has no $f"; exit 1; }
+          done
+          test -n "$(find "$home" -name plugins.json -size +0)" || { echo "::error::No plugins.json written"; exit 1; }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arc-review-${{ matrix.target }}
+          path: ${{ env.JAR }}
+          if-no-files-found: error
+
+  publish:
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: jars
+          pattern: arc-review-*
+          merge-multiple: true
+      - name: Publish the release with the jars
+        run: |
+          set -eu
+          ls -l jars
+          (cd jars && sha256sum *.jar > SHA256SUMS.txt)
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" jars/* --clobber
+          else
+            prerelease=()
+            [[ "$GITHUB_REF_NAME" == *-* ]] && prerelease=(--prerelease)
+            gh release create "$GITHUB_REF_NAME" jars/* --verify-tag --generate-notes --title "Arc ${GITHUB_REF_NAME#v}" "${prerelease[@]}"
+          fi

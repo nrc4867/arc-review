@@ -8,7 +8,8 @@ plugins {
 
 allprojects {
     group = "dev.chieppa.arc"
-    version = "0.1.0-SNAPSHOT"
+    // -Parc.version=<version> sets it for a release; the release workflow passes the tag's.
+    version = providers.gradleProperty("arc.version").getOrElse("0.1.0-SNAPSHOT")
 }
 
 subprojects {
