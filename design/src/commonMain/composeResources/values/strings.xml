@@ -966,7 +966,7 @@
     <string name="plugins_new_create">Create</string>
     <string name="plugins_new_bad_name">A name needs a letter or digit, and only letters, digits, spaces, dots, dashes and underscores</string>
     <string name="plugins_new_folder_taken">Holds files already</string>
-    <string name="cli_usage">Usage: java -jar arc-review.jar plugin new &lt;name&gt; [--in &lt;folder&gt;]</string>
+    <string name="cli_usage">Usage: java -jar arc-review.jar plugin new &lt;name&gt; [--in &lt;folder&gt;] | install [--no-launch] | uninstall</string>
     <string name="cli_plugin_created">Made %1$s in %2$s and added it to Arc as a plugin source. Enable it in Arc under Settings > Plugins.</string>
     <string name="cli_plugin_bad_name">%1$s: a name needs a letter or digit, and only letters, digits, spaces, dots, dashes and underscores.</string>
     <string name="cli_plugin_folder_taken">%1$s holds files already.</string>
@@ -987,4 +987,28 @@
     <string name="mcp_copy">Copy command</string>
     <string name="mcp_token_not_kept">Token kept only until Arc closes: no keychain here</string>
     <string name="mcp_status_tooltip">An MCP client is connected to Arc</string>
+    <string name="update_to">Update to %1$s</string>
+    <string name="update_downloading">Updating to %1$s</string>
+    <string name="update_downloading_percent">Updating to %1$s, %2$d%</string>
+    <string name="update_restart">Restart to update</string>
+    <string name="settings_card_updates">Updates</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_update">New version</string>
+    <string name="settings_previous">Previous version</string>
+    <string name="settings_switch_back">Switch back to %1$s</string>
+    <string name="settings_keywords_updates">update, upgrade, release, version, restart</string>
+    <string name="install_title">Install Arc</string>
+    <string name="install_step_runtime">Java runtime</string>
+    <string name="install_step_jar">Arc %1$s</string>
+    <string name="install_step_launcher_windows">Start menu shortcut</string>
+    <string name="install_step_launcher_mac">Arc in Applications</string>
+    <string name="install_step_launcher_other">Launcher</string>
+    <string name="install_megabytes">%1$d of %2$d MB</string>
+    <string name="install_try_again">Try again</string>
+    <string name="install_open">Open Arc</string>
+    <string name="cli_install_done">Installed Arc %1$s in %2$s</string>
+    <string name="cli_install_failed">Could not install Arc: %1$s</string>
+    <string name="cli_install_no_jar">Run install from Arc's jar: java -jar arc-review.jar install</string>
+    <string name="cli_uninstall_done">Removed Arc's launcher, runtimes and copied jars from %1$s; your data stays</string>
+    <string name="cli_uninstall_left">Could not remove %1$s; quit Arc and run uninstall again</string>
 </resources>

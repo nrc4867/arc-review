@@ -66,6 +66,8 @@ import dev.chieppa.arc.plugins.manager.PluginUi
 import dev.chieppa.arc.ui.plugins.PluginsController
 import dev.chieppa.arc.mcp.server.McpSetup
 import dev.chieppa.arc.ui.mcp.McpController
+import dev.chieppa.arc.ui.update.AppUpdates
+import dev.chieppa.arc.ui.update.UpdateController
 import dev.chieppa.arc.ui.mcp.McpSettingsProvider
 import dev.chieppa.arc.ui.plugins.settings.PluginsSettingsProvider
 import dev.chieppa.arc.ui.settings.ArcSettingsProvider
@@ -97,7 +99,7 @@ import kotlinx.coroutines.launch
  * All of the window's work runs on [dispatchers], [scope] on their main. Questions about code go to [codeNavigation].
  * Runs are watched in [runWatch] through [actions], their notifications going to [desktop]. [plugins] makes the
  * plugin manager, given what plugins ask of the window; none runs plugins. [mcp] sets up Arc's MCP server; none
- * serves no MCP.
+ * serves no MCP. [updates] updates Arc to newer releases; none where Arc runs uninstalled.
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -121,6 +123,7 @@ class Workbench(
     desktop: DesktopNotifier = DesktopNotifier.NONE,
     plugins: (PluginUi) -> PluginManager? = { null },
     mcp: McpSetup? = null,
+    updates: AppUpdates? = null,
 ) {
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
@@ -213,6 +216,9 @@ class Workbench(
 
     /** Arc's MCP server, with the plugin development tools. */
     val mcp = McpController(this, mcp)
+
+    /** Updating Arc to a newer release, where it is installed. */
+    val updates = UpdateController(updates, scope, dispatchers, onQuit)
 
     init {
         registerArcActions(registry, this, onQuit)

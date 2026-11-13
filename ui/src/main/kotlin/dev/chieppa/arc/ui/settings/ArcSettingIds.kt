@@ -19,6 +19,7 @@ object ArcSettingIds {
     const val PULLS_CARD = "arc.notify.pulls"
     const val RUNS_CARD = "arc.notify.runs"
     const val GITHUB_CARD = "arc.github"
+    const val UPDATES_CARD = "arc.updates"
 
     const val THEME = "arc.theme"
     const val SIZE = "arc.size"
@@ -26,6 +27,9 @@ object ArcSettingIds {
     const val LINE_HIGHLIGHT = "arc.line-highlight"
     const val ACCOUNT = "arc.account"
     const val TOKEN = "arc.token"
+    const val VERSION = "arc.version"
+    const val UPDATE = "arc.update"
+    const val SWITCH_BACK = "arc.switch-back"
 
     private const val PULL_RULE = "arc.notify.rule."
     private const val RUN_NOTIFY = "arc.notify.run."

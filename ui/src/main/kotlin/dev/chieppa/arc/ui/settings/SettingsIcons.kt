@@ -13,6 +13,7 @@ object SettingsIcons {
     const val CHECK_RUN = "check-run"
     const val CHECK_WAITING = "check-waiting"
     const val COMMENT = "comment"
+    const val DOWNLOAD = "download"
     const val EYE = "eye"
     const val FILTER = "filter"
     const val FIT = "fit"
@@ -24,6 +25,7 @@ object SettingsIcons {
     const val PERSON = "person"
     const val PLUGIN = "plugin"
     const val PULL_REQUEST = "pull-request"
+    const val REFRESH = "refresh"
     const val RUNS = "runs"
     const val SERVER = "server"
     const val SETTINGS = "settings"
@@ -40,6 +42,7 @@ object SettingsIcons {
             CHECK_RUN to ArcIcons.CheckRun,
             CHECK_WAITING to ArcIcons.CheckWaiting,
             COMMENT to ArcIcons.Comment,
+            DOWNLOAD to ArcIcons.Download,
             EYE to StretchIcons.Eye,
             FILTER to ArcIcons.Filter,
             FIT to StretchIcons.Fit,
@@ -51,6 +54,7 @@ object SettingsIcons {
             PERSON to ArcIcons.Person,
             PLUGIN to ArcIcons.Plugin,
             PULL_REQUEST to ArcIcons.PullRequest,
+            REFRESH to ArcIcons.Refresh,
             RUNS to ArcIcons.Runs,
             SERVER to ArcIcons.Server,
             SETTINGS to StretchIcons.Settings,

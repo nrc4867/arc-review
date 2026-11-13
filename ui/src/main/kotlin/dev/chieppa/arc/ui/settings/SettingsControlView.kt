@@ -8,11 +8,13 @@ import dev.chieppa.arc.core.settings.SettingsControl
 import dev.chieppa.arc.core.settings.SettingsValue
 import dev.chieppa.stretch.frame.Dropdown
 import dev.chieppa.stretch.theme.Stretch
+import dev.chieppa.stretch.theme.StretchIcons
+import dev.chieppa.stretch.ui.Button
 import dev.chieppa.stretch.ui.Label
 import dev.chieppa.stretch.ui.Segmented
 import dev.chieppa.stretch.ui.Toggle
 
-/** An entry's control, drawn with Stretch's: a switch, a menu or segments for a choice, or text to read. */
+/** An entry's control, drawn with Stretch's: a switch, a menu or segments for a choice, a button, or text to read. */
 @Composable
 fun SettingsControlView(control: SettingsControl, label: String, onChange: (SettingsValue) -> Unit) {
     val c = Stretch.colors
@@ -27,6 +29,12 @@ fun SettingsControlView(control: SettingsControl, label: String, onChange: (Sett
                     Segmented(control.options, selected, { onChange(SettingsValue.Chosen(it.id)) }, { it.label }, compact = true)
             }
         }
+        is SettingsControl.Action -> Button(
+            control.label,
+            { onChange(SettingsValue.Pressed) },
+            icon = if (control.attention) StretchIcons.Warn else null,
+            enabled = control.enabled,
+        )
         is SettingsControl.Readout -> Label(control.text, Stretch.type.body, if (control.attention) c.warnInk else c.ink)
     }
 }

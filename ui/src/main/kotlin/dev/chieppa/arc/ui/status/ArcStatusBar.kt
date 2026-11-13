@@ -18,7 +18,6 @@ import dev.chieppa.arc.ui.navigation.SyntaxTokens
 import dev.chieppa.arc.ui.settings.SettingsShown
 import dev.chieppa.arc.ui.settings.SettingsStatusStart
 import dev.chieppa.arc.ui.plugins.PluginsStatusEnd
-import dev.chieppa.arc.ui.mcp.McpStatusItem
 import dev.chieppa.arc.ui.plugins.PluginsStatusStart
 import dev.chieppa.arc.ui.plugins.settings.PluginsSettingsProvider
 import dev.chieppa.arc.ui.sources.sourceIcon
@@ -31,7 +30,7 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The status bar: the active source, its commits and head, and what the code index holds; at the end, the focused
  * pane's find matches while it is finding, its caret, its file's language, and tree-sitter when tree-sitter reads it;
- * on every page, how many MCP clients are connected while any are. A saved filter's tab, a run filter's, a run's, a revision matrix's and the Settings page show their own instead; the Settings page's Plugins section adds how many plugins are on and their problems.
+ * on every page, how many MCP clients are connected while any are and a newer release while one is known. A saved filter's tab, a run filter's, a run's, a revision matrix's and the Settings page show their own instead; the Settings page's Plugins section adds how many plugins are on and their problems.
  */
 @Composable
 fun ArcStatusBar(workbench: Workbench) {
@@ -41,19 +40,19 @@ fun ArcStatusBar(workbench: Workbench) {
     val pane = workbench.panes.focused
     val filter = (state.paneLayout.activeTab?.let(state::page) as? Page.Filter)?.let { workbench.watch.watchlist.filter(it.filter) }
     if (filter != null) {
-        StatusBar(start = { FilterStatusStart(filter, workbench.watch) }, end = { McpStatusItem(workbench); FilterStatusEnd(workbench.watch) })
+        StatusBar(start = { FilterStatusStart(filter, workbench.watch) }, end = { EveryPageStatus(workbench); FilterStatusEnd(workbench.watch) })
         return
     }
     val page = state.paneLayout.activeTab?.let(state::page)
     val runWatch = workbench.runs.watch
     if (page is Page.Runs) {
         val runs = runWatch.watchlist.filter(page.filter)
-        StatusBar(start = { runs?.let { RunsStatusStart(it, runWatch) } }, end = { McpStatusItem(workbench); RunsStatusEnd(runWatch, runs) })
+        StatusBar(start = { runs?.let { RunsStatusStart(it, runWatch) } }, end = { EveryPageStatus(workbench); RunsStatusEnd(runWatch, runs) })
         return
     }
     val run = (page as? Page.Run)?.let { runWatch.run(it.run) }
     if (run != null) {
-        StatusBar(start = { RunStatusStart(run, runWatch) }, end = { McpStatusItem(workbench); RunStatusEnd(run, runWatch) })
+        StatusBar(start = { RunStatusStart(run, runWatch) }, end = { EveryPageStatus(workbench); RunStatusEnd(run, runWatch) })
         return
     }
     if (page is Page.Settings) {
@@ -64,7 +63,7 @@ fun ArcStatusBar(workbench: Workbench) {
                 if (plugins) PluginsStatusStart(workbench.plugins)
             },
             end = {
-                McpStatusItem(workbench)
+                EveryPageStatus(workbench)
                 if (plugins) PluginsStatusEnd(workbench.plugins)
             },
         )
@@ -72,7 +71,7 @@ fun ArcStatusBar(workbench: Workbench) {
     }
     val matrix = page as? Page.RevisionMatrix
     if (matrix != null) {
-        StatusBar(start = { RevisionStatusStart(matrix.source, workbench) }, end = { McpStatusItem(workbench); RevisionStatusEnd(matrix.source, workbench) })
+        StatusBar(start = { RevisionStatusStart(matrix.source, workbench) }, end = { EveryPageStatus(workbench); RevisionStatusEnd(matrix.source, workbench) })
         return
     }
     StatusBar(
@@ -86,7 +85,7 @@ fun ArcStatusBar(workbench: Workbench) {
             IndexStatusItem(workbench.navigation)
         },
         end = {
-            McpStatusItem(workbench)
+            EveryPageStatus(workbench)
             val find = pane?.let { workbench.paneCommands[it.id.value]?.find }
             if (find != null && find.open && find.matches.isNotEmpty()) {
                 StatusItem(stringResource(Res.string.status_matches, find.current + 1, find.matches.size))

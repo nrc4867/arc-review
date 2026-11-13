@@ -16,14 +16,17 @@ import dev.chieppa.arc.design.generated.settings_wrap
 import dev.chieppa.arc.design.generated.settings_wrap_detail
 import org.jetbrains.compose.resources.stringResource
 
-/** Arc's General section: how panes show code, whether they wrap long lines and how changed lines are washed. */
+/**
+ * Arc's General section: how panes show code, whether they wrap long lines and how changed lines are washed, and the
+ * [updates] card where Arc updates itself, when it can.
+ */
 @Composable
-fun generalSection(preferences: UiPreferences): SettingsSection = SettingsSection(
+fun generalSection(preferences: UiPreferences, updates: SettingsCard? = null): SettingsSection = SettingsSection(
     ArcSettingIds.GENERAL,
     stringResource(Res.string.settings_section_general),
     SettingsIcons.SETTINGS,
     ArcSettingIds.GENERAL_ORDER,
-    listOf(
+    listOfNotNull(
         SettingsCard(
             ArcSettingIds.PANES_CARD,
             stringResource(Res.string.settings_card_panes),
@@ -47,5 +50,6 @@ fun generalSection(preferences: UiPreferences): SettingsSection = SettingsSectio
                 ),
             ),
         ),
+        updates,
     ),
 )

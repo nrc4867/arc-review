@@ -7,4 +7,7 @@ sealed interface SettingsValue {
 
     /** The option with id [option] chosen. */
     data class Chosen(val option: String) : SettingsValue
+
+    /** A button pressed. */
+    data object Pressed : SettingsValue
 }
