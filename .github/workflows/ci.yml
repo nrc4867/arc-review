@@ -57,6 +57,10 @@ jobs:
           build-root-directory: arc-review
       - run: ./gradlew build
         working-directory: arc-review
+      # The plugin and MCP secrets in the runner's login keychain, through the Security framework: one made-up secret
+      # written, read, rewritten and deleted.
+      - run: ./gradlew :plugins:keychainTest
+        working-directory: arc-review
 
   # Linux keeps building so it stays possible; it is not tested or supported, so it never fails the run.
   linux:

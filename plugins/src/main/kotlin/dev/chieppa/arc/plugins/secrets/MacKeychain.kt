@@ -10,10 +10,11 @@ import java.lang.foreign.ValueLayout.ADDRESS
 import java.lang.foreign.ValueLayout.JAVA_BYTE
 import java.lang.foreign.ValueLayout.JAVA_INT
 import java.lang.invoke.MethodHandle
-import java.nio.file.Path
 
 /**
- * Secrets in the macOS Keychain, as generic passwords by service and account in the person's default keychain, through the Security framework's generic password calls.
+ * Secrets in the macOS Keychain, as generic passwords by service and account in the person's default keychain, through
+ * the Security framework's generic password calls. Use it through [KeychainSecrets], which turns every failure,
+ * a missing framework or symbol included, into an [IOException].
  */
 object MacKeychain : Keychain {
     private const val SECURITY = "/System/Library/Frameworks/Security.framework/Security"
@@ -28,8 +29,11 @@ object MacKeychain : Keychain {
     private const val NOT_FOUND = -25300
 
     private val linker = Linker.nativeLinker()
-    private val security: SymbolLookup by lazy { SymbolLookup.libraryLookup(Path.of(SECURITY), Arena.global()) }
-    private val coreFoundation: SymbolLookup by lazy { SymbolLookup.libraryLookup(Path.of(CORE_FOUNDATION), Arena.global()) }
+
+    // By name, not by Path: the system frameworks live in dyld's shared cache with no file on disk, which a Path
+    // lookup requires; dlopen finds them by this name.
+    private val security: SymbolLookup by lazy { SymbolLookup.libraryLookup(SECURITY, Arena.global()) }
+    private val coreFoundation: SymbolLookup by lazy { SymbolLookup.libraryLookup(CORE_FOUNDATION, Arena.global()) }
 
     private fun function(library: SymbolLookup, name: String, descriptor: FunctionDescriptor): MethodHandle =
         linker.downcallHandle(library.find(name).orElseThrow { UnsatisfiedLinkError("No $name") }, descriptor)
