@@ -12,7 +12,8 @@ import kotlinx.coroutines.withContext
 /**
  * The window's side of updating Arc through [updates] (none when Arc runs uninstalled, as from Gradle): the newest
  * release found by [check], downloading it on [press], and once it is ready, restarting into it through [quit], which
- * closes the window as Quit does. [switchBack] makes the previous version start instead.
+ * closes the window as Quit does. [switchBack] makes the previous version start instead. A check that fails keeps its
+ * reason as [problem] until the next one; [press] with nothing newer known checks again.
  */
 class UpdateController(
     private val updates: AppUpdates?,
@@ -21,6 +22,14 @@ class UpdateController(
     private val quit: () -> Unit,
 ) {
     var state by mutableStateOf<UpdateState>(UpdateState.Current)
+        private set
+
+    /** Why the last check for a newer release failed, or null when it did not. */
+    var problem by mutableStateOf<String?>(null)
+        private set
+
+    /** Whether a check for a newer release is running now. */
+    var checking by mutableStateOf(false)
         private set
 
     /** Whether Arc can update itself here. */
@@ -32,23 +41,36 @@ class UpdateController(
     /** The version Settings can switch back to. */
     val previous: String? get() = updates?.previous
 
-    /** Asks for a newer release, unless one is already on its way; a failed check leaves the state as it was. */
+    /**
+     * Asks for a newer release, unless one is already on its way or being asked for; a failed check leaves the state as
+     * it was and keeps its [problem].
+     */
     suspend fun check() {
         val updates = updates ?: return
-        if (state is UpdateState.Downloading || state is UpdateState.Ready) return
+        if (checking || state is UpdateState.Downloading || state is UpdateState.Ready) return
+        checking = true
         val newer = try {
             withContext(dispatchers.io) { updates.check() }
         } catch (e: CancellationException) {
+            checking = false
             throw e
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            checking = false
+            problem = e.message ?: e.toString()
             return
         }
+        checking = false
+        problem = null
         state = newer?.let { UpdateState.Available(it) } ?: UpdateState.Current
     }
 
-    /** The status bar item's and Settings' button: downloads an available update, or restarts into a ready one. */
+    /**
+     * The status bar item's and Settings' button: checks for a newer release when none is known, downloads an available
+     * one, or restarts into a ready one.
+     */
     fun press() {
         when (val now = state) {
+            UpdateState.Current -> scope.launch { check() }
             is UpdateState.Available -> download(now.version)
             is UpdateState.Failed -> download(now.version)
             is UpdateState.Ready -> restart { it.activate() }

@@ -24,10 +24,14 @@ class UpdateUiTest {
         override val version = "0.2.0"
         var newer: String? = "0.3.0"
         var failing = false
+        var checkFailure: String? = null
         val downloaded = CompletableDeferred<Unit>()
         val calls = mutableListOf<String>()
 
-        override suspend fun check(): String? = newer
+        override suspend fun check(): String? {
+            checkFailure?.let { throw IOException(it) }
+            return newer
+        }
 
         override suspend fun prepare(progress: (Long, Long?) -> Unit) {
             calls += "prepare"
@@ -65,6 +69,23 @@ class UpdateUiTest {
         waitForIdle()
         assertEquals(listOf("prepare", "activate"), updates.calls)
         assertEquals(1, quits)
+    }
+
+    @Test
+    fun aFailedCheckShowsWhyInSettingsAndIsTriedAgainThere() = runComposeUiTest {
+        val updates = FakeUpdates().apply { checkFailure = "No GitHub token" }
+        val workbench = Workbench(onQuit = { quits++ }, dispatchers = testDispatchers(), updates = updates)
+        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
+        workbench.scope.launch { workbench.updates.check() }
+        waitForIdle()
+        assertEquals("No GitHub token", workbench.updates.problem)
+        assertEquals(UpdateState.Current, workbench.updates.state)
+        updates.checkFailure = null
+        workbench.updates.press()
+        waitForIdle()
+        assertEquals(null, workbench.updates.problem)
+        assertEquals(UpdateState.Available("0.3.0"), workbench.updates.state)
+        assertTrue(shows("Update to 0.3.0"))
     }
 
     @Test

@@ -30,6 +30,7 @@ object ArcSettingIds {
     const val VERSION = "arc.version"
     const val UPDATE = "arc.update"
     const val SWITCH_BACK = "arc.switch-back"
+    const val UPDATE_PROBLEM = "arc.update-problem"
 
     private const val PULL_RULE = "arc.notify.rule."
     private const val RUN_NOTIFY = "arc.notify.run."

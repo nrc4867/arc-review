@@ -22,7 +22,8 @@ class ReleaseChecker(private val client: GitHubClient, private val repo: String 
     /** The releases, newest first as GitHub lists them. Throws [GitHubException] when GitHub gives none. */
     suspend fun releases(): List<Release> {
         val response = client.get("${GitHubApi.REPOS}/$repo/releases?per_page=$PAGE")
-        if (response.status != GitHubApi.OK) throw GitHubException(GitHubException.Reason.Failed, "Releases answered ${response.status}")
+        if (response.status == NOT_FOUND) throw GitHubException(GitHubException.Reason.Failed, "GitHub shows this account no releases of $repo (404)")
+        if (response.status != GitHubApi.OK) throw GitHubException(GitHubException.Reason.Failed, "Releases of $repo answered ${response.status}")
         return ReleaseParser.parse(client.parse(response.body))
     }
 
@@ -94,6 +95,7 @@ class ReleaseChecker(private val client: GitHubClient, private val repo: String 
         const val SUMS = "SHA256SUMS.txt"
         private const val OCTET_STREAM = "application/octet-stream"
         private const val PAGE = 30
+        private const val NOT_FOUND = 404
         private const val BUFFER = 64 * 1024
     }
 }
