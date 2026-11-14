@@ -171,7 +171,7 @@ class SavedFiltersUiTest {
         onNodeWithText("Rate-limit /auth/token by family").performClick()
         waitForIdle()
         assertTrue(workbench.state.workspace.sources.isEmpty())
-        assertEquals(setOf(FakePulls.api), workbench.cloneFailed)
+        assertEquals(setOf(FakePulls.api), workbench.cloneFailed.keys)
     }
 
     @Test

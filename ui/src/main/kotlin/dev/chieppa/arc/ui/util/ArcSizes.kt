@@ -93,6 +93,9 @@ object ArcSizes {
 
     /** The Commits drawer and the revision matrix: its tool row, columns, rows, cells and their marks. */
     const val commitsDrawer = 280f
+
+    /** The Console drawer's channel dropdown. */
+    val consoleChannel = 180.dp
     val commitRow = 44.dp
     val matrixToolRow = 36.dp
     val matrixToggle = 24.dp

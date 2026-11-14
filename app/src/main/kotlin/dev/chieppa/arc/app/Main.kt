@@ -1,6 +1,7 @@
 package dev.chieppa.arc.app
 
 import androidx.compose.ui.window.application
+import dev.chieppa.arc.core.activity.ActivityLog
 import dev.chieppa.arc.install.SelfLocation
 import dev.chieppa.arc.tools.SystemTrust
 import dev.chieppa.stretch.devtools.DevTools
@@ -18,9 +19,10 @@ fun main(args: Array<String>) {
     }
     DevTools.startIfRequested()
     val self = SelfLocation.current()
-    val installation = Installation(dataDir)
+    val activity = ActivityLog()
+    val installation = Installation(dataDir, activity)
     when (installation.decide(self)) {
-        StartDecision.Run -> runArc(dataDir, installation, self)
+        StartDecision.Run -> runArc(dataDir, installation, self, activity)
         StartDecision.OpenInstalled -> {
             installation.launcher.start()
             exitProcess(0)

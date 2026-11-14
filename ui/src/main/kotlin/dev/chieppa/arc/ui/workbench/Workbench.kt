@@ -88,6 +88,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import dev.chieppa.arc.core.activity.ActivityLog
+import dev.chieppa.arc.ui.activity.ActivityConsole
+import java.io.IOException
 
 /**
  * The main window's state: the look the person chose, where the drawers are, the workspace and its panes, which
@@ -99,7 +102,8 @@ import kotlinx.coroutines.launch
  * All of the window's work runs on [dispatchers], [scope] on their main. Questions about code go to [codeNavigation].
  * Runs are watched in [runWatch] through [actions], their notifications going to [desktop]. [plugins] makes the
  * plugin manager, given what plugins ask of the window; none runs plugins. [mcp] sets up Arc's MCP server; none
- * serves no MCP. [updates] updates Arc to newer releases; none where Arc runs uninstalled.
+ * serves no MCP. [updates] updates Arc to newer releases; none where Arc runs uninstalled. [activity] is what the
+ * window's git, GitHub and download work reports into, shown in the Console drawer.
  */
 class Workbench(
     preferences: UiPreferences = UiPreferences(),
@@ -124,7 +128,11 @@ class Workbench(
     plugins: (PluginUi) -> PluginManager? = { null },
     mcp: McpSetup? = null,
     updates: AppUpdates? = null,
+    activity: ActivityLog = ActivityLog(),
 ) {
+    /** The Console drawer's activity log: the operations Arc ran, with failures and their reasons. */
+    val console = ActivityConsole(activity)
+
     var preferences by mutableStateOf(preferences)
     var frameLayout by mutableStateOf(defaultFrameLayout())
     var paletteOpen by mutableStateOf(false)
@@ -246,9 +254,9 @@ class Workbench(
     fun sourceOf(pull: PullRequestSummary): Source.PullRequest? =
         gitHubRepos.entries.firstOrNull { it.value == pull.repo }?.let { Source.PullRequest(it.key, pull.number) }
 
-    /** The GitHub repos being cloned, for a pull request or to follow, and those whose clone failed. */
+    /** The GitHub repos being cloned, for a pull request or to follow, and those whose clone failed with why, when known. */
     var cloning by mutableStateOf(emptySet<GitHubRepo>())
-    var cloneFailed by mutableStateOf(emptySet<GitHubRepo>())
+    var cloneFailed by mutableStateOf(emptyMap<GitHubRepo, String?>())
 
     /**
      * Runs [then] with [pull] as a source here: in the clone of its repo that is known, or else in the app's own clone,
@@ -269,9 +277,14 @@ class Workbench(
             cloning = cloning + repo
             cloneFailed = cloneFailed - repo
             try {
-                val name = data.clone(repo)?.let { sources.addRepo(it) }
+                val name = try {
+                    data.clone(repo)?.let { sources.addRepo(it) }
+                } catch (e: IOException) {
+                    cloneFailed = cloneFailed + (repo to e.message)
+                    return@launch
+                }
                 if (name == null) {
-                    cloneFailed = cloneFailed + repo
+                    cloneFailed = cloneFailed + (repo to null)
                 } else {
                     gitHubRepos = gitHubRepos + (name to repo)
                     then(name)

@@ -2,6 +2,7 @@ package dev.chieppa.arc.app
 
 import androidx.compose.ui.window.application
 import dev.chieppa.arc.core.actions.RunWatchlist
+import dev.chieppa.arc.core.activity.ActivityLog
 import dev.chieppa.arc.core.watch.WatchSeeds
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.filter_mine
@@ -20,16 +21,16 @@ import org.jetbrains.compose.resources.getString
 import java.nio.file.Path
 
 /**
- * Arc's window on the data folder [dataDir]. When this process is the installed Arc ([installation], [self]), it
+ * Arc's window on the data folder [dataDir], its git, GitHub and download work reported to [activity]. When this process is the installed Arc ([installation], [self]), it
  * updates itself from GitHub's releases, and after an update or a switch back it starts again through its launcher
  * once the window has closed.
  */
-internal fun runArc(dataDir: Path, installation: Installation, self: SelfLocation) {
-    val session = AppSession(dataDir, Conversations.load())
+internal fun runArc(dataDir: Path, installation: Installation, self: SelfLocation, activity: ActivityLog) {
+    val session = AppSession(dataDir, Conversations.load(), activity)
     val target = ReleaseTarget.of()
     val version = self.version
     val updates = if (target != null && version != null && installation.isInstalledSelf(self)) {
-        ArcUpdates(installation, session.github.releases, target, version)
+        ArcUpdates(installation, session.github.releases, target, version, activity)
     } else {
         null
     }

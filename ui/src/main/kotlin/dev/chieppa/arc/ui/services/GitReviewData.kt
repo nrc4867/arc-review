@@ -13,6 +13,7 @@ import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.git.marks.MarkReplayer
 import dev.chieppa.arc.git.process.GitException
+import dev.chieppa.arc.git.process.GitRunner
 import dev.chieppa.arc.git.repo.GitCloner
 import dev.chieppa.arc.git.repo.GitRepositories
 import dev.chieppa.arc.git.repo.GitRepository
@@ -27,19 +28,21 @@ import dev.chieppa.arc.host.github.pulls.CheckState
 import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.repo.GitHubRepo
 import dev.chieppa.arc.host.github.repo.GitHubRemotes
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 
 /**
  * [ReviewData] from the repos [repos] knows, read through the git CLI, with pull requests, their pushes and the checks
  * on commits asked of GitHub through [pulls]. The app's own clones of GitHub repos go under [clones], as
- * `<owner>/<name>`.
+ * `<owner>/<name>`, through [cloner]; [runner] runs the other git commands made here.
  */
 class GitReviewData(
     private val repos: GitRepositories,
     private val pulls: GitHubPulls? = null,
     private val clones: Path? = null,
-    private val cloner: GitCloner = GitCloner(),
+    private val runner: GitRunner = GitRunner(),
+    private val cloner: GitCloner = GitCloner(runner),
 ) : ReviewData {
     override suspend fun read(source: Source): SourceSnapshot = reader(source).read(source)
 
@@ -110,14 +113,14 @@ class GitReviewData(
         return try {
             cloner.clone(GitHubRemotes.url(repo), target)
             target
-        } catch (_: GitException) {
-            null
+        } catch (e: GitException) {
+            throw IOException(e.stderr.trim().ifEmpty { e.message }, e)
         }
     }
 
     override suspend fun isRepo(dir: Path): Boolean {
         if (!Files.isDirectory(dir)) return false
-        return GitRepository(dir).use { it.resolveCommit(HEAD) != null }
+        return GitRepository(dir, runner).use { it.resolveCommit(HEAD) != null }
     }
 
     private companion object {

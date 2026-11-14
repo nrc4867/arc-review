@@ -32,7 +32,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.filter_new_since
-import dev.chieppa.arc.design.generated.pull_clone_failed
 import dev.chieppa.arc.design.generated.pull_cloning
 import dev.chieppa.arc.design.generated.pull_comments
 import dev.chieppa.arc.design.generated.pull_open
@@ -43,7 +42,6 @@ import dev.chieppa.arc.ui.util.bottomRule
 import dev.chieppa.stretch.frame.ContextMenuArea
 import dev.chieppa.stretch.theme.Icon
 import dev.chieppa.stretch.theme.Stretch
-import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Chip
 import dev.chieppa.stretch.ui.ChipKind
@@ -55,7 +53,8 @@ import org.jetbrains.compose.resources.stringResource
  * One pull request in a saved filter's list: a dot when it changed since the filter was last looked at, its title, ref
  * and author, labels, who it waits on (nothing while no one is asked to review), checks, comments and age, and at the
  * end a chip when it is [open] in the strip. Only the [columns] that fit show; the title takes the rest. While its repo
- * is being cloned, or its [clone] failed, that shows in place of the chip. A click runs [onOpen]; a right-click opens
+ * is being cloned, or its [clone] failed, that shows in place of the chip, a failure with its [cloneError] and opening
+ * the Console through [onCloneError]. A click runs [onOpen]; a right-click opens
  * [menu].
  */
 @Composable
@@ -69,6 +68,8 @@ fun PullRow(
     columns: PullColumns,
     onOpen: () -> Unit,
     clone: CloneState? = null,
+    cloneError: String? = null,
+    onCloneError: () -> Unit = {},
     menu: @Composable ColumnScope.(close: () -> Unit) -> Unit,
 ) {
     val c = Stretch.colors
@@ -126,7 +127,7 @@ fun PullRow(
             Box(Modifier.width(ArcSizes.actionColumn), contentAlignment = Alignment.CenterEnd) {
                 when {
                     clone == CloneState.Cloning -> Spinner(stringResource(Res.string.pull_cloning, pull.repo.fullName))
-                    clone == CloneState.Failed -> Tooltip(stringResource(Res.string.pull_clone_failed, pull.repo.fullName)) { Icon(StretchIcons.Error, c.errorInk) }
+                    clone == CloneState.Failed -> CloneFailedMark(pull.repo.fullName, cloneError, onCloneError)
                     open -> Chip(stringResource(Res.string.pull_open), kind = ChipKind.On)
                 }
             }

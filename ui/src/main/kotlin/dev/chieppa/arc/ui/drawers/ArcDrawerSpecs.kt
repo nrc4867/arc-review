@@ -1,6 +1,8 @@
 package dev.chieppa.arc.ui.drawers
 
 import androidx.compose.runtime.Composable
+import dev.chieppa.arc.ui.activity.ConsoleDrawer
+import dev.chieppa.arc.ui.activity.ConsoleDrawerActions
 import dev.chieppa.arc.ui.conversation.ConversationDrawer
 import dev.chieppa.arc.ui.conversation.NotesDrawer
 import dev.chieppa.arc.ui.conversation.NotesExportButton
@@ -21,7 +23,8 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The frame's drawers, one per [DrawerSlot]: Files holds the workspace; Outline the focused pane's symbols; Notes, Conversation and Staged comments the
  * active source's notes, pull request conversation and staged batch; Pull requests the saved filters and notification
- * rules; Runs the run filters and run notifications; Revisions the active source's commits under the title Commits; the others open plain.
+ * rules; Runs the run filters and run notifications; Revisions the active source's commits under the title Commits;
+ * Console the activity log; the others open plain.
  */
 @Composable
 fun arcDrawerSpecs(workbench: Workbench): List<DrawerSpec> = ArcDrawerSlots.all.map { slot ->
@@ -47,6 +50,9 @@ fun arcDrawerSpecs(workbench: Workbench): List<DrawerSpec> = ArcDrawerSlots.all.
         DrawerIds.CONVERSATION -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false) { ConversationDrawer(workbench) }
         DrawerIds.NOTES -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false, actions = { NotesExportButton(workbench) }) {
             NotesDrawer(workbench)
+        }
+        DrawerIds.CONSOLE -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false, actions = { ConsoleDrawerActions(workbench.console) }) {
+            ConsoleDrawer(workbench.console)
         }
         else -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon) {}
     }

@@ -22,6 +22,7 @@ import dev.chieppa.arc.design.generated.pull_ref
 import dev.chieppa.arc.host.github.pulls.WaitingOnRule
 import dev.chieppa.arc.ui.workbench.MenuTarget
 import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.arc.ui.workbench.openConsole
 import dev.chieppa.stretch.ui.Divider
 import org.jetbrains.compose.resources.stringResource
 
@@ -75,6 +76,8 @@ fun FilterPage(page: Page.Filter, workbench: Workbench, modifier: Modifier = Mod
                                     in workbench.cloneFailed -> CloneState.Failed
                                     else -> null
                                 },
+                                cloneError = workbench.cloneFailed[pull.repo],
+                                onCloneError = { workbench.openConsole(errorsOnly = true) },
                             ) { close -> PullMenu(workbench, MenuTarget.OfPull(pull, source), close) }
                         }
                     }

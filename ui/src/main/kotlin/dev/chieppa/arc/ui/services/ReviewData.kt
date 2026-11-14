@@ -58,7 +58,10 @@ interface ReviewData {
     /** The GitHub repo [repo]'s clone comes from, or null when it comes from elsewhere. */
     suspend fun gitHubRepo(repo: RepoName): GitHubRepo? = null
 
-    /** The folder of the app's own clone of [repo], cloned first when there is none; null when it cannot be cloned. */
+    /**
+     * The folder of the app's own clone of [repo], cloned first when there is none; null where the app keeps no clones.
+     * Throws [java.io.IOException] with git's reason when it cannot be cloned.
+     */
     suspend fun clone(repo: GitHubRepo): Path? = null
 
     /**

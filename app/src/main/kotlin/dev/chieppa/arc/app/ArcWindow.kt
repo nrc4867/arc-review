@@ -73,6 +73,7 @@ fun ArcWindow(
             plugins = session::plugins,
             mcp = McpSetupFactory.of(session),
             updates = updates,
+            activity = session.activity,
         ).also { opened = it }
     }
     DisposableEffect(workbench) {

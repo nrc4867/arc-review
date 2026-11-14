@@ -20,6 +20,13 @@ import dev.chieppa.arc.ui.services.ActionsService
 import dev.chieppa.arc.ui.services.GitHubActions
 import dev.chieppa.arc.ui.services.RunKeeper
 import dev.chieppa.arc.git.repo.GitRepositories
+import dev.chieppa.arc.git.process.GitCredentials
+import dev.chieppa.arc.git.process.GitRunner
+import dev.chieppa.arc.core.activity.ActivityLog
+import dev.chieppa.arc.host.github.api.GitHubClient
+import dev.chieppa.arc.host.github.api.JdkHttpTransport
+import dev.chieppa.arc.host.github.api.ReportingTransport
+import dev.chieppa.arc.host.github.auth.GitHubTokens
 import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.host.github.GitHub
 import dev.chieppa.arc.core.conversation.LocalConversation
@@ -55,9 +62,19 @@ import java.nio.file.Path
  * What the app keeps between runs, in [dataDir]: the settings, the workspace, the repos, the saved filters and
  * notification rules, the run filters, step timings, kept runs and downloaded artifacts, the person's drafts, staged
  * comments and notes, the recently opened sources, people's pictures, the app's own clones of GitHub repos, and plugins (their setup, stores, bundles and the Node they run on). Repos are read through git for the workspace in
- * [current], and pull requests through [github].
+ * [current], and pull requests through [github]. Git, GitHub and downloads report to [activity]; Arc's git commands
+ * to github.com sign in with the same [tokens] as its GitHub requests.
  */
-class AppSession(private val dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub(viewers = ViewerCache(ViewerFile(dataDir.resolve(AppConstants.VIEWER_FILE))))) : Closeable {
+class AppSession(
+    private val dataDir: Path,
+    val conversation: ReviewConversation,
+    val activity: ActivityLog = ActivityLog(),
+    private val tokens: GitHubTokens = GitHubTokens(),
+    val github: GitHub = GitHub(
+        GitHubClient(tokens, ReportingTransport(JdkHttpTransport(), activity)),
+        viewers = ViewerCache(ViewerFile(dataDir.resolve(AppConstants.VIEWER_FILE))),
+    ),
+) : Closeable {
     private val settingsFile = SettingsFile(dataDir.resolve(AppConstants.SETTINGS_FILE))
     private val workspaceFile = WorkspaceFile(dataDir.resolve(AppConstants.WORKSPACE_FILE))
     private val reviewFolder = ReviewFolder(dataDir.resolve(AppConstants.REVIEWS_FOLDER))
@@ -75,8 +92,9 @@ class AppSession(private val dataDir: Path, val conversation: ReviewConversation
     @Volatile
     var current: WorkspaceState? = null
 
-    private val git = GitRepositories({ name -> (current?.repos ?: repos)[name] })
-    val data: ReviewData = GitReviewData(git, GitHubPulls(github), dataDir.resolve(AppConstants.CLONES_FOLDER))
+    private val runner = GitRunner(activity = activity, credentials = GitCredentials(tokens::token))
+    private val git = GitRepositories({ name -> (current?.repos ?: repos)[name] }, runner)
+    val data: ReviewData = GitReviewData(git, GitHubPulls(github), dataDir.resolve(AppConstants.CLONES_FOLDER), runner)
 
     /** Code navigation: the tree-sitter index of the open sources, read from the same repos, answering by name. */
     val codeNavigation: CodeNavigation = run {
@@ -181,7 +199,7 @@ class AppSession(private val dataDir: Path, val conversation: ReviewConversation
     private var plugins: PluginManager? = null
 
     /** The plugin manager, made once, with what plugins ask of the window going to [ui]. */
-    fun plugins(ui: PluginUi): PluginManager = plugins ?: PluginSetup.manager(dataDir, pluginScope, ui).also { plugins = it }
+    fun plugins(ui: PluginUi): PluginManager = plugins ?: PluginSetup.manager(dataDir, pluginScope, ui, activity).also { plugins = it }
 
     override fun close() {
         plugins?.stop()

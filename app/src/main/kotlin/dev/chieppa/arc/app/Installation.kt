@@ -1,5 +1,6 @@
 package dev.chieppa.arc.app
 
+import dev.chieppa.arc.core.activity.ActivityReporter
 import dev.chieppa.arc.install.ArcJar
 import dev.chieppa.arc.install.InstallLayout
 import dev.chieppa.arc.install.InstallState
@@ -10,16 +11,17 @@ import dev.chieppa.arc.install.SelfLocation
 import dev.chieppa.arc.install.Uninstaller
 import dev.chieppa.arc.install.Updater
 import dev.chieppa.arc.tools.HttpDownloader
+import dev.chieppa.arc.tools.ReportingDownloader
 import dev.chieppa.arc.tools.Sha256
 import dev.chieppa.arc.tools.ToolInstaller
 import java.nio.file.Files
 import java.nio.file.Path
 
-/** Arc's installation in the data folder [dataDir], as `main` and the command line reach it. */
-class Installation(dataDir: Path) {
+/** Arc's installation in the data folder [dataDir], as `main` and the command line reach it; downloads report to [activity]. */
+class Installation(dataDir: Path, activity: ActivityReporter = ActivityReporter.NONE) {
     val layout = InstallLayout(dataDir)
     val launcher: Launcher = Launcher.forHost(layout)
-    val installer = Installer(layout, ToolInstaller(layout.runtimes, HttpDownloader), launcher)
+    val installer = Installer(layout, ToolInstaller(layout.runtimes, ReportingDownloader(HttpDownloader, activity)), launcher)
     val updater = Updater(layout, installer)
     val uninstaller = Uninstaller(layout, launcher)
 

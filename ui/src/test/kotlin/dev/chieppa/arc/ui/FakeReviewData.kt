@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui
 
+import java.io.IOException
 import dev.chieppa.arc.core.change.ChangeStatus
 import dev.chieppa.arc.core.change.ChangedFile
 import dev.chieppa.arc.core.change.CommitInfo
@@ -35,10 +36,14 @@ import java.nio.file.Path
 class FakeReviewData(more: Boolean = false, pictures: Boolean = false) : ReviewData {
     /** What [clone] answers: the folder of the app's own clone, or null as when cloning fails. */
     var cloneTo: Path? = null
+
+    /** When set, [clone] fails with this as git's reason. */
+    var cloneError: String? = null
     val cloned = mutableListOf<GitHubRepo>()
 
     override suspend fun clone(repo: GitHubRepo): Path? {
         cloned += repo
+        cloneError?.let { throw IOException(it) }
         return cloneTo
     }
 
