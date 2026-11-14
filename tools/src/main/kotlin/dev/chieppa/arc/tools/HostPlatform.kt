@@ -7,9 +7,11 @@ object HostPlatform {
 
     val isWindows: Boolean = os.startsWith("windows")
 
+    val isMac: Boolean = os.startsWith("mac")
+
     val current: String = when {
         isWindows -> "windows"
-        os.startsWith("mac") -> "macos"
+        isMac -> "macos"
         else -> "linux"
     } + if (arm) "-aarch64" else "-x64"
 }
