@@ -1,5 +1,6 @@
 package dev.chieppa.arc.ui.plugins
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
@@ -26,6 +27,8 @@ import dev.chieppa.arc.plugins.secrets.SecretStore
 import dev.chieppa.arc.plugins.typecheck.TypeChecker
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.util.ArcDispatchers
+import dev.chieppa.arc.ui.util.FolderChooser
+import dev.chieppa.arc.ui.util.LocalFolderChooser
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.test.setStretchContent
 import dev.chieppa.stretch.theme.StretchThemes
@@ -69,7 +72,7 @@ class PluginRig(capabilitiesJson: String, contributions: Contributions, val appr
 
     /**
      * The window with the plugins [config] sets up, prepared by [preparer], their secrets kept in [secrets] and their
-     * types checked by [typeChecker].
+     * types checked by [typeChecker]. Its path fields browse with [folders], which by default is cancelled.
      */
     fun open(
         test: ComposeUiTest,
@@ -77,6 +80,7 @@ class PluginRig(capabilitiesJson: String, contributions: Contributions, val appr
         config: PluginsConfig = enabled,
         secrets: SecretStore = MemorySecretStore(lasting = true),
         typeChecker: TypeChecker = TypeChecker.NONE,
+        folders: FolderChooser = FolderChooser { _, _ -> null },
     ): Workbench {
         val dispatcher = UnconfinedTestDispatcher(test.mainClock.scheduler)
         // The plugins' timers (heartbeat, restarts) wait on a clock of their own that the test never advances.
@@ -90,7 +94,9 @@ class PluginRig(capabilitiesJson: String, contributions: Contributions, val appr
                 PluginManager(PluginServices(scope, process, storage, consoles, grep, preparer, ui = ui, secrets = secrets, typeChecker = typeChecker, typeCheckMillis = 0))
             },
         )
-        test.setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
+        test.setStretchContent(StretchThemes.WorkshopDark) {
+            CompositionLocalProvider(LocalFolderChooser provides folders) { ArcFrame(workbench) }
+        }
         test.waitForIdle()
         return workbench
     }

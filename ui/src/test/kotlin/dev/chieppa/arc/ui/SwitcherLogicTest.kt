@@ -14,7 +14,7 @@ import dev.chieppa.arc.host.github.repo.GitHubRepo
 import dev.chieppa.arc.core.recent.RecentSource
 import dev.chieppa.arc.host.github.pulls.ReviewRequest
 import dev.chieppa.arc.host.github.pulls.Viewer
-import dev.chieppa.arc.ui.switcher.FolderTarget
+import dev.chieppa.arc.ui.util.TypedPath
 import dev.chieppa.arc.ui.switcher.FollowedLookup
 import dev.chieppa.arc.ui.switcher.FollowedResults
 import dev.chieppa.arc.ui.switcher.OpenAs
@@ -168,9 +168,9 @@ class SwitcherLogicTest {
     @Test
     fun aPastedFolderIsReadAsARepoToFollow() {
         val folder = Path.of("").toAbsolutePath().toString()
-        assertEquals(Path.of(folder), FolderTarget.read("\"$folder\""))
-        assertNull(FolderTarget.read("api#398"))
-        assertNull(FolderTarget.read("token"))
+        assertEquals(Path.of(folder), TypedPath.read("\"$folder\""))
+        assertNull(TypedPath.read("api#398"))
+        assertNull(TypedPath.read("token"))
     }
 
     private fun sourceOf(item: SwitcherItem): Source = when (item) {

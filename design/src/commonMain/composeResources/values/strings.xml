@@ -906,6 +906,7 @@
     <string name="plugins_sources">Plugin sources</string>
     <string name="plugins_add_source">Add source</string>
     <string name="plugins_source_placeholder">Folder of a plugin or a plugins.json, or a git url#ref</string>
+    <string name="plugins_source_not_full">Neither a git url nor a full path: a folder starts at /, at a drive or at ~ for your home folder</string>
     <string name="plugins_source_directory">Directory · watching</string>
     <string name="plugins_source_git">Git · %1$s</string>
     <plurals name="plugins_source_count">
@@ -962,6 +963,9 @@
     <string name="plugin_secret_not_kept">Kept only until Arc closes: no keychain here</string>
     <string name="plugins_new">New plugin</string>
     <string name="plugins_new_parent">Folder to make it in</string>
+    <string name="path_browse">Browse for a folder</string>
+    <string name="path_choose_folder">Choose a folder</string>
+    <string name="path_not_full">Not a full path: a folder starts at /, at a drive or at ~ for your home folder</string>
     <string name="plugins_new_name">Name</string>
     <string name="plugins_new_create">Create</string>
     <string name="plugins_new_bad_name">A name needs a letter or digit, and only letters, digits, spaces, dots, dashes and underscores</string>

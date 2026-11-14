@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.KeyEvent
 import dev.chieppa.arc.host.github.repo.GitHubRepoLinks
+import dev.chieppa.arc.ui.util.TypedPath
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.chord
 import java.nio.file.Path
@@ -70,7 +71,7 @@ fun rememberSwitcherView(workbench: Workbench, state: SwitcherState): SwitcherVi
     val target = remember(query, workbench.gitHubRepos, workbench.state.repos) {
         PastedTargets.read(query, workbench.gitHubRepos, workbench.state.repos.keys)
     }
-    val folder = remember(query, target) { if (target == null) FolderTarget.read(query) else null }
+    val folder = remember(query, target) { if (target == null) TypedPath.read(query) else null }
     var folderFailed by remember(query) { mutableStateOf(false) }
     val link = remember(query, target, folder) { if (target == null && folder == null) GitHubRepoLinks.read(query) else null }
     val local = link?.let { found -> workbench.gitHubRepos.entries.firstOrNull { it.value == found.repo }?.key }

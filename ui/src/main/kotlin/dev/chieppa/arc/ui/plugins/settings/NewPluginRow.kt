@@ -19,10 +19,13 @@ import dev.chieppa.arc.design.generated.plugins_new_bad_name
 import dev.chieppa.arc.design.generated.plugins_new_folder_taken
 import dev.chieppa.arc.design.generated.plugins_new_name
 import dev.chieppa.arc.design.generated.plugins_new_parent
+import dev.chieppa.arc.design.generated.path_not_full
 import dev.chieppa.arc.plugins.starter.PluginStarter
 import dev.chieppa.arc.plugins.starter.StarterException
 import dev.chieppa.arc.plugins.starter.StarterName
 import dev.chieppa.arc.plugins.starter.StarterProblem
+import dev.chieppa.arc.ui.util.FolderPathField
+import dev.chieppa.arc.ui.util.TypedPath
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Button
@@ -32,13 +35,13 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
-import java.nio.file.InvalidPathException
 import java.nio.file.Path
 
 /**
- * Makes a new plugin from Arc's starter: the folder to make it in and its name, typed, and a button that writes it on
- * [io] and gives its folder to [onCreated], which adds it as a source. A name that makes no id, and a folder holding
- * files already, are highlighted on their fields.
+ * Makes a new plugin from Arc's starter: the folder to make it in, typed as [TypedPath] reads it or chosen with the
+ * field's folder button, and its name, and a button that writes it on [io] and gives its folder to [onCreated], which
+ * adds it as a source. A name that makes no id, a folder that is no full path, and a folder holding files already, are
+ * highlighted on their fields.
  */
 @Composable
 fun NewPluginRow(io: CoroutineDispatcher, onCreated: (Path) -> Unit) {
@@ -46,21 +49,19 @@ fun NewPluginRow(io: CoroutineDispatcher, onCreated: (Path) -> Unit) {
     var name by rememberSaveable { mutableStateOf("") }
     var failure by rememberSaveable { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
-    val folder = parent.trim().takeIf { it.isNotEmpty() }?.let { typed -> try { Path.of(typed) } catch (_: InvalidPathException) { null } }
+    val folder = TypedPath.read(parent)
     val named = StarterName.of(name)
     Row(
         Modifier.fillMaxWidth().padding(horizontal = StretchSpacing.space14, vertical = StretchSpacing.space10),
         horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TextField(
+        FolderPathField(
             parent,
             { parent = it; failure = null },
+            stringResource(Res.string.plugins_new_parent),
             Modifier.weight(2f).testTag(PluginSettingsTags.NEW_PARENT),
-            placeholder = stringResource(Res.string.plugins_new_parent),
-            icon = StretchIcons.Folder,
-            error = failure,
-            mono = true,
+            error = failure ?: stringResource(Res.string.path_not_full).takeIf { parent.isNotBlank() && folder == null },
         )
         TextField(
             name,

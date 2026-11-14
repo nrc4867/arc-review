@@ -15,25 +15,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.plugins_add_source
+import dev.chieppa.arc.design.generated.plugins_source_not_full
 import dev.chieppa.arc.design.generated.plugins_source_placeholder
 import dev.chieppa.arc.plugins.config.PluginSourceSpec
 import dev.chieppa.arc.plugins.gitsource.GitSourceInput
 import dev.chieppa.arc.ui.plugins.GitUpdateReview
 import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.arc.ui.util.FolderPathField
+import dev.chieppa.arc.ui.util.TypedPath
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Button
 import dev.chieppa.stretch.ui.ButtonKind
 import dev.chieppa.stretch.ui.Divider
-import dev.chieppa.stretch.ui.TextField
 import org.jetbrains.compose.resources.stringResource
-import java.nio.file.InvalidPathException
 import java.nio.file.Path
 
 /**
  * The plugin sources card: each folder or git repo plugins come from, with how many plugins it holds and a button to
- * remove it, a git source's pin and its waiting update, a field to add a folder by its path or a git repo by its url
- * and ref, and a row making a new plugin from Arc's starter.
+ * remove it, a git source's pin and its waiting update, a field to add a folder by its path, typed as [TypedPath] reads
+ * it or chosen with the field's folder button, or a git repo by its url and ref, and a row making a new plugin from
+ * Arc's starter.
  */
 @Composable
 fun PluginSourcesCard(workbench: Workbench) {
@@ -66,13 +68,19 @@ fun PluginSourcesCard(workbench: Workbench) {
 private fun AddSourceRow(onFolder: (Path) -> Unit, onGit: (String, String) -> Unit) {
     var text by rememberSaveable { mutableStateOf("") }
     val git = GitSourceInput.parse(text)
-    val folder = text.trim().takeIf { git == null && it.isNotEmpty() }?.let { typed -> try { Path.of(typed) } catch (_: InvalidPathException) { null } }
+    val folder = if (git == null) TypedPath.read(text) else null
     Row(
         Modifier.fillMaxWidth().padding(horizontal = StretchSpacing.space14, vertical = StretchSpacing.space10),
         horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TextField(text, { text = it }, Modifier.weight(1f).testTag(PluginSettingsTags.ADD_SOURCE), placeholder = stringResource(Res.string.plugins_source_placeholder), icon = StretchIcons.Folder, mono = true)
+        FolderPathField(
+            text,
+            { text = it },
+            stringResource(Res.string.plugins_source_placeholder),
+            Modifier.weight(1f).testTag(PluginSettingsTags.ADD_SOURCE),
+            error = stringResource(Res.string.plugins_source_not_full).takeIf { text.isNotBlank() && git == null && folder == null },
+        )
         Button(
             stringResource(Res.string.plugins_add_source),
             {
