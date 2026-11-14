@@ -31,8 +31,9 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The viewport: the active source's panes, and every pinned pane and page, such as a saved filter's, in a grid of tabs.
  * While there are none, the start screen shows over the grid. The tree's files drag in as tabs, onto a pane, an edge or
- * away into a window, the start screen showing or not; a tab's menu holds Arc's items. Where panes can open windows, it
- * keeps where a new one goes: over the viewport, a little in from its corner.
+ * away into a window, the start screen showing or not; a tab's menu holds Arc's items, and a tab held after a crash
+ * reloads through [dev.chieppa.arc.ui.review.PaneController.reload]. Where panes can open windows, it keeps where a new
+ * one goes: over the viewport, a little in from its corner.
  */
 @Composable
 fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
@@ -66,6 +67,7 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
             tabMenu = { id, close -> TabMenu(workbench, id, close) },
             dropTarget = workbench.dropTarget,
             onDropItem = workbench::dropFile,
+            onReload = workbench.panes::reload,
         ) { id ->
             workbench.state.pane(id)?.let { PaneContent(it, workbench) } ?: workbench.state.page(id)?.let { PageContent(it, workbench) }
         }

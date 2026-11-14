@@ -149,6 +149,15 @@ class PaneController(private val state: WorkspaceState) {
         state.workspace = state.workspace.withPage(page.copy(section = section))
     }
 
+    /**
+     * Resets what tab [id] keeps before its reload after a crash shows it again, so it does not build what crashed: a
+     * Settings page goes back to its first section.
+     */
+    fun reload(id: String) {
+        val page = state.page(id) as? Page.Settings ?: return
+        state.workspace = state.workspace.withPage(page.copy(section = null))
+    }
+
     /** Shows the pinned page [matches] finds, opening the one [make] makes when none shows. */
     private fun openPinnedPage(matches: (Page) -> Boolean, make: (PaneId) -> Page) {
         val existing = state.workspace.pages.firstOrNull(matches)
