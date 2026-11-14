@@ -10,7 +10,8 @@ import kotlinx.coroutines.launch
 /**
  * Switches Arc's MCP server on and off on [scope]: on, it starts the endpoint [endpoint] makes with the [token] on
  * [port] and follows its sessions; off, it stops it. [onChange] keeps the person's choice. The server is off until the
- * person switches it on.
+ * person switches it on. A token or endpoint that cannot be had, or a port that cannot be bound, leaves it [McpServerState.Failed]
+ * with the reason.
  */
 class McpServerControl(
     private val scope: CoroutineScope,
@@ -40,18 +41,21 @@ class McpServerControl(
         if (job != null) return
         shown.value = McpServerState.Starting
         job = scope.launch {
-            val server = endpoint(token.current())
+            val server = failing { endpoint(token.current()) } ?: return@launch
             running = server
-            val listening = try {
-                server.start(port)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                shown.value = McpServerState.Failed(e.message ?: e.toString())
-                return@launch
-            }
+            val listening = failing { server.start(port) } ?: return@launch
             server.clients.collect { shown.value = McpServerState.Listening(listening, it) }
         }
+    }
+
+    /** What [call] gives, or null with the server shown as failed for the reason it threw. */
+    private inline fun <T : Any> failing(call: () -> T): T? = try {
+        call()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        shown.value = McpServerState.Failed(e.message ?: e.toString())
+        null
     }
 
     /** Stops it, leaving it off. */

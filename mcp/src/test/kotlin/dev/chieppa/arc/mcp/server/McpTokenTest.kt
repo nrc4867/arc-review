@@ -7,6 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class McpTokenTest {
@@ -35,5 +36,34 @@ class McpTokenTest {
         val token = McpToken(refusing)
         assertEquals(token.current(), token.current())
         assertFalse(token.lasting)
+        assertEquals("refused", token.problem)
+    }
+
+    @Test
+    fun aKeychainThatCannotBeReachedIsAProblemNotACrashAndIsNotWritten() {
+        var writes = 0
+        val unreachable = object : SecretStore {
+            override val lasting = true
+
+            override fun read(plugin: String, key: String): String? = throw IllegalArgumentException("Cannot open library: Security")
+
+            override fun write(plugin: String, key: String, value: String) {
+                writes++
+            }
+
+            override fun delete(plugin: String, key: String) = Unit
+        }
+        val token = McpToken(unreachable)
+        assertTrue(token.current().isNotEmpty())
+        assertFalse(token.lasting)
+        assertEquals("Cannot open library: Security", token.problem)
+        assertEquals(0, writes)
+    }
+
+    @Test
+    fun aKeptTokenHasNoProblem() {
+        val token = McpToken(MemorySecretStore(lasting = true))
+        token.current()
+        assertNull(token.problem)
     }
 }

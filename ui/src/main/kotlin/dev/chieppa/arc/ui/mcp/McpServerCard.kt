@@ -21,6 +21,7 @@ import dev.chieppa.arc.design.generated.mcp_off
 import dev.chieppa.arc.design.generated.mcp_starting
 import dev.chieppa.arc.design.generated.mcp_switch
 import dev.chieppa.arc.design.generated.mcp_token_not_kept
+import dev.chieppa.arc.design.generated.mcp_token_this_run
 import dev.chieppa.arc.mcp.server.ConnectCommand
 import dev.chieppa.arc.mcp.server.McpServerState
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -39,7 +40,8 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The MCP server's card: its switch with where it stands beside it (off, listening on its address, how many clients are
  * connected, or why it is not listening, highlighted), and while it is on, the command that connects Claude Code with
- * its token, and a button copying it. A token that lasts only until Arc closes is highlighted.
+ * its token, and a button copying it. A token that lasts only until Arc closes is highlighted, and when the keychain
+ * failed, its reason shows in the error ink beneath, as it does in place of the command when there is no token.
  */
 @Composable
 fun McpServerCard(workbench: Workbench) {
@@ -57,7 +59,9 @@ fun McpServerCard(workbench: Workbench) {
             StateChip(state)
             Toggle(state != McpServerState.Off, mcp::switch, switchText, Modifier.testTag(McpSettingsTags.SWITCH))
         }
-        val command = mcp.command().takeIf { state != McpServerState.Off } ?: return@Column
+        val command = mcp.command
+        val problem = mcp.tokenProblem
+        if (state == McpServerState.Off || (command == null && problem == null)) return@Column
         Divider()
         Column(
             Modifier.fillMaxWidth().padding(horizontal = StretchSpacing.space14, vertical = StretchSpacing.space12),
@@ -65,10 +69,15 @@ fun McpServerCard(workbench: Workbench) {
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space10), verticalAlignment = Alignment.CenterVertically) {
                 Label(stringResource(Res.string.mcp_connect), Stretch.type.body, c.inkStrong, Modifier.weight(1f))
-                if (!mcp.tokenLasts) Chip(stringResource(Res.string.mcp_token_not_kept), kind = ChipKind.Warn)
-                Button(stringResource(Res.string.mcp_copy), { workbench.clipboard.copy(command) }, Modifier.testTag(McpSettingsTags.COPY), kind = ButtonKind.Quiet)
+                if (!mcp.tokenLasts && command != null) {
+                    Chip(stringResource(if (problem == null) Res.string.mcp_token_not_kept else Res.string.mcp_token_this_run), kind = ChipKind.Warn)
+                }
+                if (command != null) {
+                    Button(stringResource(Res.string.mcp_copy), { workbench.clipboard.copy(command) }, Modifier.testTag(McpSettingsTags.COPY), kind = ButtonKind.Quiet)
+                }
             }
-            BasicText(command, Modifier.testTag(McpSettingsTags.COMMAND), Stretch.type.valueSm.merge(TextStyle(color = c.inkMuted)))
+            if (command != null) BasicText(command, Modifier.testTag(McpSettingsTags.COMMAND), Stretch.type.valueSm.merge(TextStyle(color = c.inkMuted)))
+            if (problem != null) McpTokenProblem(problem, unavailable = command == null)
         }
     }
 }

@@ -50,6 +50,14 @@ class McpServerControlTest {
         assertTrue(control.on)
     }
 
+    @Test
+    fun anEndpointThatCannotBeMadeShowsAsFailed() = runTest {
+        val control = McpServerControl(backgroundScope, McpToken(MemorySecretStore()), PORT, { throw IllegalStateException("No engine") })
+        control.start()
+        runCurrent()
+        assertEquals(McpServerState.Failed("No engine"), control.state.value)
+    }
+
     private companion object {
         const val PORT = 47830
     }

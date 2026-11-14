@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.mcp
 
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -11,6 +12,7 @@ import dev.chieppa.arc.mcp.server.McpSetup
 import dev.chieppa.arc.mcp.server.McpToken
 import dev.chieppa.arc.mcp.tools.ArcTool
 import dev.chieppa.arc.plugins.secrets.MemorySecretStore
+import dev.chieppa.arc.plugins.secrets.SecretStore
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.plugins.PluginRig.Companion.shows
 import dev.chieppa.arc.ui.util.ArcDispatchers
@@ -20,6 +22,7 @@ import dev.chieppa.stretch.theme.StretchThemes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import java.io.IOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -72,6 +75,33 @@ class McpServerUiTest {
         assertTrue(endpoint.stopped)
         assertEquals(listOf(true, false), choices)
         assertTrue(!shows("clients connected") && !shows(command))
+    }
+
+    @Test
+    fun aKeychainThatCannotBeOpenedShowsItsReasonAndTheServerStillRuns() = runComposeUiTest {
+        val unreachable = object : SecretStore {
+            override val lasting = true
+
+            override fun read(plugin: String, key: String): String? = throw IOException("Cannot open library: Security")
+
+            override fun write(plugin: String, key: String, value: String) = throw IOException("Cannot open library: Security")
+
+            override fun delete(plugin: String, key: String) = Unit
+        }
+        val setup = McpSetup(McpToken(unreachable), port = PORT, version = "test", endpoint = { _, _ -> endpoint })
+        val workbench = Workbench(dispatchers = ArcDispatchers.on(UnconfinedTestDispatcher(mainClock.scheduler)), clipboard = { copied += it }, mcp = setup)
+        setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
+        workbench.panes.openSettings()
+        waitForIdle()
+        onNodeWithText("MCP server").performClick()
+        waitForIdle()
+        onNodeWithTag(McpSettingsTags.SWITCH).performClick()
+        waitForIdle()
+        assertEquals(McpServerState.Listening(PORT, 0), workbench.mcp.state)
+        onNodeWithTag(McpSettingsTags.TOKEN_PROBLEM).assertTextEquals("Keychain: Cannot open library: Security")
+        assertTrue(shows("Token kept only until Arc closes"))
+        onNodeWithTag(McpSettingsTags.COPY).performClick()
+        assertTrue(copied.single().startsWith("claude mcp add"))
     }
 
     @Test

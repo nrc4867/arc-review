@@ -990,6 +990,9 @@
     <string name="mcp_connect">Connect Claude Code</string>
     <string name="mcp_copy">Copy command</string>
     <string name="mcp_token_not_kept">Token kept only until Arc closes: no keychain here</string>
+    <string name="mcp_token_this_run">Token kept only until Arc closes</string>
+    <string name="mcp_token_keychain">Keychain: %1$s</string>
+    <string name="mcp_token_unavailable">Token unavailable: %1$s</string>
     <string name="mcp_status_tooltip">An MCP client is connected to Arc</string>
     <string name="update_to">Update to %1$s</string>
     <string name="update_downloading">Updating to %1$s</string>
