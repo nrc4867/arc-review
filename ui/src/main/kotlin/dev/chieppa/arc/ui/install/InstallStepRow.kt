@@ -2,6 +2,10 @@ package dev.chieppa.arc.ui.install
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -11,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.install_megabytes
 import dev.chieppa.arc.install.InstallStep
@@ -24,13 +30,33 @@ import dev.chieppa.stretch.ui.Spinner
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * One install step: a check once done, a spinner while it runs, a warning in the error ink when it failed, and for
- * the runtime, its download's progress in megabytes while it arrives.
+ * One install step: a check once done, a spinner while it runs, a warning in the error ink when it failed with the
+ * reason beneath it, selectable to copy, and for the runtime, its download's progress in megabytes while it arrives.
  */
 @Composable
 fun InstallStepRow(controller: InstallController, step: InstallStep, label: String) {
     val c = Stretch.colors
     val status = controller.status(step)
+    Column(Modifier.fillMaxWidth()) {
+        StepLine(controller, step, label, status)
+        val reason = controller.reason
+        if (status == StepStatus.Failed && reason != null) {
+            SelectionContainer(Modifier.padding(start = StretchSizes.chip + InstallSizes.rowGap)) {
+                BasicText(
+                    reason,
+                    Modifier.testTag(InstallTags.reason(step)),
+                    style = Stretch.type.bodySm.merge(TextStyle(color = c.errorInk)),
+                    maxLines = InstallSizes.reasonLines,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StepLine(controller: InstallController, step: InstallStep, label: String, status: StepStatus) {
+    val c = Stretch.colors
     Row(
         Modifier.fillMaxWidth().height(StretchSizes.row).testTag(InstallTags.row(step, status)),
         horizontalArrangement = Arrangement.spacedBy(InstallSizes.rowGap),

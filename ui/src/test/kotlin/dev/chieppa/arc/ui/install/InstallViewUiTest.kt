@@ -3,6 +3,7 @@ package dev.chieppa.arc.ui.install
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -69,8 +70,10 @@ class InstallViewUiTest {
         controller.start()
         waitForIdle()
         onNodeWithTag(InstallTags.row(InstallStep.Runtime, StepStatus.Failed)).assertExists()
+        onNodeWithTag(InstallTags.reason(InstallStep.Runtime)).assertTextEquals("offline")
         onNodeWithText("Try again").performClick()
         waitForIdle()
+        onNodeWithTag(InstallTags.reason(InstallStep.Runtime)).assertDoesNotExist()
         InstallStep.entries.forEach { onNodeWithTag(InstallTags.row(it, StepStatus.Done)).assertExists() }
         assertEquals(2, attempts)
     }

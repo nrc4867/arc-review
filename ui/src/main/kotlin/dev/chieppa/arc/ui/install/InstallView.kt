@@ -53,4 +53,7 @@ internal object InstallSizes {
     val gap = 12.dp
     val rowGap = 10.dp
     val progressWidth = 160.dp
+
+    /** The most lines a failed step's reason takes. */
+    const val reasonLines = 4
 }

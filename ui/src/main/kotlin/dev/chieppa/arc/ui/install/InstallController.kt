@@ -14,8 +14,8 @@ import kotlinx.coroutines.withContext
 
 /**
  * The install window's state: [install] runs the steps (the runtime, the jar, the launcher), each step's [status]
- * follows as it goes, the runtime's download shows its [downloaded] and [total] bytes, and a failed step stays marked
- * until [start] tries again.
+ * follows as it goes, the runtime's download shows its [downloaded] and [total] bytes, and a failed step stays marked,
+ * with the [reason] it failed, until [start] tries again.
  */
 class InstallController(
     private val install: suspend (InstallListener) -> Unit,
@@ -32,6 +32,10 @@ class InstallController(
     /** Whether every step is done, so Arc can be opened. */
     val done: Boolean get() = InstallStep.entries.all { status(it) == StepStatus.Done }
 
+    /** Why the failed step failed, or null while none has. */
+    var reason by mutableStateOf<String?>(null)
+        private set
+
     /** Whether a step failed. */
     val failed: Boolean get() = statuses.values.any { it == StepStatus.Failed }
 
@@ -46,6 +50,7 @@ class InstallController(
         if (running) return
         running = true
         statuses.clear()
+        reason = null
         downloaded = 0
         total = null
         var current: InstallStep? = null
@@ -66,17 +71,21 @@ class InstallController(
             }
         }
         scope.launch {
-            val failed = try {
+            val failure = try {
                 withContext(dispatchers.io) { install(listener) }
-                false
+                null
             } catch (e: CancellationException) {
                 throw e
-            } catch (_: Exception) {
-                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                e
             }
             // After the listener's changes, which are posted to the same scope.
             post {
-                if (failed) statuses[current ?: InstallStep.entries.first { status(it) != StepStatus.Done }] = StepStatus.Failed
+                if (failure != null) {
+                    statuses[current ?: InstallStep.entries.first { status(it) != StepStatus.Done }] = StepStatus.Failed
+                    reason = failure.message ?: failure.toString()
+                }
                 running = false
             }
         }
