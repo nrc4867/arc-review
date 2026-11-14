@@ -23,9 +23,9 @@ class ProgramLocatorTest {
 
     @Test
     fun aProgramMissingFromAShortPathIsFoundInTheHomeFolders() {
-        val gh = program(".local/bin", "gh")
+        val gh = program(".local/bin", "arc-locator-test")
         val locator = ProgramLocator(mapOf("PATH" to root.resolve("empty").toString()), root.toString(), windows = false)
-        assertEquals(gh.toString(), locator.find("gh"))
+        assertEquals(gh.toString(), locator.find("arc-locator-test"))
     }
 
     @Test
