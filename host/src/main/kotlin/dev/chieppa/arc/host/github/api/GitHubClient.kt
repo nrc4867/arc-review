@@ -41,7 +41,7 @@ class GitHubClient(private val tokens: GitHubTokens = GitHubTokens(), private va
             variables?.let { put(VARIABLES, it) }
         }.toString()
         val response = send(GitHubApi.POST, GitHubApi.GRAPHQL, mapOf(GitHubApi.CONTENT_TYPE to GitHubApi.JSON_BODY), body)
-        if (response.status != GitHubApi.OK) throw GitHubException(GitHubException.Reason.Failed, "GraphQL answered ${response.status}")
+        if (response.status != GitHubApi.OK) throw GitHubException(GitHubException.Reason.Failed, "GraphQL answered ${response.status}", response.status)
         val root = parse(response.body) as? JsonObject ?: throw GitHubException(GitHubException.Reason.Failed, "GraphQL answer is not an object")
         val errors = root[ERRORS] as? JsonArray
         val data = root[DATA] as? JsonObject

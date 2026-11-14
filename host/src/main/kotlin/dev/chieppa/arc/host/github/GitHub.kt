@@ -5,6 +5,7 @@ import dev.chieppa.arc.host.github.api.GitHubApi
 import dev.chieppa.arc.host.github.actions.ActionsClient
 import dev.chieppa.arc.host.github.actions.ActionsWriter
 import dev.chieppa.arc.host.github.pulls.RateBudget
+import dev.chieppa.arc.host.github.pulls.SearchResult
 import dev.chieppa.arc.core.conversation.PushOutcome
 import dev.chieppa.arc.core.conversation.Reaction
 import dev.chieppa.arc.core.conversation.ReviewPush
@@ -91,10 +92,45 @@ class GitHub(
     /** The person last read with the token in use, without asking GitHub; null with no token or none read yet. */
     suspend fun knownViewer(): Viewer? = client.token()?.let { viewers.known(it) }
 
-    /** Every search in [searches], by key, in one request. */
+    /**
+     * Every search in [searches], by key, in one request. When GitHub gives up on it (a 502 or 504, as for searches of
+     * large organisations' pull requests), each search is asked for on its own with smaller pages; one that still gets
+     * no answer is in the poll's `failed`, and the poll fails only when none answers.
+     */
     suspend fun search(searches: Map<String, String>): SearchPoll {
         val document = SearchDocument(searches)
-        return SearchPoll.parse(document, client.graphql(document.text))
+        return try {
+            SearchPoll.parse(document, client.graphql(document.text))
+        } catch (e: GitHubException) {
+            if (!e.timedOut) throw e
+            searchEach(searches)
+        }
+    }
+
+    private suspend fun searchEach(searches: Map<String, String>): SearchPoll {
+        val results = linkedMapOf<String, SearchResult>()
+        val failed = linkedMapOf<String, String>()
+        var budget: RateBudget? = null
+        var last: GitHubException? = null
+        for ((key, query) in searches) {
+            for (first in SearchDocument.SMALLER) {
+                val document = SearchDocument(mapOf(key to query), first)
+                val poll = try {
+                    SearchPoll.parse(document, client.graphql(document.text))
+                } catch (e: GitHubException) {
+                    if (!e.timedOut) throw e
+                    last = e
+                    failed[key] = e.message.orEmpty()
+                    continue
+                }
+                results += poll.results
+                failed -= key
+                budget = poll.budget ?: budget
+                break
+            }
+        }
+        if (results.isEmpty()) throw checkNotNull(last)
+        return SearchPoll(results, budget, failed)
     }
 
     /** The open pull requests in [repos] whose titles hold [text], or the latest updated for blank [text], in one search; none for no repo. */

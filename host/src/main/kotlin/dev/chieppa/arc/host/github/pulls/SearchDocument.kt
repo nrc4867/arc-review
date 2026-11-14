@@ -21,6 +21,9 @@ class SearchDocument(searches: Map<String, String>, first: Int = FIRST) {
     companion object {
         /** How many pull requests each search brings back. */
         const val FIRST = 50
+
+        /** The smaller pages a search is asked again for, one at a time, when GitHub gives up on it. */
+        val SMALLER = listOf(20, 10)
         private const val ALIAS_PREFIX = "s"
         private val TYPED = Regex("(^|\\s)(is|type):(pr|pull-request|issue)\\b")
         private const val PR = "is:pr "

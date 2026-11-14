@@ -48,7 +48,8 @@ class PullPoller(
             val poll = github.search(searches)
             val now = watch.now()
             val events = WatchEvents.newPulls(watch.watchlist.rules, watch.results, poll.results.mapValues { it.value.pulls })
-            watch.results = poll.results.mapValues { (_, result) -> FilterResult(result.total, result.pulls, now) }
+            // A search GitHub gave up on keeps what it last found.
+            watch.results = watch.results.filterKeys { it in poll.failed } + poll.results.mapValues { (_, result) -> FilterResult(result.total, result.pulls, now) }
             poll.budget?.let { watch.budget = it }
             watch.status = WatchStatus.Live
             events.forEach { notifier.tell(it) }

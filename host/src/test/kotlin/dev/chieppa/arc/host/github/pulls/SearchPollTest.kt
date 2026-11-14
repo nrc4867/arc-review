@@ -86,4 +86,33 @@ class SearchPollTest {
         assertEquals("is:issue label:bug", SearchDocument.withType("is:issue label:bug"))
         assertEquals("type:pr x", SearchDocument.withType("type:pr x"))
     }
+
+    private fun one(count: Int) = ApiResponse(200, body = """{"data":{"rateLimit":{"limit":5000,"remaining":4990,"resetAt":"2026-11-14T14:00:00Z"},"s0":{"issueCount":$count,"nodes":[]}}}""")
+
+    @Test
+    fun searchesGitHubGivesUpOnAreAskedAgainOneByOneWithSmallerPages() = runTest {
+        val (github, transport) = github(ApiResponse(502), one(7), ApiResponse(504), ApiResponse(502))
+        val poll = github.search(linkedMapOf("team" to "org:big", "mine" to "author:@me"))
+        assertEquals(7, poll.results.getValue("team").total)
+        assertEquals(setOf("mine"), poll.failed.keys)
+        assertEquals(4990, poll.budget?.remaining)
+        assertEquals(4, transport.requests.size)
+        assertTrue("first: 20" in transport.requests[1].body!! && "org:big" in transport.requests[1].body!!)
+        assertTrue("first: 20" in transport.requests[2].body!! && "author:@me" in transport.requests[2].body!!)
+        assertTrue("first: 10" in transport.requests[3].body!!)
+    }
+
+    @Test
+    fun aPollWhereEverySearchTimesOutFails() = runTest {
+        val (github) = github(ApiResponse(502), ApiResponse(502), ApiResponse(502))
+        val failure = assertFailsWith<GitHubException> { github.search(mapOf("team" to "org:big")) }
+        assertTrue(failure.timedOut)
+    }
+
+    @Test
+    fun anotherFailureIsNotAskedAgain() = runTest {
+        val (github, transport) = github(ApiResponse(500))
+        assertFailsWith<GitHubException> { github.search(mapOf("team" to "org:big", "mine" to "author:@me")) }
+        assertEquals(1, transport.requests.size)
+    }
 }
