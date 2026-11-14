@@ -20,6 +20,8 @@ class FakeConversations : ConversationService {
     val resolved = mutableListOf<Pair<String, Boolean>>()
     val pushes = mutableListOf<ReviewPush>()
     var answer: CompletableDeferred<Unit>? = null
+    var avatars: Map<String, ByteArray> = emptyMap()
+    val avatarsAsked = mutableListOf<String>()
 
     override suspend fun conversation(source: Source.PullRequest): HostedConversation? = hosted
 
@@ -40,7 +42,10 @@ class FakeConversations : ConversationService {
         return outcome(push)
     }
 
-    override suspend fun avatar(url: String): ByteArray? = null
+    override suspend fun avatar(url: String): ByteArray? {
+        avatarsAsked += url
+        return avatars[url]
+    }
 
     override suspend fun picture(url: String): ByteArray? = null
 }

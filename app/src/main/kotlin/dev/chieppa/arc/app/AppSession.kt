@@ -24,6 +24,8 @@ import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.host.github.GitHub
 import dev.chieppa.arc.core.conversation.LocalConversation
 import dev.chieppa.arc.host.github.avatars.AvatarCache
+import dev.chieppa.arc.host.github.pulls.ViewerCache
+import dev.chieppa.arc.host.github.pulls.ViewerFile
 import dev.chieppa.arc.core.recent.RecentSources
 import dev.chieppa.arc.core.start.StartLayout
 import dev.chieppa.arc.store.conversation.ConversationFile
@@ -55,7 +57,7 @@ import java.nio.file.Path
  * comments and notes, the recently opened sources, people's pictures, the app's own clones of GitHub repos, and plugins (their setup, stores, bundles and the Node they run on). Repos are read through git for the workspace in
  * [current], and pull requests through [github].
  */
-class AppSession(private val dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub()) : Closeable {
+class AppSession(private val dataDir: Path, val conversation: ReviewConversation, val github: GitHub = GitHub(viewers = ViewerCache(ViewerFile(dataDir.resolve(AppConstants.VIEWER_FILE))))) : Closeable {
     private val settingsFile = SettingsFile(dataDir.resolve(AppConstants.SETTINGS_FILE))
     private val workspaceFile = WorkspaceFile(dataDir.resolve(AppConstants.WORKSPACE_FILE))
     private val reviewFolder = ReviewFolder(dataDir.resolve(AppConstants.REVIEWS_FOLDER))

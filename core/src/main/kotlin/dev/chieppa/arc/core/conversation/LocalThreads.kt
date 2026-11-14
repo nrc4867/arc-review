@@ -7,9 +7,9 @@ object LocalThreads {
     /**
      * The drafts, staged comments and notes the person wrote on [path] of [source] that are not replies, each as a
      * thread at the line [placed] gives it now. One whose line is gone is left out here: the staged list shows it.
-     * [author] names the person on their own messages.
+     * [author] names the person on their own messages and [avatar] is their picture.
      */
-    fun on(local: LocalConversation, source: Source, path: String, author: String, placed: (LocalComment) -> Int?): List<ReviewThread> =
+    fun on(local: LocalConversation, source: Source, path: String, author: String, avatar: String? = null, placed: (LocalComment) -> Int?): List<ReviewThread> =
         local.of(source).filter { it.anchor?.path == path && !it.isReply }.mapNotNull { comment ->
             val anchor = comment.anchor ?: return@mapNotNull null
             val line = placed(comment) ?: return@mapNotNull null
@@ -20,7 +20,7 @@ object LocalThreads {
                 line = line,
                 side = anchor.side,
                 state = stateOf(comment.kind),
-                messages = listOf(ThreadMessage(author, comment.body, comment.writtenAt, id = comment.id)),
+                messages = listOf(ThreadMessage(author, comment.body, comment.writtenAt, id = comment.id, avatar = avatar)),
                 madeOn = anchor.madeOn,
                 startLine = anchor.startLine?.let { line - (anchor.line - it) },
                 local = comment,

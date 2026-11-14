@@ -43,6 +43,7 @@ fun ConversationPanel(workbench: Workbench, source: Source.PullRequest, inTab: B
     }
     val list = rememberLazyListState()
     val you = stringResource(Res.string.comment_you)
+    val me = ownAuthor(workbench, source)
     val own = controller.local.of(source).filter { it.anchor == null && !it.isReply && it.kind == LocalKind.Staged }
     Column(modifier.fillMaxSize()) {
         SourceHeading(workbench.state, source, Modifier.padding(StretchSpacing.space12)) { ConversationMeta(read) }
@@ -54,7 +55,7 @@ fun ConversationPanel(workbench: Workbench, source: Source.PullRequest, inTab: B
                 Divider()
             }
             items(own, key = { it.id }) { comment ->
-                val message = ThreadMessage(controller.viewer(source) ?: you, comment.body, comment.writtenAt)
+                val message = ThreadMessage(me.name, comment.body, comment.writtenAt, avatar = me.avatar)
                 ConversationItem(message, comment.id, workbench, null, author = you, when_ = stringResource(Res.string.staged_goes_up)) {
                     StateChip(stringResource(Res.string.staged_state), ArcIcons.Stage, stateLook(ThreadState.Staged))
                     TipIconButton(StretchIcons.Pen, stringResource(Res.string.staged_edit), { controller.edit(comment.id) })

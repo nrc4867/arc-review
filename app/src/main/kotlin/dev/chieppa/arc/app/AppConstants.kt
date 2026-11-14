@@ -35,6 +35,9 @@ internal object AppConstants {
     /** People's pictures from GitHub, kept for a day. */
     const val AVATARS_FOLDER = "avatars"
 
+    /** Who the person signed in to GitHub is, by their token's fingerprint, kept for a day. */
+    const val VIEWER_FILE = "viewer.json"
+
     /** The plugins' sources, which are enabled and their settings. */
     const val PLUGINS_FILE = "plugins.json"
 

@@ -6,10 +6,7 @@ import dev.chieppa.arc.core.conversation.LocalThreads
 import dev.chieppa.arc.core.conversation.ReviewThread
 import dev.chieppa.arc.core.conversation.ThreadContext
 import dev.chieppa.arc.core.pane.Pane
-import dev.chieppa.arc.design.generated.Res
-import dev.chieppa.arc.design.generated.comment_you
 import dev.chieppa.arc.ui.workbench.Workbench
-import org.jetbrains.compose.resources.stringResource
 
 /**
  * The threads to show on [pane]'s file: the host's, with the person's replies, any sample threads placed against the
@@ -24,8 +21,8 @@ fun paneThreads(workbench: Workbench, pane: Pane, changed: List<Int>, lineCount:
     val tools = workbench.comments
     val local = tools.controller.local
     val snapshot = workbench.state.snapshot(source)
-    val you = stringResource(Res.string.comment_you)
+    val me = ownAuthor(workbench, source)
     val host = tools.controller.hostThreads(source, pane.path)
-    val own = LocalThreads.on(local, source, pane.path, you) { tools.placer.lineOf(it, snapshot) }
+    val own = LocalThreads.on(local, source, pane.path, me.name, me.avatar) { tools.placer.lineOf(it, snapshot) }
     return workbench.threadViews.shown(LocalThreads.withReplies(host + samples, local)) + own
 }

@@ -24,6 +24,7 @@ import dev.chieppa.arc.host.github.pulls.PullRequestSummary
 import dev.chieppa.arc.host.github.pulls.SearchDocument
 import dev.chieppa.arc.host.github.pulls.SearchPoll
 import dev.chieppa.arc.host.github.pulls.Viewer
+import dev.chieppa.arc.host.github.pulls.ViewerCache
 import dev.chieppa.arc.host.github.pulls.ViewerQuery
 import dev.chieppa.arc.host.github.repo.GitHubRepo
 import dev.chieppa.arc.host.github.review.CommitCommenter
@@ -47,6 +48,7 @@ class GitHub(
     private val client: GitHubClient = GitHubClient(),
     pacer: MutationPacer = MutationPacer(),
     private val media: MediaFetcher = JdkMediaFetcher(client::token),
+    private val viewers: ViewerCache = ViewerCache(),
 ) {
     private val writer = ReviewWriter(client, pacer)
     private val publisher = ReviewPublisher(writer)
@@ -76,12 +78,18 @@ class GitHub(
     /** Where the token in use came from, or null when there is none. */
     fun tokenOrigin(): TokenOrigin? = client.tokenOrigin()
 
-    /** The person signed in, with their teams. */
+    /** The person signed in, with their name, picture and teams, read once a day and again when the token changes. */
     suspend fun viewer(): Viewer {
-        val login = ViewerQuery.login(client.graphql(ViewerQuery.LOGIN))
-            ?: throw GitHubException(GitHubException.Reason.Failed, "No viewer")
-        return Viewer(login, ViewerQuery.teams(client.graphql(ViewerQuery.teams(login))))
+        val token = client.token() ?: throw GitHubException(GitHubException.Reason.NoToken, "No GitHub token")
+        return viewers.viewer(token) {
+            val viewer = ViewerQuery.identity(client.graphql(ViewerQuery.IDENTITY))
+                ?: throw GitHubException(GitHubException.Reason.Failed, "No viewer")
+            viewer.copy(teams = ViewerQuery.teams(client.graphql(ViewerQuery.teams(viewer.login))))
+        }
     }
+
+    /** The person last read with the token in use, without asking GitHub; null with no token or none read yet. */
+    suspend fun knownViewer(): Viewer? = client.token()?.let { viewers.known(it) }
 
     /** Every search in [searches], by key, in one request. */
     suspend fun search(searches: Map<String, String>): SearchPoll {

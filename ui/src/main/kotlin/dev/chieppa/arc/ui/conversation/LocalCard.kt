@@ -63,7 +63,8 @@ fun LocalCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = M
         Divider()
         if (writing) {
             Row(Modifier.fillMaxWidth().padding(StretchSpacing.space10), horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8)) {
-                Avatar(controller.viewer(comment.source) ?: you, null, workbench.comments.avatars)
+                val me = ownAuthor(workbench, comment.source)
+                Avatar(me.name, me.avatar, workbench.comments.avatars)
                 Column(Modifier.weight(1f)) {
                     CommentComposer(
                         comment.body,

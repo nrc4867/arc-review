@@ -35,10 +35,10 @@ import org.jetbrains.compose.resources.stringResource
 fun ReplyRow(reply: LocalComment, workbench: Workbench, writing: Boolean) {
     val controller = workbench.comments.controller
     val you = stringResource(Res.string.comment_you)
-    val viewer = controller.viewer(reply.source) ?: you
+    val me = ownAuthor(workbench, reply.source)
     if (writing) {
         Row(Modifier.fillMaxWidth().padding(StretchSpacing.space10), horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8)) {
-            Avatar(viewer, null, workbench.comments.avatars)
+            Avatar(me.name, me.avatar, workbench.comments.avatars)
             Column(Modifier.weight(1f)) {
                 CommentComposer(reply.body, { controller.write(reply.id, it) }, stringResource(Res.string.reply_placeholder), { controller.stage(reply.id) }, { controller.close(reply.id) })
             }
@@ -46,7 +46,7 @@ fun ReplyRow(reply: LocalComment, workbench: Workbench, writing: Boolean) {
         return
     }
     if (reply.kind != LocalKind.Staged && reply.body.isBlank()) return
-    ThreadMessageRow(ThreadMessage(viewer, reply.body, reply.writtenAt, id = reply.id), workbench, author = you) {
+    ThreadMessageRow(ThreadMessage(me.name, reply.body, reply.writtenAt, id = reply.id, avatar = me.avatar), workbench, author = you) {
         StateChip(stringResource(Res.string.staged_state), ArcIcons.Stage, stagedLook(reply.failed))
         if (!reply.fromPending) TipIconButton(StretchIcons.Pen, stringResource(Res.string.staged_edit), { controller.edit(reply.id) })
     }

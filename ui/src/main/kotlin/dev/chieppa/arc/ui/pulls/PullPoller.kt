@@ -10,8 +10,8 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 /**
- * Polls GitHub for [watch] while it runs: every saved search in one request every [PullTimes.POLL_MINUTES] minutes,
- * or at once when asked, and the person's notifications as often as GitHub allows. What a poll sets off goes to
+ * Polls GitHub for [watch] while it runs: who the person is, by the token in use, and every saved search in one request
+ * every [PullTimes.POLL_MINUTES] minutes, or at once when asked, and the person's notifications as often as GitHub allows. What a poll sets off goes to
  * [notifier]. [extraSearches] are polled in the same request, by key, for others to read from the results. Blocking
  * reads run on [dispatchers]' io.
  */
@@ -32,11 +32,13 @@ class PullPoller(
     suspend fun pollOnce() {
         watch.tokenOrigin = withContext(dispatchers.io) { github.tokenOrigin() }
         if (watch.tokenOrigin == null) {
+            watch.viewer = null
             watch.status = WatchStatus.Unavailable
             return
         }
+        watch.viewer = withContext(dispatchers.io) { github.knownViewer() }
         try {
-            if (watch.viewer == null) watch.viewer = github.viewer()
+            watch.viewer = github.viewer()
             val searches = WatchSearches.of(watch.watchlist) + extraSearches
             if (searches.isEmpty()) {
                 watch.results = emptyMap()
