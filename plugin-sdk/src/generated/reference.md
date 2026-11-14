@@ -244,6 +244,7 @@ What a plugin can read and do. Every call carries the source it acts on.
 | `fetch` | `(url: string, init?: FetchInit) => Promise<FetchResponse>` | An HTTP request Arc makes to a host the manifest's network capability names, with no credentials of Arc's and no redirects followed. |
 | `on` | `(event: AppEventName, listener: (event: AppEvent) => void) => () => void` | Listens for an event in Arc; gives a function that stops. |
 | `useQuery` | `<T>(load: () => Promise<T>, deps?: readonly unknown[]) => T \| undefined` | A hook: what load gives, undefined until it has, loaded again when deps or the source change. |
+| `output` | `OutputApi` | The plugin's own channel in Arc's Console, named after it, where the person reads what it reports. Needs no capability. |
 | `log` | `(...values: unknown[]) => void` | Writes to the plugin's log. |
 
 ### PluginStore
@@ -276,6 +277,15 @@ A process Arc runs for the plugin.
 | `kill` | `() => Promise<void>` | Ends it. |
 | `onOutput` | `(listener: (text: string, error: boolean) => void) => () => void` | Listens for what it prints. |
 | `onExit` | `(listener: (code: number) => void) => () => void` | Listens for its end. |
+
+### OutputApi
+
+The plugin's own channel in Arc's Console. It reaches no other channel; text shows as plain text, and only the channel's last lines are kept.
+
+| Member | Type | What |
+| --- | --- | --- |
+| `append` | `(text: string, options?: { level?: OutputLevel }) => Promise<void>` | Writes text, info unless a level says warn (yellow) or error (in the error ink, and kept under Errors). |
+| `clear` | `() => Promise<void>` | Empties the channel. |
 
 ### PanesApi
 
@@ -388,6 +398,7 @@ Something that happened in Arc.
 - `SettingType`: `"text" | "number" | "boolean" | "choice" | "glob" | "list" | "map" | "secret"`
 - `NoteKind`: `"note" | "draft"`
 - `NoteSide`: `"old" | "new"`
+- `OutputLevel`: `"info" | "warn" | "error"`
 
 ### RepoInfo
 

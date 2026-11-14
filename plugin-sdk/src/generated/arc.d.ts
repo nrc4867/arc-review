@@ -8,6 +8,8 @@ export type IconName = "branch" | "check" | "close" | "code" | "comment" | "comm
 
 export type AppEventName = "source.opened" | "file.marked" | "push.finished" | "notes.changed";
 
+export type OutputLevel = "info" | "warn" | "error";
+
 export type SettingType = "text" | "number" | "boolean" | "choice" | "glob" | "list" | "map" | "secret";
 
 export type NoteKind = "note" | "draft";
@@ -297,6 +299,8 @@ export interface App<S = Record<string, unknown>> {
     readonly on: (event: AppEventName, listener: (event: AppEvent) => void) => () => void;
     /** A hook: what load gives, undefined until it has, loaded again when deps or the source change. */
     readonly useQuery: <T>(load: () => Promise<T>, deps?: readonly unknown[]) => T | undefined;
+    /** The plugin's own channel in Arc's Console, named after it, where the person reads what it reports. Needs no capability. */
+    readonly output: OutputApi;
     /** Writes to the plugin's log. */
     readonly log: (...values: unknown[]) => void;
 }
@@ -331,6 +335,14 @@ export interface ProcessHandle {
     readonly onOutput: (listener: (text: string, error: boolean) => void) => () => void;
     /** Listens for its end. */
     readonly onExit: (listener: (code: number) => void) => () => void;
+}
+
+/** The plugin's own channel in Arc's Console. It reaches no other channel; text shows as plain text, and only the channel's last lines are kept. */
+export interface OutputApi {
+    /** Writes text, info unless a level says warn (yellow) or error (in the error ink, and kept under Errors). */
+    readonly append: (text: string, options?: { level?: OutputLevel }) => Promise<void>;
+    /** Empties the channel. */
+    readonly clear: () => Promise<void>;
 }
 
 /** The plugin's own panes. */

@@ -1,5 +1,6 @@
 package dev.chieppa.arc.plugins.api
 
+import dev.chieppa.arc.plugins.protocol.OutputLevels
 import dev.chieppa.arc.plugins.manifest.ApiVersion
 
 /**
@@ -39,6 +40,7 @@ object ReferenceGenerator {
         append(table(listOf(NAME, WHAT), AppApi.events.map { listOf(code(it.name), it.doc) }))
         append("\n## Data\n\n")
         DataTypes.unions.forEach { append("- `${DescriptorTypes.nameOf(it)}`: ${code(DescriptorTypes.unionOf(it))}\n") }
+        append("- `OutputLevel`: ${code(OutputLevels.ALL.joinToString(" | ") { "\"$it\"" })}\n")
         append('\n')
         DataTypes.interfaces.forEach { descriptor ->
             append("### ${DescriptorTypes.nameOf(descriptor)}\n\n")

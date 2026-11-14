@@ -28,6 +28,9 @@ watches it: every save reloads the plugin in the running Arc, with no build step
   child-process modules cannot be loaded.
 - A capability added to `plugin.json` keeps the plugin off until the person enables it again in Settings › Plugins, and
   only the person enables a plugin. Ask them to.
+- What the person should be able to read later, such as progress or why something failed, goes to
+  `app.output.append(text, { level })`: the plugin's own channel in Arc's Console drawer, named after the plugin, with
+  no capability needed. `app.log` is for debugging and shows only in `plugin_log` and Settings.
 - Nothing a plugin does can push, stage or publish, or mark files reviewed.
 
 ## The development loop with Arc's MCP server

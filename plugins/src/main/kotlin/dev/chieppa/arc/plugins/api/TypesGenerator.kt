@@ -1,6 +1,7 @@
 package dev.chieppa.arc.plugins.api
 
 import dev.chieppa.arc.plugins.manifest.ApiVersion
+import dev.chieppa.arc.plugins.protocol.OutputLevels
 
 /**
  * Writes `arc.d.ts`, the TypeScript types of the plugin API, from Arc's Kotlin definitions: the protocol's data
@@ -19,6 +20,7 @@ object TypesGenerator {
         append("export type ApiVersion = ${ApiVersion.CURRENT};\n\n")
         append("export type IconName = ${PluginIcons.NAMES.joinToString(" | ") { "\"$it\"" }};\n\n")
         append("export type AppEventName = ${AppApi.eventNames.joinToString(" | ") { "\"$it\"" }};\n\n")
+        append("export type OutputLevel = ${OutputLevels.ALL.joinToString(" | ") { "\"$it\"" }};\n\n")
         DataTypes.unions.forEach { append("export type ${DescriptorTypes.nameOf(it)} = ${DescriptorTypes.unionOf(it)};\n\n") }
         DataTypes.interfaces.forEach { append(DescriptorTypes.interfaceOf(it)).append('\n') }
         append(SETTINGS)

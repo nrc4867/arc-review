@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { App, AppEvent, AppEventName, FetchInit, FetchResponse, GrepHit, NewNote, NoteInfo, NotesFilter } from "../generated/arc";
+import type { App, AppEvent, AppEventName, FetchInit, FetchResponse, GrepHit, NewNote, NoteInfo, NotesFilter, OutputLevel } from "../generated/arc";
 import type { Channel } from "./channel";
 import type { Listeners } from "./Listeners";
 import type { Processes } from "./processes";
@@ -84,6 +84,11 @@ export function createApp(shared: Shared, context: CallContext, props: Record<st
                 };
             }, [context.source?.ref, ...deps]);
             return value;
+        },
+        output: {
+            append: async (text: string, options?: { level?: OutputLevel }) =>
+                void (await channel.request(Methods.outputAppend, { text: String(text), level: options?.level ?? "info" })),
+            clear: async () => void (await channel.request(Methods.outputClear, {})),
         },
         log: (...values: unknown[]) => console.error(...values),
     } as App<any>;

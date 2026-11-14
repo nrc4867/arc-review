@@ -1,5 +1,11 @@
 package dev.chieppa.arc.plugins.manager
 
+import dev.chieppa.arc.core.activity.ActivityChannel
+import dev.chieppa.arc.core.activity.ActivityEntry
+import dev.chieppa.arc.core.activity.ActivityKind
+import dev.chieppa.arc.core.activity.ActivityLog
+import dev.chieppa.arc.core.activity.ActivityOutcome
+import java.time.Instant
 import dev.chieppa.arc.plugins.command.CommandResult
 import dev.chieppa.arc.plugins.config.PluginStorage
 import dev.chieppa.arc.plugins.config.PluginsConfig
@@ -55,6 +61,7 @@ class PluginManagerTest {
     private val changes = MutableSharedFlow<Unit>()
     private val approved = Capabilities(panels = true, git = true, console = true)
     private val configChanges = MutableSharedFlow<Unit>()
+    private val output = ActivityLog()
     private val storage = PluginStorage.InMemory(PluginsConfig(enabled = setOf("todos"), approved = mapOf("todos" to approved)), configChanges)
 
     @AfterTest
@@ -69,7 +76,7 @@ class PluginManagerTest {
         val grep = GitGrep({ _, _ -> CommandResult(0, "src/a.ts:3:// TODO one\n", "") })
         val services = PluginServices(
             backgroundScope, plugin, storage, ConsoleProcesses(consoles, backgroundScope), grep, preparer,
-            watcher = DirectoryWatcher { changes }, clock = { testScheduler.currentTime },
+            watcher = DirectoryWatcher { changes }, clock = { testScheduler.currentTime }, output = output,
         )
         return PluginManager(services).apply {
             start()
@@ -146,6 +153,26 @@ class PluginManagerTest {
         runCurrent()
         val hits = (plugin.received.last() as Envelope.Response).result.jsonObject.getValue("hits")
         assertEquals("""[{"path":"src/a.ts","line":3,"text":"// TODO one"}]""", hits.toString())
+    }
+
+    @Test
+    fun outputGoesToThePluginsOwnChannelAndClearsOnlyThat() = runTest {
+        val plugin = FakePlugin(backgroundScope, contributions)
+        manager(plugin)
+        output.report(ActivityEntry(ActivityKind.Git, "git fetch", ActivityOutcome.Failed, Instant.EPOCH, error = "fatal: no"))
+        plugin.current.write(Envelope.Request(1, Methods.OUTPUT_APPEND, buildJsonObject { put("text", "Scanned 3 files") }))
+        plugin.current.write(Envelope.Request(2, Methods.OUTPUT_APPEND, buildJsonObject { put("text", "Bad file"); put("level", "error") }))
+        runCurrent()
+        val channel = ActivityChannel.plugin("todos", "todos")
+        val written = output.entries(channel.id)
+        assertEquals(listOf("Scanned 3 files", "Bad file"), written.map { it.title })
+        assertEquals(listOf(ActivityOutcome.Succeeded, ActivityOutcome.Failed), written.map { it.outcome })
+        assertEquals(ActivityKind.Output, written.first().kind)
+        plugin.current.write(Envelope.Request(3, Methods.OUTPUT_CLEAR, buildJsonObject {}))
+        runCurrent()
+        assertTrue(output.entries(channel.id).isEmpty())
+        assertEquals(listOf("git fetch"), output.entries().map { it.title })
+        assertTrue(plugin.received.filterIsInstance<Envelope.Response>().all { it.error == null })
     }
 
     @Test

@@ -43,6 +43,7 @@ object AppApi {
                 member("fetch", "(url: string, init?: FetchInit) => Promise<FetchResponse>", "An HTTP request Arc makes to a host the manifest's network capability names, with no credentials of Arc's and no redirects followed."),
                 member("on", "(event: AppEventName, listener: (event: AppEvent) => void) => () => void", "Listens for an event in Arc; gives a function that stops."),
                 member("useQuery", "<T>(load: () => Promise<T>, deps?: readonly unknown[]) => T | undefined", "A hook: what load gives, undefined until it has, loaded again when deps or the source change."),
+                member("output", "OutputApi", "The plugin's own channel in Arc's Console, named after it, where the person reads what it reports. Needs no capability."),
                 member("log", "(...values: unknown[]) => void", "Writes to the plugin's log."),
             ),
         ),
@@ -72,6 +73,14 @@ object AppApi {
                 member("kill", "() => Promise<void>", "Ends it."),
                 member("onOutput", "(listener: (text: string, error: boolean) => void) => () => void", "Listens for what it prints."),
                 member("onExit", "(listener: (code: number) => void) => () => void", "Listens for its end."),
+            ),
+        ),
+        InterfaceSpec(
+            "OutputApi",
+            "The plugin's own channel in Arc's Console. It reaches no other channel; text shows as plain text, and only the channel's last lines are kept.",
+            listOf(
+                member("append", "(text: string, options?: { level?: OutputLevel }) => Promise<void>", "Writes text, info unless a level says warn (yellow) or error (in the error ink, and kept under Errors)."),
+                member("clear", "() => Promise<void>", "Empties the channel."),
             ),
         ),
         InterfaceSpec(

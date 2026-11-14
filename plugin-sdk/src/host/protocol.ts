@@ -31,6 +31,8 @@ export const Methods = {
     notesList: "notes.list",
     notesCreate: "notes.create",
     commentsDraft: "comments.draft",
+    outputAppend: "output.append",
+    outputClear: "output.clear",
 } as const;
 
 /** The key that marks a prop as a function the plugin holds. */

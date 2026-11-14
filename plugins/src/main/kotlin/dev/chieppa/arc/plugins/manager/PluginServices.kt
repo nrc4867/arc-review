@@ -1,5 +1,6 @@
 package dev.chieppa.arc.plugins.manager
 
+import dev.chieppa.arc.core.activity.ActivityLog
 import dev.chieppa.arc.plugins.config.PluginStorage
 import dev.chieppa.arc.plugins.console.ConsoleProcesses
 import dev.chieppa.arc.plugins.git.GitGrep
@@ -22,7 +23,7 @@ import kotlinx.coroutines.CoroutineScope
  * is the Node plugins run on, and [nodeReady] whether it is on this machine already; [typeChecker] finds a directory
  * plugin's type errors, [typeCheckMillis] after it is enabled or saved; [gitSources] keeps the git sources' clones
  * (none: git sources are not loaded), checked for new commits every [gitCheckMillis]; [shutdown] ends what runs them
- * once every plugin has stopped.
+ * once every plugin has stopped. What plugins write to their own Console channels goes to [output].
  */
 class PluginServices(
     val scope: CoroutineScope,
@@ -45,6 +46,7 @@ class PluginServices(
     val typeCheckMillis: Long = TYPE_CHECK_MILLIS,
     val gitSources: GitSourceCache? = null,
     val gitCheckMillis: Long = GIT_CHECK_MILLIS,
+    val output: ActivityLog = ActivityLog(),
 ) {
     private companion object {
         const val RELOAD_MILLIS = 300L

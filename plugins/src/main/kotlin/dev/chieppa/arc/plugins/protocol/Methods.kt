@@ -100,4 +100,10 @@ object Methods {
 
     /** [NoteCreateParams] → [NoteInfo]: start a comment draft, which only the person stages and pushes. */
     const val COMMENTS_DRAFT = "comments.draft"
+
+    /** [OutputAppendParams] → nothing: write to the plugin's own channel in the Console. */
+    const val OUTPUT_APPEND = "output.append"
+
+    /** No params → nothing: empty the plugin's own channel in the Console. */
+    const val OUTPUT_CLEAR = "output.clear"
 }

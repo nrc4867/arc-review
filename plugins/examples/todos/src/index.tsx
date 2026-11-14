@@ -22,7 +22,9 @@ export default definePlugin({
             icon: "console",
             run: async (app) => {
                 const command = app.settings.command.split(" ").filter((part) => part.length > 0);
+                await app.output.append(`Running ${app.settings.command}`);
                 const process = await app.console.run(command);
+                process.onExit((code) => void app.output.append(`${app.settings.command} exited with ${code}`, { level: code === 0 ? "info" : "error" }));
                 await app.panes.open("console", { process: process.id, command: app.settings.command });
             },
         },
