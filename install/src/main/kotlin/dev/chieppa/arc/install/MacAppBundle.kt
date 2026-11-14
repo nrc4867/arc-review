@@ -7,8 +7,10 @@ import java.nio.file.attribute.PosixFilePermissions
 
 /**
  * Arc on macOS: `Arc.app` in the person's Applications folder, whose program is a script that runs the runtime's java
- * on `launch.args` with Arc's name and icon in the Dock. The bundle is written beside its place and moved in, then
- * touched so Launch Services reads it again.
+ * on `launch.args` with Arc's name and icon in the Dock. The runtime is Apple silicon's, and the bundle keeps Arc
+ * there: Launch Services may start a script's bundle under Rosetta, and the programs Arc runs (git through Xcode's
+ * `xcrun`) would then be asked for as Intel ones. The bundle is written beside its place and moved in, then touched so
+ * Launch Services reads it again.
  */
 class MacAppBundle(private val layout: InstallLayout, private val places: LauncherPlaces) : Launcher {
     /** Where the bundle goes. */
@@ -29,6 +31,14 @@ class MacAppBundle(private val layout: InstallLayout, private val places: Launch
     }
 
     override fun exists(): Boolean = Files.isRegularFile(bundle.resolve(CONTENTS).resolve(INFO_PLIST))
+
+    override fun isCurrent(javaHome: Path, version: String): Boolean {
+        val contents = bundle.resolve(CONTENTS)
+        val program = contents.resolve(MAC_OS).resolve(InstallConstants.APP_NAME)
+        return runCatching {
+            Files.readString(contents.resolve(INFO_PLIST)) == infoPlist(version) && Files.readString(program) == script(JavaPrograms.windowed(javaHome))
+        }.getOrDefault(false)
+    }
 
     override fun remove() = AtomicFiles.deleteTree(bundle)
 
@@ -51,13 +61,20 @@ class MacAppBundle(private val layout: InstallLayout, private val places: Launch
           <key>CFBundleShortVersionString</key><string>${xml(version)}</string>
           <key>CFBundleVersion</key><string>${xml(version)}</string>
           <key>LSMinimumSystemVersion</key><string>$MINIMUM_MACOS</string>
+          <key>LSArchitecturePriority</key><array><string>$ARM64</string></array>
+          <key>LSRequiresNativeExecution</key><true/>
           <key>NSHighResolutionCapable</key><true/>
         </dict>
         </plist>
     """.trimIndent() + "\n"
 
-    /** The bundle's program: replaces itself with [java] on `launch.args`, so Arc is the bundle's own process. */
+    /**
+     * The bundle's program: replaces itself with [java] on `launch.args`, so Arc is the bundle's own process, run by
+     * `arch` as Apple silicon's whatever started the script.
+     */
     fun script(java: Path): String = "#!/bin/sh\nexec " + listOf(
+        ARCH,
+        ARCH_ARM64,
         java.toString(),
         DOCK_NAME + InstallConstants.APP_NAME,
         DOCK_ICON + layout.icns,
@@ -78,6 +95,9 @@ class MacAppBundle(private val layout: InstallLayout, private val places: Launch
         const val OPEN = "open"
         const val DOCK_NAME = "-Xdock:name="
         const val DOCK_ICON = "-Xdock:icon="
+        const val ARM64 = "arm64"
+        const val ARCH = "/usr/bin/arch"
+        const val ARCH_ARM64 = "-$ARM64"
 
         /** The oldest macOS the JetBrains Runtime 25 runs on. */
         const val MINIMUM_MACOS = "12.0"

@@ -13,6 +13,9 @@ interface Launcher {
     /** Whether the launcher is in place. */
     fun exists(): Boolean
 
+    /** Whether the launcher in place is the one [write] makes for [javaHome] and [version]. */
+    fun isCurrent(javaHome: Path, version: String): Boolean = exists()
+
     /** Takes the launcher away. */
     fun remove()
 

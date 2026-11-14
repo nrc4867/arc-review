@@ -43,13 +43,18 @@ class LauncherFilesTest {
         assertTrue("<key>CFBundleIdentifier</key><string>dev.chieppa.arc</string>" in plist)
         assertTrue("<key>CFBundleName</key><string>Arc</string>" in plist)
         assertTrue("<key>LSMinimumSystemVersion</key>" in plist)
+        assertTrue("<key>LSRequiresNativeExecution</key><true/>" in plist)
         assertEquals("icns", contents.resolve("Resources/Arc.icns").readText())
         val script = contents.resolve("MacOS/Arc").readText()
         assertEquals(
-            "#!/bin/sh\nexec '${home.resolve("bin/java")}' '-Xdock:name=Arc' '-Xdock:icon=${layout.icns}' '@${layout.launchArgs}' \"\$@\"\n",
+            "#!/bin/sh\nexec '/usr/bin/arch' '-arm64' '${home.resolve("bin/java")}' '-Xdock:name=Arc' '-Xdock:icon=${layout.icns}' '@${layout.launchArgs}' \"\$@\"\n",
             script,
         )
         assertTrue(bundle.exists())
+        assertTrue(bundle.isCurrent(home, "0.2.0"))
+        assertFalse(bundle.isCurrent(home, "0.3.0"))
+        contents.resolve("MacOS/Arc").writeText("#!/bin/sh\nexec java\n")
+        assertFalse(bundle.isCurrent(home, "0.2.0"))
 
         bundle.write(home, "0.3.0")
         assertTrue("0.3.0" in contents.resolve("Info.plist").readText())

@@ -16,7 +16,8 @@ import java.time.Instant
 import java.util.concurrent.CancellationException
 
 /**
- * [transport] reporting every request to [activity]: its method and path, host, status and time, and for a failure
+ * [transport] reporting every request to [activity]: its method and path (with what a GraphQL request asks for, as
+ * [GraphqlLabel] names it), host, status and time, and for a failure
  * (no answer, a status GitHub gives for an error, or GraphQL errors) the start of the body. Headers, where the token
  * is, are never reported.
  */
@@ -58,7 +59,8 @@ class ReportingTransport(private val transport: HttpTransport, private val activ
     private fun report(request: ApiRequest, started: Instant, start: Long, outcome: ActivityOutcome, code: String?, error: String?) {
         val uri = runCatching { URI(request.url) }.getOrNull()
         val path = uri?.let { it.rawPath + (it.rawQuery?.let { query -> "?$query" } ?: "") } ?: request.url
-        activity.report(ActivityEntry(ActivityKind.GitHub, "${request.method} $path", outcome, started, elapsedMillis(start), uri?.host, code, error))
+        val label = if (request.url == GitHubApi.GRAPHQL) GraphqlLabel.of(request.body)?.let { " $it" }.orEmpty() else ""
+        activity.report(ActivityEntry(ActivityKind.GitHub, "${request.method} $path$label", outcome, started, elapsedMillis(start), uri?.host, code, error))
     }
 
     private fun graphqlErrors(request: ApiRequest, response: ApiResponse): Boolean {

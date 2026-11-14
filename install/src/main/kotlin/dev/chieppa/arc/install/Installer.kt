@@ -46,7 +46,7 @@ class Installer(
 
     /**
      * Makes the staged [version] current: rewrites `launch.args` and the state, and the launcher when [writeLauncher]
-     * is set, it is missing or the runtime changed, with any pinned copies then.
+     * is set, it is not the one this Arc makes or the runtime changed, with any pinned copies then.
      */
     suspend fun activate(version: InstalledVersion, listener: InstallListener = InstallListener.None, writeLauncher: Boolean = false) {
         withContext(Dispatchers.IO) {
@@ -55,7 +55,7 @@ class Installer(
             AtomicFiles.write(layout.launchArgs, LaunchArgs.text(LaunchArgs.of(version.jar)))
             listener.started(InstallStep.Launcher)
             val runtimeChanged = state.current != null && state.current.javaHome != version.javaHome
-            if (writeLauncher || runtimeChanged || !launcher.exists()) launcher.write(version.javaHome, version.version)
+            if (writeLauncher || runtimeChanged || !launcher.isCurrent(version.javaHome, version.version)) launcher.write(version.javaHome, version.version)
             if (runtimeChanged) launcher.refreshPins(version.javaHome, version.version)
             next.write(layout)
             listener.finished(InstallStep.Launcher)
