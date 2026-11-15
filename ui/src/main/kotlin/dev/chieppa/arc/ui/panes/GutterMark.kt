@@ -21,7 +21,7 @@ fun GutterMark(thread: ThreadState) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         val ink = when (thread) {
             ThreadState.Open -> c.warnInk
-            ThreadState.Draft -> c.accent
+            ThreadState.Draft -> c.accentInk
             else -> stateLook(thread).ink
         }
         val dot = Modifier.size(ArcSizes.gutterDot)
