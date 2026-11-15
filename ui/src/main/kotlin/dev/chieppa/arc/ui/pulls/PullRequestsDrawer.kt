@@ -67,7 +67,7 @@ fun PullRequestsDrawer(workbench: Workbench) {
             }
             Box { RenameFilterPopover(renaming, watch) { renaming = null } }
         }
-        NewFilterSection(watch) { workbench.panes.openFilter(it) }
+        NewFilterSection(watch, workbench.console.log) { workbench.panes.openFilter(it) }
         Column(
             Modifier.fillMaxWidth().padding(start = StretchSpacing.space14, end = StretchSpacing.space14, top = StretchSpacing.space10, bottom = StretchSpacing.space12),
             verticalArrangement = Arrangement.spacedBy(StretchSpacing.space2),

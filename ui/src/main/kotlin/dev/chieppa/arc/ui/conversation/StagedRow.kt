@@ -38,6 +38,7 @@ import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.arc.ui.util.TipIconButton
 import dev.chieppa.stretch.ui.PathLabel
+import dev.chieppa.stretch.ui.opensOnPress
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -83,7 +84,7 @@ fun StagedRow(comment: StagedComment, workbench: Workbench, modifier: Modifier =
 private fun RowMenu(comment: StagedComment, workbench: Workbench, open: () -> Unit, edit: () -> Unit, delete: () -> Unit) {
     var shown by remember { mutableStateOf(false) }
     Box {
-        TipIconButton(StretchIcons.More, stringResource(Res.string.staged_menu), { shown = true })
+        TipIconButton(StretchIcons.More, stringResource(Res.string.staged_menu), { shown = true }, modifier = Modifier.opensOnPress(shown) { shown = true })
         Menu(shown, { shown = false }) {
             if (comment.path != null) MenuItem(stringResource(Res.string.staged_open), { shown = false; open() })
             if (!comment.fromPending) {
