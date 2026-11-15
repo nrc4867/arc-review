@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.v2.runComposeUiTest
 import dev.chieppa.arc.ui.actions.ArcActionIds
 import dev.chieppa.arc.ui.frame.ArcFrame
+import dev.chieppa.arc.ui.settings.StagedPlace
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.test.setStretchContent
 import dev.chieppa.stretch.theme.StretchThemes
@@ -31,7 +32,7 @@ class ArcFrameUiTest {
     }
 
     private val drawerNames = listOf(
-        "Files", "Outline", "Search", "Notes", "Conversation", "Revisions", "Console", "Pull requests", "Checks", "Staged comments",
+        "Files", "Outline", "Search", "Notes", "Conversation", "Revisions", "Console", "Pull requests", "Checks",
     )
 
     @Test
@@ -42,6 +43,10 @@ class ArcFrameUiTest {
         for (name in drawerNames) {
             assertTrue(onAllNodesWithContentDescription(name).fetchSemanticsNodes().isNotEmpty(), name)
         }
+        assertTrue(onAllNodesWithContentDescription("Staged comments").fetchSemanticsNodes().isEmpty())
+        workbench.preferences = workbench.preferences.copy(stagedPlace = StagedPlace.Rail)
+        waitForIdle()
+        assertTrue(onAllNodesWithContentDescription("Staged comments").fetchSemanticsNodes().isNotEmpty())
     }
 
     @Test
