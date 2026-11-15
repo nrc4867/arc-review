@@ -15,10 +15,11 @@ import dev.chieppa.arc.ui.tree.TreeKeys
  * active source.
  */
 object ActionTargets {
-    /** The source: the chip's or tree row's, else the active one. */
+    /** The source: the chip's or tree row's, the tab's pane's or page's (none when it has none), else the active one. */
     fun source(workbench: Workbench): Source? = when (val target = workbench.menuTarget) {
         is MenuTarget.OfSource -> target.source
         is MenuTarget.OfRows -> target.item.source
+        is MenuTarget.OfPane -> workbench.state.pane(target.id)?.source ?: workbench.state.page(target.id)?.let(::sourceOf)
         is MenuTarget.OfStart -> StartTargets.source(workbench, target.action) ?: workbench.state.active
         else -> workbench.state.active
     }
@@ -58,6 +59,14 @@ object ActionTargets {
     /** The folder row the menu is open on, if it is one. */
     fun folder(workbench: Workbench): FileTreeItem.FolderRow? =
         (workbench.menuTarget as? MenuTarget.OfRows)?.item as? FileTreeItem.FolderRow
+
+    private fun sourceOf(page: Page): Source? = when (page) {
+        is Page.Home -> page.source
+        is Page.Conversation -> page.source
+        is Page.RevisionMatrix -> page.source
+        is Page.Plugin -> page.source
+        is Page.Filter, is Page.Runs, is Page.Run, is Page.Settings -> null
+    }
 
     private fun changeOf(pane: Pane): Pair<Source, String>? = pane.source?.takeIf { pane.hasChange }?.let { it to pane.path }
 

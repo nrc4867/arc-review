@@ -12,7 +12,10 @@ import dev.chieppa.arc.design.generated.start_base_head
 import dev.chieppa.arc.host.github.pulls.CheckState
 import dev.chieppa.arc.host.github.pulls.WaitingOn
 import dev.chieppa.arc.host.github.pulls.WaitingOnRule
+import dev.chieppa.arc.ui.actions.ArcActionIds
+import dev.chieppa.arc.ui.menus.TargetActionButton
 import dev.chieppa.arc.ui.pulls.SmallAvatar
+import dev.chieppa.arc.ui.workbench.MenuTarget
 import dev.chieppa.arc.ui.pulls.WaitingPill
 import dev.chieppa.arc.ui.sources.sourceIcon
 import dev.chieppa.arc.ui.switcher.SeparatorDot
@@ -24,7 +27,7 @@ import dev.chieppa.stretch.ui.ControlLabel
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The one-source screen's header: the source's title, then its ref, author, base and head, its commits and how many
+ * The one-source screen's header: the source's title with its link to GitHub, then its ref, author, base and head, its commits and how many
  * came since the person's review, and for a pull request who it waits on, and failed checks.
  */
 @Composable
@@ -52,7 +55,9 @@ fun SourceHeader(workbench: Workbench, source: Source) {
         snapshot?.let { { ControlLabel(commitsText(state, source, it), Stretch.type.bodySm, c.inkMuted) } },
     )
     Column(verticalArrangement = Arrangement.spacedBy(StretchSpacing.space8)) {
-        StartTitle(sourceIcon(source), pull?.title ?: snapshot?.title ?: SourceLabels.of(source))
+        StartTitle(sourceIcon(source), pull?.title ?: snapshot?.title ?: SourceLabels.of(source)) {
+            TargetActionButton(workbench, ArcActionIds.OPEN_ON_GITHUB, MenuTarget.OfSource(source))
+        }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8),
             verticalArrangement = Arrangement.spacedBy(StretchSpacing.space4),

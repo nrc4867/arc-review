@@ -23,6 +23,7 @@ object StartIcons {
     const val KEYBOARD = "keyboard"
     const val MATRIX = "matrix"
     const val NOTE = "note"
+    const val OPEN_ON_HOST = "open-on-host"
     const val PROBLEM = "problem"
     const val PULL_REQUEST = "pull-request"
     const val RANGE = "range"
@@ -51,6 +52,7 @@ object StartIcons {
             KEYBOARD to ArcIcons.Keyboard,
             MATRIX to ArcIcons.Matrix,
             NOTE to ArcIcons.Note,
+            OPEN_ON_HOST to ArcIcons.OpenOnHost,
             PROBLEM to ArcIcons.Problem,
             PULL_REQUEST to ArcIcons.PullRequest,
             RANGE to ArcIcons.Range,

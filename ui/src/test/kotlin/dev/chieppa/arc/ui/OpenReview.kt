@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onAllNodesWithText
 import dev.chieppa.arc.ui.frame.ArcFrame
 import dev.chieppa.arc.ui.review.WorkspaceState
 import dev.chieppa.arc.ui.services.ConversationService
+import dev.chieppa.arc.ui.services.LinkOpener
 import dev.chieppa.arc.ui.services.NoConversations
 import dev.chieppa.arc.ui.services.TextClipboard
 import dev.chieppa.arc.ui.settings.UiPreferences
@@ -24,13 +25,17 @@ class CopiedText : TextClipboard {
     }
 }
 
-/** The main window on [data] with its source added and read, copying to [clipboard], its conversation through [conversations]. */
+/**
+ * The main window on [data] with its source added and read, copying to [clipboard], its conversation through
+ * [conversations], web links going to [links].
+ */
 @OptIn(ExperimentalTestApi::class)
 fun ComposeUiTest.openReview(
     data: FakeReviewData,
     clipboard: TextClipboard = CopiedText(),
     preferences: UiPreferences = UiPreferences(),
     conversations: ConversationService = NoConversations,
+    links: LinkOpener = LinkOpener {},
 ): Workbench {
     val workbench = Workbench(
         dispatchers = testDispatchers(),
@@ -39,6 +44,7 @@ fun ComposeUiTest.openReview(
         state = WorkspaceState(repos = mapOf(data.repo to Path.of("."))),
         clipboard = clipboard,
         conversationService = conversations,
+        links = links,
     )
     setStretchContent(StretchThemes.WorkshopDark) { ArcFrame(workbench) }
     waitForIdle()
