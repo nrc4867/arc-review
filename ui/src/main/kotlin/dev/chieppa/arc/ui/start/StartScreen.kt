@@ -15,27 +15,29 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.core.start.StartContributor
 import dev.chieppa.arc.core.start.StartMerge
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.theme.Stretch
 
 /**
- * What the pane grid shows while it has no tab: the start screen for the sources selected in the strip. Every
+ * The start screen for [selection]: the sources selected in the strip, as the pane grid shows it while it has no tab,
+ * or one source, as its home page shows it. Every
  * contributor in the start registry is asked for the screen's context, Arc's own among them, and their cards are merged
  * with the person's layout into the two columns under the screen's top area and main buttons.
  */
 @Composable
-fun StartScreen(workbench: Workbench, modifier: Modifier = Modifier) {
+fun StartScreen(workbench: Workbench, modifier: Modifier = Modifier, selection: List<Source> = workbench.state.selection) {
     val start = workbench.start
-    val context = StartContexts.of(workbench.state)
+    val context = StartContexts.of(workbench.state, selection)
     val contributors = start.registry.all.map { (id, provider) -> key(id) { StartContributor(id, provider(context)) } }
     val columns = StartMerge.merge(context.kind, contributors, start.layout.of(context.kind), StartCards.slots)
     SideEffect {
         start.kind = context.kind
         start.showing = columns
     }
-    StartReads(workbench)
+    StartReads(workbench, selection)
     Box(modifier.fillMaxSize().background(Stretch.colors.surfacePanel).verticalScroll(rememberScrollState()), contentAlignment = Alignment.TopCenter) {
         Column(
             Modifier
@@ -44,8 +46,8 @@ fun StartScreen(workbench: Workbench, modifier: Modifier = Modifier) {
                 .padding(start = StartSizes.paddingSide, end = StartSizes.paddingSide, top = StartSizes.paddingTop, bottom = StartSizes.paddingBottom),
             verticalArrangement = Arrangement.spacedBy(StartSizes.sectionGap),
         ) {
-            StartTop(workbench, context.kind, columns.buttons)
-            StartColumnsView(workbench, columns)
+            StartTop(workbench, context.kind, columns.buttons, selection)
+            StartColumnsView(workbench, columns, selection)
         }
     }
 }

@@ -10,6 +10,7 @@ import dev.chieppa.arc.ui.actions.actionIcon
 import dev.chieppa.arc.ui.actions.actionText
 import dev.chieppa.arc.ui.conversation.ConversationEffects
 import dev.chieppa.arc.ui.conversation.OpenStagedWhenFilled
+import dev.chieppa.arc.ui.conversation.PushConfirmation
 import dev.chieppa.arc.ui.drawers.arcDrawerSpecs
 import dev.chieppa.arc.ui.plugins.PluginDrawers
 import dev.chieppa.arc.ui.plugins.PluginEvents
@@ -28,7 +29,7 @@ import dev.chieppa.stretch.frame.actionKeys
  * The main window's content: the top bar, the source strip under it across the window, Arc's drawers on both rails, the pane grid in
  * the viewport, the status bar, and the command palette and the switcher over them, all on [workbench]'s state. Every source
  * not read yet is read when it opens, and each repo's GitHub origin is looked up and its runs followed. The run dialogs
- * go over all of it.
+ * and the push confirmation go over all of it.
  */
 @Composable
 fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
@@ -64,6 +65,7 @@ fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
             )
             Switcher(workbench)
             RunOverlays(workbench.runs)
+            PushConfirmation(workbench)
         }
     }
 }

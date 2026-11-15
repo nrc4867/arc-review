@@ -9,9 +9,8 @@ import dev.chieppa.arc.ui.review.WorkspaceState
 
 /** The start screen's context as contributors are told it, from the window's state. */
 object StartContexts {
-    /** The screen for [state]'s selection, with what is known of each selected source. */
-    fun of(state: WorkspaceState): StartContext {
-        val selection = state.selection
+    /** The screen for [selection], [state]'s own unless given, with what is known of each selected source. */
+    fun of(state: WorkspaceState, selection: List<Source> = state.selection): StartContext {
         return StartContext(StartScreenKind.of(selection.size), selection.map { info(state, it) })
     }
 

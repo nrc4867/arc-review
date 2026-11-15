@@ -18,6 +18,11 @@ sealed interface StoredPage {
     @SerialName("revisions")
     data class RevisionMatrix(override val id: String, val source: String, val pinned: Boolean = false) : StoredPage
 
+    /** A source's home, by the source's ref. */
+    @Serializable
+    @SerialName("home")
+    data class Home(override val id: String, val source: String, val pinned: Boolean = false) : StoredPage
+
     /** A pull request's conversation, by the source's ref. */
     @Serializable
     @SerialName("conversation")

@@ -15,6 +15,7 @@ object ArcSettingIds {
     const val NOTIFICATIONS_ORDER = 800
 
     const val PANES_CARD = "arc.panes"
+    const val REVIEW_CARD = "arc.review"
     const val LOOK_CARD = "arc.look"
     const val PULLS_CARD = "arc.notify.pulls"
     const val RUNS_CARD = "arc.notify.runs"
@@ -25,6 +26,7 @@ object ArcSettingIds {
     const val SIZE = "arc.size"
     const val WRAP = "arc.wrap"
     const val LINE_HIGHLIGHT = "arc.line-highlight"
+    const val STAGED_PLACE = "arc.staged-place"
     const val ACCOUNT = "arc.account"
     const val TOKEN = "arc.token"
     const val VERSION = "arc.version"

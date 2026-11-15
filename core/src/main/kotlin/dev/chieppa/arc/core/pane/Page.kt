@@ -20,6 +20,11 @@ sealed interface Page {
     /** The revision matrix of [source]: its files against the heads it has had. It stays with its source unless [pinned]. */
     data class RevisionMatrix(override val id: PaneId, val source: Source, override val pinned: Boolean = false) : Page
 
+    /**
+     * [source]'s home: the start screen for that one source, open in the grid. It stays with its source unless [pinned].
+     */
+    data class Home(override val id: PaneId, val source: Source, override val pinned: Boolean = false) : Page
+
     /** The conversation of pull request [source], open in the grid. It stays with its source unless [pinned]. */
     data class Conversation(override val id: PaneId, val source: Source, override val pinned: Boolean = false) : Page
 

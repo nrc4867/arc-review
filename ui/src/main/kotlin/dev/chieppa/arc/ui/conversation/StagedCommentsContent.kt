@@ -12,7 +12,7 @@ import dev.chieppa.stretch.ui.Divider
 
 /**
  * The Staged comments drawer for the active source: its verdict and summary, one row per staged comment, and the push
- * at the foot, which asks for confirmation first. Plain while there is no source.
+ * at the foot, which asks for confirmation first ([PushConfirmation]). Plain while there is no source.
  */
 @Composable
 fun StagedCommentsContent(workbench: Workbench) {
@@ -31,5 +31,4 @@ fun StagedCommentsContent(workbench: Workbench) {
         Divider()
         StagedFooter(workbench, source, staged)
     }
-    if (pusher.confirming == source) PushDialog(workbench, source)
 }

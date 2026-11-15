@@ -16,6 +16,7 @@ import dev.chieppa.arc.host.conversation.NoConversation
 import dev.chieppa.arc.host.conversation.ReviewConversation
 import dev.chieppa.arc.ui.actions.registerArcActions
 import dev.chieppa.arc.ui.actions.registerContextActions
+import dev.chieppa.arc.ui.actions.registerHostLinkActions
 import dev.chieppa.arc.ui.actions.registerPullActions
 import dev.chieppa.arc.ui.actions.registerReviewActions
 import dev.chieppa.arc.ui.actions.registerRunActions
@@ -232,6 +233,7 @@ class Workbench(
         registerArcActions(registry, this, onQuit)
         registerReviewActions(registry, this)
         registerContextActions(registry, this)
+        registerHostLinkActions(registry, this)
         registerPullActions(registry, this)
         registerRunActions(registry, this)
         navigation.start()
@@ -308,6 +310,12 @@ class Workbench(
     fun openRevisions(source: Source) {
         if (source != state.active) activateSource(source)
         panes.openRevisions(source)
+    }
+
+    /** Makes [source] active and shows its home, opening it when it is not open. */
+    fun openHome(source: Source) {
+        if (source != state.active) activateSource(source)
+        panes.openHome(source)
     }
 
     /** Removes saved filter [id], with its rules and its tab. */

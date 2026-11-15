@@ -176,6 +176,13 @@ object ArcIcons {
             stroke("M8 4v9.5")
         }
     }
+    val Home: ImageVector by lazy {
+        icon("home") {
+            stroke("M2 7.5L8 2.5l6 5")
+            stroke("M3.5 6.5v6a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1v-6")
+            stroke("M6.5 13.5V10h3v3.5")
+        }
+    }
     val Keyboard: ImageVector by lazy {
         icon("keyboard") {
             stroke("M3 4h10a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1 -1.5 1.5h-10a1.5 1.5 0 0 1 -1.5 -1.5v-5a1.5 1.5 0 0 1 1.5 -1.5z")
@@ -236,6 +243,14 @@ object ArcIcons {
         icon("open-as-tab") {
             stroke("M2 6.5h12")
             stroke("M2 4a1.5 1.5 0 0 1 1.5-1.5h3L8 4.5h4.5A1.5 1.5 0 0 1 14 6v6a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 12z")
+        }
+    }
+    val OpenOnHost: ImageVector by lazy {
+        icon("open-on-host") {
+            stroke("M7 2.5H3.5A1.5 1.5 0 0 0 2 4v8.5A1.5 1.5 0 0 0 3.5 14h9a1.5 1.5 0 0 0 1.5-1.5V9")
+            stroke("M2 6h3.5")
+            stroke("M9.5 2H14v4.5")
+            stroke("M14 2L8.5 7.5")
         }
     }
     val Outline: ImageVector by lazy {

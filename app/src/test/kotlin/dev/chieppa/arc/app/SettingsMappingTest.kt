@@ -1,6 +1,7 @@
 package dev.chieppa.arc.app
 
 import dev.chieppa.arc.store.settings.AppSettings
+import dev.chieppa.arc.ui.settings.StagedPlace
 import dev.chieppa.arc.ui.settings.UiPreferences
 import dev.chieppa.stretch.theme.StretchThemes
 import kotlin.test.Test
@@ -16,10 +17,12 @@ class SettingsMappingTest {
     fun theLookSurvivesARoundTrip() {
         val look = UiPreferences(StretchThemes.InkDark, 1.25f)
         assertEquals(look, look.toSettings().toPreferences())
-        assertEquals(AppSettings("ink-dark", 1.25f, wrapLines = false, wholeLineHighlight = true), look.toSettings())
+        assertEquals(AppSettings("ink-dark", 1.25f, wrapLines = false, wholeLineHighlight = true, stagedPlace = "home"), look.toSettings())
         val wrapping = look.copy(wrapLines = true)
         assertEquals(wrapping, wrapping.toSettings().toPreferences())
         val gutter = look.copy(wholeLineHighlight = false)
         assertEquals(gutter, gutter.toSettings().toPreferences())
+        val rail = look.copy(stagedPlace = StagedPlace.Rail)
+        assertEquals(rail, rail.toSettings().toPreferences())
     }
 }

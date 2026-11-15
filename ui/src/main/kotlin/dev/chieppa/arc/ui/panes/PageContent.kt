@@ -10,6 +10,7 @@ import dev.chieppa.arc.ui.revisions.RevisionMatrixPage
 import dev.chieppa.arc.ui.runs.RunPage
 import dev.chieppa.arc.ui.runs.RunsPage
 import dev.chieppa.arc.ui.settings.SettingsPage
+import dev.chieppa.arc.ui.start.SourceHomePage
 import dev.chieppa.arc.ui.workbench.Workbench
 
 /** What a page's tab shows, by its kind. */
@@ -19,6 +20,7 @@ fun PageContent(page: Page, workbench: Workbench, modifier: Modifier = Modifier)
         is Page.Filter -> FilterPage(page, workbench, modifier)
         is Page.RevisionMatrix -> RevisionMatrixPage(page, workbench, modifier)
         is Page.Conversation -> ConversationPage(page, workbench, modifier)
+        is Page.Home -> SourceHomePage(page, workbench, modifier)
         is Page.Runs -> RunsPage(page, workbench, modifier)
         is Page.Run -> RunPage(page, workbench, modifier)
         is Page.Settings -> SettingsPage(page, workbench, modifier)

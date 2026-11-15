@@ -24,10 +24,11 @@ import org.jetbrains.compose.resources.stringResource
  * The frame's drawers, one per [DrawerSlot]: Files holds the workspace; Outline the focused pane's symbols; Notes, Conversation and Staged comments the
  * active source's notes, pull request conversation and staged batch; Pull requests the saved filters and notification
  * rules; Runs the run filters and run notifications; Revisions the active source's commits under the title Commits;
- * Console the activity log; the others open plain.
+ * Console the activity log; the others open plain. Staged comments is on the rail only while the settings put the staged
+ * batch there rather than on the source's home.
  */
 @Composable
-fun arcDrawerSpecs(workbench: Workbench): List<DrawerSpec> = ArcDrawerSlots.all.map { slot ->
+fun arcDrawerSpecs(workbench: Workbench): List<DrawerSpec> = ArcDrawerSlots.shown(workbench.preferences).map { slot ->
     when (slot.id) {
         DrawerIds.FILES -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false) { FilesDrawerContent(workbench) }
         DrawerIds.OUTLINE -> DrawerSpec(slot.id, stringResource(slot.title), slot.icon, scrolls = false) { OutlineDrawer(workbench) }

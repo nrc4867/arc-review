@@ -22,15 +22,15 @@ import dev.chieppa.stretch.ui.TextArea
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The top of the Staged comments drawer: the source the batch is for and, for a pull request, the verdict and the
- * summary text that go up with it.
+ * The top of the staged batch: the source it is for, unless [heading] is off where the source shows already, and, for a
+ * pull request, the verdict and the summary text that go up with it.
  */
 @Composable
-fun StagedHead(workbench: Workbench, source: Source) {
+fun StagedHead(workbench: Workbench, source: Source, heading: Boolean = true) {
     val controller = workbench.comments.controller
     val label = Stretch.type.eyebrow.merge(TextStyle(color = Stretch.colors.inkMuted))
     Column(Modifier.fillMaxWidth().padding(StretchSpacing.space12), verticalArrangement = Arrangement.spacedBy(StretchSpacing.space10)) {
-        SourceHeading(workbench.state, source)
+        if (heading) SourceHeading(workbench.state, source)
         if (source !is Source.PullRequest) return@Column
         val summary = controller.summary(source)
         Column(verticalArrangement = Arrangement.spacedBy(StretchSpacing.space6)) {

@@ -11,7 +11,7 @@ import dev.chieppa.stretch.theme.StretchIcons
 /**
  * The tab the pane grid shows for [page]: a saved filter's name under the filter icon, a revision matrix's title, as
  * [revisionsTitle] gives it for its source, under the matrix icon, or a conversation's, as [conversationTitle] gives it,
- * under the comment icon; a run filter's as [runsTitle] gives it for the filter, and a run's as [runTitle] gives it, under
+ * under the comment icon, or a source's home, as [homeTitle] gives it, under the home icon; a run filter's as [runsTitle] gives it for the filter, and a run's as [runTitle] gives it, under
  * the runs icon; the Settings page as [settingsTitle] under the settings icon; a plugin's pane as [pluginTab] gives it.
  */
 fun pageTab(
@@ -19,6 +19,7 @@ fun pageTab(
     watchlist: Watchlist,
     revisionsTitle: (Source) -> String,
     conversationTitle: (Source) -> String,
+    homeTitle: (Source) -> String,
     runsTitle: (String) -> String,
     runTitle: (RunRef) -> String,
     settingsTitle: String,
@@ -27,6 +28,7 @@ fun pageTab(
     is Page.Filter -> TabItem(page.id.value, watchlist.filter(page.filter)?.name ?: page.filter, ArcIcons.Filter)
     is Page.RevisionMatrix -> TabItem(page.id.value, revisionsTitle(page.source), ArcIcons.Matrix)
     is Page.Conversation -> TabItem(page.id.value, conversationTitle(page.source), ArcIcons.Comment)
+    is Page.Home -> TabItem(page.id.value, homeTitle(page.source), ArcIcons.Home)
     is Page.Runs -> TabItem(page.id.value, runsTitle(page.filter), ArcIcons.Runs)
     is Page.Run -> TabItem(page.id.value, runTitle(page.run), ArcIcons.Runs)
     is Page.Settings -> TabItem(page.id.value, settingsTitle, StretchIcons.Settings)
