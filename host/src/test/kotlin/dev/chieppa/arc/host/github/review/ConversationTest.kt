@@ -3,8 +3,10 @@ package dev.chieppa.arc.host.github.review
 import dev.chieppa.arc.core.change.ObjectId
 import dev.chieppa.arc.core.conversation.CommentAnchor
 import dev.chieppa.arc.core.conversation.ConversationEntry
+import dev.chieppa.arc.core.conversation.HeadForcePush
 import dev.chieppa.arc.core.conversation.LineSide
 import dev.chieppa.arc.core.conversation.LocalKind
+import dev.chieppa.arc.core.conversation.PullCommit
 import dev.chieppa.arc.core.conversation.Reaction
 import dev.chieppa.arc.core.conversation.ReactionGroup
 import dev.chieppa.arc.core.conversation.ReviewState
@@ -16,13 +18,13 @@ import dev.chieppa.arc.host.github.GitHub
 import dev.chieppa.arc.host.github.RecordedTransport
 import dev.chieppa.arc.host.github.api.ApiResponse
 import dev.chieppa.arc.host.github.repo.GitHubRepo
-import kotlinx.coroutines.test.runTest
 import java.time.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class ConversationTest {
     private val repo = GitHubRepo("acme", "api")
@@ -125,6 +127,19 @@ class ConversationTest {
         assertEquals("A new thought.", fresh.body)
         assertEquals(CommentAnchor("src/d.kt", 20, LineSide.New, 18, head), fresh.anchor)
         assertEquals(source, fresh.source)
+    }
+
+    @Test
+    fun commitsAndForcePushesComeBackOldestFirst() = runTest {
+        val read = read(FakeGitHub.resource("conversation.json")).first!!.conversation
+        assertEquals(
+            listOf(
+                PullCommit("aaaa111111111111111111111111111111111111", "Add the cache", "alice", epoch("2026-11-01T12:00:00Z"), "https://avatars.githubusercontent.com/u/1?v=4"),
+                PullCommit("bbbb222222222222222222222222222222222222", "Rename the cache", "Bot Person", epoch("2026-11-02T09:00:00Z")),
+            ),
+            read.commits,
+        )
+        assertEquals(listOf(HeadForcePush("alice", "aaaa111111111111111111111111111111111111", null, epoch("2026-11-03T08:00:00Z"))), read.forcePushes)
     }
 
     @Test

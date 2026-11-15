@@ -28,6 +28,8 @@ object ConversationParser {
             threads = threads,
             pending = pending,
             viewer = data.obj("viewer").string("login"),
+            commits = TimelineParser.commits(pull.nodes("timeline")),
+            forcePushes = TimelineParser.forcePushes(pull.nodes("timeline")),
         )
         val pendingReview = pull.nodes("pending").firstOrNull { it.boolean("viewerDidAuthor") == true }.string("id")
         return HostConversation(pullId, pull.string("headRefOid"), pendingReview, conversation)

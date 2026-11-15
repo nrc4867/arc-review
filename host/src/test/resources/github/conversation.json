@@ -14,6 +14,10 @@
  {"id":"PRR_3","body":"Mine, unsent","state":"PENDING","createdAt":"2026-11-04T09:00:00Z","submittedAt":null,"author":{"login":"me","avatarUrl":null},"comments":{"totalCount":2},"reactionGroups":[]},
  {"id":"PRR_4","body":"Please split this.","state":"CHANGES_REQUESTED","createdAt":"2026-11-04T10:00:00Z","submittedAt":"2026-11-04T10:00:00Z","author":{"login":"dave","avatarUrl":null},"comments":{"totalCount":2},"reactionGroups":[{"content":"EYES","viewerHasReacted":false,"reactors":{"totalCount":1}}]}]},
 "pending":{"nodes":[{"id":"PRR_3","viewerDidAuthor":true}]},
+"timeline":{"nodes":[
+ {"__typename":"PullRequestCommit","commit":{"oid":"aaaa111111111111111111111111111111111111","messageHeadline":"Add the cache","committedDate":"2026-11-01T12:00:00Z","authoredDate":"2026-11-01T11:00:00Z","author":{"name":"Alice A","user":{"login":"alice","avatarUrl":"https://avatars.githubusercontent.com/u/1?v=4"}}}},
+ {"__typename":"HeadRefForcePushedEvent","createdAt":"2026-11-03T08:00:00Z","actor":{"login":"alice","avatarUrl":null},"beforeCommit":{"oid":"aaaa111111111111111111111111111111111111"},"afterCommit":null},
+ {"__typename":"PullRequestCommit","commit":{"oid":"bbbb222222222222222222222222222222222222","messageHeadline":"Rename the cache","committedDate":null,"authoredDate":"2026-11-02T09:00:00Z","author":{"name":"Bot Person","user":null}}}]},
 "reviewThreads":{"nodes":[
  {"id":"PRRT_open","path":"src/a.kt","line":12,"originalLine":10,"startLine":10,"originalStartLine":8,"diffSide":"RIGHT","isResolved":false,"isOutdated":false,"subjectType":"LINE",
   "comments":{"nodes":[
