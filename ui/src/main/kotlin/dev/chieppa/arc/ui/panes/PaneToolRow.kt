@@ -30,14 +30,15 @@ import dev.chieppa.arc.design.generated.pane_unified
 import dev.chieppa.arc.design.generated.pane_unpin
 import dev.chieppa.arc.design.generated.pane_docs
 import dev.chieppa.arc.design.generated.pane_wrap
+import dev.chieppa.arc.ui.actions.ArcActionIds
 import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.util.ArcSizes
+import dev.chieppa.arc.ui.util.TipIconButton
 import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.arc.ui.workbench.keysFor
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
-import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
-import dev.chieppa.stretch.ui.IconButton
 import dev.chieppa.stretch.ui.PathLabel
 import dev.chieppa.stretch.ui.Segmented
 import org.jetbrains.compose.resources.stringResource
@@ -45,15 +46,15 @@ import org.jetbrains.compose.resources.stringResource
 /**
  * The row under a pane's tabs, its file's header: the repo and path, shortened from the middle, a chip for an added,
  * deleted, unchanged or binary file, its revisions, how it shows (diff, full file or rendered), side by side or one
- * column, moving between changes, wrapping, find, pinning, and marking it reviewed. [kind] is null until the text is
- * read. A narrow pane leaves out the revisions and the mark key's cap, so the path keeps its room.
+ * column, moving between changes, wrapping, find, pinning, and marking it reviewed; each icon names itself and its key
+ * in a tooltip. [kind] is null until the text is read. A narrow pane leaves out the revisions, so the path keeps its
+ * room.
  */
 @Composable
 fun PaneToolRow(pane: Pane, kind: FileKind?, binary: Boolean, workbench: Workbench, find: FindState, modifier: Modifier = Modifier) {
     val c = Stretch.colors
     val id = pane.id.value
     BoxWithConstraints(modifier.fillMaxWidth()) {
-        val wide = maxWidth >= ArcSizes.toolRowWide
         val roomy = maxWidth >= ArcSizes.toolRowRoomy
         Row(
             Modifier.fillMaxWidth().height(ArcSizes.toolRow).background(c.surfacePanel).padding(horizontal = StretchSpacing.space8),
@@ -81,22 +82,45 @@ fun PaneToolRow(pane: Pane, kind: FileKind?, binary: Boolean, workbench: Workben
             }
             if (view == PaneView.Diff) {
                 val split = workbench.state.paneState(id).split
-                IconButton(StretchIcons.SplitView, stringResource(Res.string.pane_split), { workbench.panes.setSplit(id, true) }, size = StretchSizes.seg, on = split)
-                IconButton(StretchIcons.UnifiedView, stringResource(Res.string.pane_unified), { workbench.panes.setSplit(id, false) }, size = StretchSizes.seg, on = !split)
+                val keys = workbench.keysFor(ArcActionIds.TOGGLE_SPLIT)
+                TipIconButton(StretchIcons.SplitView, stringResource(Res.string.pane_split), { workbench.panes.setSplit(id, true) }, keys = keys, on = split)
+                TipIconButton(StretchIcons.UnifiedView, stringResource(Res.string.pane_unified), { workbench.panes.setSplit(id, false) }, keys = keys, on = !split)
             }
             if (view != null && view != PaneView.Rendered && !binary) {
                 if (kind.hasDiff) {
-                    IconButton(StretchIcons.ChevronLeft, stringResource(Res.string.action_previous_change), { workbench.runOnPane(id) { previousChange() } }, size = StretchSizes.seg)
-                    IconButton(StretchIcons.ChevronRight, stringResource(Res.string.action_next_change), { workbench.runOnPane(id) { nextChange() } }, size = StretchSizes.seg)
+                    TipIconButton(
+                        StretchIcons.ChevronLeft,
+                        stringResource(Res.string.action_previous_change),
+                        { workbench.runOnPane(id) { previousChange() } },
+                        keys = workbench.keysFor(ArcActionIds.PREVIOUS_CHANGE),
+                    )
+                    TipIconButton(
+                        StretchIcons.ChevronRight,
+                        stringResource(Res.string.action_next_change),
+                        { workbench.runOnPane(id) { nextChange() } },
+                        keys = workbench.keysFor(ArcActionIds.NEXT_CHANGE),
+                    )
                 }
                 val wrap = workbench.wrap(id)
-                IconButton(ArcIcons.Wrap, stringResource(Res.string.pane_wrap), { workbench.panes.setWrap(id, !wrap) }, size = StretchSizes.seg, on = wrap)
+                TipIconButton(ArcIcons.Wrap, stringResource(Res.string.pane_wrap), { workbench.panes.setWrap(id, !wrap) }, keys = workbench.keysFor(ArcActionIds.TOGGLE_WRAP), on = wrap)
                 val docs = workbench.state.paneState(id).docs
-                IconButton(ArcIcons.Docs, stringResource(Res.string.pane_docs), { workbench.panes.setDocs(id, !docs) }, size = StretchSizes.seg, on = docs)
-                IconButton(StretchIcons.Search, stringResource(Res.string.action_find_in_file), { if (find.open) find.open = false else find.show() }, size = StretchSizes.seg, on = find.open)
+                TipIconButton(ArcIcons.Docs, stringResource(Res.string.pane_docs), { workbench.panes.setDocs(id, !docs) }, keys = workbench.keysFor(ArcActionIds.TOGGLE_DOCS), on = docs)
+                TipIconButton(
+                    StretchIcons.Search,
+                    stringResource(Res.string.action_find_in_file),
+                    { if (find.open) find.open = false else find.show() },
+                    keys = workbench.keysFor(ArcActionIds.FIND_IN_FILE),
+                    on = find.open,
+                )
             }
-            IconButton(StretchIcons.Pin, stringResource(if (pane.pinned) Res.string.pane_unpin else Res.string.pane_pin), { workbench.panes.togglePin(id) }, size = StretchSizes.seg, on = pane.pinned)
-            if (pane.source != null && pane.hasChange) MarkReviewedButton(pane, workbench, showKeys = wide)
+            TipIconButton(
+                StretchIcons.Pin,
+                stringResource(if (pane.pinned) Res.string.pane_unpin else Res.string.pane_pin),
+                { workbench.panes.togglePin(id) },
+                keys = workbench.keysFor(ArcActionIds.TOGGLE_PIN),
+                on = pane.pinned,
+            )
+            if (pane.source != null && pane.hasChange) MarkReviewedButton(pane, workbench)
         }
     }
 }

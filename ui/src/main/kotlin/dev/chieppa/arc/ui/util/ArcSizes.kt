@@ -14,8 +14,7 @@ object ArcSizes {
     /** A pane's tool row under its tabs. */
     val toolRow = 34.dp
 
-    /** How wide a tool row shows the mark key beside its button, and its revisions. */
-    val toolRowWide = 900.dp
+    /** How wide a tool row shows its revisions. */
     val toolRowRoomy = 720.dp
     val revisionChipHeight = 22.dp
 
