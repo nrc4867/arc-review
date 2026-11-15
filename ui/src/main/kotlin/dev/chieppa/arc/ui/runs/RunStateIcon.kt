@@ -26,7 +26,7 @@ fun RunStateIcon(state: RunState, modifier: Modifier = Modifier, size: Dp = 16.d
     val (icon, color, text) = when (state) {
         RunState.Waiting -> Triple(ArcIcons.CheckWaiting, c.warnInk, Res.string.run_state_waiting)
         RunState.Queued -> Triple(ArcIcons.CheckQueued, c.inkSubtle, Res.string.run_state_queued)
-        RunState.Running -> Triple(ArcIcons.CheckPending, c.accent, Res.string.run_state_running)
+        RunState.Running -> Triple(ArcIcons.CheckPending, c.accentInk, Res.string.run_state_running)
         RunState.Succeeded -> Triple(ArcIcons.CheckRun, c.deltaUp, Res.string.run_state_succeeded)
         RunState.Failed -> Triple(ArcIcons.CheckFail, c.errorInk, Res.string.run_state_failed)
         RunState.Cancelled -> Triple(ArcIcons.Stop, c.inkMuted, Res.string.run_state_cancelled)

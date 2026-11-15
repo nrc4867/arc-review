@@ -31,7 +31,7 @@ fun MarkBox(checked: Boolean?, onToggle: (Boolean) -> Unit, description: String,
     val (fill, edge, ink) = when {
         changedSince -> Triple(c.warnWash, c.warnEdge, c.warnInk)
         checked != false -> Triple(c.accent, c.accent, c.onAccent)
-        else -> Triple(Color.Transparent, c.lineStrong, c.ink)
+        else -> Triple(Color.Transparent, c.toggleOffEdge, c.ink)
     }
     Box(
         modifier

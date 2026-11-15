@@ -60,7 +60,7 @@ fun ConversationThread(thread: ReviewThread, workbench: Workbench, modifier: Mod
             StateChip(text, icon, look)
             val where = if (showPath) stringResource(Res.string.staged_location, thread.path, thread.line) else stringResource(Res.string.thread_line, thread.line)
             Tooltip(stringResource(Res.string.thread_go_to)) {
-                PathLabel(where, Stretch.type.valueSm, c.accent, Modifier.clickable { ThreadJumps.to(workbench, thread) })
+                PathLabel(where, Stretch.type.valueSm, c.accentInk, Modifier.clickable { ThreadJumps.to(workbench, thread) })
             }
             Spacer(Modifier.weight(1f))
             val replies = thread.messages.size - 1
