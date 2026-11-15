@@ -1,6 +1,7 @@
 package dev.chieppa.arc.ui.actions
 
 import dev.chieppa.stretch.core.KeyChord
+import dev.chieppa.stretch.frame.NavigationKeys
 
 /** Arc's default shortcuts. Ctrl is Cmd on macOS. */
 object ArcKeys {
@@ -16,6 +17,9 @@ object ArcKeys {
     val FIND_IN_FILE: KeyChord = KeyChord.parse("Ctrl F")
     val GO_TO_DEFINITION: KeyChord = KeyChord.parse("F12")
     val SHOW_USAGES: KeyChord = KeyChord.parse("Ctrl Alt F7")
+    val GO_TO_IMPLEMENTATION: KeyChord = KeyChord.parse("Ctrl Alt B")
+    val NAVIGATE_BACK: KeyChord = NavigationKeys.back
+    val NAVIGATE_FORWARD: KeyChord = NavigationKeys.forward
     val OPEN_FILE: KeyChord = KeyChord.parse("Ctrl P")
     val CLOSE_PANE: KeyChord = KeyChord.parse("Ctrl W")
     val TOGGLE_WRAP: KeyChord = KeyChord.parse("Alt Z")

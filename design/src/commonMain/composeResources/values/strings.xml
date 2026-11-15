@@ -47,6 +47,7 @@
     <string name="settings_size_percent">%1$d%</string>
     <string name="settings_wrap">Wrap long lines</string>
     <string name="settings_line_highlight">Highlight whole changed lines</string>
+    <string name="settings_scroll_past_end">Scroll past the end of the file</string>
     <string name="settings_status">Settings · %1$s</string>
     <string name="settings_search">Search settings</string>
     <string name="settings_section_general">General</string>
@@ -61,6 +62,7 @@
     <string name="settings_size_interface">Interface size</string>
     <string name="settings_wrap_detail">Where a pane is not set otherwise</string>
     <string name="settings_line_highlight_detail">Off washes only the gutter</string>
+    <string name="settings_scroll_past_end_detail">Half a pane of room after the last line</string>
     <string name="settings_account">Account</string>
     <string name="settings_account_login">@%1$s</string>
     <string name="settings_account_signed_out">Not signed in</string>
@@ -71,6 +73,7 @@
     <string name="settings_keywords_size">zoom, scale, font, bigger, smaller</string>
     <string name="settings_keywords_wrap">soft wrap, line, long</string>
     <string name="settings_keywords_line_highlight">diff, gutter, wash, added, removed</string>
+    <string name="settings_keywords_scroll_past_end">scroll, end, bottom, last line, overscroll, virtual space</string>
     <string name="settings_keywords_notify">alert, desktop, toast, notification</string>
     <string name="settings_keywords_account">login, sign in, token, gh, github</string>
     <string name="menu_review">Review</string>
@@ -582,6 +585,9 @@
 
     <string name="action_go_to_definition">Go to definition</string>
     <string name="action_show_usages">Show usages</string>
+    <string name="action_go_to_implementation">Go to implementation</string>
+    <string name="action_navigate_back">Back</string>
+    <string name="action_navigate_forward">Forward</string>
     <string name="outline_place">%1$s @ %2$s</string>
     <string name="outline_filter">Filter symbols</string>
     <string name="status_index">index: %1$s, %2$s</string>

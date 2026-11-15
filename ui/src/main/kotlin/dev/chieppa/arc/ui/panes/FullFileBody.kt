@@ -11,12 +11,13 @@ import dev.chieppa.arc.core.conversation.LineSide
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.ui.conversation.LineChooser
 import dev.chieppa.arc.ui.conversation.PaneComments
-import dev.chieppa.arc.ui.conversation.ThreadReveal
 import dev.chieppa.arc.ui.conversation.PaneThread
 import dev.chieppa.arc.ui.conversation.paneThreads
 import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.find.ViewerMatches
 import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.arc.ui.menus.CodeMenu
+import dev.chieppa.stretch.frame.ContextMenuArea
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.produceState
@@ -25,14 +26,12 @@ import dev.chieppa.arc.ui.hints.RenderedDocBlock
 import dev.chieppa.arc.ui.hints.rememberPaneDocs
 import dev.chieppa.arc.ui.navigation.NameSpan
 import dev.chieppa.arc.ui.navigation.NavigationPopover
-import dev.chieppa.arc.ui.navigation.NavigationSizes
 import dev.chieppa.arc.ui.navigation.NavigationTargets
 import dev.chieppa.arc.ui.navigation.PaneCaret
 import dev.chieppa.arc.ui.navigation.SyntaxTokens
 import dev.chieppa.arc.ui.navigation.rememberDecorations
 import dev.chieppa.stretch.code.CodeDecoration
 import dev.chieppa.stretch.code.CodeLanguages
-import dev.chieppa.stretch.code.CodePosition
 import dev.chieppa.stretch.code.CodeRange
 import dev.chieppa.stretch.code.CodeToken
 import kotlinx.coroutines.withContext
@@ -79,36 +78,39 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
     val chosen = choice?.takeIf { it.side == LineSide.New }?.line
     val kept = remember(changed, threadsAt, matches, chosen) { changed + threadsAt.keys + matches.map { it.line } + listOfNotNull(chosen) }
     val docs = rememberPaneDocs(workbench, id, document, text.takeUnless { removed }, kept)
-    Box(modifier) {
-        CodeViewer(
-            code,
-            Modifier.fillMaxSize(),
-            viewer,
-            language = CodeLanguages.forPath(pane.path),
-            tones = { line -> if (line in changed) (if (removed) LineTone.Removed else LineTone.Added) else null },
-            slots = CodeViewerSlots(
-                gutterMark = { line -> threadsAt[line]?.firstOrNull()?.let { GutterMark(it.state) } },
-                lineAnnotation = { line ->
-                    if (choice?.side == LineSide.New && choice.line == line) {
-                        LineChooser(workbench, threadsAt[line].orEmpty()) { PaneComments.start(workbench, pane, LineSide.New, line) }
-                    }
-                    threadsAt[line].orEmpty().forEach { PaneThread(it, workbench) }
-                },
-                onLineNumberClick = { line -> if (!removed) PaneComments.click(workbench, pane, LineSide.New, line, line, threadsAt[line].orEmpty()) },
-                symbolAt = { at -> navigation.nameAt(document, at.line, at.column)?.let { CodeRange(it.line, it.start, it.end) } },
-                onSymbolClick = { click -> navigation.click(id, document, NameSpan(click.range.line, click.range.start, click.range.end), click.bounds) },
-                symbolCard = { at, _, card -> PaneHintCard(document, at.line, at.column, card, workbench.hints) },
-                lineBlock = { lines -> docs.at(lines.first)?.let { doc -> RenderedDocBlock(doc, document, workbench.hints) { docs.showRaw(doc) } } },
-            ),
-            tokens = tokens,
-            matches = matches,
-            currentMatch = current,
-            marks = marks,
-            changeWash = workbench.preferences.changeWash,
-            decorations = decorations,
-            blocks = docs.ranges,
-        )
-        NavigationPopover(workbench, id)
+    ContextMenuArea({ close -> CodeMenu(workbench, id, close) }, modifier) {
+        Box(Modifier.fillMaxSize()) {
+            CodeViewer(
+                code,
+                Modifier.fillMaxSize(),
+                viewer,
+                language = CodeLanguages.forPath(pane.path),
+                tones = { line -> if (line in changed) (if (removed) LineTone.Removed else LineTone.Added) else null },
+                slots = CodeViewerSlots(
+                    gutterMark = { line -> threadsAt[line]?.firstOrNull()?.let { GutterMark(it.state) } },
+                    lineAnnotation = { line ->
+                        if (choice?.side == LineSide.New && choice.line == line) {
+                            LineChooser(workbench, threadsAt[line].orEmpty()) { PaneComments.start(workbench, pane, LineSide.New, line) }
+                        }
+                        threadsAt[line].orEmpty().forEach { PaneThread(it, workbench) }
+                    },
+                    onLineNumberClick = { line -> if (!removed) PaneComments.click(workbench, pane, LineSide.New, line, line, threadsAt[line].orEmpty()) },
+                    symbolAt = { at -> navigation.nameAt(document, at.line, at.column)?.let { CodeRange(it.line, it.start, it.end) } },
+                    onSymbolClick = { click -> navigation.click(id, document, NameSpan(click.range.line, click.range.start, click.range.end), click.bounds) },
+                    symbolCard = { at, _, card -> PaneHintCard(document, at.line, at.column, card, workbench.hints) },
+                    lineBlock = { lines -> docs.at(lines.first)?.let { doc -> RenderedDocBlock(doc, document, workbench.hints) { docs.showRaw(doc) } } },
+                ),
+                tokens = tokens,
+                matches = matches,
+                currentMatch = current,
+                marks = marks,
+                changeWash = workbench.preferences.changeWash,
+                decorations = decorations,
+                blocks = docs.ranges,
+                scrollPastEnd = workbench.preferences.endSpace,
+            )
+            NavigationPopover(workbench, id)
+        }
     }
     val commands = remember(viewer, find, changeStarts) {
         val shared = find
@@ -142,23 +144,9 @@ fun FullFileBody(pane: Pane, text: String, diff: FileDiff?, workbench: Workbench
         snapshotFlow { viewer.firstVisibleLine }.collect { workbench.state.paneLines[id] = it }
     }
     LaunchedEffect(viewer) {
-        snapshotFlow { viewer.caret }.collect { at -> at?.let { navigation.caret = PaneCaret(id, it.line, it.column) } }
+        snapshotFlow { viewer.caret }.collect { at -> at?.let { navigation.caret = PaneCaret(id, it.line, it.column, document.path, if (removed) LineSide.Old else LineSide.New) } }
     }
-    val jump = navigation.reveal?.takeIf { it.repo == pane.repo && it.revision == document.revision && it.path == document.path }
-    LaunchedEffect(viewer, jump) {
-        jump ?: return@LaunchedEffect
-        withFrameNanos {}
-        viewer.scrollToLine((jump.line - NavigationSizes.LEAD_IN).coerceAtLeast(1))
-        viewer.caret = CodePosition(jump.line, jump.column)
-        navigation.reveal = null
-    }
-    val reveal = workbench.threadViews.reveal?.takeIf { it.source == pane.source && it.path == pane.path && it.side == LineSide.New }
-    LaunchedEffect(viewer, reveal) {
-        reveal ?: return@LaunchedEffect
-        withFrameNanos {}
-        viewer.scrollToLine((reveal.line - ThreadReveal.LEAD_IN).coerceAtLeast(1))
-        workbench.threadViews.reveal = null
-    }
+    CodeJumps(pane, viewer, document, workbench)
 }
 
 /** Lines a change stepped to keeps showing above it, matching the viewer's own lead-in. */

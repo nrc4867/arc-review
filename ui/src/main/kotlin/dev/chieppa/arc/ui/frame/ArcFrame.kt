@@ -23,6 +23,7 @@ import dev.chieppa.stretch.frame.CommandPalette
 import dev.chieppa.stretch.frame.LocalActionText
 import dev.chieppa.stretch.frame.StretchApp
 import dev.chieppa.stretch.frame.actionKeys
+import dev.chieppa.stretch.ui.onBackForwardButtons
 
 /**
  * The main window's content: the top bar, the source strip under it across the window, Arc's drawers on both rails, the pane grid in
@@ -47,7 +48,7 @@ fun ArcFrame(workbench: Workbench, modifier: Modifier = Modifier) {
                 onLayoutChange = { workbench.frameLayout = it },
                 drawers = arcDrawerSpecs(workbench) + PluginDrawers.specs(workbench),
                 onResetLayout = workbench::resetLayout,
-                modifier = modifier.actionKeys(workbench.keymap, null),
+                modifier = modifier.actionKeys(workbench.keymap, null).onBackForwardButtons(workbench.history::back, workbench.history::forward),
                 statusBar = { ArcStatusBar(workbench) },
                 placeNewDrawer = PluginDrawers::place,
                 topStrip = { SourceStrip(workbench) },

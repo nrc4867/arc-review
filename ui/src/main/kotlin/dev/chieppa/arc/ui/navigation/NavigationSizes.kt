@@ -16,4 +16,10 @@ object NavigationSizes {
 
     /** Lines a revealed name keeps showing above it. */
     const val LEAD_IN = 3
+
+    /** Lines apart two places in a file may be and still count as one in the navigation history. */
+    const val NEAR_LINES = 3
+
+    /** The most places the navigation history keeps behind and ahead. */
+    const val HISTORY_LIMIT = 100
 }

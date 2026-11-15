@@ -12,6 +12,7 @@ import dev.chieppa.arc.codeintel.model.Confidence
 import dev.chieppa.arc.codeintel.model.DecorationStyle
 import dev.chieppa.arc.codeintel.model.DefinitionRequest
 import dev.chieppa.arc.codeintel.model.DocumentRef
+import dev.chieppa.arc.codeintel.model.ImplementationsRequest
 import dev.chieppa.arc.codeintel.model.SourceScope
 import dev.chieppa.arc.codeintel.model.SymbolTarget
 import dev.chieppa.arc.codeintel.model.UsagesRequest
@@ -27,7 +28,7 @@ import kotlinx.coroutines.withContext
 /**
  * Code navigation in the window: keeps the index on the open sources, answers which name is under the pointer, and
  * acts on a Ctrl+click. One confident definition opens through [opener]; candidates or usages open a list under the
- * name; nothing happens for a name with no definition here. The names a navigation found are marked in the panes.
+ * name, as do the implementations Go to implementation finds; nothing happens for a name with no definition here. The names a navigation found are marked in the panes.
  */
 class NavigationController(
     private val state: WorkspaceState,
@@ -48,7 +49,7 @@ class NavigationController(
     /** The caret of the pane that last had one. */
     var caret by mutableStateOf<PaneCaret?>(null)
 
-    private var usagesNext = false
+    private var next = NextClick.Definition
 
     /** Keeps the index on the sources as they are read and move. */
     fun start() {
@@ -65,25 +66,34 @@ class NavigationController(
 
     /** Makes the next symbol click list the usages of the name's definition instead of going to it. */
     fun askUsagesNext() {
-        usagesNext = true
+        next = NextClick.Usages
     }
 
-    /** Takes back [askUsagesNext] when no click followed. */
+    /** Makes the next symbol click go to what implements the name, or list it, instead of going to its definition. */
+    fun askImplementationsNext() {
+        next = NextClick.Implementations
+    }
+
+    /** Takes back [askUsagesNext] or [askImplementationsNext] when no click followed. */
     fun cancelUsagesNext() {
-        usagesNext = false
+        next = NextClick.Definition
     }
 
     /** A Ctrl+click on [name] in [document], shown in pane [paneId], whose name lies at [anchor] in the pane. */
     fun click(paneId: String, document: DocumentRef, name: NameSpan, anchor: Rect?) {
-        val usages = usagesNext
-        usagesNext = false
+        val asked = next
+        next = NextClick.Definition
+        val usages = asked == NextClick.Usages
         val sources = NavigationTargets.scopes(NavigationTargets.of(state))
         val clicked = CodeLocation(document, CodeRange(CodePosition(name.line, name.start), CodePosition(name.line, name.end)))
         scope.launch {
             val request = DefinitionRequest(document, clicked.range.start, sources)
             val navigation = withContext(dispatchers.default) {
-                val found = service.router.navigate(request)
-                if (usages) usagesOf(found, sources) ?: found else found
+                when (asked) {
+                    NextClick.Implementations -> service.router.toImplementations(ImplementationsRequest(document, clicked.range.start, sources))
+                    NextClick.Usages -> service.router.navigate(request).let { found -> usagesOf(found, sources) ?: found }
+                    NextClick.Definition -> service.router.navigate(request)
+                }
             }
             when (navigation) {
                 is Navigation.Jump -> {
@@ -122,3 +132,6 @@ class NavigationController(
         return if (answer.count == 0) null else Navigation.Usages(answer)
     }
 }
+
+/** What the next symbol click asks for. */
+private enum class NextClick { Definition, Usages, Implementations }

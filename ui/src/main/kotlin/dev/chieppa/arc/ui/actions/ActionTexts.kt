@@ -11,6 +11,9 @@ import dev.chieppa.arc.design.generated.action_mark_and_advance
 import dev.chieppa.arc.design.generated.action_next_change
 import dev.chieppa.arc.design.generated.action_go_to_definition
 import dev.chieppa.arc.design.generated.action_show_usages
+import dev.chieppa.arc.design.generated.action_go_to_implementation
+import dev.chieppa.arc.design.generated.action_navigate_back
+import dev.chieppa.arc.design.generated.action_navigate_forward
 import dev.chieppa.arc.design.generated.action_next_file
 import dev.chieppa.arc.design.generated.action_open_file
 import dev.chieppa.arc.design.generated.action_previous_change
@@ -83,6 +86,9 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.NEXT_CHANGE.value to Res.string.action_next_change,
     ArcActionIds.GO_TO_DEFINITION.value to Res.string.action_go_to_definition,
     ArcActionIds.SHOW_USAGES.value to Res.string.action_show_usages,
+    ArcActionIds.GO_TO_IMPLEMENTATION.value to Res.string.action_go_to_implementation,
+    ArcActionIds.NAVIGATE_BACK.value to Res.string.action_navigate_back,
+    ArcActionIds.NAVIGATE_FORWARD.value to Res.string.action_navigate_forward,
     ArcActionIds.PREVIOUS_CHANGE.value to Res.string.action_previous_change,
     ArcActionIds.MARK_AND_ADVANCE.value to Res.string.action_mark_and_advance,
     ArcActionIds.TOGGLE_REVIEWED.value to Res.string.action_toggle_reviewed,
