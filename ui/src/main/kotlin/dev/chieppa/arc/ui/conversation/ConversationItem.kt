@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,13 +22,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import dev.chieppa.arc.core.conversation.Reaction
 import dev.chieppa.arc.core.conversation.ThreadMessage
 import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.stretch.markdown.markdownPeek
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchSpacing
 
 /**
- * One entry in a conversation: its author's picture and name, [chips] such as a verdict, how long ago, what it says
- * and its reactions, which [onReact] toggles, then [below] it, such as a review's threads. A click on its head folds it
- * to that one line with the start of what it says, under [key]. [panel] sets the pull request's description apart.
+ * One entry in a conversation: its author's picture and name, [chips] such as a verdict, how long ago and the button
+ * to react, then what it says and the reactions it has, which [onReact] toggles, then [below] it, such as a review's
+ * threads. A click on its head folds it to that one line with the start of what it says, under [key]. [panel] sets the
+ * pull request's description apart.
  */
 @Composable
 fun ConversationItem(
@@ -45,6 +48,7 @@ fun ConversationItem(
     val c = Stretch.colors
     val views = workbench.conversationViews
     val folded = views.isFolded(key)
+    val react = onReact.takeIf { message.id.isNotEmpty() }
     Column(
         modifier.fillMaxWidth().background(if (panel) c.surfacePanel else Color.Transparent).padding(horizontal = StretchSpacing.space12, vertical = StretchSpacing.space10),
         verticalArrangement = Arrangement.spacedBy(StretchSpacing.space6),
@@ -58,16 +62,17 @@ fun ConversationItem(
             BasicText(author, style = Stretch.type.bodySm.merge(TextStyle(color = c.inkStrong, fontWeight = FontWeight.SemiBold)), maxLines = 1)
             chips()
             if (folded) {
-                val peek = message.body.lineSequence().firstOrNull { it.isNotBlank() }.orEmpty()
+                val peek = remember(message.body) { markdownPeek(message.body) }
                 BasicText(peek, Modifier.weight(1f), style = Stretch.type.bodySm.merge(TextStyle(color = c.inkMuted)), maxLines = 1, overflow = TextOverflow.Ellipsis)
             } else {
                 Spacer(Modifier.weight(1f))
             }
             BasicText(when_ ?: ageText(message.writtenAt), style = Stretch.type.bodySm.merge(TextStyle(color = c.inkMuted)), maxLines = 1)
+            if (react != null) AddReaction(message.reactions, react)
         }
         if (folded) return@Column
         if (message.body.isNotBlank()) ClampedBody(key, message.body, workbench)
-        ReactionRow(message.reactions, onReact.takeIf { message.id.isNotEmpty() })
+        ReactionRow(message.reactions, react)
         below()
     }
 }
