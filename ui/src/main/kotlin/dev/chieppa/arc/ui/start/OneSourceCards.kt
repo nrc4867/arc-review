@@ -13,6 +13,7 @@ import dev.chieppa.arc.core.start.StartScreenKind
 import dev.chieppa.arc.core.start.StartTone
 import dev.chieppa.arc.core.start.StartTrailing
 import dev.chieppa.arc.design.generated.Res
+import dev.chieppa.arc.design.generated.drawer_staged_comments
 import dev.chieppa.arc.design.generated.staged_location
 import dev.chieppa.arc.design.generated.start_changed_since
 import dev.chieppa.arc.design.generated.start_compare
@@ -30,6 +31,8 @@ import dev.chieppa.arc.design.generated.start_this_source
 import dev.chieppa.arc.design.generated.start_waiting
 import dev.chieppa.arc.ui.actions.ArcActionIds
 import dev.chieppa.arc.ui.drawers.DrawerIds
+import dev.chieppa.arc.ui.settings.StagedPlace
+import dev.chieppa.arc.ui.workbench.GitHubTargets
 import dev.chieppa.arc.ui.workbench.Workbench
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -46,15 +49,15 @@ private val KEYS = listOf(
 )
 
 /**
- * Arc's cards and buttons for one selected [source]: Continue, Changed since you reviewed and Conversation; Waiting on
- * you and Your notes, then Revisions, Keys while reviewing and This source beside them.
+ * Arc's cards and buttons for one selected [source]: Continue, Changed since you reviewed and Conversation; the staged
+ * comments while the settings put them here, for a pull request or once any are staged, Waiting on you and Your notes,
+ * then Revisions, Keys while reviewing and This source beside them.
  */
 @Composable
 fun oneSourceCards(workbench: Workbench, source: Source): StartContribution {
     val state = workbench.state
     val next = StartReview.nextFile(state, source)
     val changed = StartReview.count(state, source, FileReviewState.ChangedSinceReviewed)
-    val pull = state.pulls[source]
     val buttons = listOfNotNull(
         next?.let {
             StartButton(
@@ -66,11 +69,16 @@ fun oneSourceCards(workbench: Workbench, source: Source): StartContribution {
         if (source !is Source.PullRequest) null else StartButton(stringResource(Res.string.start_conversation), ArcStartActions.on(ArcActionIds.OPEN_CONVERSATION, source), StartIcons.COMMENT),
     )
     val thisSource = listOfNotNull(
-        pull?.let { StartRow(stringResource(Res.string.start_open_on_github), StartIcons.EXTERNAL_LINK, action = ArcStartActions.openLink(it.url)) },
+        GitHubTargets.source(workbench, source)?.let {
+            StartRow(stringResource(Res.string.start_open_on_github), StartIcons.OPEN_ON_HOST, action = ArcStartActions.on(ArcActionIds.OPEN_ON_GITHUB, source))
+        },
         StartRow(stringResource(Res.string.start_remove), StartIcons.CLOSE, action = ArcStartActions.on(ArcActionIds.REMOVE_SOURCE, source)),
     )
+    val staged = workbench.preferences.stagedPlace == StagedPlace.Home &&
+        (source is Source.PullRequest || workbench.comments.pusher.staged(source).isNotEmpty())
     return StartContribution(
-        cards = listOf(
+        cards = listOfNotNull(
+            if (!staged) null else StartCard(StartCards.STAGED, stringResource(Res.string.drawer_staged_comments), SCREEN, StartColumn.Main, StartIcons.STAGE),
             StartCard(StartCards.WAITING, stringResource(Res.string.start_waiting), SCREEN, StartColumn.Main, StartIcons.EYE, rows = waitingRows(workbench, source)),
             StartCard(StartCards.NOTES, stringResource(Res.string.start_notes), SCREEN, StartColumn.Main, StartIcons.NOTE, rows = noteRows(workbench, source)),
             StartCard(

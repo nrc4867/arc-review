@@ -5,6 +5,7 @@ import dev.chieppa.arc.core.source.SourceRefs
 import dev.chieppa.arc.core.start.StartArgs
 import dev.chieppa.arc.core.start.StartArrange
 import dev.chieppa.arc.ui.drawers.DrawerIds
+import dev.chieppa.arc.ui.settings.StagedPlace
 import dev.chieppa.arc.ui.start.SideBySide
 import dev.chieppa.arc.ui.start.StartReview
 import dev.chieppa.arc.ui.workbench.ActionTargets
@@ -45,12 +46,18 @@ fun registerStartActions(registry: ActionRegistry, workbench: Workbench) {
         if (source != state.active) workbench.activateSource(source)
         workbench.panes.openConversation(source)
     }
+    action(ArcActionIds.OPEN_SOURCE_HOME, { source() != null }) { source()?.let(workbench::openHome) }
     action(ArcActionIds.OPEN_SIDE_BY_SIDE, { SideBySide.openable(workbench, state.selection).size > 1 }) {
         SideBySide.open(workbench, state.selection)
     }
     action(ArcActionIds.REVIEW_STAGED, { state.active?.let(workbench.comments.pusher::canPush) == true }) {
-        if (workbench.frameLayout[DrawerIds.STAGED_COMMENTS]?.open != true) workbench.toggleDrawer(DrawerIds.STAGED_COMMENTS)
-        workbench.comments.pusher.confirming = state.active
+        val source = state.active ?: return@action
+        if (workbench.preferences.stagedPlace == StagedPlace.Home) {
+            workbench.openHome(source)
+        } else if (workbench.frameLayout[DrawerIds.STAGED_COMMENTS]?.open != true) {
+            workbench.toggleDrawer(DrawerIds.STAGED_COMMENTS)
+        }
+        workbench.comments.pusher.confirming = source
     }
     action(ArcActionIds.CLEAR_RECENT, { start.recent.sources.isNotEmpty() }, start::clearRecent)
     action(ArcActionIds.FORGET_RECENT, { arg(StartArgs.SOURCE)?.let { ref -> start.recent.sources.any { it.ref == ref } } == true }) {

@@ -26,6 +26,7 @@ class ArcSettingsProvider(private val workbench: Workbench) : SettingsProvider {
             value is SettingsValue.Switched && entry == ArcSettingIds.WRAP -> workbench.preferences = preferences.copy(wrapLines = value.on)
             value is SettingsValue.Switched && entry == ArcSettingIds.LINE_HIGHLIGHT -> workbench.preferences = preferences.copy(wholeLineHighlight = value.on)
             value is SettingsValue.Chosen && entry == ArcSettingIds.THEME -> workbench.preferences = preferences.copy(theme = ThemeChoices.byId(value.option))
+            value is SettingsValue.Chosen && entry == ArcSettingIds.STAGED_PLACE -> workbench.preferences = preferences.copy(stagedPlace = StagedPlace.byId(value.option))
             value is SettingsValue.Chosen && entry == ArcSettingIds.SIZE ->
                 InterfaceSizes.byId(value.option)?.let { workbench.preferences = preferences.copy(interfaceSize = it) }
             value is SettingsValue.Pressed && entry == ArcSettingIds.UPDATE -> workbench.updates.press()

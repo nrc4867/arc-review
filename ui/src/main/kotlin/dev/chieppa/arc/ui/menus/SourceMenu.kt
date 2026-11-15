@@ -7,14 +7,16 @@ import dev.chieppa.arc.ui.workbench.MenuTarget
 import dev.chieppa.arc.ui.workbench.Workbench
 
 /**
- * The context menu of a source, on its chip or its tree row: make it active, remove it, close every merged and closed
- * pull request while there are any, copy its ref, open its revision matrix.
+ * The context menu of a source, on its chip or its tree row: make it active, open its home, remove it, close every
+ * merged and closed pull request while there are any, copy its ref, open its revision matrix, open it on GitHub.
  */
 @Composable
 fun SourceMenu(workbench: Workbench, source: Source, close: () -> Unit, target: MenuTarget = MenuTarget.OfSource(source)) {
     TargetActionItem(workbench, ArcActionIds.ACTIVATE_SOURCE, target, close)
+    TargetActionItem(workbench, ArcActionIds.OPEN_SOURCE_HOME, target, close)
     TargetActionItem(workbench, ArcActionIds.REMOVE_SOURCE, target, close)
     if (workbench.endedPulls.isNotEmpty()) TargetActionItem(workbench, ArcActionIds.CLOSE_ENDED_PULLS, target, close)
     TargetActionItem(workbench, ArcActionIds.COPY_SOURCE_REF, target, close)
     TargetActionItem(workbench, ArcActionIds.OPEN_REVISIONS, target, close)
+    TargetActionItem(workbench, ArcActionIds.OPEN_ON_GITHUB, target, close)
 }

@@ -10,6 +10,9 @@ import dev.chieppa.arc.core.mark.FileReviewState
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.files_reviewed
 import dev.chieppa.arc.design.generated.sources_progress
+import dev.chieppa.arc.ui.actions.ArcActionIds
+import dev.chieppa.arc.ui.menus.TargetActionButton
+import dev.chieppa.arc.ui.workbench.MenuTarget
 import dev.chieppa.arc.ui.sources.ProgressRing
 import dev.chieppa.arc.ui.tree.FileTreeItem
 import dev.chieppa.arc.ui.tree.LineCounts
@@ -21,19 +24,22 @@ import dev.chieppa.stretch.theme.StretchSpacing
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The end of a tree row: a source's progress; a folder's file count and mark for all its files; a file's line counts
- * and mark; the set-aside fold's count.
+ * The end of a tree row: a source's progress, after its GitHub page's button while [hovered]; a folder's file count and
+ * mark for all its files; a file's line counts and mark; the set-aside fold's count.
  */
 @Composable
-fun TreeRowEnd(item: FileTreeItem, workbench: Workbench) {
+fun TreeRowEnd(item: FileTreeItem, workbench: Workbench, hovered: Boolean = false) {
     val c = Stretch.colors
     val mono = Stretch.type.valueSm
     val reviewed = stringResource(Res.string.files_reviewed)
     Row(horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space6), verticalAlignment = Alignment.CenterVertically) {
         when (item) {
-            is FileTreeItem.SourceRow -> item.progress?.let { progress ->
-                ProgressRing(if (progress.total == 0) 1f else progress.reviewed.toFloat() / progress.total)
-                BasicText(stringResource(Res.string.sources_progress, progress.reviewed, progress.total), style = mono.merge(TextStyle(color = c.inkMuted)))
+            is FileTreeItem.SourceRow -> {
+                if (hovered) TargetActionButton(workbench, ArcActionIds.OPEN_ON_GITHUB, MenuTarget.OfSource(item.source))
+                item.progress?.let { progress ->
+                    ProgressRing(if (progress.total == 0) 1f else progress.reviewed.toFloat() / progress.total)
+                    BasicText(stringResource(Res.string.sources_progress, progress.reviewed, progress.total), style = mono.merge(TextStyle(color = c.inkMuted)))
+                }
             }
             is FileTreeItem.FolderRow -> {
                 BasicText(item.files.toString(), style = mono.merge(TextStyle(color = c.inkSubtle)))

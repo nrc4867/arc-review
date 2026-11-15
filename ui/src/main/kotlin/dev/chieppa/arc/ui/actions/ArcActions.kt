@@ -9,8 +9,8 @@ import dev.chieppa.stretch.core.KeyChord
 
 /** Registers every Arc action that runs on [workbench] with [registry]. [onQuit] closes the app. */
 fun registerArcActions(registry: ActionRegistry, workbench: Workbench, onQuit: () -> Unit) {
-    fun action(id: ActionId, keys: List<KeyChord> = emptyList(), run: () -> Unit) =
-        registry.register(Action(id, id.value, id.value, keys, run = run))
+    fun action(id: ActionId, keys: List<KeyChord> = emptyList(), available: () -> Boolean = { true }, run: () -> Unit) =
+        registry.register(Action(id, id.value, id.value, keys, isAvailable = available, run = run))
 
     action(ArcActionIds.GO_TO_ANYTHING, listOf(ArcKeys.GO_TO_ANYTHING)) { workbench.switcher.show() }
     action(ArcActionIds.COMMANDS, listOf(ArcKeys.COMMANDS)) { workbench.paletteOpen = true }
@@ -18,6 +18,6 @@ fun registerArcActions(registry: ActionRegistry, workbench: Workbench, onQuit: (
     action(ArcActionIds.RESET_LAYOUT) { workbench.resetLayout() }
     action(ArcActionIds.QUIT, run = onQuit)
     for (slot in ArcDrawerSlots.all) {
-        action(ArcActionIds.toggleDrawer(slot.id)) { workbench.toggleDrawer(slot.id) }
+        action(ArcActionIds.toggleDrawer(slot.id), available = { ArcDrawerSlots.isShown(slot.id, workbench.preferences) }) { workbench.toggleDrawer(slot.id) }
     }
 }

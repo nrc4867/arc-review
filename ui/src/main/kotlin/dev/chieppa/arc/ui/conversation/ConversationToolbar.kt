@@ -21,7 +21,10 @@ import dev.chieppa.arc.design.generated.conversation_open_as_tab
 import dev.chieppa.arc.design.generated.conversation_previous
 import dev.chieppa.arc.design.generated.conversation_timeline
 import dev.chieppa.arc.design.generated.conversation_unfold_all
+import dev.chieppa.arc.ui.actions.ArcActionIds
+import dev.chieppa.arc.ui.menus.TargetActionButton
 import dev.chieppa.arc.ui.util.TipIconButton
+import dev.chieppa.arc.ui.workbench.MenuTarget
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
@@ -31,7 +34,8 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * The row over a conversation: in time order or by file, step to the previous or next item in [list], fold every item
- * to one line or open them all, and, in the drawer, open the conversation as a tab in the grid.
+ * to one line or open them all, open the pull request on GitHub, and, in the drawer, open the conversation as a tab in
+ * the grid.
  */
 @Composable
 fun ConversationToolbar(workbench: Workbench, source: Source, items: List<TimelineItem>, list: LazyListState, inTab: Boolean) {
@@ -58,6 +62,7 @@ fun ConversationToolbar(workbench: Workbench, source: Source, items: List<Timeli
             stringResource(if (allFolded) Res.string.conversation_unfold_all else Res.string.conversation_fold_all),
             { views.folded = if (allFolded) views.folded - keys else views.folded + keys },
         )
+        TargetActionButton(workbench, ArcActionIds.OPEN_ON_GITHUB, MenuTarget.OfSource(source))
         if (!inTab) TipIconButton(ArcIcons.OpenAsTab, stringResource(Res.string.conversation_open_as_tab), { workbench.panes.openConversation(source) })
     }
 }

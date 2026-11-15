@@ -22,6 +22,7 @@ object ArcKeys {
     val TOGGLE_DOCS: KeyChord = KeyChord.parse("Alt D")
     val COMMENT_HERE: KeyChord = KeyChord.parse("C")
     val PUSH_REVIEW: KeyChord = KeyChord.parse("Ctrl Shift Enter")
+    val OPEN_ON_GITHUB: KeyChord = KeyChord.parse("Ctrl Shift G")
 
     /** Stages the comment being written, or saves the note. */
     val SUBMIT_COMMENT: KeyChord = KeyChord.parse("Ctrl Enter")

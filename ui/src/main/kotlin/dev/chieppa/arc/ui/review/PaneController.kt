@@ -106,12 +106,22 @@ class PaneController(private val state: WorkspaceState) {
 
     /** Opens the conversation of [source] as a tab in the grid, or shows its tab when one is open already. */
     fun openConversation(source: Source) {
-        val existing = state.workspace.pages.firstOrNull { it is Page.Conversation && it.source == source }
+        openSourcePage({ it is Page.Conversation && it.source == source }) { Page.Conversation(it, source) }
+    }
+
+    /** Opens [source]'s home as a tab in the grid, or shows its tab when one is open already. */
+    fun openHome(source: Source) {
+        openSourcePage({ it is Page.Home && it.source == source }) { Page.Home(it, source) }
+    }
+
+    /** Shows the page of a source [matches] finds, opening the one [make] makes when none shows. */
+    private fun openSourcePage(matches: (Page) -> Boolean, make: (PaneId) -> Page) {
+        val existing = state.workspace.pages.firstOrNull(matches)
         if (existing != null && state.paneLayout.leafOf(existing.id.value) != null) {
             state.paneLayout = state.paneLayout.activate(existing.id.value)
             return
         }
-        val page = existing ?: Page.Conversation(PaneFactory.nextId(state.workspace), source)
+        val page = existing ?: make(PaneFactory.nextId(state.workspace))
         state.workspace = state.workspace.withPage(page)
         state.paneLayout = state.paneLayout.open(page.id.value)
     }

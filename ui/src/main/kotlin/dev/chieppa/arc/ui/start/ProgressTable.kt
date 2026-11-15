@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.start_column_changed
 import dev.chieppa.arc.design.generated.start_column_checks
@@ -23,9 +24,9 @@ import dev.chieppa.stretch.ui.ControlLabel
 import dev.chieppa.stretch.ui.Divider
 import org.jetbrains.compose.resources.stringResource
 
-/** The Progress card's table: a row for each selected source, under a row naming the columns. */
+/** The Progress card's table: a row for each source in [selection], under a row naming the columns. */
 @Composable
-fun ProgressTable(workbench: Workbench) {
+fun ProgressTable(workbench: Workbench, selection: List<Source>) {
     val c = Stretch.colors
     val eyebrow = Stretch.type.eyebrow
     Row(
@@ -40,7 +41,7 @@ fun ProgressTable(workbench: Workbench) {
         }
         Spacer(Modifier.width(StartSizes.tableAction))
     }
-    for (source in workbench.state.selection) {
+    for (source in selection) {
         Divider()
         ProgressTableRow(workbench, source)
     }

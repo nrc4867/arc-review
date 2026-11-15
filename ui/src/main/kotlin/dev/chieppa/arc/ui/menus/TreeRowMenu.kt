@@ -8,8 +8,8 @@ import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.MenuDivider
 
 /**
- * The context menu of a file tree row. A file opens in each way a pane can take it, is marked and copied; a folder
- * marks, sets aside, opens and closes everything under it; a source is made active, removed or copied.
+ * The context menu of a file tree row. A file opens in each way a pane can take it, is marked, copied and opened on
+ * GitHub; a folder marks, sets aside, opens and closes everything under it; a source has the source menu.
  */
 @Composable
 fun TreeRowMenu(workbench: Workbench, target: MenuTarget.OfRows, close: () -> Unit) {
@@ -21,6 +21,7 @@ fun TreeRowMenu(workbench: Workbench, target: MenuTarget.OfRows, close: () -> Un
             MenuDivider()
             TargetActionItem(workbench, ArcActionIds.COPY_PATH, target, close)
             TargetActionItem(workbench, ArcActionIds.COPY_FILE_REF, target, close)
+            TargetActionItem(workbench, ArcActionIds.OPEN_FILE_ON_GITHUB, target, close)
         }
         is FileTreeItem.FolderRow, is FileTreeItem.AsideRow -> {
             MarkItems(workbench, target, close, many = true)

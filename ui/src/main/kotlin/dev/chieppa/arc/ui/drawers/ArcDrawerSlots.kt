@@ -13,6 +13,8 @@ import dev.chieppa.arc.design.generated.drawer_revisions
 import dev.chieppa.arc.design.generated.drawer_runs
 import dev.chieppa.arc.design.generated.drawer_search
 import dev.chieppa.arc.design.generated.drawer_staged_comments
+import dev.chieppa.arc.ui.settings.StagedPlace
+import dev.chieppa.arc.ui.settings.UiPreferences
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.stretch.frame.Side
 import dev.chieppa.stretch.theme.StretchIcons
@@ -34,4 +36,10 @@ object ArcDrawerSlots {
     )
 
     fun byId(id: String): DrawerSlot? = all.firstOrNull { it.id == id }
+
+    /** Whether drawer [id] is on the rail with [preferences]: Staged comments only while the staged batch sits there. */
+    fun isShown(id: String, preferences: UiPreferences): Boolean = id != DrawerIds.STAGED_COMMENTS || preferences.stagedPlace == StagedPlace.Rail
+
+    /** The drawers on the rail with [preferences], in rail order. */
+    fun shown(preferences: UiPreferences): List<DrawerSlot> = all.filter { isShown(it.id, preferences) }
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.layout.positionInWindow
 import dev.chieppa.arc.core.source.Source
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.conversation_tab
+import dev.chieppa.arc.design.generated.home_tab
 import dev.chieppa.arc.design.generated.revisions_tab
 import dev.chieppa.arc.design.generated.run_tab
 import dev.chieppa.arc.design.generated.settings_title
@@ -42,6 +43,8 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
     val titleOf = { source: Source -> revisionsTitle.replace(TITLE_ARG, SourceLabels.of(source)) }
     val conversationTitle = stringResource(Res.string.conversation_tab)
     val conversationOf = { source: Source -> conversationTitle.replace(TITLE_ARG, SourceLabels.of(source)) }
+    val homeTitle = stringResource(Res.string.home_tab)
+    val homeOf = { source: Source -> homeTitle.replace(TITLE_ARG, SourceLabels.of(source)) }
     val runsTab = stringResource(Res.string.runs_tab)
     val runsOf = { id: String -> runsTab.replace(TITLE_ARG, workbench.runs.watch.watchlist.filter(id)?.name ?: id) }
     val settingsTitle = stringResource(Res.string.settings_title)
@@ -51,7 +54,7 @@ fun ArcViewport(workbench: Workbench, modifier: Modifier = Modifier) {
         PaneGrid(
             layout = workbench.paneLayout,
             onChange = { workbench.paneLayout = it },
-            item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf, conversationOf, runsOf, runOf, settingsTitle, workbench.plugins::tabOf) } ?: paneTab(id, workbench.state.pane(id)) },
+            item = { id -> workbench.state.page(id)?.let { pageTab(it, workbench.watch.watchlist, titleOf, conversationOf, homeOf, runsOf, runOf, settingsTitle, workbench.plugins::tabOf) } ?: paneTab(id, workbench.state.pane(id)) },
             modifier = Modifier.fillMaxSize().onGloballyPositioned { coordinates ->
                 val topLeft = coordinates.positionInWindow()
                 val size = Offset(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())

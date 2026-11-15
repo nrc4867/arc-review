@@ -58,6 +58,9 @@ import dev.chieppa.arc.design.generated.action_open_filter
 import dev.chieppa.arc.design.generated.action_continue_review
 import dev.chieppa.arc.design.generated.action_toggle_since_review
 import dev.chieppa.arc.design.generated.action_open_conversation
+import dev.chieppa.arc.design.generated.action_open_source_home
+import dev.chieppa.arc.design.generated.action_open_on_github
+import dev.chieppa.arc.design.generated.action_open_file_on_github
 import dev.chieppa.arc.design.generated.action_open_side_by_side
 import dev.chieppa.arc.design.generated.action_review_staged
 import dev.chieppa.arc.design.generated.action_clear_recent
@@ -116,6 +119,8 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.OPEN_PULL.value to Res.string.action_open_pull,
     ArcActionIds.ADD_PULL.value to Res.string.action_add_pull,
     ArcActionIds.OPEN_PULL_ON_GITHUB.value to Res.string.action_open_pull_on_github,
+    ArcActionIds.OPEN_ON_GITHUB.value to Res.string.action_open_on_github,
+    ArcActionIds.OPEN_FILE_ON_GITHUB.value to Res.string.action_open_file_on_github,
     ArcActionIds.COPY_PULL_LINK.value to Res.string.action_copy_pull_link,
     ArcActionIds.COPY_PULL_NUMBER.value to Res.string.action_copy_pull_number,
     ArcActionIds.COPY_PULL_REFERENCE.value to Res.string.action_copy_pull_reference,
@@ -128,6 +133,7 @@ private val texts: Map<String, StringResource> = mapOf(
     ArcActionIds.CONTINUE_REVIEW.value to Res.string.action_continue_review,
     ArcActionIds.TOGGLE_SINCE_REVIEW.value to Res.string.action_toggle_since_review,
     ArcActionIds.OPEN_CONVERSATION.value to Res.string.action_open_conversation,
+    ArcActionIds.OPEN_SOURCE_HOME.value to Res.string.action_open_source_home,
     ArcActionIds.OPEN_SIDE_BY_SIDE.value to Res.string.action_open_side_by_side,
     ArcActionIds.REVIEW_STAGED.value to Res.string.action_review_staged,
     ArcActionIds.CLEAR_RECENT.value to Res.string.action_clear_recent,

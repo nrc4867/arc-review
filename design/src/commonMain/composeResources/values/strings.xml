@@ -47,6 +47,9 @@
     <string name="settings_size_percent">%1$d%</string>
     <string name="settings_wrap">Wrap long lines</string>
     <string name="settings_line_highlight">Highlight whole changed lines</string>
+    <string name="settings_staged_place">Staged comments</string>
+    <string name="settings_staged_home">Home</string>
+    <string name="settings_staged_rail">Rail</string>
     <string name="settings_status">Settings · %1$s</string>
     <string name="settings_search">Search settings</string>
     <string name="settings_section_general">General</string>
@@ -54,6 +57,7 @@
     <string name="settings_section_notifications">Notifications</string>
     <string name="settings_section_accounts">Accounts</string>
     <string name="settings_card_panes">Panes</string>
+    <string name="settings_card_review">Review</string>
     <string name="settings_card_look">Look</string>
     <string name="settings_card_pull_requests">Pull requests</string>
     <string name="settings_card_runs">Runs</string>
@@ -61,6 +65,7 @@
     <string name="settings_size_interface">Interface size</string>
     <string name="settings_wrap_detail">Where a pane is not set otherwise</string>
     <string name="settings_line_highlight_detail">Off washes only the gutter</string>
+    <string name="settings_staged_place_detail">On the source's home, or in a drawer on the rail</string>
     <string name="settings_account">Account</string>
     <string name="settings_account_login">@%1$s</string>
     <string name="settings_account_signed_out">Not signed in</string>
@@ -71,6 +76,7 @@
     <string name="settings_keywords_size">zoom, scale, font, bigger, smaller</string>
     <string name="settings_keywords_wrap">soft wrap, line, long</string>
     <string name="settings_keywords_line_highlight">diff, gutter, wash, added, removed</string>
+    <string name="settings_keywords_staged">verdict, summary, push, drawer, home</string>
     <string name="settings_keywords_notify">alert, desktop, toast, notification</string>
     <string name="settings_keywords_account">login, sign in, token, gh, github</string>
     <string name="menu_review">Review</string>
@@ -112,6 +118,8 @@
     <string name="action_open_pull">Open</string>
     <string name="action_add_pull">Open without switching</string>
     <string name="action_open_pull_on_github">Open on GitHub</string>
+    <string name="action_open_on_github">Open on GitHub</string>
+    <string name="action_open_file_on_github">Open file on GitHub</string>
     <string name="action_copy_pull_link">Link</string>
     <string name="action_copy_pull_number">Number</string>
     <string name="action_copy_pull_reference">Reference</string>
@@ -353,6 +361,7 @@
     <string name="conversation_placeholder">Comment on %1$s</string>
     <string name="conversation_stage">Stage comment</string>
     <string name="conversation_tab">Conversation · %1$s</string>
+    <string name="home_tab">Home · %1$s</string>
     <string name="conversation_timeline">Timeline</string>
     <string name="conversation_by_file">By file</string>
     <string name="conversation_previous">Previous item</string>
@@ -650,6 +659,7 @@
     <string name="action_continue_review">Continue reviewing</string>
     <string name="action_toggle_since_review">Show only files changed since reviewed</string>
     <string name="action_open_conversation">Open conversation</string>
+    <string name="action_open_source_home">Open home</string>
     <string name="action_open_side_by_side">Open side by side</string>
     <string name="action_review_staged">Review staged comments</string>
     <string name="action_clear_recent">Clear recent sources</string>

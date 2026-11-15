@@ -19,7 +19,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
+import dev.chieppa.arc.core.source.Source
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import dev.chieppa.arc.core.source.SourceRefs
 import dev.chieppa.arc.design.ArcIcons
@@ -40,11 +44,13 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * Every source's changed files, grouped by source and folder. Selecting one file opens its change; Enter or a
- * double-click opens it in a new tab. The file being read is kept selected, and a source shown with no folder open
+ * double-click opens it in a new tab. A click on a source's row opens its home, and the row offers its GitHub page
+ * while the pointer is over it. The file being read is kept selected, and a source shown with no folder open
  * opens them all. The marking keys act on the selection while the tree has the keyboard. A right-click, or Shift F10,
  * opens the row's menu. A file drags into the pane grid as a tab: onto a pane, an edge to split it, or away into a
  * window of its own.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
     val state = workbench.state
@@ -52,6 +58,7 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
     val aside = stringResource(Res.string.files_set_aside)
     val treeState = workbench.treeState
     var menu by remember { mutableStateOf<Pair<MenuTarget.OfRows, Offset>?>(null) }
+    var hovered by remember { mutableStateOf<Source?>(null) }
     LaunchedEffect(treeState) {
         snapshotFlow { treeState.selection }.distinctUntilChanged().collect { keys ->
             if (menu != null) return@collect
@@ -104,6 +111,7 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
                     is FileTreeItem.AsideRow -> ArcIcons.SetAside
                 }
             },
+            onClick = { item -> if (item is FileTreeItem.SourceRow) workbench.openHome(item.source) },
             onActivate = { item ->
                 when (item) {
                     is FileTreeItem.FileRow -> workbench.panes.openChange(item.source, item.file.path, newTab = true)
@@ -115,13 +123,17 @@ fun FileTree(workbench: Workbench, modifier: Modifier = Modifier) {
                 when {
                     item is FileTreeItem.FileRow ->
                         Modifier.paneDragSource(workbench.dropTarget) { TabItem(item.key, item.file.name, StretchIcons.File, subtitle = item.source.repo.value) }
-                    item is FileTreeItem.SourceRow && item.ended -> Modifier.alpha(ArcAlphas.ENDED)
+                    item is FileTreeItem.SourceRow ->
+                        Modifier
+                            .onPointerEvent(PointerEventType.Enter) { hovered = item.source }
+                            .onPointerEvent(PointerEventType.Exit) { if (hovered == item.source) hovered = null }
+                            .then(if (item.ended) Modifier.alpha(ArcAlphas.ENDED) else Modifier)
                     else -> Modifier
                 }
             },
             onContextMenu = { item, at -> menu = MenuTarget.OfRows(item, treeState.selection) to at },
             leading = { item -> if (item is FileTreeItem.FileRow) StatusLetter(item.file.status) },
-            trailing = { item -> TreeRowEnd(item, workbench) },
+            trailing = { item -> TreeRowEnd(item, workbench, hovered = item is FileTreeItem.SourceRow && item.source == hovered) },
         )
         ContextMenuPopup(menu?.second, { menu = null }) { close -> menu?.first?.let { TreeRowMenu(workbench, it, close) } }
     }

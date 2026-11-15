@@ -30,6 +30,7 @@ object SettingsIcons {
     const val SERVER = "server"
     const val SETTINGS = "settings"
     const val SPLIT_VIEW = "split-view"
+    const val STAGE = "stage"
     const val THEME = "theme"
     const val WRAP = "wrap"
 
@@ -58,6 +59,7 @@ object SettingsIcons {
             RUNS to ArcIcons.Runs,
             SERVER to ArcIcons.Server,
             SETTINGS to StretchIcons.Settings,
+            STAGE to ArcIcons.Stage,
             SPLIT_VIEW to StretchIcons.SplitView,
             THEME to StretchIcons.Theme,
             WRAP to ArcIcons.Wrap,
