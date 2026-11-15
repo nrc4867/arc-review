@@ -31,6 +31,7 @@ import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.arc.ui.util.SourceLabels
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.markdown.MarkdownEditor
+import dev.chieppa.stretch.markdown.markdownPeek
 import dev.chieppa.stretch.markdown.rememberMarkdownEditorState
 import dev.chieppa.stretch.theme.Icon
 import dev.chieppa.stretch.theme.Stretch
@@ -78,7 +79,7 @@ fun NotesDrawer(workbench: Workbench) {
                 ) {
                     Icon(ArcIcons.Note, c.inkMuted, size = ArcSizes.pullIcon)
                     BasicText(stringResource(Res.string.staged_location, anchor.path.substringAfterLast('/'), anchor.line), style = Stretch.type.valueSm.merge(TextStyle(color = c.inkStrong)), maxLines = 1)
-                    BasicText(note.body.lineSequence().firstOrNull().orEmpty(), Modifier.weight(1f), style = muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    BasicText(markdownPeek(note.body), Modifier.weight(1f), style = muted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
