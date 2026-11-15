@@ -8,6 +8,7 @@ import dev.chieppa.arc.core.conversation.CommentAnchor
 import dev.chieppa.arc.core.conversation.ConversationEntry
 import dev.chieppa.arc.core.conversation.LineSide
 import dev.chieppa.arc.core.conversation.LocalKind
+import dev.chieppa.arc.core.conversation.PullCommit
 import dev.chieppa.arc.core.conversation.PullConversation
 import dev.chieppa.arc.core.conversation.PushOutcome
 import dev.chieppa.arc.core.conversation.Reaction
@@ -191,6 +192,29 @@ class ConversationUiTest {
         workbench.panes.openConversation(pull)
         waitForIdle()
         assertTrue(workbench.state.workspace.pages.any { it is dev.chieppa.arc.core.pane.Page.Conversation && it.source == pull })
+    }
+
+    @Test
+    fun commitsInARowShowAsOneEventWithoutReactions() = runComposeUiTest {
+        val pull = Source.PullRequest(data.repo, 8)
+        data.pulls[pull] = FakePulls.pull(8, "Eight")
+        val commits = (1..5).map { PullCommit("c${it}aaaaaaaaaa", "Step $it", "bo", it.toLong() + 10) }
+        val comment = ConversationEntry.Comment(ThreadMessage("ana", "Halfway", 20, id = "C_1"))
+        val later = PullCommit("d1bbbbbbbbbb", "Last step", "bo", 30)
+        host.hosted = HostedConversation("PR_8", PullConversation(entries = listOf(comment), commits = commits + later, viewer = "me"))
+        val workbench = openReview(data, conversations = host)
+        assertTrue(workbench.addSource(pull.ref))
+        assertWhenIdle { workbench.comments.controller.hosted[pull] != null }
+        workbench.panes.openConversation(pull)
+        waitForIdle()
+        assertTrue(shows("bo added 5 commits"))
+        assertTrue(shows("Step 3"))
+        assertTrue(!shows("Step 4"))
+        onNodeWithText("Show all 5").performClick()
+        waitForIdle()
+        assertTrue(shows("Step 5"))
+        assertTrue(shows("Last step"))
+        assertTrue(shows("d1bbbbb"))
     }
 
     @Test
