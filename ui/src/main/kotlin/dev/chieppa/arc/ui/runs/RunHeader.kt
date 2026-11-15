@@ -53,6 +53,7 @@ import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.IconButton
 import dev.chieppa.stretch.ui.Segmented
 import dev.chieppa.stretch.ui.Tooltip
+import dev.chieppa.stretch.ui.opensOnPress
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -126,7 +127,7 @@ fun RunHeader(run: WorkflowRun, why: WhyMine?, stalls: List<RunStall>, state: Ru
             Tooltip(watchLabel) { IconButton(StretchIcons.Eye, watchLabel, { controller.toggleWatch(run) }, quiet = !watched, on = watched) }
             Box {
                 val label = stringResource(Res.string.run_menu)
-                Tooltip(label) { IconButton(StretchIcons.More, label, { menu = true }) }
+                Tooltip(label) { IconButton(StretchIcons.More, label, { menu = true }, Modifier.opensOnPress(menu) { menu = true }) }
                 Menu(menu, { menu = false }) { RunMenu(workbench, run) { menu = false } }
             }
         }

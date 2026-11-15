@@ -37,11 +37,12 @@ import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Tooltip
+import dev.chieppa.stretch.ui.opensOnPress
 import org.jetbrains.compose.resources.stringResource
 
 /**
  * The Files drawer's compact scope control: its label says what the tree shows, all the source's changes or one
- * commit's, and pressing it lists the source's [commits] to pick from. With one commit or none there is nothing to
+ * commit's, and pressing it lists the source's [commits] to pick from, pressing it again closes the list. With one commit or none there is nothing to
  * pick, so it shows the label alone.
  */
 @Composable
@@ -61,6 +62,7 @@ fun ScopeMenu(commits: List<CommitInfo>, selected: CommitInfo?, onSelect: (Commi
                     .clip(shape)
                     .background(c.surfaceWell)
                     .border(Stretch.stroke, c.lineControl, shape)
+                    .then(if (choosable) Modifier.opensOnPress(open) { open = true } else Modifier)
                     .clickable(enabled = choosable, role = Role.DropdownList) { open = true }
                     .semantics { contentDescription = description }
                     .padding(horizontal = StretchSpacing.space6),
