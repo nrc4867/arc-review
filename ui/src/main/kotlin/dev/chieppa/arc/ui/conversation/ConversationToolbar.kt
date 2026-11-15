@@ -55,7 +55,7 @@ fun ConversationToolbar(workbench: Workbench, source: Source, items: List<Timeli
         Spacer(Modifier.weight(1f))
         TipIconButton(StretchIcons.ArrowUp, stringResource(Res.string.conversation_previous), { step(-1) })
         TipIconButton(StretchIcons.ArrowDown, stringResource(Res.string.conversation_next), { step(1) })
-        val keys = items.map { it.key }.toSet()
+        val keys = items.filterNot { it is TimelineItem.Commits || it is TimelineItem.ForcePushed }.map { it.key }.toSet()
         val allFolded = keys.isNotEmpty() && views.folded.containsAll(keys)
         TipIconButton(
             if (allFolded) ArcIcons.UnfoldAll else ArcIcons.FoldAll,

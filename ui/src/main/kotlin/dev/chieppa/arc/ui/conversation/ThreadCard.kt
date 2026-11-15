@@ -25,6 +25,7 @@ import dev.chieppa.arc.design.generated.thread_replies
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.arc.ui.util.SourceLabels
 import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.stretch.markdown.markdownPeek
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
@@ -61,7 +62,7 @@ fun ThreadCard(thread: ReviewThread, workbench: Workbench, modifier: Modifier = 
             .framedSurface(Stretch.shapes.cardShape, fill, edge, Stretch.stroke),
     ) {
         val first = thread.messages.firstOrNull()
-        ThreadHead(thread, expanded, { views.toggle(thread) }, SourceLabels.of(thread.source), first?.let { "${it.author}: ${it.body}" }) {
+        ThreadHead(thread, expanded, { views.toggle(thread) }, SourceLabels.of(thread.source), first?.let { "${it.author}: ${markdownPeek(it.body)}" }) {
             val muted = Stretch.type.valueSm.merge(TextStyle(color = c.inkMuted))
             thread.changedIn?.let { BasicText(stringResource(Res.string.thread_lines_changed, it), style = muted.merge(TextStyle(color = look.ink))) }
             if (staged > 0) StateChip(pluralStringResource(Res.plurals.staged_replies, staged, staged), ArcIcons.Stage, stagedLook(false))

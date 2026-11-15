@@ -12,6 +12,7 @@ import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.Menu
 import dev.chieppa.stretch.frame.MenuDivider
 import dev.chieppa.stretch.frame.MenuItem
+import dev.chieppa.stretch.markdown.markdownPeek
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -32,7 +33,7 @@ fun LineChooser(workbench: Workbench, threads: List<ReviewThread>, onNew: () -> 
                 for (thread in threads) {
                     val (state, icon) = threadChip(thread.state)
                     val first = thread.messages.firstOrNull()?.takeIf { it.body.isNotBlank() }
-                    val peek = first?.let { "${it.author}: ${it.body.lineSequence().first()}" }
+                    val peek = first?.let { "${it.author}: ${markdownPeek(it.body)}" }
                     MenuItem(listOfNotNull(state, peek).joinToString(separator), { dismiss(); views.open(thread.id, thread.state) }, icon = icon)
                 }
             }

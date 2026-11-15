@@ -3,6 +3,7 @@ package dev.chieppa.arc.ui.conversation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
@@ -22,9 +23,10 @@ import dev.chieppa.stretch.theme.StretchSpacing
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * One message: who wrote it, with their picture (an agent marked as a guest, in the guest color), how long ago, what
- * it says, formatted and cut short when long, and its reactions, which [onReact] toggles when the host takes them. [author] names the writer in
- * place of the message's own, as "You" does; [trailing] sits after the time, such as a state chip.
+ * One message: who wrote it, with their picture (an agent marked as a guest, in the guest color), how long ago and the
+ * button to react at the end of that line, then what it says, formatted and cut short when long, and the reactions it
+ * has, which [onReact] toggles when the host takes them. [author] names the writer in place of the message's own, as
+ * "You" does; [trailing] sits after the time, such as a state chip.
  */
 @Composable
 fun ThreadMessageRow(
@@ -37,17 +39,20 @@ fun ThreadMessageRow(
 ) {
     val c = Stretch.colors
     val guest = Arc.colors.guest
+    val react = onReact.takeIf { message.id.isNotEmpty() }
     Row(modifier.fillMaxWidth().padding(StretchSpacing.space10), horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space8)) {
         Avatar(message.author, message.avatar, workbench.comments.avatars, guest = message.guest)
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(StretchSpacing.space2)) {
-            Row(horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space6), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(StretchSpacing.space6), verticalAlignment = Alignment.CenterVertically) {
                 BasicText(author, style = Stretch.type.bodySm.merge(TextStyle(color = if (message.guest) guest else c.inkStrong, fontWeight = FontWeight.SemiBold)))
                 if (message.guest) BasicText(stringResource(Res.string.thread_guest_author), style = Stretch.type.bodySm.merge(TextStyle(color = c.inkMuted)))
                 BasicText(ageText(message.writtenAt), style = Stretch.type.bodySm.merge(TextStyle(color = c.inkMuted)))
                 trailing()
+                Spacer(Modifier.weight(1f))
+                if (react != null) AddReaction(message.reactions, react)
             }
             if (message.body.isNotBlank()) ClampedBody(message.id.ifEmpty { "${message.author}@${message.writtenAt}" }, message.body, workbench)
-            ReactionRow(message.reactions, onReact.takeIf { message.id.isNotEmpty() })
+            ReactionRow(message.reactions, react, Modifier.padding(top = StretchSpacing.space4))
         }
     }
 }

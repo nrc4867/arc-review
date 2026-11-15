@@ -25,7 +25,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * One item of [source]'s conversation: the description, a comment, a review with the threads it started under it, a
- * thread on its own, or a file's heading over its threads, which opens the file.
+ * thread on its own, a run of commits, a force push, or a file's heading over its threads, which opens the file.
  */
 @Composable
 fun ConversationRow(item: TimelineItem, source: Source, workbench: Workbench) {
@@ -33,9 +33,9 @@ fun ConversationRow(item: TimelineItem, source: Source, workbench: Workbench) {
     val react = { id: String -> { r: Reaction -> controller.react(source, id, r) } }
     val inset = Modifier.padding(horizontal = StretchSpacing.space12, vertical = StretchSpacing.space6)
     when (item) {
-        is TimelineItem.Description -> ConversationItem(item.message, item.key, workbench, react(item.message.id), panel = true) {
+        is TimelineItem.Description -> ConversationItem(item.message, item.key, workbench, react(item.message.id), panel = true, chips = {
             ChipText(stringResource(Res.string.conversation_author))
-        }
+        })
         is TimelineItem.Entry -> when (val entry = item.entry) {
             is ConversationEntry.Comment -> ConversationItem(entry.message, item.key, workbench, react(entry.message.id))
             is ConversationEntry.Review -> ConversationItem(entry.message, item.key, workbench, react(entry.message.id), chips = { ReviewChips(entry) }) {
@@ -43,6 +43,8 @@ fun ConversationRow(item: TimelineItem, source: Source, workbench: Workbench) {
             }
         }
         is TimelineItem.Thread -> ConversationThread(item.thread, workbench, inset)
+        is TimelineItem.Commits -> CommitGroup(item, workbench)
+        is TimelineItem.ForcePushed -> ForcePushRow(item.push, workbench)
         is TimelineItem.File -> Column(inset, verticalArrangement = Arrangement.spacedBy(StretchSpacing.space6)) {
             val c = Stretch.colors
             Row(

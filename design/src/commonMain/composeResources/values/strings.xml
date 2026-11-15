@@ -372,6 +372,14 @@
     <string name="conversation_fold_all">Fold all</string>
     <string name="conversation_unfold_all">Unfold all</string>
     <string name="conversation_open_as_tab">Open as a tab</string>
+    <plurals name="conversation_commits_added">
+        <item quantity="one">%1$s added %2$d commit</item>
+        <item quantity="other">%1$s added %2$d commits</item>
+    </plurals>
+    <string name="conversation_commits_show_all">Show all %1$d</string>
+    <string name="conversation_commits_show_fewer">Show fewer</string>
+    <string name="conversation_force_pushed">%1$s force-pushed %2$s → %3$s</string>
+    <string name="conversation_force_pushed_to">%1$s force-pushed to %2$s</string>
     <string name="comment_show_more">Show more</string>
     <string name="comment_show_less">Show less</string>
     <string name="thread_go_to">Go to the line</string>
