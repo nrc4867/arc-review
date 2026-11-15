@@ -183,6 +183,14 @@ object ArcIcons {
             stroke("M6.5 13.5V10h3v3.5")
         }
     }
+    val Implementations: ImageVector by lazy {
+        icon("implementations") {
+            stroke("M6.5 3.5a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0z")
+            stroke("M8 5v2.5M3.5 13V9.5h9V13")
+            fill("M3 13a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0z")
+            fill("M12 13a0.5 0.5 0 1 0 1 0a0.5 0.5 0 1 0 -1 0z")
+        }
+    }
     val Keyboard: ImageVector by lazy {
         icon("keyboard") {
             stroke("M3 4h10a1.5 1.5 0 0 1 1.5 1.5v5a1.5 1.5 0 0 1 -1.5 1.5h-10a1.5 1.5 0 0 1 -1.5 -1.5v-5a1.5 1.5 0 0 1 1.5 -1.5z")
@@ -222,6 +230,16 @@ object ArcIcons {
             stroke("M10.5 3a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0z")
             stroke("M6.5 13a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0z")
             stroke("M4 4.5c0 4 4 3.5 4 7M12 4.5c0 4-4 3.5-4 7")
+        }
+    }
+    val NavigateBack: ImageVector by lazy {
+        icon("navigate-back") {
+            stroke("M13 8H3.5M7 4.5L3.5 8 7 11.5")
+        }
+    }
+    val NavigateForward: ImageVector by lazy {
+        icon("navigate-forward") {
+            stroke("M3 8h9.5M9 4.5L12.5 8 9 11.5")
         }
     }
     val NewBranch: ImageVector by lazy {
@@ -358,6 +376,11 @@ object ArcIcons {
         icon("schedule") {
             stroke("M4 3.5h8a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1 -1.5 1.5h-8a1.5 1.5 0 0 1 -1.5 -1.5v-7a1.5 1.5 0 0 1 1.5 -1.5z")
             stroke("M2.5 6.5h11M5.5 2v3M10.5 2v3")
+        }
+    }
+    val ScrollPastEnd: ImageVector by lazy {
+        icon("scroll-past-end") {
+            stroke("M3 2.5h10M3 5.5h7M8 8.5v5M5.5 11L8 13.5 10.5 11")
         }
     }
     val Server: ImageVector by lazy {

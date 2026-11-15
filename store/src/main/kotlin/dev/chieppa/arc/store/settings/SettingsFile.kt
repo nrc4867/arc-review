@@ -28,6 +28,7 @@ class SettingsFile(private val path: Path) {
             wrapLines = properties.getProperty(SettingsKeys.WRAP_LINES)?.trim()?.toBooleanStrictOrNull(),
             wholeLineHighlight = properties.getProperty(SettingsKeys.LINE_HIGHLIGHT)?.trim()?.toBooleanStrictOrNull(),
             stagedPlace = properties.getProperty(SettingsKeys.STAGED_PLACE)?.trim()?.ifEmpty { null },
+            scrollPastEnd = properties.getProperty(SettingsKeys.SCROLL_PAST_END)?.trim()?.toBooleanStrictOrNull(),
             startLayout = StartLayoutProperties.read(properties),
             mcpServer = properties.getProperty(SettingsKeys.MCP_SERVER)?.trim()?.toBooleanStrictOrNull(),
             mcpPort = properties.getProperty(SettingsKeys.MCP_PORT)?.trim()?.toIntOrNull()?.takeIf { it in 1..SettingsKeys.MAX_PORT },
@@ -42,6 +43,7 @@ class SettingsFile(private val path: Path) {
         settings.wrapLines?.let { properties.setProperty(SettingsKeys.WRAP_LINES, it.toString()) }
         settings.wholeLineHighlight?.let { properties.setProperty(SettingsKeys.LINE_HIGHLIGHT, it.toString()) }
         settings.stagedPlace?.let { properties.setProperty(SettingsKeys.STAGED_PLACE, it) }
+        settings.scrollPastEnd?.let { properties.setProperty(SettingsKeys.SCROLL_PAST_END, it.toString()) }
         settings.mcpServer?.let { properties.setProperty(SettingsKeys.MCP_SERVER, it.toString()) }
         settings.mcpPort?.let { properties.setProperty(SettingsKeys.MCP_PORT, it.toString()) }
         StartLayoutProperties.write(settings.startLayout, properties)

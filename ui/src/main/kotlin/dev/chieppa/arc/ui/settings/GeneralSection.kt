@@ -19,14 +19,17 @@ import dev.chieppa.arc.design.generated.settings_keywords_line_highlight
 import dev.chieppa.arc.design.generated.settings_keywords_wrap
 import dev.chieppa.arc.design.generated.settings_line_highlight
 import dev.chieppa.arc.design.generated.settings_line_highlight_detail
+import dev.chieppa.arc.design.generated.settings_keywords_scroll_past_end
+import dev.chieppa.arc.design.generated.settings_scroll_past_end
+import dev.chieppa.arc.design.generated.settings_scroll_past_end_detail
 import dev.chieppa.arc.design.generated.settings_section_general
 import dev.chieppa.arc.design.generated.settings_wrap
 import dev.chieppa.arc.design.generated.settings_wrap_detail
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * Arc's General section: how panes show code, whether they wrap long lines and how changed lines are washed, where
- * the staged comments sit, and the [updates] card where Arc updates itself, when it can.
+ * Arc's General section: how panes show code, whether they wrap long lines, how changed lines are washed and whether
+ * they scroll past the end, where the staged comments sit, and the [updates] card where Arc updates itself, when it can.
  */
 @Composable
 fun generalSection(preferences: UiPreferences, updates: SettingsCard? = null): SettingsSection = SettingsSection(
@@ -55,6 +58,14 @@ fun generalSection(preferences: UiPreferences, updates: SettingsCard? = null): S
                     stringResource(Res.string.settings_line_highlight_detail),
                     SettingsIcons.CHANGED_SINCE,
                     settingsKeywords(Res.string.settings_keywords_line_highlight),
+                ),
+                SettingsEntry(
+                    ArcSettingIds.SCROLL_PAST_END,
+                    stringResource(Res.string.settings_scroll_past_end),
+                    SettingsControl.Switch(preferences.scrollPastEnd),
+                    stringResource(Res.string.settings_scroll_past_end_detail),
+                    SettingsIcons.SCROLL_PAST_END,
+                    settingsKeywords(Res.string.settings_keywords_scroll_past_end),
                 ),
             ),
         ),

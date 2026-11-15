@@ -8,7 +8,7 @@ import dev.chieppa.arc.ui.settings.UiPreferences
 
 /** The stored settings as the look to show, falling back to the defaults for anything unknown. */
 internal fun AppSettings.toPreferences(): UiPreferences =
-    UiPreferences(ThemeChoices.byId(themeId), InterfaceSizes.nearest(interfaceSize), wrapLines ?: false, wholeLineHighlight ?: true, StagedPlace.byId(stagedPlace))
+    UiPreferences(ThemeChoices.byId(themeId), InterfaceSizes.nearest(interfaceSize), wrapLines ?: false, wholeLineHighlight ?: true, StagedPlace.byId(stagedPlace), scrollPastEnd ?: false)
 
 /** The look as settings to store, over [base]'s other settings. */
 internal fun UiPreferences.toSettings(base: AppSettings = AppSettings()): AppSettings = base.copy(
@@ -17,4 +17,5 @@ internal fun UiPreferences.toSettings(base: AppSettings = AppSettings()): AppSet
     wrapLines = wrapLines,
     wholeLineHighlight = wholeLineHighlight,
     stagedPlace = stagedPlace.id,
+    scrollPastEnd = scrollPastEnd,
 )

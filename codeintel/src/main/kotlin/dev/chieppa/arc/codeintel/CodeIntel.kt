@@ -3,6 +3,7 @@ package dev.chieppa.arc.codeintel
 import dev.chieppa.arc.codeintel.provider.DecorationProvider
 import dev.chieppa.arc.codeintel.provider.DefinitionProvider
 import dev.chieppa.arc.codeintel.provider.HoverProvider
+import dev.chieppa.arc.codeintel.provider.ImplementationsProvider
 import dev.chieppa.arc.codeintel.provider.OutlineProvider
 import dev.chieppa.arc.codeintel.provider.ProviderRegistry
 import dev.chieppa.arc.codeintel.provider.UsagesProvider
@@ -14,6 +15,7 @@ import dev.chieppa.arc.codeintel.provider.UsagesProvider
 class CodeIntel {
     val definitions = ProviderRegistry<DefinitionProvider>()
     val usages = ProviderRegistry<UsagesProvider>()
+    val implementations = ProviderRegistry<ImplementationsProvider>()
     val decorations = ProviderRegistry<DecorationProvider>()
     val hovers = ProviderRegistry<HoverProvider>()
     val outlines = ProviderRegistry<OutlineProvider>()

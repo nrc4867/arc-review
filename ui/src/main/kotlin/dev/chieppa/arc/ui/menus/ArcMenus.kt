@@ -25,7 +25,8 @@ object ArcMenus {
             Res.string.menu_go,
             listOf(
                 ArcActionIds.GO_TO_ANYTHING, ArcActionIds.OPEN_FILE, ArcActionIds.FIND_IN_FILE, null,
-                ArcActionIds.GO_TO_DEFINITION, ArcActionIds.SHOW_USAGES, null,
+                ArcActionIds.NAVIGATE_BACK, ArcActionIds.NAVIGATE_FORWARD, null,
+                ArcActionIds.GO_TO_DEFINITION, ArcActionIds.GO_TO_IMPLEMENTATION, ArcActionIds.SHOW_USAGES, null,
                 ArcActionIds.NEXT_FILE, ArcActionIds.PREVIOUS_FILE, ArcActionIds.NEXT_CHANGE, ArcActionIds.PREVIOUS_CHANGE, null,
                 ArcActionIds.OPEN_RUNS, ArcActionIds.RUN_WORKFLOW,
             ),

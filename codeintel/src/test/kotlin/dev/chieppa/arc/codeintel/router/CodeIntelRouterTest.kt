@@ -12,6 +12,9 @@ import dev.chieppa.arc.codeintel.model.UsageGroup
 import dev.chieppa.arc.codeintel.model.UsagesAnswer
 import dev.chieppa.arc.codeintel.model.UsagesRequest
 import dev.chieppa.arc.codeintel.provider.DefinitionProvider
+import dev.chieppa.arc.codeintel.provider.ImplementationsProvider
+import dev.chieppa.arc.codeintel.model.ImplementationsAnswer
+import dev.chieppa.arc.codeintel.model.ImplementationsRequest
 import dev.chieppa.arc.codeintel.provider.UsagesProvider
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -25,6 +28,11 @@ class CodeIntelRouterTest {
     private class Definitions(override val id: String, override val rank: Int = 0, val answer: () -> DefinitionAnswer?) : DefinitionProvider {
         override val selector = DocumentSelector(setOf("kotlin"))
         override suspend fun definitions(request: DefinitionRequest) = answer()
+    }
+
+    private class Implementations(override val id: String, val answer: ImplementationsAnswer) : ImplementationsProvider {
+        override val selector = DocumentSelector.All
+        override suspend fun implementations(request: ImplementationsRequest) = answer
     }
 
     private class Usages(override val id: String, val answer: UsagesAnswer) : UsagesProvider {
@@ -96,5 +104,22 @@ class CodeIntelRouterTest {
             changedPaths = listOf("z/Z.kt"),
         )
         assertEquals(listOf("z/Z.kt:1", "a/A.kt:9", "b/B.kt:2", "b/B.kt:5"), ordered.map { "${it.location.document.path}:${it.location.range.start.line}" })
+    }
+
+    @Test
+    fun aDefinitionWithNoUsagesLeadsToWhatImplementsIt() = runTest {
+        val intel = CodeIntel()
+        intel.definitions.register(Definitions("ts") { DefinitionAnswer("revoke", emptyList(), atDefinition = true) })
+        intel.implementations.register(Implementations("ts", ImplementationsAnswer("revoke", listOf(Answers.target("a/Db.kt", 4), Answers.target("a/Memory.kt", 8)))))
+        val choose = assertIs<Navigation.Choose>(CodeIntelRouter(intel).navigate(request))
+        assertEquals(listOf("a/Db.kt", "a/Memory.kt"), choose.answer.targets.map { it.location.document.path })
+    }
+
+    @Test
+    fun oneImplementationIsJumpedTo() = runTest {
+        val intel = CodeIntel()
+        intel.implementations.register(Implementations("ts", ImplementationsAnswer("Store", listOf(Answers.target("a/Db.kt", 4)))))
+        val jump = CodeIntelRouter(intel).toImplementations(ImplementationsRequest(request.document, request.at, sources))
+        assertEquals("a/Db.kt", assertIs<Navigation.Jump>(jump).target.location.document.path)
     }
 }

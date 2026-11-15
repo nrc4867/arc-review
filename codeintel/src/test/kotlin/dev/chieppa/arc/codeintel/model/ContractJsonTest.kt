@@ -14,6 +14,8 @@ class ContractJsonTest {
     fun answersRoundTripThroughJson() {
         val usages = UsagesAnswer("TokenPair", listOf(UsageGroup("api#412", "9c1e2fa", "kotlin", Answers.byName, listOf(Answers.target("a/T.kt", 47)))))
         assertEquals(usages, json.decodeFromString<UsagesAnswer>(json.encodeToString(usages)))
+        val implementations = ImplementationsAnswer("Store", listOf(Answers.target("a/Db.kt", 4)))
+        assertEquals(implementations, json.decodeFromString<ImplementationsAnswer>(json.encodeToString(implementations)))
         val decoration = CodeDecoration(CodeRange.onLine(3, 0, 5), DecorationStyle.Warning, Answers.exact, "**deprecated**")
         assertEquals(decoration, json.decodeFromString<CodeDecoration>(json.encodeToString(decoration)))
         val outline = OutlineAnswer(listOf(OutlineSymbol("TokenService", "class", CodeRange.onLine(40, 6, 12), children = listOf(OutlineSymbol("refresh", "function", CodeRange.onLine(47, 8, 7), listOf("token"), "TokenPair")))), Answers.byName)

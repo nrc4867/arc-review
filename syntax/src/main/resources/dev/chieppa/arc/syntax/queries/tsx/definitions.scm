@@ -21,6 +21,13 @@
 (class_declaration name: (type_identifier) @name) @definition.class
 (abstract_class_declaration name: (type_identifier) @name) @definition.class
 (interface_declaration name: (type_identifier) @name) @definition.interface
+
+; Each supertype a class or interface extends or implements, as @super.
+(class_declaration name: (type_identifier) @name (class_heritage (extends_clause value: (_) @super))) @definition.class
+(class_declaration name: (type_identifier) @name (class_heritage (implements_clause (_) @super))) @definition.class
+(abstract_class_declaration name: (type_identifier) @name (class_heritage (extends_clause value: (_) @super))) @definition.class
+(abstract_class_declaration name: (type_identifier) @name (class_heritage (implements_clause (_) @super))) @definition.class
+(interface_declaration name: (type_identifier) @name (extends_type_clause type: (_) @super)) @definition.interface
 (type_alias_declaration name: (type_identifier) @name) @definition.type
 (enum_declaration name: (identifier) @name) @definition.enum
 (enum_body (property_identifier) @name @definition.constant)

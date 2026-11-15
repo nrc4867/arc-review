@@ -66,7 +66,7 @@ class NavigationControllerTest {
         val pane = state.workspace.panes.single()
         assertEquals("src/TokenPair.kt", pane.path)
         assertEquals(PaneView.FullFile, pane.view)
-        assertEquals(NavReveal(RepoName("api"), "a1", "src/TokenPair.kt", 5, 6), controller.reveal)
+        assertEquals(NavReveal(RepoName("api"), "a1", "src/TokenPair.kt", 5, 6, end = 15), controller.reveal)
         assertEquals(listOf(DecorationStyle.Reference, DecorationStyle.Definition), controller.focus.map { it.style })
         assertNull(controller.popup)
     }

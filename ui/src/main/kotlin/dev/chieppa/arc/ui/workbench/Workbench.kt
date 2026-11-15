@@ -46,6 +46,7 @@ import dev.chieppa.arc.ui.navigation.CodeNavigation
 import dev.chieppa.arc.ui.hints.HintController
 import dev.chieppa.arc.ui.navigation.NavigationController
 import dev.chieppa.arc.ui.navigation.SymbolOpener
+import dev.chieppa.arc.ui.navigation.HistoryNavigator
 import dev.chieppa.arc.ui.panes.PaneCommands
 import dev.chieppa.arc.ui.panes.PaneTexts
 import dev.chieppa.arc.ui.review.MarkController
@@ -191,6 +192,9 @@ class Workbench(
     val threadViews = ThreadViews()
     val conversationViews = ConversationViews()
 
+    /** Where the person has read, to go back and forward between. */
+    val history = HistoryNavigator(state, panes, navigation, threadViews, SymbolOpener(state, panes), scope)
+
     /** The review's conversation: threads, the person's drafts, notes and staged comments, and pushing them. */
     val comments = CommentTools(state, data, conversationService, scope, dispatchers, localConversation)
 
@@ -237,6 +241,7 @@ class Workbench(
         registerPullActions(registry, this)
         registerRunActions(registry, this)
         navigation.start()
+        history.start()
         registerStartActions(registry, this)
         start.registry.register(StartContributor.ARC, arcStartProvider(this))
         settings.register(SettingsContributor.ARC, ArcSettingsProvider(this))

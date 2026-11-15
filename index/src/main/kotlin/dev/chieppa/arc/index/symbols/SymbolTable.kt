@@ -3,16 +3,19 @@ package dev.chieppa.arc.index.symbols
 import dev.chieppa.arc.index.IndexedFile
 import dev.chieppa.arc.syntax.grammar.LanguageFamily
 
-/** Every definition and use in a set of files, of any repos and revisions, by name. */
+/** Every definition and use in a set of files, of any repos and revisions, by name, and the types under each supertype name. */
 class SymbolTable(files: Sequence<IndexedFile>) {
     private val definitions = HashMap<String, MutableList<DefSite>>()
     private val uses = HashMap<String, MutableList<UseSite>>()
+    private val subtypes = HashMap<String, MutableList<DefSite>>()
 
     init {
         for (file in files) {
             val sqlFile = file.grammar.family == LanguageFamily.Sql
             for (definition in file.facts.definitions) {
-                definitions.getOrPut(SymbolKeys.of(definition.name, sqlFile)) { ArrayList() } += DefSite(file, definition)
+                val site = DefSite(file, definition)
+                definitions.getOrPut(SymbolKeys.of(definition.name, sqlFile)) { ArrayList() } += site
+                for (supertype in definition.supertypes) subtypes.getOrPut(supertype) { ArrayList() } += site
             }
             for (reference in file.facts.references) {
                 val site = UseSite(file, reference)
@@ -26,6 +29,9 @@ class SymbolTable(files: Sequence<IndexedFile>) {
 
     /** The uses filed under [name], SQL ones when [sql]. */
     fun uses(name: String, sql: Boolean): List<UseSite> = uses[SymbolKeys.of(name, sql)].orEmpty()
+
+    /** The types that name [supertype] among those they extend or implement, by its simple name. */
+    fun subtypes(supertype: String): List<DefSite> = subtypes[supertype].orEmpty()
 
     companion object {
         val Empty = SymbolTable(emptySequence())

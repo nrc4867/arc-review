@@ -10,6 +10,7 @@
 (variable_declarator name: (identifier) @name value: (arrow_function parameter: (identifier)) @params) @definition.function
 (variable_declarator name: (identifier) @name) @definition.constant
 (class_declaration name: (identifier) @name) @definition.class
+(class_declaration name: (identifier) @name (class_heritage (_) @super)) @definition.class
 (field_definition property: (property_identifier) @name) @definition.property
 
 (formal_parameters [(identifier) (assignment_pattern) (rest_pattern) (object_pattern) (array_pattern)] @param)

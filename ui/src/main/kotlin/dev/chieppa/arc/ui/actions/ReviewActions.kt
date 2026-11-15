@@ -5,6 +5,7 @@ import dev.chieppa.arc.core.pane.PaneView
 import dev.chieppa.arc.ui.conversation.PaneComments
 import dev.chieppa.arc.core.mark.FileReviewState
 import dev.chieppa.arc.ui.switcher.SwitcherScope
+import dev.chieppa.arc.ui.panes.PaneCommands
 import dev.chieppa.arc.ui.workbench.ActionTargets
 import dev.chieppa.arc.ui.workbench.ReviewTargets
 import dev.chieppa.arc.ui.workbench.Workbench
@@ -29,11 +30,21 @@ fun registerReviewActions(registry: ActionRegistry, workbench: Workbench) {
     action(ArcActionIds.NEXT_CHANGE, ArcKeys.NEXT_CHANGE, hasPane) { workbench.onFocusedPane { nextChange() } }
     action(ArcActionIds.PREVIOUS_CHANGE, ArcKeys.PREVIOUS_CHANGE, hasPane) { workbench.onFocusedPane { previousChange() } }
     action(ArcActionIds.FIND_IN_FILE, ArcKeys.FIND_IN_FILE, hasPane) { workbench.onFocusedPane { openFind() } }
-    action(ArcActionIds.GO_TO_DEFINITION, ArcKeys.GO_TO_DEFINITION, hasPane) { workbench.onFocusedPane { clickSymbolAtCaret() } }
-    action(ArcActionIds.SHOW_USAGES, ArcKeys.SHOW_USAGES, hasPane) {
-        workbench.navigation.askUsagesNext()
-        workbench.onFocusedPane { if (!clickSymbolAtCaret()) workbench.navigation.cancelUsagesNext() }
+    val hasCode = { ActionTargets.pane(workbench) != null }
+    fun onTargetPane(command: suspend PaneCommands.() -> Unit) {
+        ActionTargets.pane(workbench)?.let { workbench.runOnPane(it.id.value, command) }
     }
+    action(ArcActionIds.GO_TO_DEFINITION, ArcKeys.GO_TO_DEFINITION, hasCode) { onTargetPane { clickSymbolAtCaret() } }
+    action(ArcActionIds.GO_TO_IMPLEMENTATION, ArcKeys.GO_TO_IMPLEMENTATION, hasCode) {
+        workbench.navigation.askImplementationsNext()
+        onTargetPane { if (!clickSymbolAtCaret()) workbench.navigation.cancelUsagesNext() }
+    }
+    action(ArcActionIds.SHOW_USAGES, ArcKeys.SHOW_USAGES, hasCode) {
+        workbench.navigation.askUsagesNext()
+        onTargetPane { if (!clickSymbolAtCaret()) workbench.navigation.cancelUsagesNext() }
+    }
+    action(ArcActionIds.NAVIGATE_BACK, ArcKeys.NAVIGATE_BACK, { workbench.history.history.behind.isNotEmpty() }) { workbench.history.back() }
+    action(ArcActionIds.NAVIGATE_FORWARD, ArcKeys.NAVIGATE_FORWARD, { workbench.history.history.ahead.isNotEmpty() }) { workbench.history.forward() }
     action(ArcActionIds.MARK_AND_ADVANCE, ArcKeys.MARK_AND_ADVANCE, hasSource) {
         val targets = ReviewTargets.of(workbench)
         if (workbench.treeFocused && targets.isNotEmpty()) {

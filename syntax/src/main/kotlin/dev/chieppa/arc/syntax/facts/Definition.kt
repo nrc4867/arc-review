@@ -5,7 +5,8 @@ package dev.chieppa.arc.syntax.facts
  * lower-case last part). Positions are string indices; [line] counts from 1 and [column] from 0. [spanStart] and
  * [spanEnd] cover the whole definition. [parameters] are a callable's parameter names, null for anything else; [type]
  * is its declared or return type as written. [parent] is the index of the innermost definition around it, -1 at the
- * top, and [container] and [containerKind] that definition's name and kind (or a SQL name's schema).
+ * top, and [container] and [containerKind] that definition's name and kind (or a SQL name's schema). [supertypes] are
+ * the simple names of the types a type extends or implements, as written, without their type arguments.
  */
 data class Definition(
     val name: String,
@@ -22,6 +23,7 @@ data class Definition(
     val parent: Int = -1,
     val container: String? = null,
     val containerKind: SymbolKind? = null,
+    val supertypes: List<String> = emptyList(),
 ) {
     /** How many parameters a callable takes, or null. */
     val arity: Int? get() = parameters?.size

@@ -7,7 +7,8 @@ import dev.chieppa.arc.syntax.runtime.SyntaxTree
 
 /**
  * Reads a tree's definitions from its grammar's definitions query. One definition can match several patterns (one
- * giving its parameters, another its type); they merge by name position, the more telling kind winning. Each
+ * giving its parameters, another its type, others each a supertype as @super); they merge by name position, the more
+ * telling kind winning. Each
  * definition then learns the innermost definition around it.
  */
 internal object DefinitionCollector {
@@ -16,6 +17,7 @@ internal object DefinitionCollector {
     private const val PARAM = "param"
     private const val PARAMS = "params"
     private const val TYPE = "type"
+    private const val SUPER = "super"
 
     private class Draft(
         var kind: SymbolKind,
@@ -25,6 +27,7 @@ internal object DefinitionCollector {
         var spanEnd: Int,
         var params: Int,
         var type: String?,
+        val supertypes: MutableList<String> = ArrayList(),
     )
 
     fun collect(tree: SyntaxTree, lines: LineIndex): List<Definition> {
@@ -42,6 +45,7 @@ internal object DefinitionCollector {
             var nameEnd = -1
             var type: String? = null
             var params = -1
+            var supertype: String? = null
             for (i in from until until) {
                 val capture = names[records.capture(i)]
                 when {
@@ -57,14 +61,16 @@ internal object DefinitionCollector {
                         lists.addList(records.start(i), records.end(i))
                     }
                     capture == TYPE -> type = CodeText.compact(text.substring(records.start(i), records.end(i)))
+                    capture == SUPER -> supertype = SupertypeNames.simple(text.substring(records.start(i), records.end(i)))
                 }
             }
             val found = kind ?: return@forEachMatch
             if (nameStart < 0 || nameEnd <= nameStart) return@forEachMatch
             val existing = drafts[nameStart]
             if (existing == null) {
-                drafts[nameStart] = Draft(found, nameStart, nameEnd, spanStart, spanEnd, params, type)
+                drafts[nameStart] = Draft(found, nameStart, nameEnd, spanStart, spanEnd, params, type).also { draft -> supertype?.let { draft.supertypes += it } }
             } else {
+                supertype?.takeIf { it !in existing.supertypes }?.let { existing.supertypes += it }
                 if (found.rank > existing.kind.rank) existing.kind = found
                 if (existing.type == null) existing.type = type
                 if (existing.params < 0) existing.params = params
@@ -93,6 +99,7 @@ internal object DefinitionCollector {
                 parameters = if (draft.kind.isCallable) parameterLists[draft.params].orEmpty() else null,
                 type = draft.type,
                 container = schema,
+                supertypes = draft.supertypes.toList(),
             )
         }
         return withParents(built)

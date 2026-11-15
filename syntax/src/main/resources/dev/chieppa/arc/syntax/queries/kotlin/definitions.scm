@@ -7,6 +7,11 @@
 (companion_object (type_identifier) @name) @definition.object
 (type_alias (type_identifier) @name) @definition.type
 
+; Each supertype a class, interface or object extends or implements, as @super.
+(class_declaration "interface" (type_identifier) @name (delegation_specifier [(user_type) @super (constructor_invocation (user_type) @super)])) @definition.interface
+(class_declaration "class" (type_identifier) @name (delegation_specifier [(user_type) @super (constructor_invocation (user_type) @super)])) @definition.class
+(object_declaration (type_identifier) @name (delegation_specifier [(user_type) @super (constructor_invocation (user_type) @super)])) @definition.object
+
 (function_declaration (simple_identifier) @name (function_value_parameters) @params) @definition.function
 (function_declaration
   (simple_identifier) @name

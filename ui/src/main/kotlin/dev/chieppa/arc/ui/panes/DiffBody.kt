@@ -11,12 +11,13 @@ import dev.chieppa.arc.core.conversation.LineSide
 import dev.chieppa.arc.core.pane.Pane
 import dev.chieppa.arc.ui.conversation.LineChooser
 import dev.chieppa.arc.ui.conversation.PaneComments
-import dev.chieppa.arc.ui.conversation.ThreadReveal
 import dev.chieppa.arc.ui.conversation.PaneThread
 import dev.chieppa.arc.ui.conversation.paneThreads
 import dev.chieppa.arc.ui.find.FindState
 import dev.chieppa.arc.ui.find.ViewerMatches
 import dev.chieppa.arc.ui.workbench.Workbench
+import dev.chieppa.arc.ui.menus.CodeMenu
+import dev.chieppa.stretch.frame.ContextMenuArea
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.produceState
@@ -25,7 +26,6 @@ import dev.chieppa.arc.ui.hints.RenderedDocBlock
 import dev.chieppa.arc.ui.hints.rememberPaneDocs
 import dev.chieppa.arc.ui.navigation.NameSpan
 import dev.chieppa.arc.ui.navigation.NavigationPopover
-import dev.chieppa.arc.ui.navigation.NavigationSizes
 import dev.chieppa.arc.ui.navigation.NavigationTargets
 import dev.chieppa.arc.ui.navigation.PaneCaret
 import dev.chieppa.arc.ui.navigation.SyntaxTokens
@@ -34,7 +34,6 @@ import dev.chieppa.stretch.code.CodeRange
 import dev.chieppa.stretch.diff.DiffBlock
 import dev.chieppa.stretch.diff.DiffDecoration
 import dev.chieppa.stretch.diff.DiffLineRef
-import dev.chieppa.stretch.diff.DiffPosition
 import dev.chieppa.stretch.diff.FileTokens
 import kotlinx.coroutines.withContext
 import dev.chieppa.stretch.diff.DiffMark
@@ -123,22 +122,25 @@ fun DiffBody(pane: Pane, text: PaneText, diff: FileDiff, workbench: Workbench, f
         symbolCard = { at, _, card -> PaneHintCard(documents.getValue(at.side), at.line, at.column, card, workbench.hints) },
         lineBlock = { block, _ -> docs.at(block.lines.first)?.let { doc -> RenderedDocBlock(doc, newDocument, workbench.hints) { docs.showRaw(doc) } } },
     )
-    Box(modifier) {
-        DiffViewer(
-            listOf(diff),
-            Modifier.fillMaxSize(),
-            viewer,
-            showBar = false,
-            slots = slots,
-            tokens = tokens,
-            matches = matches,
-            currentMatch = current,
-            marks = marks,
-            changeWash = workbench.preferences.changeWash,
-            decorations = decorations,
-            blocks = docs.ranges.map { DiffBlock(0, it) },
-        )
-        NavigationPopover(workbench, id)
+    ContextMenuArea({ close -> CodeMenu(workbench, id, close) }, modifier) {
+        Box(Modifier.fillMaxSize()) {
+            DiffViewer(
+                listOf(diff),
+                Modifier.fillMaxSize(),
+                viewer,
+                showBar = false,
+                slots = slots,
+                tokens = tokens,
+                matches = matches,
+                currentMatch = current,
+                marks = marks,
+                changeWash = workbench.preferences.changeWash,
+                decorations = decorations,
+                blocks = docs.ranges.map { DiffBlock(0, it) },
+                scrollPastEnd = workbench.preferences.endSpace,
+            )
+            NavigationPopover(workbench, id)
+        }
     }
 
     val commands = remember(viewer, find, lines) {
@@ -166,24 +168,9 @@ fun DiffBody(pane: Pane, text: PaneText, diff: FileDiff, workbench: Workbench, f
         snapshotFlow { viewer.firstVisibleLine(DiffSide.New)?.second }.filterNotNull().collect { workbench.state.paneLines[id] = it }
     }
     LaunchedEffect(viewer) {
-        snapshotFlow { viewer.caret }.collect { at -> at?.let { navigation.caret = PaneCaret(id, it.line, it.column) } }
+        snapshotFlow { viewer.caret }.collect { at -> at?.let { navigation.caret = PaneCaret(id, it.line, it.column, documents.getValue(it.side).path, lineSide(it.side)) } }
     }
-    val jump = navigation.reveal?.takeIf { jump -> DiffSide.entries.any { documents.getValue(it).let { d -> d.repo == jump.repo.value && d.revision == jump.revision && d.path == jump.path } } }
-    LaunchedEffect(viewer, jump) {
-        jump ?: return@LaunchedEffect
-        withFrameNanos {}
-        val side = if (documents.getValue(DiffSide.New).revision == jump.revision) DiffSide.New else DiffSide.Old
-        viewer.scrollToLine(0, side, (jump.line - NavigationSizes.LEAD_IN).coerceAtLeast(1))
-        viewer.caret = DiffPosition(0, side, jump.line, jump.column)
-        navigation.reveal = null
-    }
-    val reveal = workbench.threadViews.reveal?.takeIf { it.source == pane.source && it.path == pane.path }
-    LaunchedEffect(viewer, reveal) {
-        reveal ?: return@LaunchedEffect
-        withFrameNanos {}
-        viewer.scrollToLine(0, if (reveal.side == LineSide.Old) DiffSide.Old else DiffSide.New, (reveal.line - ThreadReveal.LEAD_IN).coerceAtLeast(1))
-        workbench.threadViews.reveal = null
-    }
+    DiffJumps(pane, viewer, documents, workbench)
 }
 
 private fun lineSide(side: DiffSide) = if (side == DiffSide.Old) LineSide.Old else LineSide.New
