@@ -25,6 +25,7 @@ object ArcSettingIds {
     const val SIZE = "arc.size"
     const val WRAP = "arc.wrap"
     const val LINE_HIGHLIGHT = "arc.line-highlight"
+    const val SCROLL_PAST_END = "arc.scroll-past-end"
     const val ACCOUNT = "arc.account"
     const val TOKEN = "arc.token"
     const val VERSION = "arc.version"

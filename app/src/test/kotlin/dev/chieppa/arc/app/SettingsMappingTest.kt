@@ -16,10 +16,12 @@ class SettingsMappingTest {
     fun theLookSurvivesARoundTrip() {
         val look = UiPreferences(StretchThemes.InkDark, 1.25f)
         assertEquals(look, look.toSettings().toPreferences())
-        assertEquals(AppSettings("ink-dark", 1.25f, wrapLines = false, wholeLineHighlight = true), look.toSettings())
+        assertEquals(AppSettings("ink-dark", 1.25f, wrapLines = false, wholeLineHighlight = true, scrollPastEnd = false), look.toSettings())
         val wrapping = look.copy(wrapLines = true)
         assertEquals(wrapping, wrapping.toSettings().toPreferences())
         val gutter = look.copy(wholeLineHighlight = false)
         assertEquals(gutter, gutter.toSettings().toPreferences())
+        val pastEnd = look.copy(scrollPastEnd = true)
+        assertEquals(pastEnd, pastEnd.toSettings().toPreferences())
     }
 }

@@ -8,6 +8,7 @@ internal object SettingsKeys {
     const val LAST_REVIEW = "review.last"
     const val WRAP_LINES = "panes.wrap"
     const val LINE_HIGHLIGHT = "panes.highlight.lines"
+    const val SCROLL_PAST_END = "panes.scroll.past.end"
     const val MCP_SERVER = "mcp.server"
     const val MCP_PORT = "mcp.port"
     const val MAX_PORT = 65_535

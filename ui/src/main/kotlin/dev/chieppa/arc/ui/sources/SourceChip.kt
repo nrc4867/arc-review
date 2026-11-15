@@ -46,6 +46,7 @@ import dev.chieppa.arc.design.generated.sources_close
 import dev.chieppa.stretch.frame.ContextMenuArea
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.ui.FieldIcon
+import dev.chieppa.stretch.ui.onMiddleClick
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.stretch.theme.Icon
 import dev.chieppa.stretch.theme.Stretch
@@ -58,7 +59,7 @@ import org.jetbrains.compose.resources.stringResource
  * were reviewed, and for a pull request its [checks]. A [selected] source, the active one or one added beside it, is
  * outlined; a source that could not be read is edged in the error color, and a pull request whose [pullState] is merged
  * or closed is dimmed, its ref's tooltip saying which. A click runs [onClick], and with Ctrl (Cmd on macOS) held
- * [onToggleSelected]. Its close button runs [onClose], and a right-click opens [menu].
+ * [onToggleSelected]. Its close button and a middle-click run [onClose], and a right-click opens [menu].
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -93,6 +94,7 @@ fun SourceChip(
                 .background(if (selected) c.onFill else c.surfaceRail)
                 .border(Stretch.stroke, edge, shape)
                 .onPointerEvent(PointerEventType.Press, PointerEventPass.Initial) { extending = it.keyboardModifiers.extendsSelection }
+                .onMiddleClick(onClose)
                 .clickable(role = Role.Tab) {
                     if (extending) onToggleSelected() else onClick()
                     extending = false

@@ -27,6 +27,7 @@ object SettingsIcons {
     const val PULL_REQUEST = "pull-request"
     const val REFRESH = "refresh"
     const val RUNS = "runs"
+    const val SCROLL_PAST_END = "scroll-past-end"
     const val SERVER = "server"
     const val SETTINGS = "settings"
     const val SPLIT_VIEW = "split-view"
@@ -56,6 +57,7 @@ object SettingsIcons {
             PULL_REQUEST to ArcIcons.PullRequest,
             REFRESH to ArcIcons.Refresh,
             RUNS to ArcIcons.Runs,
+            SCROLL_PAST_END to ArcIcons.ScrollPastEnd,
             SERVER to ArcIcons.Server,
             SETTINGS to StretchIcons.Settings,
             SPLIT_VIEW to StretchIcons.SplitView,
