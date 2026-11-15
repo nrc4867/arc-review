@@ -15,6 +15,9 @@ kotlin {
             api("dev.chieppa.stretch:stretch-theme")
             api(libs.compose.components.resources)
         }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
     }
 }
 

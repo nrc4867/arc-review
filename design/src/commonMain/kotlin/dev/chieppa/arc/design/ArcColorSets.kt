@@ -16,10 +16,10 @@ object ArcColorSets {
     )
 
     val Light = ArcColors(
-        guest = Color(0xFF5B4FC4),
+        guest = Color(0xFF4A3FAE),
         guestWash = Color(0xFFEFEDFC),
         guestEdge = Color(0xFFB3ACEC),
-        addressed = Color(0xFF2B66A6),
+        addressed = Color(0xFF1D528C),
         addressedWash = Color(0xFFE7F0FA),
         addressedEdge = Color(0xFF9CC0E8),
         passFill = Color(0xFFDCEFDF),
