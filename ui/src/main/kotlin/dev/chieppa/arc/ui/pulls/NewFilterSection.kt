@@ -16,57 +16,81 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import dev.chieppa.arc.core.activity.ActivityReporter
 import dev.chieppa.arc.design.generated.Res
 import dev.chieppa.arc.design.generated.filter_default_name
+import dev.chieppa.arc.design.generated.filters_name
 import dev.chieppa.arc.design.generated.filters_new
 import dev.chieppa.arc.design.generated.filters_paste
-import dev.chieppa.arc.host.github.search.SearchUrls
+import dev.chieppa.arc.host.github.search.SearchInput
+import dev.chieppa.arc.host.github.search.SearchReading
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Button
 import dev.chieppa.stretch.ui.ButtonKind
 import dev.chieppa.stretch.ui.Divider
-import org.jetbrains.compose.resources.stringResource
 import dev.chieppa.stretch.ui.TextField
+import org.jetbrains.compose.resources.stringResource
 
 /**
- * Making a saved filter: a pasted GitHub search link becomes one, named for its query, and with the field empty the
- * button makes one on [DEFAULT_QUERY] to edit in its tab. [onCreated] opens the new filter. A link that is not a
- * search is edged in the error color.
+ * Making a saved filter: a pasted GitHub search link or a typed search query becomes one, named as the person types
+ * in the name field once there is something to name, else for its query. With the field empty the button makes one on
+ * [DEFAULT_QUERY] to edit in its tab. [onCreated] opens the new filter. Text that makes no filter is edged in the error
+ * color with the reason in its tooltip, and the reason goes to [activity].
  */
 @Composable
-fun NewFilterSection(watch: PullWatch, onCreated: (String) -> Unit) {
-    var link by remember { mutableStateOf("") }
-    var failed by remember { mutableStateOf(false) }
+fun NewFilterSection(watch: PullWatch, activity: ActivityReporter, onCreated: (String) -> Unit) {
+    var input by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var refused by remember { mutableStateOf<SearchReading.Refused?>(null) }
+    var attempts by remember { mutableStateOf(0) }
     val defaultName = stringResource(Res.string.filter_default_name)
+    val reason = refused?.let { searchProblemText(it) }
+    LogSearchRefusal(reason?.let { SearchRefusal(input.trim(), it, attempts) }, activity)
     fun create() {
-        val text = link.trim()
+        val text = input.trim()
         val filter = if (text.isEmpty()) {
-            watch.addFilter(defaultName, DEFAULT_QUERY)
+            watch.addFilter(name.trim().ifEmpty { defaultName }, DEFAULT_QUERY)
         } else {
-            val pasted = SearchUrls.parse(text) ?: return run { failed = true }
-            watch.addFilter(pasted.name ?: defaultName, pasted.query)
+            when (val reading = SearchInput.read(text)) {
+                is SearchReading.Refused -> {
+                    refused = reading
+                    attempts++
+                    return
+                }
+                is SearchReading.Found -> watch.addFilter(name.trim().ifEmpty { reading.search.name ?: defaultName }, reading.search.query)
+            }
         }
-        link = ""
+        input = ""
+        name = ""
         onCreated(filter.id)
+    }
+    val onEnter = Modifier.onPreviewKeyEvent { event ->
+        if (event.type != KeyEventType.KeyDown || event.key != Key.Enter) return@onPreviewKeyEvent false
+        create()
+        true
     }
     Column(
         Modifier.fillMaxWidth().padding(horizontal = StretchSpacing.space14, vertical = StretchSpacing.space10),
         verticalArrangement = Arrangement.spacedBy(StretchSpacing.space6),
     ) {
         TextField(
-            link,
-            { link = it; failed = false },
-            Modifier.fillMaxWidth().height(ArcSizes.filterField).onPreviewKeyEvent { event ->
-                if (event.type != KeyEventType.KeyDown || event.key != Key.Enter) return@onPreviewKeyEvent false
-                create()
-                true
-            },
+            input,
+            { input = it; refused = null },
+            Modifier.fillMaxWidth().height(ArcSizes.filterField).then(onEnter),
             placeholder = stringResource(Res.string.filters_paste),
-            icon = StretchIcons.Link,
-            error = if (failed) "" else null,
+            icon = if (SearchInput.isLink(input)) StretchIcons.Link else StretchIcons.Search,
+            error = reason,
         )
+        if (input.isNotBlank()) {
+            TextField(
+                name,
+                { name = it },
+                Modifier.fillMaxWidth().height(ArcSizes.filterField).then(onEnter),
+                placeholder = stringResource(Res.string.filters_name),
+            )
+        }
         Button(stringResource(Res.string.filters_new), ::create, Modifier.height(ArcSizes.newFilterButton), kind = ButtonKind.Quiet, icon = StretchIcons.Plus)
     }
     Divider()

@@ -414,8 +414,18 @@
 
     <string name="notifications">Notifications</string>
 
-    <string name="filters_paste">Paste a GitHub search URL</string>
+    <string name="filters_paste">Paste a GitHub search URL or type a query</string>
+    <string name="filters_name">Name</string>
     <string name="filters_new">New filter</string>
+    <string name="filters_problem_empty">Type a GitHub search query</string>
+    <string name="filters_problem_not_github">Not a github.com link</string>
+    <string name="filters_problem_not_search">Not a GitHub search or list of pull requests</string>
+    <string name="filters_problem_no_query">The link has no search query in it</string>
+    <string name="filters_problem_not_pulls">The link searches %1$s, not pull requests</string>
+    <string name="filters_problem_unclosed_quote">A quote is not closed</string>
+    <string name="filters_problem_parentheses">The parentheses do not pair up</string>
+    <string name="filters_problem_empty_qualifier">%1$s has nothing after it</string>
+    <string name="filters_refused">Saved filter from %1$s</string>
     <string name="filters_new_count">%1$d new</string>
     <string name="filters_notify">Notify me</string>
     <string name="filters_add_rule">Add rule</string>

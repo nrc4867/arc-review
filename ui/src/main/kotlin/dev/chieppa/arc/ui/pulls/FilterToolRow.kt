@@ -33,6 +33,8 @@ import dev.chieppa.arc.design.generated.filter_group_repo
 import dev.chieppa.arc.design.generated.filter_query
 import dev.chieppa.arc.design.generated.filter_refresh
 import dev.chieppa.arc.design.generated.filter_updated
+import dev.chieppa.arc.host.github.search.SearchInput
+import dev.chieppa.arc.host.github.search.SearchReading
 import dev.chieppa.arc.ui.conversation.ageText
 import dev.chieppa.arc.ui.util.ArcSizes
 import dev.chieppa.stretch.frame.Dropdown
@@ -46,17 +48,26 @@ import dev.chieppa.stretch.ui.Tooltip
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * The row under a saved filter's tab: its GitHub search query, edited in place and applied with Enter or on leaving
- * the field, how its pull requests are grouped, when it was last polled and a button to poll now. The time is in the
- * error color while polling fails.
+ * The row under a saved filter's tab: its GitHub search query, edited in place (or replaced by a pasted search link)
+ * and applied with Enter or on leaving the field, a query that makes no filter edged in the error color with the reason
+ * in its tooltip; how its pull requests are grouped, when it was last polled and a button to poll now. The time is in
+ * the error color while polling fails.
  */
 @Composable
 fun FilterToolRow(filter: SavedFilter, watch: PullWatch, now: Long) {
     val c = Stretch.colors
     var query by remember(filter.id, filter.query) { mutableStateOf(filter.query) }
+    var refused by remember(filter.id, filter.query) { mutableStateOf<SearchReading.Refused?>(null) }
     fun apply() {
         val text = query.trim()
-        if (text.isNotEmpty() && text != filter.query) watch.updateFilter(filter.copy(query = text))
+        if (text == filter.query) return
+        when (val reading = SearchInput.read(text)) {
+            is SearchReading.Refused -> refused = reading
+            is SearchReading.Found -> {
+                query = reading.search.query
+                if (reading.search.query != filter.query) watch.updateFilter(filter.copy(query = reading.search.query))
+            }
+        }
     }
     Row(
         Modifier.fillMaxWidth().height(ArcSizes.filterToolRow).background(c.surfacePanel).padding(start = StretchSpacing.space10, end = StretchSpacing.space6),
@@ -65,7 +76,7 @@ fun FilterToolRow(filter: SavedFilter, watch: PullWatch, now: Long) {
     ) {
         TextField(
             query,
-            { query = it },
+            { query = it; refused = null },
             Modifier.weight(1f)
                 .onFocusChanged { if (!it.isFocused) apply() }
                 .onPreviewKeyEvent { event ->
@@ -76,6 +87,7 @@ fun FilterToolRow(filter: SavedFilter, watch: PullWatch, now: Long) {
             icon = StretchIcons.Search,
             contentDescription = stringResource(Res.string.filter_query),
             mono = true,
+            error = refused?.let { searchProblemText(it) },
         )
         val labels = mapOf(
             FilterGrouping.Label to stringResource(Res.string.filter_group_label),
