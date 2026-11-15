@@ -19,6 +19,16 @@ sealed interface TimelineItem {
         override val key: String get() = thread.id
     }
 
+    /** Commits pushed one after another with nothing said between them, oldest first. */
+    data class Commits(val commits: List<PullCommit>) : TimelineItem {
+        override val key: String get() = "commits:${commits.first().sha}"
+    }
+
+    /** A force push of the branch. */
+    data class ForcePushed(val push: HeadForcePush) : TimelineItem {
+        override val key: String get() = "force-push:${push.at}:${push.after}"
+    }
+
     /** The threads on one file, in line order, when threads are grouped by file. */
     data class File(val path: String, val threads: List<ReviewThread>) : TimelineItem {
         override val key: String get() = "file:$path"

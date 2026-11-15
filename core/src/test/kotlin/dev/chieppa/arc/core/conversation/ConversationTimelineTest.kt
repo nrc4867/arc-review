@@ -38,4 +38,25 @@ class ConversationTimelineTest {
         assertEquals(listOf("description", "file:a.kt", "file:b.kt"), items.map { it.key })
         assertEquals(listOf("T3", "T1"), (items[1] as TimelineItem.File).threads.map { it.id })
     }
+
+    @Test
+    fun `commits with nothing between them make one item and a force push stands alone`() {
+        fun commit(sha: String, at: Long) = PullCommit(sha, "Change $sha", "bo", at)
+        val withCommits = conversation.copy(
+            commits = listOf(commit("a1", 2), commit("a2", 3), commit("a3", 15), commit("a4", 40), commit("a5", 42)),
+            forcePushes = listOf(HeadForcePush("bo", "a4", "a5", 41)),
+        )
+        val items = ConversationTimeline.inOrder(withCommits)
+        assertEquals(
+            listOf("description", "commits:a1", "C1", "commits:a3", "T3", "R1", "commits:a4", "force-push:41:a5", "commits:a5"),
+            items.map { it.key },
+        )
+        assertEquals(listOf("a1", "a2"), (items[1] as TimelineItem.Commits).commits.map { it.sha })
+    }
+
+    @Test
+    fun `by file leaves commits out`() {
+        val items = ConversationTimeline.byFile(conversation.copy(commits = listOf(PullCommit("a1", "x", "bo", 2))))
+        assertEquals(listOf("description", "file:a.kt", "file:b.kt"), items.map { it.key })
+    }
 }
