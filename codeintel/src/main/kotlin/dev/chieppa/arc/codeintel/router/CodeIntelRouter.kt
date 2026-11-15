@@ -8,6 +8,8 @@ import dev.chieppa.arc.codeintel.model.DefinitionAnswer
 import dev.chieppa.arc.codeintel.model.DefinitionRequest
 import dev.chieppa.arc.codeintel.model.HoverAnswer
 import dev.chieppa.arc.codeintel.model.HoverRequest
+import dev.chieppa.arc.codeintel.model.ImplementationsAnswer
+import dev.chieppa.arc.codeintel.model.ImplementationsRequest
 import dev.chieppa.arc.codeintel.model.OutlineAnswer
 import dev.chieppa.arc.codeintel.model.OutlineRequest
 import dev.chieppa.arc.codeintel.model.UsagesAnswer
@@ -24,18 +26,36 @@ class CodeIntelRouter(private val intel: CodeIntel) {
     suspend fun usages(request: UsagesRequest): UsagesAnswer? =
         AnswerMerging.usages(askAll(intel.usages.matching(request.document)) { it.usages(request) }, request.sources)
 
-    /** What a Ctrl+click at [request] leads to: a jump, a list to choose from, the usages, or nothing. */
+    suspend fun implementations(request: ImplementationsRequest): ImplementationsAnswer? =
+        AnswerMerging.implementations(askAll(intel.implementations.matching(request.document)) { it.implementations(request) })
+
+    /**
+     * What a Ctrl+click at [request] leads to: a jump, a list to choose from, the usages, or nothing. On a definition with
+     * no usages, such as an interface's method called only through the interface elsewhere, it leads to what implements it.
+     */
     suspend fun navigate(request: DefinitionRequest): Navigation {
         val answer = definitions(request) ?: return Navigation.Nothing
         if (answer.atDefinition) {
             val usages = usages(UsagesRequest(request.document, request.at, request.sources))
-            return if (usages == null || usages.count == 0) Navigation.Nothing else Navigation.Usages(usages)
+            if (usages != null && usages.count > 0) return Navigation.Usages(usages)
+            return toImplementations(ImplementationsRequest(request.document, request.at, request.sources))
         }
         val confident = answer.targets.filter { it.confidence == Confidence.Confident }
         return when {
             answer.targets.isEmpty() -> Navigation.Nothing
             confident.size == 1 -> Navigation.Jump(confident.single())
             else -> Navigation.Choose(answer)
+        }
+    }
+
+    /** Where Go to implementation at [request] leads: the one implementation, a list of several, or nothing. */
+    suspend fun toImplementations(request: ImplementationsRequest): Navigation {
+        val answer = implementations(request) ?: return Navigation.Nothing
+        val confident = answer.targets.filter { it.confidence == Confidence.Confident }
+        return when {
+            answer.targets.isEmpty() -> Navigation.Nothing
+            answer.targets.size == 1 && confident.size == 1 -> Navigation.Jump(confident.single())
+            else -> Navigation.Choose(DefinitionAnswer(answer.name, answer.targets))
         }
     }
 

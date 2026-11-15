@@ -2,6 +2,7 @@ package dev.chieppa.arc.codeintel.router
 
 import dev.chieppa.arc.codeintel.model.Confidence
 import dev.chieppa.arc.codeintel.model.DefinitionAnswer
+import dev.chieppa.arc.codeintel.model.ImplementationsAnswer
 import dev.chieppa.arc.codeintel.model.Precision
 import dev.chieppa.arc.codeintel.model.SourceScope
 import dev.chieppa.arc.codeintel.model.SymbolTarget
@@ -10,7 +11,7 @@ import dev.chieppa.arc.codeintel.model.UsagesAnswer
 /**
  * How answers from several providers become one. A place named twice keeps its most precise, most confident answer.
  * Where an exact provider is confident about a language, by-name answers in that language drop to filtered, and
- * by-name usage groups give way to exact ones for the same source and language.
+ * by-name usage groups give way to exact ones for the same source and language. Implementations merge as definitions do.
  */
 object AnswerMerging {
     /** Confident before filtered, exact before by name; otherwise the order given. */
@@ -27,6 +28,12 @@ object AnswerMerging {
         }
         val best = demoted.groupBy { it.location }.values.map { same -> same.minWith(targetOrder) }
         return DefinitionAnswer(first.name, best.sortedWith(targetOrder), answers.any { it.atDefinition })
+    }
+
+    fun implementations(answers: List<ImplementationsAnswer>): ImplementationsAnswer? {
+        val first = answers.firstOrNull() ?: return null
+        val merged = definitions(answers.map { DefinitionAnswer(it.name, it.targets) }) ?: return null
+        return ImplementationsAnswer(first.name, merged.targets)
     }
 
     fun usages(answers: List<UsagesAnswer>, sources: List<SourceScope>): UsagesAnswer? {

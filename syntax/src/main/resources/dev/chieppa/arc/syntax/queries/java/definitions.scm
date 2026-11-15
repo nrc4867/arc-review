@@ -7,6 +7,13 @@
 (enum_declaration name: (identifier) @name) @definition.enum
 (record_declaration name: (identifier) @name) @definition.class
 
+; Each supertype a type extends or implements, as @super.
+(class_declaration name: (identifier) @name (superclass (_) @super)) @definition.class
+(class_declaration name: (identifier) @name (super_interfaces (type_list (_) @super))) @definition.class
+(record_declaration name: (identifier) @name (super_interfaces (type_list (_) @super))) @definition.class
+(enum_declaration name: (identifier) @name (super_interfaces (type_list (_) @super))) @definition.enum
+(interface_declaration name: (identifier) @name (extends_interfaces (type_list (_) @super))) @definition.interface
+
 (method_declaration type: (_) @type name: (identifier) @name parameters: (formal_parameters) @params) @definition.method
 (constructor_declaration name: (identifier) @name parameters: (formal_parameters) @params) @definition.constructor
 (compact_constructor_declaration name: (identifier) @name) @definition.constructor
