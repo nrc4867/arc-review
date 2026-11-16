@@ -44,7 +44,7 @@ fun registerContextActions(registry: ActionRegistry, workbench: Workbench) {
     action(ArcActionIds.OPEN_CHANGE, hasFile, withFile { source, path -> workbench.panes.openChange(source, path) })
     action(ArcActionIds.OPEN_IN_NEW_TAB, hasFile, withFile { source, path -> workbench.panes.openChange(source, path, newTab = true) })
     action(ArcActionIds.OPEN_TO_SIDE, hasFile, withFile { source, path -> workbench.panes.openChangeToSide(source, path) })
-    action(ArcActionIds.OPEN_IN_NEW_WINDOW, { hasFile() && workbench.newWindowBounds != null }, withFile { source, path ->
+    action(ArcActionIds.OPEN_IN_NEW_WINDOW, { hasFile() && workbench.windowBounds != null }, withFile { source, path ->
         workbench.newWindowBounds?.let { workbench.panes.openChangeAt(source, path, PaneItemDrop.InWindow(it)) }
     })
     action(ArcActionIds.OPEN_PINNED, hasFile, withFile { source, path ->

@@ -37,6 +37,15 @@ class ContextMenuUiTest {
     }
 
     @Test
+    fun askingWhatCanRunNeverPlacesANewWindowBeforeTheWindowIsOnScreen() = runComposeUiTest {
+        val workbench = openReview(data)
+        workbench.panes.openChange(data.source, "app/Main.kt")
+        waitForIdle()
+        workbench.windowBounds = { error("not on screen") }
+        assertTrue(workbench.registry.available(null).any { it.id == dev.chieppa.arc.ui.actions.ArcActionIds.OPEN_IN_NEW_WINDOW })
+    }
+
+    @Test
     fun openToTheSideSplitsThePanes() = runComposeUiTest {
         val workbench = openReview(data)
         workbench.panes.openChange(data.source, "app/util/Text.kt")
