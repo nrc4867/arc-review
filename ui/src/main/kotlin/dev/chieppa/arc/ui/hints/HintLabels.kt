@@ -18,8 +18,6 @@ import dev.chieppa.arc.design.generated.hint_since
 import dev.chieppa.arc.design.generated.hint_throws
 import dev.chieppa.arc.design.generated.hint_type_parameters
 import dev.chieppa.arc.index.hint.HintFormats
-import dev.chieppa.arc.ui.actions.ArcKeys
-import dev.chieppa.stretch.frame.caps
 import org.jetbrains.compose.resources.stringResource
 
 /** The words a symbol card shows for what a doc comment holds. */
@@ -48,7 +46,4 @@ object HintLabels {
         HintFormats.SQL -> stringResource(Res.string.hint_format_sql)
         else -> format
     }
-
-    /** The key cap of the modifier a click through holds: Ctrl, or Cmd on macOS. */
-    fun clickModifier(): List<String> = ArcKeys.SUBMIT_COMMENT.caps().take(1)
 }

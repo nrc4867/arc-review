@@ -16,7 +16,6 @@ import dev.chieppa.arc.core.revision.CellKind
 import dev.chieppa.arc.core.revision.MatrixRow
 import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
-import dev.chieppa.arc.design.generated.key_enter
 import dev.chieppa.arc.design.generated.matrix_changed_in
 import dev.chieppa.arc.design.generated.matrix_changed_since
 import dev.chieppa.arc.design.generated.matrix_count_addressed
@@ -37,13 +36,12 @@ import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSpacing
 import dev.chieppa.stretch.ui.Button
 import dev.chieppa.stretch.ui.ButtonKind
-import dev.chieppa.stretch.ui.Kbd
 import org.jetbrains.compose.resources.stringResource
 
 /**
  * The line under the revision matrix about its selected cell: the file and revision, what happened to the file there
  * and its threads, and buttons that open its change from the revision it was last reviewed or changed at, and the
- * file whole at the revision (Enter).
+ * file whole at the revision.
  */
 @Composable
 fun SelectionLine(row: MatrixRow, index: Int, onOpenDiff: (from: Int?) -> Unit, onOpenAt: () -> Unit) {
@@ -80,6 +78,5 @@ fun SelectionLine(row: MatrixRow, index: Int, onOpenDiff: (from: Int?) -> Unit, 
         val diff = if (from != null) stringResource(Res.string.matrix_open_diff, from + 1, number) else stringResource(Res.string.matrix_open_diff_base, number)
         Button(diff, { onOpenDiff(from) }, kind = ButtonKind.Quiet, icon = ArcIcons.Compare)
         Button(stringResource(Res.string.matrix_open_at, number), onOpenAt, icon = StretchIcons.File)
-        Kbd(listOf(stringResource(Res.string.key_enter)))
     }
 }

@@ -26,12 +26,11 @@ import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchIcons
 import dev.chieppa.stretch.theme.StretchSizes
 import dev.chieppa.stretch.theme.StretchSpacing
-import dev.chieppa.stretch.ui.Kbd
 import org.jetbrains.compose.resources.stringResource
 
-/** The top bar's "Go to anything" field: a search field look with the switcher's [keys], which opens the switcher. */
+/** The top bar's "Go to anything" field: a search field look, which opens the switcher. */
 @Composable
-fun GoToAnythingField(keys: List<String>?, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun GoToAnythingField(onClick: () -> Unit, modifier: Modifier = Modifier) {
     val c = Stretch.colors
     val shape = Stretch.shapes.ctlShape
     val description = stringResource(Res.string.switcher_open)
@@ -50,6 +49,5 @@ fun GoToAnythingField(keys: List<String>?, onClick: () -> Unit, modifier: Modifi
     ) {
         Icon(StretchIcons.Search, c.inkMuted)
         BasicText(stringResource(Res.string.action_go_to_anything), Modifier.weight(1f), style = Stretch.type.bodySm.merge(TextStyle(color = c.inkSubtle)), maxLines = 1)
-        if (keys != null) Kbd(keys)
     }
 }

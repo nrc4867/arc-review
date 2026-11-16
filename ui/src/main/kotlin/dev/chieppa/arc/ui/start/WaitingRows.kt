@@ -44,7 +44,6 @@ fun waitingRows(workbench: Workbench, source: Source): List<StartRow> {
     val stagedRow = if (staged == 0 || source != workbench.state.active) null else StartRow(
         title = pluralStringResource(Res.plurals.start_staged, staged, staged),
         icon = StartIcons.STAGE,
-        trailing = StartTrailing.Keys(ArcActionIds.PUSH_REVIEW.value),
         action = ArcStartActions.of(ArcActionIds.REVIEW_STAGED),
     )
     val pull = workbench.state.pulls[source]

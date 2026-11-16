@@ -19,7 +19,6 @@ import dev.chieppa.arc.codeintel.model.Precision
 import dev.chieppa.arc.codeintel.model.SymbolHint
 import dev.chieppa.arc.design.ArcIcons
 import dev.chieppa.arc.design.generated.Res
-import dev.chieppa.arc.design.generated.hint_click_to_go
 import dev.chieppa.arc.design.generated.hint_keep_open
 import dev.chieppa.arc.design.generated.hint_origin
 import dev.chieppa.arc.design.generated.navigation_by_name
@@ -27,12 +26,11 @@ import dev.chieppa.arc.design.generated.navigation_exact
 import dev.chieppa.arc.design.generated.navigation_line
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.ui.IconButton
-import dev.chieppa.stretch.ui.Kbd
 import org.jetbrains.compose.resources.stringResource
 
 /**
  * The card's foot: where the definition is (a click goes there) and the revision it was read at, the doc comment's
- * convention and how the definition was found, the pin that keeps the card open, and the click that goes there.
+ * convention and how the definition was found, and the pin that keeps the card open.
  */
 @Composable
 fun HintFooter(hint: SymbolHint, pinned: Boolean, onPin: () -> Unit, onOpen: () -> Unit) {
@@ -58,8 +56,6 @@ fun HintFooter(hint: SymbolHint, pinned: Boolean, onPin: () -> Unit, onOpen: () 
         val origin = hint.doc?.let { stringResource(Res.string.hint_origin, HintLabels.format(it.format), precision) } ?: precision
         BasicText(origin, style = Stretch.type.bodySm.merge(TextStyle(color = c.inkSubtle)), maxLines = 1)
         IconButton(ArcIcons.Pin, stringResource(Res.string.hint_keep_open), onPin, size = HintSizes.button, on = pinned)
-        Kbd(HintLabels.clickModifier())
-        BasicText(stringResource(Res.string.hint_click_to_go), style = Stretch.type.bodySm.merge(TextStyle(color = c.inkMuted)), maxLines = 1)
     }
 }
 

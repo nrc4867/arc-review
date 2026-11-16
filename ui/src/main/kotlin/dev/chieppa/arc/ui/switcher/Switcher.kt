@@ -55,7 +55,6 @@ fun Switcher(workbench: Workbench) {
         scrim = true,
         icon = if (target?.link == true) StretchIcons.Link else StretchIcons.Search,
         queryStyle = if (target?.link == true) Stretch.type.value.merge(TextStyle(fontSize = Stretch.type.body.fontSize)) else null,
-        hints = switcherHints(view),
         onKey = { view.onKey(it, switcher, commands) },
         trailing = {
             if (view.searching) {

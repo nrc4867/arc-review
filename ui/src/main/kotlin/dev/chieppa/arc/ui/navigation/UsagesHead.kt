@@ -17,16 +17,13 @@ import dev.chieppa.arc.design.generated.navigation_repos
 import dev.chieppa.arc.design.generated.navigation_title
 import dev.chieppa.arc.design.generated.navigation_title_in
 import dev.chieppa.arc.design.generated.navigation_usages
-import dev.chieppa.arc.ui.actions.ArcKeys
-import dev.chieppa.stretch.frame.caps
 import dev.chieppa.stretch.theme.Icon
 import dev.chieppa.stretch.theme.Stretch
 import dev.chieppa.stretch.theme.StretchSpacing
-import dev.chieppa.stretch.ui.Kbd
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
-/** The usages list's head: `TokenPair · 7 usages in 2 repos`, with the key that shows usages. */
+/** The usages list's head: `TokenPair · 7 usages in 2 repos`. */
 @Composable
 fun UsagesHead(name: String, count: Int, repos: Int) {
     val usages = pluralStringResource(Res.plurals.navigation_usages, count, count)
@@ -35,20 +32,18 @@ fun UsagesHead(name: String, count: Int, repos: Int) {
     } else {
         stringResource(Res.string.navigation_title, name, usages)
     }
-    PopoverHeadRow(ArcIcons.Usages, title) { Kbd(ArcKeys.SHOW_USAGES.caps()) }
+    PopoverHeadRow(ArcIcons.Usages, title)
 }
 
 /** The candidates list's head: `refresh · 3 definitions`. */
 @Composable
 fun CandidatesHead(name: String, count: Int) {
-    PopoverHeadRow(ArcIcons.Definition, stringResource(Res.string.navigation_title, name, pluralStringResource(Res.plurals.navigation_definitions, count, count))) {
-        Kbd(ArcKeys.GO_TO_DEFINITION.caps())
-    }
+    PopoverHeadRow(ArcIcons.Definition, stringResource(Res.string.navigation_title, name, pluralStringResource(Res.plurals.navigation_definitions, count, count)))
 }
 
-/** A list's head row: its [icon], [title] and what [end] puts at the end. */
+/** A list's head row: its [icon] and [title]. */
 @Composable
-private fun PopoverHeadRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, end: @Composable () -> Unit) {
+private fun PopoverHeadRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String) {
     val c = Stretch.colors
     Row(
         Modifier.fillMaxWidth().padding(vertical = StretchSpacing.space6),
@@ -57,6 +52,5 @@ private fun PopoverHeadRow(icon: androidx.compose.ui.graphics.vector.ImageVector
     ) {
         Icon(icon, c.inkMuted)
         BasicText(title, Modifier.weight(1f), style = Stretch.type.body.merge(TextStyle(color = c.inkStrong)), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        end()
     }
 }

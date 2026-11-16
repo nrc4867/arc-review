@@ -62,7 +62,7 @@ fun oneSourceCards(workbench: Workbench, source: Source): StartContribution {
         next?.let {
             StartButton(
                 stringResource(Res.string.start_continue, StartReview.name(it)), ArcStartActions.on(ArcActionIds.CONTINUE_REVIEW, source),
-                StartIcons.CONTINUE, keys = ArcActionIds.NEXT_FILE.value, primary = true,
+                StartIcons.CONTINUE, primary = true,
             )
         },
         if (changed == 0) null else StartButton(stringResource(Res.string.start_changed_since, changed), ArcStartActions.of(ArcActionIds.TOGGLE_SINCE_REVIEW), StartIcons.CHANGED_SINCE),

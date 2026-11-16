@@ -33,7 +33,6 @@ import dev.chieppa.arc.ui.switcher.SwitcherKeys
 import dev.chieppa.arc.ui.switcher.SwitcherScope
 import dev.chieppa.arc.ui.switcher.SwitcherState
 import dev.chieppa.arc.ui.switcher.rememberSwitcherView
-import dev.chieppa.arc.ui.switcher.switcherHints
 import dev.chieppa.arc.ui.workbench.Workbench
 import dev.chieppa.stretch.frame.SuggestionPanel
 import dev.chieppa.stretch.frame.chord
@@ -86,7 +85,7 @@ fun OpenField(workbench: Workbench) {
                 val view = rememberSwitcherView(workbench, search)
                 val width = with(LocalDensity.current) { fieldWidth.toDp() }
                 SideEffect { suggestionKeys = { event -> view.onKey(event, search, commands, scopes = false) } }
-                SuggestionPanel(true, search::close, width, hints = switcherHints(view, scopes = false)) {
+                SuggestionPanel(true, search::close, width) {
                     SwitcherBody(workbench, view, search.query, search.index, commands)
                 }
             }

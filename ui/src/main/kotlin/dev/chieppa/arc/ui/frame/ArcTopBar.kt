@@ -21,13 +21,12 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 fun ArcTopBar(workbench: Workbench) {
-    val switcherKeys = workbench.registry[ArcActionIds.GO_TO_ANYTHING]?.let(workbench.keymap::capsFor)
     val commandsKeys = workbench.registry[ArcActionIds.COMMANDS]?.let(workbench.keymap::capsFor)
     WindowTopBar(
         appName = stringResource(Res.string.app_name),
         document = "",
         menus = { ArcBarMenus(workbench.registry, workbench.keymap) },
-        center = { GoToAnythingField(switcherKeys, { workbench.switcher.show() }) },
+        center = { GoToAnythingField({ workbench.switcher.show() }) },
         actions = {
             TopBarActions(
                 onUndo = null,

@@ -229,12 +229,6 @@
     <string name="switcher_waiting_you">waiting on you</string>
     <string name="switcher_draft">draft</string>
     <string name="switcher_meta">%1$s · %2$s</string>
-    <string name="switcher_hint_switch">Switch</string>
-    <string name="switcher_hint_new_pane">Open in new pane</string>
-    <string name="switcher_hint_beside">Open without switching</string>
-    <string name="switcher_hint_scope">Scope</string>
-    <string name="switcher_hint_open">Open</string>
-    <string name="switcher_hint_close">Close</string>
     <string name="switcher_link_commit">GitHub commit</string>
     <string name="switcher_link_pull">GitHub pull request</string>
     <string name="switcher_link_branch">GitHub comparison</string>
@@ -600,7 +594,6 @@
     <string name="matrix_open_diff">Open diff r%1$d → r%2$d</string>
     <string name="matrix_open_diff_base">Open diff base → r%1$d</string>
     <string name="matrix_open_at">Open at r%1$d</string>
-    <string name="key_enter">↵</string>
     <string name="matrix_legend_changed">Changed</string>
     <string name="matrix_legend_reviewed">Reviewed there</string>
     <string name="matrix_legend_after_review">Changed after review</string>
@@ -670,7 +663,6 @@
     <string name="hint_keep_open">Keep open</string>
     <string name="hint_previous">Previous definition</string>
     <string name="hint_next">Next definition</string>
-    <string name="hint_click_to_go">click to go</string>
     <string name="language_kotlin">Kotlin</string>
     <string name="language_java">Java</string>
     <string name="language_javascript">JavaScript</string>
