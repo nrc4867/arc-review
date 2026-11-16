@@ -7,6 +7,7 @@ jvmToolchain = "25"
 snakeyaml-engine = "3.1.1"
 mcp-sdk = "0.16.0"
 ktor = "3.5.2"
+chicory = "1.7.5"
 
 [libraries]
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
@@ -18,6 +19,8 @@ kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 snakeyaml-engine = { module = "org.snakeyaml:snakeyaml-engine", version.ref = "snakeyaml-engine" }
 mcp-sdk-server = { module = "io.modelcontextprotocol:kotlin-sdk-server", version.ref = "mcp-sdk" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
+chicory-runtime = { module = "com.dylibso.chicory:runtime", version.ref = "chicory" }
+chicory-build-time-compiler = { module = "com.dylibso.chicory:build-time-compiler", version.ref = "chicory" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
