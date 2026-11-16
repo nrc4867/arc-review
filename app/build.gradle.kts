@@ -40,8 +40,8 @@ tasks.test {
     jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
 
-// The uber jar Arc ships as, one per OS: it may call restricted methods (skiko loading its library, FFM for
-// tree-sitter, the keychain and the Start menu shortcut) without Java warning on every run, and carries its version,
+// The uber jar Arc ships as, one per OS: it may call restricted methods (skiko loading its library, FFM for the
+// keychain and the Start menu shortcut) without Java warning on every run, and carries its version,
 // which installing and updating compare.
 tasks.withType<org.gradle.jvm.tasks.Jar>().matching { it.name.startsWith("packageUberJar") }.configureEach {
     manifest.attributes("Enable-Native-Access" to "ALL-UNNAMED", "Implementation-Version" to project.version.toString())
@@ -66,4 +66,21 @@ compose.desktop {
             modules("java.instrument", "jdk.httpserver", "jdk.unsupported")
         }
     }
+}
+
+// Arc's own modules carry no native library and no native loader; -Psyntax.engine=native, for comparison, puts one in.
+val checkNoNativeCode = tasks.register<dev.chieppa.arc.build.CheckNoNativeCode>("checkNoNativeCode") {
+    group = "verification"
+    description = "Fails when Arc's own jars on the app's classpath hold native code"
+    classpath.from(
+        configurations.runtimeClasspath.map { runtime ->
+            runtime.incoming.artifactView {
+                componentFilter { it is ProjectComponentIdentifier && it.build.buildPath == ":" }
+            }.files
+        },
+    )
+    classpath.from(tasks.jar)
+}
+if (providers.gradleProperty("syntax.engine").orNull != "native") {
+    tasks.check { dependsOn(checkNoNativeCode) }
 }
