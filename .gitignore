@@ -24,5 +24,5 @@ out/
 .worktrees/*
 !.worktrees/.gitkeep
 
-# The tree-sitter libraries are built by :syntax:compileNatives into syntax/build/generated/natives.
-syntax/src/main/resources/dev/chieppa/arc/syntax/natives/
+# The native tree-sitter libraries are built by :syntax-native:compileNatives into syntax-native/build/generated/natives.
+syntax-native/src/main/resources/dev/chieppa/arc/syntax/natives/

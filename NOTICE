@@ -3,8 +3,17 @@ Copyright Nicholas Chieppa
 
 Licensed under the GNU Affero General Public License, version 3 only (AGPL-3.0-only). See LICENSE.
 
-The syntax module bundles native libraries built from these projects, each under the MIT License, at the commits
-listed in syntax/native/grammars.tsv: tree-sitter (Copyright (c) 2018 Max Brunsfeld), tree-sitter-java (Copyright
-(c) 2017 Ayman Nadeem), tree-sitter-kotlin (Copyright (c) 2019 fwcd), tree-sitter-javascript (Copyright (c) 2014 Max
-Brunsfeld), tree-sitter-typescript (Copyright (c) 2017 Max Brunsfeld) and tree-sitter-mssql (Copyright (c) 2026 M.
-Reifschneider and Copyright (c) 2021 Derek Stride). Its highlights queries are those projects' own query files.
+The syntax module bundles code compiled to WebAssembly and from there to JVM classes from these projects, each under
+the MIT License, at the commits listed in syntax-engine/tree-sitter/grammars.tsv: tree-sitter (Copyright (c) 2018 Max
+Brunsfeld), tree-sitter-java (Copyright (c) 2017 Ayman Nadeem), tree-sitter-kotlin (Copyright (c) 2019 fwcd),
+tree-sitter-javascript (Copyright (c) 2014 Max Brunsfeld), tree-sitter-typescript (Copyright (c) 2017 Max Brunsfeld)
+and tree-sitter-mssql (Copyright (c) 2026 M. Reifschneider and Copyright (c) 2021 Derek Stride). Its highlights
+queries are those projects' own query files.
+
+The same compiled code holds parts of wasi-libc as distributed with zig, used under the MIT License: musl (Copyright
+(c) 2005-2020 Rich Felker, et al.) and wasi-libc's own code, with dlmalloc (Doug Lea, released to the public domain
+under CC0) and cloudlibc (Copyright (c) 2015-2017 Nuxi (https://nuxi.nl/) and contributors, under the BSD 2-Clause
+License).
+
+It runs on Chicory (Copyright 2023-present Dylibso, Inc.), under the Apache License, Version 2.0: its runtime and
+wasm libraries, and the code its build-time compiler writes into the compiled classes.

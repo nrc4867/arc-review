@@ -19,7 +19,7 @@ defaults:
     shell: bash
 
 # Stretch is built from source: it is checked out beside the app, where settings.gradle.kts looks for it.
-# The tree-sitter libraries are built by zig in ~/.gradle/arc-natives, cached on the pins as in CI.
+# The tree-sitter WebAssembly modules are built by zig in ~/.gradle/arc-natives, cached on the pins as in CI.
 jobs:
   package:
     strategy:
@@ -58,7 +58,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: ~/.gradle/arc-natives
-          key: arc-natives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('arc-review/syntax/native/grammars.tsv', 'arc-review/syntax/native/arc_shim.c', 'arc-review/buildSrc/src/main/kotlin/dev/chieppa/arc/build/natives/ZigRelease.kt') }}
+          key: arc-natives-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('arc-review/syntax-engine/tree-sitter/grammars.tsv', 'arc-review/syntax-engine/tree-sitter/arc_shim.c', 'arc-review/buildSrc/src/main/kotlin/dev/chieppa/arc/build/natives/ZigRelease.kt') }}
       - uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: true
