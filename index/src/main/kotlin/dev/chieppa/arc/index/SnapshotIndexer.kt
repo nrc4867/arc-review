@@ -13,6 +13,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 
 /**
  * Parses the files of a revision that [cache] has not seen: the blobs stream from [store] in one read while each is
@@ -34,7 +35,7 @@ class SnapshotIndexer(
 
     /** The files of [entries] in [repo] at [revision], parsing those not cached. */
     suspend fun files(repo: RepoName, revision: String, entries: List<Pair<TreeBlob, Grammar>>): List<IndexedFile> {
-        val missing = entries.filter { (entry, grammar) -> cache[entry.blob, grammar] == null }
+        val missing = withContext(parse) { entries.filter { (entry, grammar) -> cache[entry.blob, grammar] == null } }
         val grammars = missing.groupBy({ it.first.blob }, { it.second })
         coroutineScope {
             val parses = ArrayList<Deferred<Unit>>()

@@ -2,6 +2,7 @@ package dev.chieppa.arc.index
 
 import dev.chieppa.arc.core.source.RepoName
 import dev.chieppa.arc.git.repo.TreeBlob
+import dev.chieppa.arc.index.facts.FactsStore
 import dev.chieppa.arc.index.store.BlobStore
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -15,10 +16,11 @@ import kotlinx.coroutines.sync.withLock
 /**
  * The tree-sitter index of every open source together, which is what lets a name in one repo lead to a definition in
  * another. [update] reads each source's revision straight from its repo's objects; a revision already read is kept,
- * and moving a source to a nearby revision parses only the blobs that changed. Parsing runs on [parse].
+ * and moving a source to a nearby revision parses only the blobs that changed. Parsing runs on [parse]; [facts] keeps
+ * what was parsed beyond the process.
  */
-class WorkspaceIndex(private val store: BlobStore, parse: CoroutineDispatcher) {
-    private val cache = BlobFactsCache()
+class WorkspaceIndex(private val store: BlobStore, parse: CoroutineDispatcher, facts: FactsStore = FactsStore.NONE) {
+    private val cache = BlobFactsCache(facts)
     private val indexer = SnapshotIndexer(store, cache, parse)
     private val lock = Mutex()
     private val trees = object : LinkedHashMap<Pair<RepoName, String>, List<TreeBlob>>(IndexLimits.LISTED_TREES, LOAD_FACTOR, true) {

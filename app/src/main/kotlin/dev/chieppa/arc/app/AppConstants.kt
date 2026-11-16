@@ -35,6 +35,9 @@ internal object AppConstants {
     /** People's pictures from GitHub, kept for a day. */
     const val AVATARS_FOLDER = "avatars"
 
+    /** What the tree-sitter index read from each blob, by the version of fact extraction, at most 512 MB. */
+    const val FACTS_FOLDER = "index-facts"
+
     /** Who the person signed in to GitHub is, by their token's fingerprint, kept for a day. */
     const val VIEWER_FILE = "viewer.json"
 
