@@ -42,6 +42,8 @@ val stretchDir = providers.gradleProperty("stretch.dir").orNull
 includeBuild(stretchDir)
 
 include(":core")
+include(":syntax-engine")
+include(":syntax-wasm")
 include(":syntax")
 include(":codeintel")
 include(":tools")
@@ -58,3 +60,6 @@ include(":app")
 
 // Dev only: sample threads and staged comments, on the classpath only with -Pdemo.
 include(":demo")
+
+// The native tree-sitter engine over FFM, on the classpath in place of syntax-wasm with -Psyntax.engine=native.
+if (providers.gradleProperty("syntax.engine").orNull == "native") include(":syntax-native")

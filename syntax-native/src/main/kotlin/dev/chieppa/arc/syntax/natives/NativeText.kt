@@ -1,4 +1,4 @@
-package dev.chieppa.arc.syntax.runtime
+package dev.chieppa.arc.syntax.natives
 
 import java.lang.foreign.Arena
 import java.lang.foreign.MemorySegment

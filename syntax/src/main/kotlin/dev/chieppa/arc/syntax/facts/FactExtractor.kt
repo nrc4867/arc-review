@@ -3,7 +3,7 @@ package dev.chieppa.arc.syntax.facts
 import dev.chieppa.arc.syntax.grammar.Grammar
 import dev.chieppa.arc.syntax.runtime.SyntaxTree
 
-/** Parses a file's text and reads its [FileFacts]. Every query runs natively, once per file. */
+/** Parses a file's text and reads its [FileFacts]. Every query runs in the syntax engine, once per file. */
 object FactExtractor {
     fun extract(grammar: Grammar, text: String): FileFacts = SyntaxTree.parse(grammar, text).use { extract(it) }
 

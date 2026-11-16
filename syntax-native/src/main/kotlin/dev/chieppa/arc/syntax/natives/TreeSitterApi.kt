@@ -1,6 +1,5 @@
-package dev.chieppa.arc.syntax.runtime
+package dev.chieppa.arc.syntax.natives
 
-import dev.chieppa.arc.syntax.natives.NativeLibraries
 import java.lang.foreign.FunctionDescriptor
 import java.lang.foreign.Linker
 import java.lang.foreign.MemorySegment
@@ -11,7 +10,7 @@ import java.lang.foreign.ValueLayout.JAVA_INT
 import java.lang.invoke.MethodHandle
 
 /**
- * Arc's bindings to the tree-sitter C API and to `arc_query_records` (`syntax/native/arc_shim.c`), the functions Arc
+ * Arc's bindings to the tree-sitter C API and to `arc_query_records` (`syntax-engine/tree-sitter/arc_shim.c`), the functions Arc
  * calls and nothing else. Pointers stay [MemorySegment]s; the classes in this package own them.
  */
 internal object TreeSitterApi {

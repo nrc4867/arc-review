@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap
 object SyntaxQueries {
     private const val ROOT = "/dev/chieppa/arc/syntax/queries"
 
-    /** Captures every ERROR node, for judging how much of a file failed to parse. */
-    private const val ERRORS = "(ERROR) @error"
+    /** The query file shared by every grammar capturing each ERROR node, for judging how much of a file failed to parse. */
+    private const val ERRORS = "errors.scm"
 
     private val compiled = ConcurrentHashMap<Pair<String, QueryKind>, Optional<SyntaxQuery>>()
     private val errors = ConcurrentHashMap<String, SyntaxQuery>()
@@ -20,7 +20,9 @@ object SyntaxQueries {
     }.orElse(null)
 
     /** The query capturing [grammar]'s ERROR nodes. */
-    fun errors(grammar: Grammar): SyntaxQuery = errors.computeIfAbsent(grammar.id) { SyntaxQuery.compile(grammar, ERRORS) }
+    fun errors(grammar: Grammar): SyntaxQuery = errors.computeIfAbsent(grammar.id) {
+        SyntaxQuery.compile(grammar, SyntaxQueries::class.java.getResource("$ROOT/$ERRORS")!!.readText())
+    }
 
     /** The text of [grammar]'s query file of [kind], or null. */
     fun source(grammar: Grammar, kind: QueryKind): String? =

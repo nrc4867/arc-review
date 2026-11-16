@@ -1,6 +1,5 @@
-package dev.chieppa.arc.syntax.runtime
+package dev.chieppa.arc.syntax.natives
 
-import dev.chieppa.arc.syntax.grammar.Grammar
 import java.lang.foreign.MemorySegment
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -12,8 +11,8 @@ import java.util.concurrent.ConcurrentLinkedQueue
 internal object ParserPool {
     private val idle = ConcurrentHashMap<String, ConcurrentLinkedQueue<MemorySegment>>()
 
-    fun <T> withParser(grammar: Grammar, block: (MemorySegment) -> T): T {
-        val queue = idle.computeIfAbsent(grammar.id) { ConcurrentLinkedQueue() }
+    fun <T> withParser(grammar: String, block: (MemorySegment) -> T): T {
+        val queue = idle.computeIfAbsent(grammar) { ConcurrentLinkedQueue() }
         val parser = queue.poll() ?: create(grammar)
         try {
             return block(parser)
@@ -22,10 +21,10 @@ internal object ParserPool {
         }
     }
 
-    fun create(grammar: Grammar): MemorySegment {
+    private fun create(grammar: String): MemorySegment {
         val parser = TreeSitterApi.parserNew.invokeWithArguments() as MemorySegment
         val set = TreeSitterApi.parserSetLanguage.invokeWithArguments(parser, SyntaxLanguages.of(grammar)) as Boolean
-        check(set) { "tree-sitter rejected the ${grammar.id} language's version" }
+        check(set) { "tree-sitter rejected the $grammar language's version" }
         return parser
     }
 }

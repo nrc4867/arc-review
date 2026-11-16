@@ -1,5 +1,7 @@
 package dev.chieppa.arc.syntax.runtime
 
+import dev.chieppa.arc.syntax.engine.CaptureLayout
+
 /**
  * Every capture of one query run, flat: for capture [i], the match it belongs to (numbered from 0 in order), the
  * query pattern that matched, which capture of the query it is, its range as string indices, and how many named
@@ -8,12 +10,12 @@ package dev.chieppa.arc.syntax.runtime
 class QueryRecords internal constructor(private val data: IntArray) {
     val size: Int get() = data.size / STRIDE
 
-    fun match(i: Int): Int = data[STRIDE * i]
-    fun pattern(i: Int): Int = data[STRIDE * i + PATTERN]
-    fun capture(i: Int): Int = data[STRIDE * i + CAPTURE]
-    fun start(i: Int): Int = data[STRIDE * i + START] / Char.SIZE_BYTES
-    fun end(i: Int): Int = data[STRIDE * i + END] / Char.SIZE_BYTES
-    fun namedChildren(i: Int): Int = data[STRIDE * i + CHILDREN]
+    fun match(i: Int): Int = data[STRIDE * i + CaptureLayout.MATCH]
+    fun pattern(i: Int): Int = data[STRIDE * i + CaptureLayout.PATTERN]
+    fun capture(i: Int): Int = data[STRIDE * i + CaptureLayout.CAPTURE]
+    fun start(i: Int): Int = data[STRIDE * i + CaptureLayout.START] / Char.SIZE_BYTES
+    fun end(i: Int): Int = data[STRIDE * i + CaptureLayout.END] / Char.SIZE_BYTES
+    fun namedChildren(i: Int): Int = data[STRIDE * i + CaptureLayout.CHILDREN]
 
     /** Calls [block] with the first and last-plus-one record index of each match, in order. */
     inline fun forEachMatch(block: (from: Int, until: Int) -> Unit) {
@@ -40,13 +42,7 @@ class QueryRecords internal constructor(private val data: IntArray) {
         return QueryRecords(kept.copyOf(length))
     }
 
-    internal companion object {
-        /** Ints per capture, as `arc_query_records` writes them. */
-        const val STRIDE = 6
-        private const val PATTERN = 1
-        private const val CAPTURE = 2
-        private const val START = 3
-        private const val END = 4
-        private const val CHILDREN = 5
+    private companion object {
+        const val STRIDE = CaptureLayout.STRIDE
     }
 }
